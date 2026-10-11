@@ -1,0 +1,134 @@
+version: 1
+approval: CKS requested 2026-10-11; established reading-only scope
+course:
+  id: ATS031
+  certification:
+    name: Certified Kubernetes Security Specialist
+    code: CKS
+    provider: CNCF / Linux Foundation
+    domain: Cluster Setup
+    weight: 15
+    competencies:
+    - Use Network security policies to restrict cluster level access
+    - Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet,
+      kubedns, kubeapi)
+    - Properly set up Ingress with TLS
+    - Protect node metadata and endpoints
+    - Verify platform binaries before deploying
+defaults:
+  playground: false
+  module_lab: false
+  capstone: false
+  section_quiz: false
+  final_quiz: true
+assessment_format: YAML question banks v1, registered in assessments/index.yaml
+sections:
+- id: section-010
+  title: Use Network security policies to restrict cluster level access
+  curriculum_item: Use Network security policies to restrict cluster level access
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: NetworkPolicy Semantics And Verification
+    objectives:
+    - Explain Pod selection and direction-specific network isolation.
+    - Evaluate additive allowed rules and selector structure.
+    - Relate DNS and dependencies to egress requirements.
+    - Distinguish declared policy from actual implementation enforcement.
+    outline:
+    - Traffic Isolation And Allowed Peers
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
+      adapted_from: ATS043/sections/section-080/module-01/course-01-traffic-isolation-and-allowed-peers.md
+- id: section-020
+  title: Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet,
+    kubedns, kubeapi)
+  curriculum_item: Use CIS benchmark to review the security configuration of Kubernetes components (etcd,
+    kubelet, kubedns, kubeapi)
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Reviewing A Cluster Against A Security Benchmark
+    objectives:
+    - Select a benchmark matching component versions and deployment ownership.
+    - Distinguish automated findings from manual security judgment.
+    - Trace a failed recommendation to effective configuration.
+    - Plan a scoped correction with availability and exception evidence.
+    outline:
+    - Reviewing A Cluster Against A Security Benchmark
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+      adapted_from: null
+- id: section-030
+  title: Properly set up Ingress with TLS
+  curriculum_item: Properly set up Ingress with TLS
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Ingress Routing And TLS Contracts
+    objectives:
+    - Identify IngressClass and controller responsibility.
+    - Compare exact, prefix and implementation-specific paths.
+    - Trace host and Service port matching.
+    - Explain TLS termination and backend protocol limits.
+    - Explain public keys, private keys and certificate authority trust.
+    - Distinguish server authentication from mutual TLS.
+    - Relate identity names, validity and trust chains to verification.
+    - Describe rotation and compromise recovery for certificate-based identities.
+    outline:
+    - Matching Ingress Hosts, Paths And Service Backends
+    - PKI Trust And Certificate Verification
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+      adapted_from: ATS030/sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+    - reading: sections/section-030/module-01/course-02-pki-trust-and-certificate-verification.md
+      adapted_from: ATS045/sections/section-050/module-01/course-01-pki-trust-and-certificate-verification.md
+- id: section-040
+  title: Protect node metadata and endpoints
+  curriculum_item: Protect node metadata and endpoints
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Protecting Node Metadata And Management Endpoints
+    objectives:
+    - Identify credentials and authority exposed through node-local endpoints.
+    - Separate workload network paths from host and control-plane paths.
+    - Explain cloud metadata protections and their implementation limits.
+    - Evaluate endpoint authentication, authorization and least privilege together.
+    outline:
+    - Protecting Node Metadata And Management Endpoints
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+      adapted_from: null
+- id: section-050
+  title: Verify platform binaries before deploying
+  curriculum_item: Verify platform binaries before deploying
+  capstone: false
+  section_quiz: false
+  modules:
+  - id: module-01
+    title: Verifying Release Artifacts Before Deployment
+    objectives:
+    - Distinguish integrity checks from publisher authenticity.
+    - Bind verification evidence to an exact release and architecture.
+    - Explain authenticated checksum and signature trust chains.
+    - Preserve verified bytes through storage and deployment.
+    outline:
+    - Verifying Release Artifacts Before Deployment
+    playground: false
+    module_lab: false
+    sources:
+    - reading: sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+      adapted_from: null
