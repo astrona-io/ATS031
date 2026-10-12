@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Use Network security policies to restrict cluster level access
 
-This section covers use Network security policies to restrict cluster level access. It develops networkPolicy Semantics And Verification through mechanisms, examples, prerequisites and failure reasoning.
+A rule should allow only Pods labelled `app: shuttle` inside a selected namespace. Placing both selectors in one peer requires both matches. Splitting them into separate peers changes the condition into alternatives and can widen access.
+
+The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
 
 Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
 
