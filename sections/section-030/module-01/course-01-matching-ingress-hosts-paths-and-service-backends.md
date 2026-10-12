@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Matching Ingress Hosts, Paths And Service Backends
 
+A client requests `probe.local`, and Traefik chooses an Ingress route before forwarding to the `probe` Service. The Ingress object declares matching rules; the controller implements them. A rule stored without an active controller cannot provide the same routing behavior.
+
+## Learning objectives
+
+- Identify IngressClass and controller responsibility.
+- Compare exact, prefix and implementation-specific paths.
+- Trace host and Service port matching.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 An Ingress declares rules for routing external HTTP or HTTPS traffic to Services. HTTP means Hypertext Transfer Protocol; HTTPS is HTTP protected through Transport Layer Security (TLS). An Ingress controller interprets the resource and configures the actual traffic-handling infrastructure. Creating the resource without a suitable controller does not create a working external entry point.
 
 ## Identify The Controller Contract
@@ -38,6 +52,25 @@ A TLS configuration can reference a Secret containing certificate and key materi
 TLS termination at the controller does not automatically mean the controller-to-backend connection is encrypted. That depends on the controller and backend configuration. Likewise, standard path matching does not universally rewrite the path passed to the application. A backend expecting `/` can return an error when it receives `/reports` unless the application or supported routing configuration handles that path.
 
 The useful design exercise is to trace one request from hostname resolution through class selection, host and path matching, Service port selection and the ready backend. At each point, identify the declared rule and the responsible component. That sequence supports both a correct definition and a focused diagnosis.
+
+## Work through the decision
+
+An Ingress declares supported external web routing, including host, path and backend Service port. Its IngressClass identifies the controller contract. For this example, assume the cluster uses Traefik, which observes matching resources and serves the frontend connection. Inspect the class and controller before assuming that an accepted route is realized.
+
+Transport Layer Security (TLS) can terminate at that frontend, using a certificate for the requested hostname. Certificate trust and hostname match are different checks from route matching. TLS on the frontend does not automatically encrypt the controller-to-Service hop. The basic practice backend uses plain Hypertext Transfer Protocol (HTTP), so describe this boundary explicitly rather than claiming end-to-end encryption.
+
+```mermaid
+flowchart TB
+    C["Client hostname and path"] --> T["Traefik frontend"]
+    I["Ingress and class"] --> T
+    T --> S["Selected Service port"]
+    S --> E["Ready backend"]
+    E --> A["Application response"]
+```
+
+The controller converts declared matching rules into a frontend-to-backend request path.
+
+You can now separate route declaration, controller realization and connection security. A working external request still needs matching host and path, reachable backends and the intended certificate trust contract.
 
 ## Common pitfalls
 

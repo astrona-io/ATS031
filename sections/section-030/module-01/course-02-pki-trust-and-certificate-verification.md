@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # PKI Trust And Certificate Verification
 
+A certificate chains to a trusted issuer but names a different server. The client can still reject it. Trusting the issuer and authenticating the intended endpoint are separate checks.
+
+## Learning objectives
+
+- Identify IngressClass and controller responsibility.
+- Compare exact, prefix and implementation-specific paths.
+- Trace host and Service port matching.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 Public key infrastructure (PKI) organizes certificates, keys and trusted authorities used to establish identities. A certificate associates an identity with a public key under an issuer's signature. The corresponding private key proves possession and must remain protected. This is an identity system, not merely a file format needed to silence connection errors.
 
 ## Keys And Certificate Authorities
@@ -42,6 +56,29 @@ Revocation and rejection behavior depend on the protocol and implementation. Do 
 A client rejects a server because its name does not match. The protected response is to inspect the target, certificate names and trusted deployment configuration. Disabling verification accepts a weaker contract and can permit impersonation. A valid chain to the wrong name is not enough to establish the intended peer.
 
 A complete PKI explanation identifies holder, issuer, accepted identity, permitted use and lifecycle. These details connect encrypted communication to trusted authority while preserving the distinction between authenticated identity and allowed application behavior.
+
+## Work through the decision
+
+Public Key Infrastructure (PKI) connects certificates, issuers and trust decisions. A certificate binds an identity claim to a public key under the issuer's signature. The client evaluates chain trust, validity and the requested identity under its protocol's verification rules.
+
+For a web endpoint, the Subject Alternative Name (SAN) identifies supported hostnames. Connecting to an address while expecting another hostname must still preserve that intended name in verification. Disabling verification removes evidence of endpoint authentication. A client certificate used for mutual authentication has another role and its own issuer and usage requirements. Encrypted transport alone does not establish application permission.
+
+```mermaid
+flowchart TB
+    N0["Requested server identity"]
+    N1["Certificate identity match"]
+    N2["Trusted valid chain"]
+    N3["Authenticated TLS connection"]
+    N4["Application authorization"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+Certificate verification connects trust material to the intended peer rather than merely enabling encryption.
+
+Certificate verification connects trust material to the intended peer rather than merely enabling encryption.
 
 ## Common pitfalls
 
