@@ -8,3 +8,5 @@ exam_objectives:
 NetworkPolicy selects Pods and defines supported allowances for isolated ingress and egress directions. Rules combine additively, and a source's egress and destination's ingress can both affect a connection.
 
 Selector structure, ports and required dependencies determine the intended paths. API acceptance is not evidence of actual enforcement; a supporting network implementation must realize the policy. Connection control remains distinct from encryption and application authorization.
+
+You can now explain the actual matching structure rather than relying on a policy title. Complete connection verification still needs the selected ports, isolated directions and real enforcement behavior.
