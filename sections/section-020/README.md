@@ -6,7 +6,9 @@ exam_objectives:
 ---
 # Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
 
-This section covers use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi). It develops reviewing A Cluster Against A Security Benchmark through mechanisms, examples, prerequisites and failure reasoning.
+A benchmark tool reports a compliant setting, but the cluster uses a different component layout from the selected benchmark profile. A result needs a supported target and meaningful evidence before it describes the actual system.
+
+The explanations identify the responsible components, compare intended and observed state, and work through the decisions needed to preserve the requirement. Read the worked examples as reasoning about a proposed system; no environment is started by this section.
 
 Read the module goals, teaching and closing summary in order. YAML checks are indexed separately and appear after designated summaries. Larger domains include an intermediate checkpoint before the final review.
 
