@@ -5,6 +5,20 @@ exam_objectives:
 ---
 # Verifying Release Artifacts Before Deployment
 
+A verified download and the binary actually executed have different hashes. Verification described one artifact, while installation selected another. The trust decision must stay linked to execution.
+
+## Learning objectives
+
+- Distinguish integrity checks from publisher authenticity.
+- Bind verification evidence to an exact release and architecture.
+- Explain authenticated checksum and signature trust chains.
+
+## Before you start
+
+This chapter is standalone reading material; no running cluster or installed tools are required. A Pod is the Kubernetes unit for running one or more containers, and a namespace groups namespaced objects. Treat the worked configurations as teaching examples rather than recorded observations from a provisioned environment.
+
+## Responsible components and behavior
+
 A platform binary executes with the authority of its host or component identity. Verifying it before deployment reduces the chance of installing substituted or corrupted software. The verification decision must connect the actual file to an expected release, architecture and authorized publisher. A recognizable filename or successful download does not establish that connection.
 
 ## Integrity And Authenticity Answer Different Questions
@@ -30,6 +44,29 @@ For example, a file with a matching digest from an unauthenticated message prove
 Verification can be defeated by a later replacement. A shared writable download directory, untrusted mirror update or mutable artifact reference can substitute bytes after the check. Store verified artifacts under controlled access and ensure the deployment process consumes the same artifact. Automation should fail clearly when verification is missing or does not match policy rather than silently continue with an unchecked fallback.
 
 A signed malicious release can still be vulnerable. Publisher authenticity is not a vulnerability assessment, code review or compatibility guarantee. Keep those decisions separate so evidence for one does not conceal missing evidence for another. Release provenance can add information about how software was built, but it also needs policy and trust interpretation.
+
+## Work through the decision
+
+A checksum comparison detects whether content matches the selected digest, but the expected digest also needs a trustworthy source. If both bytes and checksum come from one compromised location, agreement alone does not establish the publisher's identity. A supported signature process adds issuer evidence under its trust policy.
+
+Record the exact version, platform variant, artifact digest and trusted verification material. Then ensure the installed or deployed bytes are the verified bytes. A familiar filename, tag or mirror hostname cannot preserve that relationship by itself. Verification of origin also leaves known vulnerabilities and runtime permissions as separate properties to review.
+
+```mermaid
+flowchart TB
+    N0["Selected release artifact"]
+    N1["Trusted expected evidence"]
+    N2["Content and origin verification"]
+    N3["Same artifact installed"]
+    N4["Runtime identity confirmation"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+```
+
+A release check protects execution only when verified identity survives the delivery path.
+
+A release check protects execution only when verified identity survives the delivery path.
 
 ## Common pitfalls
 
