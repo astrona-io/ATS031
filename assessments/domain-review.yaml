@@ -1,0 +1,303 @@
+schema_version: 1
+kind: question_bank
+id: ats031-domain-review
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material; not official examination questions.
+scope:
+  type: domain
+  id: domain-review
+  title: Cluster Setup
+placement:
+  position: after
+  reading: sections/section-050/module-01/course-02-summary.md
+questions:
+- id: ats031-domain-review-q01
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish declared policy from actual implementation enforcement.
+  source_readings:
+  - sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
+  prompt: A policy exists, traffic passes and enforcement support is unknown. What should be established
+    first?
+  options:
+  - id: a
+    text: That TLS alone blocks every unwanted connection.
+    explanation: Encryption and connection isolation are separate.
+  - id: b
+    text: Whether the installed network implementation realizes the intended rules.
+    explanation: Object presence is not enforcement evidence.
+  - id: c
+    text: That every caller is automatically authorized by policy name.
+    explanation: Names are not a permission decision.
+  correct_option: b
+  explanation: Object presence is not enforcement evidence.
+- id: ats031-domain-review-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Evaluate additive allowed rules and selector structure.
+  source_readings:
+  - sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
+  prompt: Two policies select the same destination and permit different callers. How do their ordinary
+    allowances combine?
+  options:
+  - id: a
+    text: As a union of allowed traffic for the isolated direction.
+    explanation: Policies provide additive allowances.
+  - id: b
+    text: The more restrictive name overrides every rule.
+    explanation: Object names do not establish precedence.
+  - id: c
+    text: The later filename automatically replaces the earlier one.
+    explanation: File ordering does not define that policy union.
+  correct_option: a
+  explanation: Policies provide additive allowances.
+- id: ats031-domain-review-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Relate DNS and dependencies to egress requirements.
+  source_readings:
+  - sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
+  prompt: A source is egress-isolated and cannot resolve Service names. Which required dependency may
+    need an allowance?
+  options:
+  - id: a
+    text: Only the image's writable layer.
+    explanation: That does not permit DNS network requests.
+  - id: b
+    text: A wildcard administrative role by default.
+    explanation: API administration is not the specific connection requirement.
+  - id: c
+    text: DNS through the intended resolver path.
+    explanation: Discovery can fail before a permitted backend connection is attempted.
+  correct_option: c
+  explanation: Discovery can fail before a permitted backend connection is attempted.
+- id: ats031-domain-review-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Select a benchmark matching component versions and deployment ownership.
+  source_readings:
+  - sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+  prompt: Why must a benchmark version be selected deliberately?
+  options:
+  - id: a
+    text: The benchmark replaces the cluster's version documentation.
+    explanation: It is assessment guidance rather than a platform support contract.
+  - id: b
+    text: Recommendations and checks depend on platform version and deployment model.
+    explanation: A check can otherwise target absent settings or responsibilities owned by a provider.
+  - id: c
+    text: Every benchmark applies identically to every Kubernetes release.
+    explanation: Component defaults and supported settings change across releases.
+  correct_option: b
+  explanation: A check can otherwise target absent settings or responsibilities owned by a provider.
+- id: ats031-domain-review-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish automated findings from manual security judgment.
+  source_readings:
+  - sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+  prompt: An automated check cannot inspect a provider-owned API server. What is justified?
+  options:
+  - id: a
+    text: Record the inspection limitation and seek provider evidence.
+    explanation: Unavailable evidence should not be represented as a verified compliant setting.
+  - id: b
+    text: Declare the API server compliant automatically.
+    explanation: A tool's lack of access is not evidence of a passing control.
+  - id: c
+    text: Disable all workload controls until inspection is possible.
+    explanation: Other controls remain relevant and do not depend on that single inspection.
+  correct_option: a
+  explanation: Unavailable evidence should not be represented as a verified compliant setting.
+- id: ats031-domain-review-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Trace a failed recommendation to effective configuration.
+  source_readings:
+  - sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+  prompt: A security flag appears in an unused file. What establishes the control?
+  options:
+  - id: a
+    text: The existence of any file containing the flag.
+    explanation: Unused files do not change runtime behavior.
+  - id: b
+    text: The file's creation date alone.
+    explanation: Recency does not show that a component loaded the setting.
+  - id: c
+    text: The effective configuration used by the running component.
+    explanation: Launch arguments and active configuration determine actual behavior.
+  correct_option: c
+  explanation: Launch arguments and active configuration determine actual behavior.
+- id: ats031-domain-review-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Trace host and Service port matching.
+  source_readings:
+  - sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+  prompt: A host rule is correct but the backend has no ready selected endpoints. What remains broken?
+  options:
+  - id: a
+    text: The certificate automatically repairs readiness
+    explanation: Transport identity does not fix application health.
+  - id: b
+    text: The Service-to-backend availability relationship
+    explanation: Matching a route does not create useful backend capacity.
+  - id: c
+    text: The resource automatically stops being an Ingress
+    explanation: The kind remains unchanged.
+  correct_option: b
+  explanation: Matching a route does not create useful backend capacity.
+- id: ats031-domain-review-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify IngressClass and controller responsibility.
+  source_readings:
+  - sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+  prompt: An Ingress is accepted but no controller handles its class. What can happen?
+  options:
+  - id: a
+    text: The declaration produces no intended active route
+    explanation: Resource acceptance and traffic implementation are separate stages.
+  - id: b
+    text: The API server always becomes the missing controller
+    explanation: The API server does not universally implement Ingress traffic handling.
+  - id: c
+    text: The backend gets a public route without infrastructure
+    explanation: External reachability still requires an appropriate implementation.
+  correct_option: a
+  explanation: Resource acceptance and traffic implementation are separate stages.
+- id: ats031-domain-review-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare exact, prefix and implementation-specific paths.
+  source_readings:
+  - sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+  prompt: A Prefix path is /reports. Which request illustrates its path-element behavior?
+  options:
+  - id: a
+    text: Only the empty path can ever match
+    explanation: A prefix can match the declared path and its qualifying subpaths.
+  - id: b
+    text: Every path beginning with the letters reports must match
+    explanation: That ignores the element boundary.
+  - id: c
+    text: /reports/daily can match while /reports-old is not the same prefix element
+    explanation: Prefix path matching uses path elements rather than arbitrary text prefix alone.
+  correct_option: c
+  explanation: Prefix path matching uses path elements rather than arbitrary text prefix alone.
+- id: ats031-domain-review-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Identify credentials and authority exposed through node-local endpoints.
+  source_readings:
+  - sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+  prompt: Why is cloud instance metadata sensitive to an ordinary application Pod?
+  options:
+  - id: a
+    text: Access automatically uses the Pod's Kubernetes RBAC permissions.
+    explanation: Cloud metadata access is a separate path from ordinary Kubernetes API authorization.
+  - id: b
+    text: It can expose credentials or details associated with the node's cloud identity.
+    explanation: That authority may exceed the application's intended workload identity.
+  - id: c
+    text: It contains only public DNS data by definition.
+    explanation: Metadata services can carry sensitive identity and configuration information.
+  correct_option: b
+  explanation: That authority may exceed the application's intended workload identity.
+- id: ats031-domain-review-q11
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Separate workload network paths from host and control-plane paths.
+  source_readings:
+  - sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+  prompt: Why can a Pod NetworkPolicy be insufficient for host management protection?
+  options:
+  - id: a
+    text: Host-networked and node-local paths may have implementation-specific treatment.
+    explanation: The actual traffic path and enforcement coverage must be assessed.
+  - id: b
+    text: NetworkPolicy always controls every host process connection.
+    explanation: Host traffic coverage is not a universal guarantee of the namespaced API.
+  - id: c
+    text: A denied Pod connection permanently disables the kubelet endpoint.
+    explanation: Policy filtering does not stop or authenticate the endpoint itself.
+  correct_option: a
+  explanation: The actual traffic path and enforcement coverage must be assessed.
+- id: ats031-domain-review-q12
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Evaluate endpoint authentication, authorization and least privilege together.
+  source_readings:
+  - sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+  prompt: What reduces harm if node cloud credentials are exposed?
+  options:
+  - id: a
+    text: Giving every node the broadest cloud administrator role.
+    explanation: Broader authority increases the impact of exposure.
+  - id: b
+    text: Relying only on the metadata IP being hard to remember.
+    explanation: Address obscurity is not a security boundary.
+  - id: c
+    text: Narrow permissions on the node's cloud identity plus restricted metadata access.
+    explanation: Limiting credential authority complements preventing access to the credential.
+  correct_option: c
+  explanation: Limiting credential authority complements preventing access to the credential.
+- id: ats031-domain-review-q13
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish integrity checks from publisher authenticity.
+  source_readings:
+  - sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+  prompt: What does a checksum copied from the same compromised download page fail to establish?
+  options:
+  - id: a
+    text: The CPU architecture of the machine automatically.
+    explanation: A digest alone does not describe deployment compatibility.
+  - id: b
+    text: Authenticity of the expected artifact.
+    explanation: An attacker controlling both files can provide a matching malicious checksum.
+  - id: c
+    text: Whether the local file can be hashed.
+    explanation: Hash computation still works on malicious bytes.
+  correct_option: b
+  explanation: An attacker controlling both files can provide a matching malicious checksum.
+- id: ats031-domain-review-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Bind verification evidence to an exact release and architecture.
+  source_readings:
+  - sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+  prompt: A valid signature belongs to an unrelated publisher. Is it sufficient?
+  options:
+  - id: a
+    text: No; verification must require the intended publisher identity.
+    explanation: Cryptographic validity alone does not satisfy the release trust policy.
+  - id: b
+    text: Yes; all valid signatures authorize Kubernetes releases.
+    explanation: Trust policy determines which identities are authorized publishers.
+  - id: c
+    text: Yes; the file extension establishes the intended signer.
+    explanation: A filename has no cryptographic binding to publisher authority.
+  correct_option: a
+  explanation: Cryptographic validity alone does not satisfy the release trust policy.
+- id: ats031-domain-review-q15
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Preserve verified bytes through storage and deployment.
+  source_readings:
+  - sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+  prompt: What breaks a completed verification chain?
+  options:
+  - id: a
+    text: Recording the verified digest in release metadata.
+    explanation: That helps retain the binding between verification and deployment.
+  - id: b
+    text: Selecting the documented operating system and architecture.
+    explanation: Compatibility selection is part of a coherent artifact choice.
+  - id: c
+    text: Replacing the artifact after verification before deployment.
+    explanation: The deployed bytes would no longer be the bytes covered by the evidence.
+  correct_option: c
+  explanation: The deployed bytes would no longer be the bytes covered by the evidence.
