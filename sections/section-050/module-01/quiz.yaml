@@ -1,0 +1,207 @@
+# Knowledge check for section 050. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-050-01
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-050
+  title: Verify Platform Binaries Before Deploying
+placement:
+  position: after
+  reading: sections/section-050/module-01/course-05-summary.md
+questions:
+- id: ats031-050-01-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Separate integrity from authenticity.
+  source_readings:
+  - sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
+  prompt: A computed SHA-256 digest equals the digest on the download page. What does this establish?
+  options:
+  - id: a
+    text: The file matches the digest on that page, and nothing about who controls the page.
+    explanation: Correct. Integrity is shown, authenticity is not, unless the digest comes from a trusted source.
+  - id: b
+    text: The file was produced by the Kubernetes project.
+    explanation: An attacker who controls the page can publish a matching pair.
+  - id: c
+    text: The file has no vulnerabilities.
+    explanation: A digest says nothing about defects.
+  correct_option: a
+  explanation: A digest compares bytes with an expected value. Trust in the value is a separate question.
+- id: ats031-050-01-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify what a signature adds.
+  source_readings:
+  - sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
+  prompt: What does a valid digital signature on a checksum manifest add to a bare checksum?
+  options:
+  - id: a
+    text: It encrypts the binary during download.
+    explanation: A signature does not encrypt the file.
+  - id: b
+    text: It shows that the holder of a specific key vouched for exactly this manifest.
+    explanation: Correct. Only the holder of the private key can produce it.
+  - id: c
+    text: It removes the need to compare digests.
+    explanation: You still compare the binary with the digest in the manifest.
+  correct_option: b
+  explanation: Signing the manifest authenticates the digests, and then the digest comparison is meaningful.
+- id: ats031-050-01-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose the exact artifact.
+  source_readings:
+  - sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
+  prompt: Which set of facts identifies an artifact precisely enough to verify it?
+  options:
+  - id: a
+    text: The file name only.
+    explanation: Names can be shared by different files.
+  - id: b
+    text: Component, version, operating system, CPU architecture and digest.
+    explanation: Correct. These select exactly one file and bind the decision to its bytes.
+  - id: c
+    text: The download host name.
+    explanation: A host serves many files and can be compromised.
+  correct_option: b
+  explanation: Record component, version, platform and digest before the file enters automation.
+- id: ats031-050-01-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Show the limit of a forged manifest.
+  source_readings:
+  - sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
+  prompt: An attacker replaces `kubectl` and writes a new manifest with the digest of the replacement. What does `sha256sum -c` on the new manifest report?
+  options:
+  - id: a
+    text: OK for the replacement, because the check compares a file with a manifest and does not ask who wrote it.
+    explanation: Correct. This is why the manifest needs a signature.
+  - id: b
+    text: FAILED, because the file was modified.
+    explanation: The manifest was modified together with the file, so they agree.
+  - id: c
+    text: An error, because the manifest is not signed.
+    explanation: '`sha256sum` does not look at signatures.'
+  correct_option: a
+  explanation: A bare checksum check passes for a matching forged pair.
+- id: ats031-050-01-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Predict a signature check result.
+  source_readings:
+  - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+  prompt: '`openssl dgst -sha256 -verify publisher.pub -signature checksums.sig` is run on a manifest that was edited after signing. What is the result?'
+  options:
+  - id: a
+    text: '`Verified OK`, because the key is correct.'
+    explanation: The signature covers the original content.
+  - id: b
+    text: '`Verification failure` and a nonzero exit status.'
+    explanation: Correct. The manifest is not what was signed.
+  - id: c
+    text: The file is repaired automatically.
+    explanation: Verification never changes the file.
+  correct_option: b
+  explanation: A signature check fails for any change to the signed data.
+- id: ats031-050-01-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Order the checks.
+  source_readings:
+  - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+  prompt: In which order do you check a signed release?
+  options:
+  - id: a
+    text: Compare the binary's digest first, then verify the signature of the manifest.
+    explanation: The digest comes from an unverified manifest, so the comparison proves nothing yet.
+  - id: b
+    text: Verify the manifest signature first, then compare the binary with a digest from that manifest.
+    explanation: Correct. Only an authenticated manifest gives digests worth comparing against.
+  - id: c
+    text: Run the binary first and verify only if it fails.
+    explanation: Running unverified software defeats the check.
+  correct_option: b
+  explanation: Authenticate the manifest, then check the file against it.
+- id: ats031-050-01-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Judge the source of the public key.
+  source_readings:
+  - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+  prompt: A script downloads a binary, its signature and the public key from the same unauthenticated address, then verifies. Why is the result weak?
+  options:
+  - id: a
+    text: A signature check never works with a downloaded key.
+    explanation: It works when the key is trusted.
+  - id: b
+    text: An attacker who controls the address can supply a matching key, signature and file.
+    explanation: Correct. The key must come from a separate, trusted channel.
+  - id: c
+    text: Public keys expire after one hour.
+    explanation: Key lifetime depends on the key and is not the issue here.
+  correct_option: b
+  explanation: Trust in the public key is the root of the check.
+- id: ats031-050-01-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: State the limit of the fixture.
+  source_readings:
+  - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+  prompt: The playground verifies a manifest with a key made for the exercise. Which claim is accurate?
+  options:
+  - id: a
+    text: The staged `kubectl` is proven to come from the Kubernetes project.
+    explanation: The fixture key is not the project's key.
+  - id: b
+    text: The manifest was signed by the holder of the fixture key, and no claim about the real publisher follows.
+    explanation: Correct. The key is an exercise trust root.
+  - id: c
+    text: Any binary signed with any key is safe.
+    explanation: A valid signature from an unknown signer proves nothing about trust.
+  correct_option: b
+  explanation: State what the evidence establishes, and name the key that was used.
+- id: ats031-050-01-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Choose the verification for an identity-based signature.
+  source_readings:
+  - sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
+  prompt: '`cosign verify-blob` is run with a certificate and signature but without `--certificate-identity` and `--certificate-oidc-issuer`. What is wrong?'
+  options:
+  - id: a
+    text: Nothing, because a valid signature is sufficient.
+    explanation: A valid signature from any signer would pass.
+  - id: b
+    text: The check does not state which signer to expect, so it cannot establish authenticity.
+    explanation: Correct. The expected identity and issuer are the trust policy.
+  - id: c
+    text: The certificate cannot be read without them.
+    explanation: They are expectations you state, not decoding options.
+  correct_option: b
+  explanation: State the identity and issuer that you expect. Take them from the project's documentation.
+- id: ats031-050-01-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Keep the binding after verification.
+  source_readings:
+  - sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
+  prompt: A pipeline verifies a binary in a shared download directory and installs it a minute later. Which change best keeps the verified bytes bound to what runs?
+  options:
+  - id: a
+    text: Verify the copy at its final location, in a directory only the deployment user can write.
+    explanation: Correct. The check then covers the bytes that will run, and a replacement in the gap is prevented or caught.
+  - id: b
+    text: Verify twice in the download directory.
+    explanation: The directory is still writable by others, so the gap remains.
+  - id: c
+    text: Rename the file after verification.
+    explanation: A new name does not protect the bytes.
+  correct_option: a
+  explanation: Verify where you install, and fail the pipeline when verification does not match.

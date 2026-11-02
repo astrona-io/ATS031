@@ -1,0 +1,207 @@
+# Knowledge check for section 010. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-010-01
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-010
+  title: Restrict Pod Traffic With NetworkPolicy
+placement:
+  position: after
+  reading: sections/section-010/module-01/course-05-summary.md
+questions:
+- id: ats031-010-01-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain which component enforces a NetworkPolicy.
+  source_readings:
+  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  prompt: You apply a NetworkPolicy and `kubectl apply` reports `created`, but traffic that the policy should block still flows. The cluster uses a network plugin that does not implement NetworkPolicy. What explains this?
+  options:
+  - id: a
+    text: The API server only stores the object; the network plugin must enforce it, and this one does not.
+    explanation: Correct. Enforcement is done by the network plugin on each node.
+  - id: b
+    text: The policy needs a restart of the `kube-apiserver` before it takes effect.
+    explanation: The API server does not filter traffic, so restarting it changes nothing.
+  - id: c
+    text: Policies only apply to pods created after the policy.
+    explanation: Policies apply to matching pods that already run, as long as a plugin enforces them.
+  correct_option: a
+  explanation: The API server validates and stores NetworkPolicy objects. The network plugin turns them into packet filtering rules, and without that support nothing is enforced.
+- id: ats031-010-01-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: State the default behaviour of pods that no policy selects.
+  source_readings:
+  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  prompt: In a namespace with no NetworkPolicy, a pod in another namespace sends a request to a pod in that namespace. What happens?
+  options:
+  - id: a
+    text: The request is dropped, because cross-namespace traffic is denied by default.
+    explanation: Kubernetes does not deny cross-namespace traffic by default.
+  - id: b
+    text: The request is allowed, because pods that no policy selects accept all traffic.
+    explanation: Correct. Isolation starts only when a policy selects a pod for a direction.
+  - id: c
+    text: The request is allowed only if both namespaces carry the same label.
+    explanation: Namespace labels play no part when no policy exists.
+  correct_option: b
+  explanation: Without a selecting policy a pod is not isolated and accepts all traffic in that direction.
+- id: ats031-010-01-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Write an ingress rule that allows one labelled peer on one port.
+  source_readings:
+  - sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
+  prompt: 'A policy must let only pods labelled `app: shuttle` in its own namespace reach `app: probe` pods on TCP 8080. Which fields do that?'
+  options:
+  - id: a
+    text: '`spec.podSelector` selects `app: probe`; `ingress[].from` has a `podSelector` for `app: shuttle`; `ports` lists TCP 8080.'
+    explanation: Correct. The top-level selector picks the protected pods and the peer picks the allowed sources.
+  - id: b
+    text: '`spec.podSelector` selects `app: shuttle`; `ingress[].from` has a `podSelector` for `app: probe`.'
+    explanation: This protects the wrong pods. The top-level selector chooses the destination of an ingress policy.
+  - id: c
+    text: '`spec.egress[].to` selects `app: probe` and `policyTypes` lists `Ingress`.'
+    explanation: An `egress` section controls what selected pods send, not what `probe` receives.
+  correct_option: a
+  explanation: The top-level `podSelector` is the protected destination. The peers in `from` are the allowed sources.
+- id: ats031-010-01-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish a timeout from a refusal when testing a denial.
+  source_readings:
+  - sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
+  prompt: After applying an ingress policy you request the `probe` Service from the `drifter` pod in another namespace. The command stops after its 3 second limit with a timeout. What does this show?
+  options:
+  - id: a
+    text: A pod answered with a reset because port 8080 is closed.
+    explanation: A closed port produces an immediate refusal, not a timeout.
+  - id: b
+    text: The Service has no endpoints and Kubernetes returned an error.
+    explanation: A Service without endpoints makes no listener answer at all, so it is a different fault. The signature of a policy block is the timeout together with a healthy destination.
+  - id: c
+    text: The network plugin dropped the packets, which is the evidence that the policy blocks the request.
+    explanation: Correct. A timeout means no reply, which is how the packet filter drops traffic.
+  correct_option: c
+  explanation: A timeout means the packets were dropped. A refusal means a host answered because no process listens on the port.
+- id: ats031-010-01-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Evaluate how selector placement changes an ingress rule.
+  source_readings:
+  - sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
+  prompt: 'A `from` list has two items: the first is `namespaceSelector` with `kubernetes.io/metadata.name: starfleet`, the second is `podSelector` with `app: shuttle`. What does the rule allow?'
+  options:
+  - id: a
+    text: 'Only `app: shuttle` pods in the namespace `starfleet`.'
+    explanation: That reading needs both selectors in one item. Two items are alternatives.
+  - id: b
+    text: 'Every pod in `starfleet`, and also `app: shuttle` pods in the policy''s own namespace.'
+    explanation: Correct. Separate items are combined with OR, so the first item admits every pod in the namespace.
+  - id: c
+    text: Nothing, because a rule may contain only one selector.
+    explanation: A `from` list can hold several items, and each item can hold several selectors.
+  correct_option: b
+  explanation: Fields in one item combine with AND, and separate items combine with OR. Moving a dash can widen a rule.
+- id: ats031-010-01-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Relate DNS to egress requirements.
+  source_readings:
+  - sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+  prompt: A `shuttle` pod has an egress policy that allows only TCP 8080 to the `probe` pods. The application now fails with a name resolution error when it calls `http://probe/`. What is missing?
+  options:
+  - id: a
+    text: An ingress rule on the `probe` pods for port 80.
+    explanation: The failure is a resolution error, which happens before any connection to `probe`.
+  - id: b
+    text: An egress rule for UDP and TCP port 53 to the DNS pods in `kube-system`.
+    explanation: Correct. Without it the pod cannot ask the cluster DNS for the address of `probe`.
+  - id: c
+    text: A `ClusterIP` for the DNS pods.
+    explanation: Pods do not have a ClusterIP, and the problem is a missing allowance, not a missing address.
+  correct_option: b
+  explanation: An isolated client loses DNS too. DNS needs its own egress rule for port 53 over UDP and TCP.
+- id: ats031-010-01-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose the port a rule must name when a Service is involved.
+  source_readings:
+  - sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+  prompt: The `probe` Service listens on port 80 and forwards to container port 8080. An egress rule for a client must allow the connection to the Service. Which port goes in the rule?
+  options:
+  - id: a
+    text: 80, because the client sends its request to the Service port.
+    explanation: The filter checks the destination after the Service address was replaced by a pod address and port.
+  - id: b
+    text: Both ports are always needed.
+    explanation: Only the port that the filter sees, the pod port, is needed.
+  - id: c
+    text: 8080, because the filter compares the pod IP address and pod port after the Service rewrite.
+    explanation: Correct. Policies never match Service names or Service ports.
+  correct_option: c
+  explanation: The node replaces the Service address with a pod address and port before the policy is checked.
+- id: ats031-010-01-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Combine namespace and pod selectors in one egress peer.
+  source_readings:
+  - sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+  prompt: You must allow DNS from `shuttle` to the CoreDNS pods only. Which `to` peer is correct?
+  options:
+  - id: a
+    text: 'One item with `namespaceSelector` for `kube-system` and `podSelector` for `k8s-app: kube-dns`.'
+    explanation: Correct. Both conditions in one item mean only DNS pods in that namespace.
+  - id: b
+    text: 'A `namespaceSelector` item for `kube-system` followed by a separate `podSelector` item for `k8s-app: kube-dns`.'
+    explanation: This allows every pod in `kube-system`, and `kube-dns` pods in the policy's own namespace.
+  - id: c
+    text: 'A `namespaceSelector: {}` item, which selects the DNS Service.'
+    explanation: An empty `namespaceSelector` selects all namespaces, and it does not select Services.
+  correct_option: a
+  explanation: Selectors in one item combine with AND. Keep the namespace and the pod label together to limit the rule to the DNS pods.
+- id: ats031-010-01-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Predict the effect of a default-deny policy next to allow policies.
+  source_readings:
+  - sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
+  prompt: 'A namespace has the allow policies `probe-shuttle` and `shuttle-egress`. You add a policy with `podSelector: {}` and `policyTypes: [Ingress, Egress]` and no rules. The `shuttle` to `probe` request is tested again. What happens?'
+  options:
+  - id: a
+    text: It is blocked, because the newest policy replaces the older ones.
+    explanation: Policies never replace each other. Their allowances are combined.
+  - id: b
+    text: It is blocked, because a deny policy has higher priority than allow policies.
+    explanation: NetworkPolicy has no deny rules and no priority.
+  - id: c
+    text: It still works, because the allowances of the other two policies are combined with the empty one.
+    explanation: Correct. The default-deny policy allows nothing, and the union still contains the existing allowances.
+  correct_option: c
+  explanation: The union of all policies selecting a pod decides. A policy with no rules adds no allowances and removes none.
+- id: ats031-010-01-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Diagnose a blocked request systematically.
+  source_readings:
+  - sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
+  prompt: 'A request from `shuttle` to `probe` fails after a new policy. The policy selects `app: prob` in its `podSelector`. What is the most likely result and the right first check?'
+  options:
+  - id: a
+    text: The policy selects no pod, so it protects nothing. Compare the selector with `kubectl get pods --show-labels`.
+    explanation: Correct. A mistyped label selects no pods. Comparing selectors with real labels is the check to do first.
+  - id: b
+    text: The policy blocks every pod in the namespace. Delete the namespace.
+    explanation: An empty set of selected pods isolates nothing, and deleting the namespace is not a diagnosis.
+  - id: c
+    text: The API server rejects the policy, so no object exists.
+    explanation: The API server accepts a selector that matches no pods. Check the labels instead.
+  correct_option: a
+  explanation: A selector that matches no pods is valid but has no effect. The failure then has another cause, found by checking the real labels and every policy.

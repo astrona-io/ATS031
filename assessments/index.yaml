@@ -7,10 +7,50 @@ banks:
   question_count: 15
   placement:
     position: after
-    reading: sections/section-050/module-01/course-02-summary.md
+    reading: sections/section-050/module-01/course-05-summary.md
   covered_sections:
   - section-010
   - section-020
   - section-030
   - section-040
+  - section-050
+- id: ats031-010-01
+  path: sections/section-010/module-01/quiz.yaml
+  question_count: 10
+  placement:
+    position: after
+    reading: sections/section-010/module-01/course-05-summary.md
+  covered_sections:
+  - section-010
+- id: ats031-020-01
+  path: sections/section-020/module-01/quiz.yaml
+  question_count: 10
+  placement:
+    position: after
+    reading: sections/section-020/module-01/course-05-summary.md
+  covered_sections:
+  - section-020
+- id: ats031-030-01
+  path: sections/section-030/module-01/quiz.yaml
+  question_count: 10
+  placement:
+    position: after
+    reading: sections/section-030/module-01/course-05-summary.md
+  covered_sections:
+  - section-030
+- id: ats031-040-01
+  path: sections/section-040/module-01/quiz.yaml
+  question_count: 10
+  placement:
+    position: after
+    reading: sections/section-040/module-01/course-04-summary.md
+  covered_sections:
+  - section-040
+- id: ats031-050-01
+  path: sections/section-050/module-01/quiz.yaml
+  question_count: 10
+  placement:
+    position: after
+    reading: sections/section-050/module-01/course-05-summary.md
+  covered_sections:
   - section-050

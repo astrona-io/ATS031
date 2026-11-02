@@ -1,0 +1,212 @@
+{
+  "context": "kind-astro-ats-031-playground-040-01",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "metadata-simulator",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "metadata-simulator",
+          "namespace": "starfleet",
+          "labels": {
+            "app": "metadata-simulator"
+          }
+        },
+        "spec": {
+          "restartPolicy": "Never",
+          "containers": [
+            {
+              "name": "web",
+              "image": "docker.io/library/python:3.13-alpine",
+              "command": [
+                "python",
+                "-m",
+                "http.server",
+                "8080"
+              ]
+            }
+          ]
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "networkpolicy",
+      "name": "shuttle-isolation",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "shuttle-isolation",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "shuttle"
+            }
+          },
+          "policyTypes": [
+            "Egress"
+          ],
+          "egress": [
+            {
+              "to": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "kube-system"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "k8s-app": "kube-dns"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "port": 53,
+                  "protocol": "UDP"
+                },
+                {
+                  "port": 53,
+                  "protocol": "TCP"
+                }
+              ]
+            },
+            {
+              "to": [
+                {
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "probe"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "port": 8080,
+                  "protocol": "TCP"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 2,
+          "selector": {
+            "matchLabels": {
+              "app": "probe",
+              "release": "probe"
+            }
+          },
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "probe",
+                "release": "probe"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "probe",
+                  "image": "docker.io/library/python:3.13-alpine",
+                  "command": [
+                    "python",
+                    "/app/server.py"
+                  ],
+                  "env": [
+                    {
+                      "name": "VERSION",
+                      "value": "v1"
+                    }
+                  ],
+                  "ports": [
+                    {
+                      "name": "http",
+                      "containerPort": 8080
+                    }
+                  ],
+                  "readinessProbe": {
+                    "httpGet": {
+                      "path": "/ready",
+                      "port": "http"
+                    },
+                    "periodSeconds": 2
+                  },
+                  "resources": {
+                    "requests": {
+                      "cpu": "10m",
+                      "memory": "32Mi"
+                    },
+                    "limits": {
+                      "memory": "128Mi"
+                    }
+                  },
+                  "volumeMounts": [
+                    {
+                      "name": "app",
+                      "mountPath": "/app",
+                      "readOnly": true
+                    }
+                  ]
+                }
+              ],
+              "volumes": [
+                {
+                  "name": "app",
+                  "configMap": {
+                    "name": "probe-code"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "shuttle",
+        "--",
+        "wget",
+        "-q",
+        "-T",
+        "3",
+        "-O-",
+        "http://probe/"
+      ],
+      "contains": [
+        "version=v1"
+      ]
+    }
+  ]
+}

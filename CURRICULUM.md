@@ -20,4 +20,17 @@ The [official objectives](https://training.linuxfoundation.org/certification/cer
 | 040 / 01 | Protecting Node Metadata And Management Endpoints | Protecting Node Metadata And Management Endpoints |
 | 050 / 01 | Verifying Release Artifacts Before Deployment | Verifying Release Artifacts Before Deployment |
 
-AUTHORING.yaml records measurable goals and adaptation sources. Every objective retains its section ID. All technical readings remain draft. Question banks are separate from the reading manifest and follow their declared summaries. No labs, playgrounds or runtime validation are included.
+AUTHORING.yaml records measurable goals and adaptation sources. Every objective retains its section ID. All technical readings remain draft. Question banks are separate from the reading manifest and follow their declared summaries. Playgrounds and draft labs accompany each module; live runtime validation is still pending.
+
+## Hands-On Coverage
+
+This course has 5 ungraded module playgrounds and 6 draft independent labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static configuration, shell/Python/YAML, parser, lifecycle and offline grader checks pass. Live execution remains pending because the session cannot access Podman; installed CLI configuration validation is separately blocked by its maintenance lock.
+
+| Module | Labs in teaching order |
+| --- | --- |
+| 010/01 | Allow One Peer And Deny Another |
+| 010/01 | Allow DNS And One Application Dependency |
+| 020/01 | Disable API Server Profiling In A Private Node |
+| 030/01 | Verify TLS Termination And Server Identity |
+| 040/01 | Block A Simulated Metadata Endpoint |
+| 050/01 | Verify Signed Artifact Checksums |

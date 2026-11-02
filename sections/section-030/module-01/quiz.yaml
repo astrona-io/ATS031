@@ -1,0 +1,207 @@
+# Knowledge check for section 030. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-030-01
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: Ingress With TLS
+placement:
+  position: after
+  reading: sections/section-030/module-01/course-05-summary.md
+questions:
+- id: ats031-030-01-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain what an Ingress object does.
+  source_readings:
+  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+  prompt: What does an Ingress object do on its own, with no Ingress controller installed?
+  options:
+  - id: a
+    text: It routes HTTP requests to Services.
+    explanation: Routing is done by the controller. The object only stores the rules.
+  - id: b
+    text: It stores routing rules, and nothing acts on them until a controller reads them.
+    explanation: Correct. The Ingress is configuration. The controller, here Traefik, does the routing.
+  - id: c
+    text: It terminates TLS for every Service in the namespace.
+    explanation: TLS termination is done by the controller, and only for hosts listed in spec.tls.
+  correct_option: b
+  explanation: An Ingress is a set of rules. A controller of the matching class turns them into routing.
+- id: ats031-030-01-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose the type of a TLS Secret.
+  source_readings:
+  - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+  prompt: Which Secret type and keys does an Ingress need for a certificate?
+  options:
+  - id: a
+    text: Type `kubernetes.io/tls` with the keys `tls.crt` and `tls.key`.
+    explanation: Correct. These are the type and key names the controller expects.
+  - id: b
+    text: Type `Opaque` with the keys `cert` and `key`.
+    explanation: Opaque Secrets can hold anything, but the controller looks for the TLS keys by name.
+  - id: c
+    text: Type `kubernetes.io/dockerconfigjson` with a `.dockerconfigjson` key.
+    explanation: That type holds registry credentials.
+  correct_option: a
+  explanation: Use kubernetes.io/tls with tls.crt and tls.key, in the namespace of the Ingress.
+- id: ats031-030-01-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Identify the field that selects a controller.
+  source_readings:
+  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+  prompt: Which field of an Ingress names the controller that should handle it?
+  options:
+  - id: a
+    text: '`spec.ingressClassName`'
+    explanation: Correct. It refers to an IngressClass, which names the controller.
+  - id: b
+    text: '`metadata.name`'
+    explanation: The name identifies the object only.
+  - id: c
+    text: '`spec.tls.secretName`'
+    explanation: This names the certificate Secret.
+  correct_option: a
+  explanation: ingressClassName points to an IngressClass. Without a matching class, no controller picks up the Ingress.
+- id: ats031-030-01-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Apply path matching rules.
+  source_readings:
+  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+  prompt: 'An Ingress has the rule `path: /api` with `pathType: Prefix`. Which request path matches it?'
+  options:
+  - id: a
+    text: '`/apiv2`'
+    explanation: Prefix matches whole path elements, so /apiv2 is a different element.
+  - id: b
+    text: '`/api/users`'
+    explanation: Correct. /api is a prefix of /api/users at an element boundary.
+  - id: c
+    text: '`/API`'
+    explanation: Path matching is case sensitive.
+  correct_option: b
+  explanation: Prefix matches by path element. Exact would match only /api.
+- id: ats031-030-01-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Explain the three checks a client makes.
+  source_readings:
+  - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+  prompt: A client trusts the self-signed CA of a server, but the certificate has only `DNS:other.local` in its SAN. The client connects to `probe.local`. What happens?
+  options:
+  - id: a
+    text: The connection succeeds, because the chain is trusted.
+    explanation: Trust in the chain does not cover the name check.
+  - id: b
+    text: The client rejects the certificate, because the name does not match.
+    explanation: Correct. Chain, name and dates are checked separately, and the name check failed.
+  - id: c
+    text: The client falls back to the common name and accepts it.
+    explanation: Modern clients use the SAN, and a SAN that is present is not replaced by the common name.
+  correct_option: b
+  explanation: A trusted chain is not enough. The requested host must be in the SAN.
+- id: ats031-030-01-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Test TLS without disabling verification.
+  source_readings:
+  - sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
+  prompt: Which command tests the HTTPS route and still verifies the certificate of a self-signed server?
+  options:
+  - id: a
+    text: '`curl -k https://probe.local:8443/`'
+    explanation: The -k flag turns verification off, so it proves nothing about the certificate.
+  - id: b
+    text: '`curl --cacert probe.crt --resolve probe.local:8443:127.0.0.1 https://probe.local:8443/`'
+    explanation: Correct. The CA file is trusted, and --resolve keeps the host name while connecting to the port forward.
+  - id: c
+    text: '`curl http://127.0.0.1:8080/`'
+    explanation: This uses plain HTTP and does not test TLS.
+  correct_option: b
+  explanation: Give curl the certificate as a trusted CA and keep the real host name with --resolve.
+- id: ats031-030-01-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Locate where TLS ends.
+  source_readings:
+  - sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
+  prompt: A client connects over HTTPS to Traefik, which forwards to the `probe` Service on port 80. Where is the traffic encrypted?
+  options:
+  - id: a
+    text: Between the client and Traefik only, unless encryption to the backend is configured.
+    explanation: Correct. The controller terminates TLS and sends plain HTTP to the Service.
+  - id: b
+    text: All the way to the container.
+    explanation: That needs a TLS backend or pass-through, which is not configured here.
+  - id: c
+    text: Not at all, because the Secret is only base64.
+    explanation: Base64 is how the Secret is stored. The connection to the controller is encrypted with the certificate.
+  correct_option: a
+  explanation: TLS ends at the controller by default. The hop to the Service is plain HTTP.
+- id: ats031-030-01-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Diagnose a missing Secret.
+  source_readings:
+  - sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
+  prompt: 'An Ingress names `secretName: scout-tls-missing`, which does not exist. `kubectl apply` succeeded. What does a client see for `scout.local`?'
+  options:
+  - id: a
+    text: The API server rejected it, so nothing is served.
+    explanation: The API server does not check Secret names.
+  - id: b
+    text: The Traefik default certificate, and the controller log reports the missing Secret.
+    explanation: Correct. With no usable certificate the controller serves its own default, which the client does not trust.
+  - id: c
+    text: A plain HTTP response with no encryption.
+    explanation: The websecure entry point still serves TLS, using the default certificate.
+  correct_option: b
+  explanation: A missing Secret ends in the default certificate. Read the controller log to find the cause.
+- id: ats031-030-01-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Explain how the certificate is chosen.
+  source_readings:
+  - sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
+  prompt: Why does the controller serve a certificate before it has read the HTTP `Host` header?
+  options:
+  - id: a
+    text: It guesses from the source IP address of the client.
+    explanation: The address plays no part in the choice.
+  - id: b
+    text: It uses the Server Name Indication that the client sends in the TLS handshake.
+    explanation: Correct. The handshake comes first, so the name must be sent in it.
+  - id: c
+    text: It reads the Host header from the first encrypted packet.
+    explanation: The header is inside the encrypted data, which cannot be read before the handshake finishes.
+  correct_option: b
+  explanation: SNI carries the name in the handshake. The Host header selects the route later.
+- id: ats031-030-01-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Pick the first check for a verification error.
+  source_readings:
+  - sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
+  prompt: A client reports a certificate verification error for a host that returned correct content yesterday. Which check finds a time-based cause?
+  options:
+  - id: a
+    text: '`kubectl get ingressclass`'
+    explanation: This shows controller classes and tells nothing about dates.
+  - id: b
+    text: '`openssl x509 -checkend 0 -noout -in probe.crt`'
+    explanation: Correct. It tells you whether the certificate has expired.
+  - id: c
+    text: '`kubectl get endpoints probe`'
+    explanation: Endpoints concern the backend, not the certificate.
+  correct_option: b
+  explanation: Certificates expire without any cluster change. Check the validity dates, then the SAN and the Secret.

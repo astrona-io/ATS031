@@ -1,0 +1,207 @@
+# Knowledge check for section 020. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-020-01
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-020
+  title: Review Kubernetes Components With The CIS Benchmark
+placement:
+  position: after
+  reading: sections/section-020/module-01/course-05-summary.md
+questions:
+- id: ats031-020-01-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain how the CIS benchmark is organised.
+  source_readings:
+  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  prompt: Which benchmark section covers the settings of the kubelet on worker nodes?
+  options:
+  - id: a
+    text: Section 1, the control plane components.
+    explanation: Section 1 covers the API server, controller manager and scheduler and their files.
+  - id: b
+    text: Section 4, the worker nodes.
+    explanation: Correct. Section 4 covers worker node files (4.1) and the kubelet (4.2).
+  - id: c
+    text: Section 2, etcd.
+    explanation: Section 2 covers the etcd data store only.
+  correct_option: b
+  explanation: Section 4 holds the worker node recommendations. Section 1 is the control plane, section 2 is etcd and section 5 is policies.
+- id: ats031-020-01-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Find the manifests of control plane components on a kubeadm node.
+  source_readings:
+  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  prompt: On a kubeadm control plane node, where does the kubelet read the manifests that start `kube-apiserver` and `etcd`?
+  options:
+  - id: a
+    text: /etc/kubernetes/manifests
+    explanation: Correct. These are static pod manifests that the kubelet starts without the API server.
+  - id: b
+    text: /var/lib/etcd
+    explanation: This is the etcd data directory, not a manifest directory.
+  - id: c
+    text: /etc/kubernetes/pki
+    explanation: This directory holds certificates and keys.
+  correct_option: a
+  explanation: Static pod manifests live in /etc/kubernetes/manifests. A change to a file there makes the kubelet recreate the pod.
+- id: ats031-020-01-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain what kube-bench does.
+  source_readings:
+  - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+  prompt: What does `kube-bench` do?
+  options:
+  - id: a
+    text: It repairs insecure settings on the node automatically.
+    explanation: The tool only reports. A person decides on and applies the change.
+  - id: b
+    text: It scans container images for vulnerable packages.
+    explanation: That is the job of an image scanner. kube-bench checks Kubernetes component settings.
+  - id: c
+    text: It runs the benchmark audits on a node and reports PASS, FAIL, WARN or INFO for each check.
+    explanation: Correct. It also prints remediation text for the failed and manual checks.
+  correct_option: c
+  explanation: kube-bench runs benchmark audits and reports. It does not change the cluster.
+- id: ats031-020-01-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret a missing flag in an audit.
+  source_readings:
+  - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+  prompt: The API server manifest has no `--profiling` flag. What does the benchmark audit conclude?
+  options:
+  - id: a
+    text: The check passes, because nothing enables profiling.
+    explanation: The absence of the flag means the default, which is `true`.
+  - id: b
+    text: The check fails, because the default value of `--profiling` is `true`.
+    explanation: Correct. An absent flag means the default, and here the default is not the recommended value.
+  - id: c
+    text: The check cannot run until the flag is added.
+    explanation: The audit can read the absence of a flag and judge it.
+  correct_option: b
+  explanation: A missing flag means the default value. Check the default before you decide whether a result is safe.
+- id: ats031-020-01-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Distinguish a WARN from a PASS.
+  source_readings:
+  - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+  prompt: A `kube-bench` report shows `WARN` for a recommendation about RBAC permissions. What should the reviewer do?
+  options:
+  - id: a
+    text: Treat it as passed, since it is not a FAIL.
+    explanation: A WARN is not a pass. The tool could not decide.
+  - id: b
+    text: Review the item manually and record the decision.
+    explanation: Correct. WARN marks a manual recommendation or an undecidable audit, so a person judges it.
+  - id: c
+    text: Delete the roles that the check lists.
+    explanation: Removing roles without review can break workloads. A WARN is an invitation to review.
+  correct_option: b
+  explanation: A WARN needs a human decision. Record the decision and the evidence.
+- id: ats031-020-01-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Find the effective kubelet configuration.
+  source_readings:
+  - sections/section-020/module-01/course-03-reviewing-the-kubelet.md
+  prompt: 'The file `/var/lib/kubelet/config.yaml` says `authentication.anonymous.enabled: false`, but you suspect that the running kubelet allows anonymous requests. Where do you read the values the kubelet really uses?'
+  options:
+  - id: a
+    text: The `configz` endpoint of the node, through `kubectl get --raw /api/v1/nodes/<node>/proxy/configz`.
+    explanation: Correct. It returns the merged result of file, flags and defaults.
+  - id: b
+    text: The `config.yaml` file again, since it always wins.
+    explanation: Command-line flags override the file, so the file alone can be wrong.
+  - id: c
+    text: The `kube-apiserver` manifest, since it configures kubelets.
+    explanation: The API server does not set the kubelet's own authentication settings.
+  correct_option: a
+  explanation: The kubelet merges the file, flags and defaults. configz reports the effective values.
+- id: ats031-020-01-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Choose the safe fix for a file permission finding.
+  source_readings:
+  - sections/section-020/module-01/course-03-reviewing-the-kubelet.md
+  prompt: '`/var/lib/kubelet/config.yaml` has mode `644`. The benchmark wants `600` or stricter and owner `root`. What is the right correction?'
+  options:
+  - id: a
+    text: Change the owner to a normal user so only that user can read it.
+    explanation: The kubelet runs as root and the benchmark expects root as the owner.
+  - id: b
+    text: Delete the file so no one can read it.
+    explanation: The kubelet needs the file at start.
+  - id: c
+    text: Run `chmod 600` on the file; the kubelet runs as root and can still read it.
+    explanation: Correct. The mode is stricter and the kubelet keeps working.
+  correct_option: c
+  explanation: Use chmod 600 with owner root. Confirm that the component still works after a permission change.
+- id: ats031-020-01-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Plan a safe change of an API server flag.
+  source_readings:
+  - sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
+  prompt: You must add `--profiling=false` to a kubeadm API server. Which plan keeps the change recoverable?
+  options:
+  - id: a
+    text: Back up the manifest outside `/etc/kubernetes/manifests`, change a copy, install it and wait for the new flag in the pod object.
+    explanation: Correct. A backup outside the directory is not loaded as a pod, and the pod object shows when the new instance runs.
+  - id: b
+    text: Save a copy called `kube-apiserver.yaml.bak` in the manifests directory first.
+    explanation: The kubelet starts a pod from every file in that directory, so the backup would be loaded too.
+  - id: c
+    text: Edit the live manifest in place with no backup because the API server restarts itself.
+    explanation: Without the original file there is no quick way back if the new manifest is wrong.
+  correct_option: a
+  explanation: Keep backups outside the manifests directory, change one flag, and wait for evidence that the new instance runs.
+- id: ats031-020-01-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Judge a benchmark result on a managed cluster.
+  source_readings:
+  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  prompt: A team runs a CIS review on a managed Kubernetes service. They cannot read the API server flags. How should those checks be reported?
+  options:
+  - id: a
+    text: As passed, because the provider runs the control plane.
+    explanation: A setting you cannot see is not verified. Provider evidence is needed.
+  - id: b
+    text: As not assessable by the team, with provider documentation or assurance as the evidence source.
+    explanation: Correct. The review covers only what the team can see and own.
+  - id: c
+    text: As failed, because the team has no access.
+    explanation: Missing access does not show that the setting is wrong.
+  correct_option: b
+  explanation: Do not report invisible settings as passed. State that they are not assessable and name the source of assurance.
+- id: ats031-020-01-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Verify a correction with evidence.
+  source_readings:
+  - sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
+  prompt: After editing the API server manifest, `kubectl get --raw=/readyz` prints `ok` two seconds later. Why is this not yet proof of the change?
+  options:
+  - id: a
+    text: The old API server instance can still be answering until the kubelet recreates the pod.
+    explanation: Correct. Wait until the pod object shows the new flag, then verify.
+  - id: b
+    text: '`/readyz` never returns `ok` on a kubeadm cluster.'
+    explanation: It returns `ok` when the API server is ready.
+  - id: c
+    text: '`/readyz` reports only the etcd connection.'
+    explanation: It reports the readiness of the API server as a whole, but it does not show flag values.
+  correct_option: a
+  explanation: The kubelet reacts to a changed manifest after a short delay. Check the new instance's flags before you call the change verified.

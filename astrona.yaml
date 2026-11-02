@@ -1,8 +1,7 @@
 training:
   id: ATS031
   title: 'CKS: Cluster Setup'
-  description: 'Detailed reading material and reusable YAML knowledge checks for CKS:
-    Cluster Setup. Technical content remains draft. No labs or playgrounds.'
+  description: 'Detailed reading material, labs and reusable YAML knowledge checks for CKS: Cluster Setup. Technical content remains draft.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -11,8 +10,7 @@ training:
     weight: 15
     competencies:
     - Use Network security policies to restrict cluster level access
-    - Use CIS benchmark to review the security configuration of Kubernetes components
-      (etcd, kubelet, kubedns, kubeapi)
+    - Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
     - Properly set up Ingress with TLS
     - Protect node metadata and endpoints
     - Verify platform binaries before deploying
@@ -35,19 +33,21 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Use Network security policies to restrict cluster level access
-  description: Developed reading and reasoning for Use Network security policies to
-    restrict cluster level access.
+  description: Developed reading and reasoning for Use Network security policies to restrict cluster level access.
   status: alpha
   content:
   - type: reading
     title: Use Network security policies to restrict cluster level access
     path: sections/section-010/README.md
   - type: reading
-    title: NetworkPolicy Semantics And Verification
+    title: Restrict Pod Traffic With NetworkPolicy
     path: sections/section-010/module-01/course.md
   - type: reading
-    title: Traffic Isolation And Allowed Peers
-    path: sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
+    title: How NetworkPolicy Isolation Works
+    path: sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  - type: reading
+    title: Allow One Peer With An Ingress Policy
+    path: sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
   - type: reading
     title: Allow One Peer And Deny Another — Task
     path: sections/section-010/module-01/labs/lab-01/question.md
@@ -67,6 +67,9 @@ modules:
     title: Allow One Peer And Deny Another — Solution
     path: sections/section-010/module-01/labs/lab-01/solution.md
   - type: reading
+    title: Restrict Egress And Allow DNS
+    path: sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+  - type: reading
     title: Allow DNS And One Application Dependency — Task
     path: sections/section-010/module-01/labs/lab-02/question.md
   - type: lab
@@ -77,8 +80,7 @@ modules:
     topic: networkpolicy-egress
     task_kind: build
     learning_goals:
-    - Allow name resolution and application access while denying a healthy unrelated
-      listener.
+    - Allow name resolution and application access while denying a healthy unrelated listener.
     tags:
     - cks
     - networkpolicy-egress
@@ -86,28 +88,38 @@ modules:
     title: Allow DNS And One Application Dependency — Solution
     path: sections/section-010/module-01/labs/lab-02/solution.md
   - type: reading
-    title: 'Guided Practice: Allow One Peer And Deny Another'
-    path: sections/section-010/module-01/course-02-guided-practice.md
+    title: Default Deny And Troubleshooting Policies
+    path: sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
   - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-03-summary.md
+    path: sections/section-010/module-01/course-05-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Restrict Pod Traffic With NetworkPolicy'
+    path: sections/section-010/module-01/quiz.yaml
+    question_count: 10
 - id: module-020
-  title: Use CIS benchmark to review the security configuration of Kubernetes components
-    (etcd, kubelet, kubedns, kubeapi)
-  description: Developed reading and reasoning for Use CIS benchmark to review the
-    security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi).
+  title: Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
+  description: Developed reading and reasoning for Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi).
   status: alpha
   content:
   - type: reading
-    title: Use CIS benchmark to review the security configuration of Kubernetes components
-      (etcd, kubelet, kubedns, kubeapi)
+    title: Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
     path: sections/section-020/README.md
   - type: reading
-    title: Reviewing A Cluster Against A Security Benchmark
+    title: Review Kubernetes Components With The CIS Benchmark
     path: sections/section-020/module-01/course.md
   - type: reading
-    title: Reviewing A Cluster Against A Security Benchmark
-    path: sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+    title: The Benchmark And Where The Settings Live
+    path: sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  - type: reading
+    title: 'Read A Check: kube-bench And The Manual Audit'
+    path: sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+  - type: reading
+    title: 'Review The Kubelet: Effective Configuration And File Permissions'
+    path: sections/section-020/module-01/course-03-reviewing-the-kubelet.md
+  - type: reading
+    title: Correct A Finding Safely And Record It
+    path: sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
   - type: reading
     title: Disable API Server Profiling In A Private Node — Task
     path: sections/section-020/module-01/labs/lab-01/question.md
@@ -119,8 +131,7 @@ modules:
     topic: api-profiling
     task_kind: build
     learning_goals:
-    - Review and correct one effective control-plane setting while keeping API access
-      available.
+    - Review and correct one effective control-plane setting while keeping API access available.
     tags:
     - cks
     - api-profiling
@@ -128,11 +139,12 @@ modules:
     title: Disable API Server Profiling In A Private Node — Solution
     path: sections/section-020/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Disable API Server Profiling In A Private Node'
-    path: sections/section-020/module-01/course-02-guided-practice.md
-  - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-03-summary.md
+    path: sections/section-020/module-01/course-05-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Review Kubernetes Components With The CIS Benchmark'
+    path: sections/section-020/module-01/quiz.yaml
+    question_count: 10
 - id: module-030
   title: Properly set up Ingress with TLS
   description: Developed reading and reasoning for Properly set up Ingress with TLS.
@@ -142,14 +154,17 @@ modules:
     title: Properly set up Ingress with TLS
     path: sections/section-030/README.md
   - type: reading
-    title: Ingress Routing And TLS Contracts
+    title: Set Up Ingress With TLS
     path: sections/section-030/module-01/course.md
   - type: reading
-    title: Matching Ingress Hosts, Paths And Service Backends
-    path: sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+    title: 'Ingress Routing: Controller, Class, Host And Path'
+    path: sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
   - type: reading
-    title: PKI Trust And Certificate Verification
-    path: sections/section-030/module-01/course-02-pki-trust-and-certificate-verification.md
+    title: Certificates And The TLS Secret
+    path: sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+  - type: reading
+    title: Configure An Ingress With TLS And Verify It
+    path: sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
   - type: reading
     title: Verify TLS Termination And Server Identity — Task
     path: sections/section-030/module-01/labs/lab-01/question.md
@@ -161,8 +176,7 @@ modules:
     topic: ingress-tls
     task_kind: build
     learning_goals:
-    - Route HTTPS through the controller and verify both matching and mismatched certificate
-      identities.
+    - Route HTTPS through the controller and verify both matching and mismatched certificate identities.
     tags:
     - cks
     - ingress-tls
@@ -170,11 +184,15 @@ modules:
     title: Verify TLS Termination And Server Identity — Solution
     path: sections/section-030/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Verify TLS Termination And Server Identity'
-    path: sections/section-030/module-01/course-03-guided-practice.md
+    title: Several Hosts, Server Name Selection And Troubleshooting
+    path: sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
   - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-04-summary.md
+    path: sections/section-030/module-01/course-05-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Set Up Ingress With TLS'
+    path: sections/section-030/module-01/quiz.yaml
+    question_count: 10
 - id: module-040
   title: Protect node metadata and endpoints
   description: Developed reading and reasoning for Protect node metadata and endpoints.
@@ -184,11 +202,17 @@ modules:
     title: Protect node metadata and endpoints
     path: sections/section-040/README.md
   - type: reading
-    title: Protecting Node Metadata And Management Endpoints
+    title: Protect Node Metadata And Management Endpoints
     path: sections/section-040/module-01/course.md
   - type: reading
-    title: Protecting Node Metadata And Management Endpoints
-    path: sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+    title: Endpoints That Carry Authority
+    path: sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+  - type: reading
+    title: Network Paths To A Metadata-Style Endpoint
+    path: sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
+  - type: reading
+    title: Restrict The Pod And Verify The Boundary
+    path: sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
   - type: reading
     title: Block A Simulated Metadata Endpoint — Task
     path: sections/section-040/module-01/labs/lab-01/question.md
@@ -200,8 +224,7 @@ modules:
     topic: metadata-isolation
     task_kind: build
     learning_goals:
-    - Separate permitted application dependencies from a metadata-style endpoint in
-      the private network.
+    - Separate permitted application dependencies from a metadata-style endpoint in the private network.
     tags:
     - cks
     - metadata-isolation
@@ -209,26 +232,32 @@ modules:
     title: Block A Simulated Metadata Endpoint — Solution
     path: sections/section-040/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Block A Simulated Metadata Endpoint'
-    path: sections/section-040/module-01/course-02-guided-practice.md
-  - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-03-summary.md
+    path: sections/section-040/module-01/course-04-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Protect Node Metadata And Management Endpoints'
+    path: sections/section-040/module-01/quiz.yaml
+    question_count: 10
 - id: module-050
   title: Verify platform binaries before deploying
-  description: Developed reading and reasoning for Verify platform binaries before
-    deploying.
+  description: Developed reading and reasoning for Verify platform binaries before deploying.
   status: alpha
   content:
   - type: reading
     title: Verify platform binaries before deploying
     path: sections/section-050/README.md
   - type: reading
-    title: Verifying Release Artifacts Before Deployment
+    title: Verify Platform Binaries Before Deploying
     path: sections/section-050/module-01/course.md
   - type: reading
-    title: Verifying Release Artifacts Before Deployment
-    path: sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+    title: Integrity, Authenticity And The Exact Artifact
+    path: sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
+  - type: reading
+    title: Digests At Work And The Limits Of A Checksum
+    path: sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
+  - type: reading
+    title: Verify A Signed Manifest And Record The Result
+    path: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
   - type: reading
     title: Verify Signed Artifact Checksums — Task
     path: sections/section-050/module-01/labs/lab-01/question.md
@@ -248,8 +277,12 @@ modules:
     title: Verify Signed Artifact Checksums — Solution
     path: sections/section-050/module-01/labs/lab-01/solution.md
   - type: reading
-    title: 'Guided Practice: Verify Signed Artifact Checksums'
-    path: sections/section-050/module-01/course-02-guided-practice.md
+    title: Keep The Binding Through Delivery, And Identity-Based Signatures
+    path: sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
   - type: reading
     title: Summary
-    path: sections/section-050/module-01/course-03-summary.md
+    path: sections/section-050/module-01/course-05-summary.md
+  - type: quiz
+    title: 'Knowledge Check: Verify Platform Binaries Before Deploying'
+    path: sections/section-050/module-01/quiz.yaml
+    question_count: 10

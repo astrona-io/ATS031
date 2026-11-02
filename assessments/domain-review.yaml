@@ -11,16 +11,15 @@ scope:
   title: Cluster Setup
 placement:
   position: after
-  reading: sections/section-050/module-01/course-02-summary.md
+  reading: sections/section-050/module-01/course-05-summary.md
 questions:
 - id: ats031-domain-review-q01
   type: single_choice
   difficulty: intermediate
   learning_objective: Distinguish declared policy from actual implementation enforcement.
   source_readings:
-  - sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
-  prompt: A policy exists, traffic passes and enforcement support is unknown. What should be established
-    first?
+  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  prompt: A policy exists, traffic passes and enforcement support is unknown. What should be established first?
   options:
   - id: a
     text: That TLS alone blocks every unwanted connection.
@@ -38,9 +37,8 @@ questions:
   difficulty: intermediate
   learning_objective: Evaluate additive allowed rules and selector structure.
   source_readings:
-  - sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
-  prompt: Two policies select the same destination and permit different callers. How do their ordinary
-    allowances combine?
+  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  prompt: Two policies select the same destination and permit different callers. How do their ordinary allowances combine?
   options:
   - id: a
     text: As a union of allowed traffic for the isolated direction.
@@ -58,9 +56,8 @@ questions:
   difficulty: intermediate
   learning_objective: Relate DNS and dependencies to egress requirements.
   source_readings:
-  - sections/section-010/module-01/course-01-traffic-isolation-and-allowed-peers.md
-  prompt: A source is egress-isolated and cannot resolve Service names. Which required dependency may
-    need an allowance?
+  - sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+  prompt: A source is egress-isolated and cannot resolve Service names. Which required dependency may need an allowance?
   options:
   - id: a
     text: Only the image's writable layer.
@@ -78,7 +75,7 @@ questions:
   difficulty: intermediate
   learning_objective: Select a benchmark matching component versions and deployment ownership.
   source_readings:
-  - sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
   prompt: Why must a benchmark version be selected deliberately?
   options:
   - id: a
@@ -97,7 +94,7 @@ questions:
   difficulty: intermediate
   learning_objective: Distinguish automated findings from manual security judgment.
   source_readings:
-  - sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+  - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
   prompt: An automated check cannot inspect a provider-owned API server. What is justified?
   options:
   - id: a
@@ -116,7 +113,7 @@ questions:
   difficulty: intermediate
   learning_objective: Trace a failed recommendation to effective configuration.
   source_readings:
-  - sections/section-020/module-01/course-01-reviewing-a-cluster-against-a-security-benchmark.md
+  - sections/section-020/module-01/course-03-reviewing-the-kubelet.md
   prompt: A security flag appears in an unused file. What establishes the control?
   options:
   - id: a
@@ -135,7 +132,7 @@ questions:
   difficulty: intermediate
   learning_objective: Trace host and Service port matching.
   source_readings:
-  - sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
   prompt: A host rule is correct but the backend has no ready selected endpoints. What remains broken?
   options:
   - id: a
@@ -154,7 +151,7 @@ questions:
   difficulty: intermediate
   learning_objective: Identify IngressClass and controller responsibility.
   source_readings:
-  - sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
   prompt: An Ingress is accepted but no controller handles its class. What can happen?
   options:
   - id: a
@@ -173,7 +170,7 @@ questions:
   difficulty: intermediate
   learning_objective: Compare exact, prefix and implementation-specific paths.
   source_readings:
-  - sections/section-030/module-01/course-01-matching-ingress-hosts-paths-and-service-backends.md
+  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
   prompt: A Prefix path is /reports. Which request illustrates its path-element behavior?
   options:
   - id: a
@@ -192,7 +189,7 @@ questions:
   difficulty: intermediate
   learning_objective: Identify credentials and authority exposed through node-local endpoints.
   source_readings:
-  - sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+  - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
   prompt: Why is cloud instance metadata sensitive to an ordinary application Pod?
   options:
   - id: a
@@ -211,7 +208,7 @@ questions:
   difficulty: intermediate
   learning_objective: Separate workload network paths from host and control-plane paths.
   source_readings:
-  - sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+  - sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
   prompt: Why can a Pod NetworkPolicy be insufficient for host management protection?
   options:
   - id: a
@@ -230,7 +227,7 @@ questions:
   difficulty: intermediate
   learning_objective: Evaluate endpoint authentication, authorization and least privilege together.
   source_readings:
-  - sections/section-040/module-01/course-01-protecting-node-metadata-and-management-endpoints.md
+  - sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
   prompt: What reduces harm if node cloud credentials are exposed?
   options:
   - id: a
@@ -249,7 +246,7 @@ questions:
   difficulty: intermediate
   learning_objective: Distinguish integrity checks from publisher authenticity.
   source_readings:
-  - sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+  - sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
   prompt: What does a checksum copied from the same compromised download page fail to establish?
   options:
   - id: a
@@ -268,7 +265,7 @@ questions:
   difficulty: intermediate
   learning_objective: Bind verification evidence to an exact release and architecture.
   source_readings:
-  - sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+  - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
   prompt: A valid signature belongs to an unrelated publisher. Is it sufficient?
   options:
   - id: a
@@ -287,7 +284,7 @@ questions:
   difficulty: intermediate
   learning_objective: Preserve verified bytes through storage and deployment.
   source_readings:
-  - sections/section-050/module-01/course-01-verifying-release-artifacts-before-deployment.md
+  - sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
   prompt: What breaks a completed verification chain?
   options:
   - id: a

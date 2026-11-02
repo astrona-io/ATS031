@@ -1,0 +1,207 @@
+# Knowledge check for section 040. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-040-01
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-040
+  title: Protect Node Metadata And Endpoints
+placement:
+  position: after
+  reading: sections/section-040/module-01/course-04-summary.md
+questions:
+- id: ats031-040-01-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain why RBAC does not cover a metadata service.
+  source_readings:
+  - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+  prompt: A ServiceAccount has no permissions in the Kubernetes API. Why can a pod using it still obtain cloud credentials on a cloud node?
+  options:
+  - id: a
+    text: The metadata service is outside the Kubernetes API, so RBAC does not govern it.
+    explanation: Correct. The node identity is issued by the provider and reachable over HTTP from the node.
+  - id: b
+    text: RBAC grants cloud credentials to every ServiceAccount by default.
+    explanation: RBAC does not grant cloud credentials at all.
+  - id: c
+    text: The kubelet copies cloud credentials into every pod.
+    explanation: The kubelet does not do this. The pod fetches them from the metadata address.
+  correct_option: a
+  explanation: Node and workload identities are separate systems. The metadata service sits outside Kubernetes authorization.
+- id: ats031-040-01-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the kubelet API port.
+  source_readings:
+  - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+  prompt: On which port does the kubelet serve its API on a standard node?
+  options:
+  - id: a
+    text: '10250'
+    explanation: Correct. This port allows pod listing, logs and exec, subject to authentication and authorization.
+  - id: b
+    text: '6443'
+    explanation: This is the default port of the Kubernetes API server.
+  - id: c
+    text: '2379'
+    explanation: This is the etcd client port.
+  correct_option: a
+  explanation: The kubelet API is on 10250. Restrict its callers with authentication, authorization and the network.
+- id: ats031-040-01-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain the risk of a runtime socket mount.
+  source_readings:
+  - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+  prompt: A pod mounts the container runtime socket of the node through a `hostPath` volume. What is the risk?
+  options:
+  - id: a
+    text: The pod can control containers on the node, including starting privileged ones.
+    explanation: Correct. Access to the socket is control of the runtime.
+  - id: b
+    text: The pod gets more CPU than its limit.
+    explanation: A socket mount does not change resource limits.
+  - id: c
+    text: The pod loses access to the pod network.
+    explanation: The mount does not affect networking.
+  correct_option: a
+  explanation: A runtime socket is an authority boundary even though it is not a network port.
+- id: ats031-040-01-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read secure kubelet settings.
+  source_readings:
+  - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+  prompt: Which combination of kubelet settings is the secure one?
+  options:
+  - id: a
+    text: Anonymous access enabled and `AlwaysAllow` authorization.
+    explanation: Both settings expose every container to unauthenticated callers.
+  - id: b
+    text: Anonymous access disabled and `Webhook` authorization.
+    explanation: Correct. Callers must authenticate and the API server's RBAC decides what they may do.
+  - id: c
+    text: Anonymous access disabled and `AlwaysAllow` authorization.
+    explanation: Any authenticated caller, including a stolen low-privilege credential, could do everything.
+  correct_option: b
+  explanation: Disable anonymous access and use Webhook authorization so RBAC applies.
+- id: ats031-040-01-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Know what a pod NetworkPolicy does not select.
+  source_readings:
+  - sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
+  prompt: A namespaced NetworkPolicy selects pods by label. Which kind of traffic source does it not cover?
+  options:
+  - id: a
+    text: 'A pod with `hostNetwork: true`, which shares the network namespace of the node.'
+    explanation: Correct. It has no pod interface, so pod policy does not select it as a pod.
+  - id: b
+    text: A pod in another namespace.
+    explanation: Cross-namespace pod traffic is covered by namespace selectors.
+  - id: c
+    text: A pod with several labels.
+    explanation: Labels do not affect whether a policy applies to the pod network.
+  correct_option: a
+  explanation: A pod policy protects the pod network. Host-network pods and node processes need other controls.
+- id: ats031-040-01-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Compare an allow-list with a deny-list.
+  source_readings:
+  - sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
+  prompt: Why is an egress allow-list stronger than an `ipBlock` that excludes only `169.254.169.254`?
+  options:
+  - id: a
+    text: It is shorter to write.
+    explanation: It is often longer. Strength is the reason, not length.
+  - id: b
+    text: It blocks every destination you did not list, including addresses you forgot.
+    explanation: Correct. A deny-list leaves open every address that you did not name.
+  - id: c
+    text: It also covers host-network pods.
+    explanation: Pod policy does not select host-network pods in either form.
+  correct_option: b
+  explanation: Select the pod for egress and name its dependencies, so the unknown stays blocked.
+- id: ats031-040-01-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Interpret a policy and a service port.
+  source_readings:
+  - sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
+  prompt: 'A pod has an egress rule for TCP port 8080 to pods labelled `app: probe`. It calls the Service `probe` on port 80, and the Service forwards to pod port 8080. Does the call work?'
+  options:
+  - id: a
+    text: No, the rule must list port 80 because that is what the client used.
+    explanation: Policy is evaluated after the Service address is translated to a pod address.
+  - id: b
+    text: Yes, as long as DNS is also allowed, because the rule matches the pod and its port.
+    explanation: Correct. The destination at evaluation time is the pod on port 8080, and the name needs DNS.
+  - id: c
+    text: No, a Service call is never matched by an egress rule.
+    explanation: Egress rules apply to the pod endpoints that a Service call ends at.
+  correct_option: b
+  explanation: Write the pod port in the rule and keep the DNS allowance.
+- id: ats031-040-01-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Prove a block with a control request.
+  source_readings:
+  - sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
+  prompt: A restricted pod times out when it requests the stand-in endpoint. What else must you show before you call the policy effective?
+  options:
+  - id: a
+    text: That the same endpoint answers an unrestricted client, so the timeout is not a broken server.
+    explanation: Correct. A control request separates the policy from an unrelated fault.
+  - id: b
+    text: That the timeout lasted at least a minute.
+    explanation: Duration does not separate causes.
+  - id: c
+    text: That the pod restarted.
+    explanation: A restart is unrelated to the network rule.
+  correct_option: a
+  explanation: Use a working control request. Also show the permitted dependency still works.
+- id: ats031-040-01-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Diagnose a block that is too broad.
+  source_readings:
+  - sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
+  prompt: After the policy is applied, the restricted pod cannot reach anything, even the allowed `probe` Service. What is the most likely cause?
+  options:
+  - id: a
+    text: The stand-in pod is not running.
+    explanation: That would affect only the stand-in.
+  - id: b
+    text: The DNS rule is missing or wrong, so the name `probe` cannot be resolved.
+    explanation: Correct. Without DNS the dependency is never reached.
+  - id: c
+    text: The unrestricted client is blocked.
+    explanation: The policy selects only the restricted pod.
+  correct_option: b
+  explanation: Name resolution is the first dependency of an isolated pod. Check the DNS rule first.
+- id: ats031-040-01-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: Judge what the playground proves.
+  source_readings:
+  - sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
+  prompt: The network test in the playground passes. Which statement is accurate?
+  options:
+  - id: a
+    text: A real cloud metadata service is now protected.
+    explanation: The test uses a web server pod and proves nothing about a provider service.
+  - id: b
+    text: The pod network step works, and provider protections, node role limits and admission controls remain to be done on a real cluster.
+    explanation: Correct. The playground shows the network technique only.
+  - id: c
+    text: Host-network pods are now also blocked.
+    explanation: Pod policy does not select host-network pods.
+  correct_option: b
+  explanation: Report exactly what was shown. The network rule is one layer among several.
