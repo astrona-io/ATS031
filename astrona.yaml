@@ -37,7 +37,7 @@ modules:
   title: Use Network security policies to restrict cluster level access
   description: Developed reading and reasoning for Use Network security policies to
     restrict cluster level access.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Use Network security policies to restrict cluster level access
@@ -96,7 +96,7 @@ modules:
     (etcd, kubelet, kubedns, kubeapi)
   description: Developed reading and reasoning for Use CIS benchmark to review the
     security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi).
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Use CIS benchmark to review the security configuration of Kubernetes components
@@ -136,7 +136,7 @@ modules:
 - id: module-030
   title: Properly set up Ingress with TLS
   description: Developed reading and reasoning for Properly set up Ingress with TLS.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Properly set up Ingress with TLS
@@ -178,7 +178,7 @@ modules:
 - id: module-040
   title: Protect node metadata and endpoints
   description: Developed reading and reasoning for Protect node metadata and endpoints.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Protect node metadata and endpoints
@@ -218,7 +218,7 @@ modules:
   title: Verify platform binaries before deploying
   description: Developed reading and reasoning for Verify platform binaries before
     deploying.
-  status: alpha
+  maturity: alpha
   content:
   - type: reading
     title: Verify platform binaries before deploying
