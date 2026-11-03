@@ -101,6 +101,7 @@ modules:
     title: 'Knowledge Check: Restrict Pod Traffic With NetworkPolicy'
     path: sections/section-010/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Build Default-Deny Baselines For Namespaces
     path: sections/section-010/module-02/course.md
@@ -144,6 +145,7 @@ modules:
     title: 'Knowledge Check: Build Default-Deny Baselines For Namespaces'
     path: sections/section-010/module-02/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Select Peers And Ports Precisely
     path: sections/section-010/module-03/course.md
@@ -208,6 +210,7 @@ modules:
     title: 'Knowledge Check: Select Peers And Ports Precisely'
     path: sections/section-010/module-03/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Policy For Real Cluster Traffic And Troubleshooting
     path: sections/section-010/module-04/course.md
@@ -252,6 +255,7 @@ modules:
     title: 'Knowledge Check: Policy For Real Cluster Traffic And Troubleshooting'
     path: sections/section-010/module-04/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Secure Three Namespaces With Network Policies — Task
     path: sections/section-010/capstone/labs/lab-01/question.md
@@ -323,6 +327,7 @@ modules:
     title: 'Knowledge Check: Review Kubernetes Components With The CIS Benchmark'
     path: sections/section-020/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Run kube-bench And Read Its Output
     path: sections/section-020/module-02/course.md
@@ -369,6 +374,7 @@ modules:
     title: 'Knowledge Check: Run kube-bench And Read Its Output'
     path: sections/section-020/module-02/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Harden The API Server And Control Plane Components
     path: sections/section-020/module-03/course.md
@@ -434,6 +440,7 @@ modules:
     title: 'Knowledge Check: Harden The API Server And Control Plane Components'
     path: sections/section-020/module-03/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Review etcd Security Configuration
     path: sections/section-020/module-04/course.md
@@ -479,6 +486,7 @@ modules:
     title: 'Knowledge Check: Review etcd Security Configuration'
     path: sections/section-020/module-04/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Harden The kubelet And CoreDNS, Then Remediate End To End
     path: sections/section-020/module-05/course.md
@@ -550,6 +558,7 @@ modules:
       End'
     path: sections/section-020/module-05/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Remediate A CIS Benchmark Review Across The Control Plane And The Kubelet
       — Task
@@ -624,6 +633,7 @@ modules:
     title: 'Knowledge Check: Set Up Ingress With TLS'
     path: sections/section-030/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Run Traefik On kind
     path: sections/section-030/module-02/course.md
@@ -672,6 +682,7 @@ modules:
     title: 'Knowledge Check: Run Traefik On kind'
     path: sections/section-030/module-02/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Build TLS With openssl For Traefik
     path: sections/section-030/module-03/course.md
@@ -739,6 +750,7 @@ modules:
     title: 'Knowledge Check: Build TLS With openssl For Traefik'
     path: sections/section-030/module-03/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Harden And Troubleshoot Traefik TLS
     path: sections/section-030/module-04/course.md
@@ -802,6 +814,7 @@ modules:
     title: 'Knowledge Check: Harden And Troubleshoot Traefik TLS'
     path: sections/section-030/module-04/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: 'Capstone: Secure Two Hosts With Traefik TLS — Task'
     path: sections/section-030/capstone/labs/lab-01/question.md
@@ -868,6 +881,7 @@ modules:
     title: 'Knowledge Check: Protect Node Metadata And Management Endpoints'
     path: sections/section-040/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Block The Cloud Metadata Endpoint
     path: sections/section-040/module-02/course.md
@@ -935,6 +949,7 @@ modules:
     title: 'Knowledge Check: Block The Cloud Metadata Endpoint'
     path: sections/section-040/module-02/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Protect Node Endpoints And The Runtime
     path: sections/section-040/module-03/course.md
@@ -1002,6 +1017,7 @@ modules:
     title: 'Knowledge Check: Protect Node Endpoints And The Runtime'
     path: sections/section-040/module-03/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Protect The Node — Task
     path: sections/section-040/capstone/labs/lab-01/question.md
@@ -1072,6 +1088,7 @@ modules:
     title: 'Knowledge Check: Verify Platform Binaries Before Deploying'
     path: sections/section-050/module-01/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Verify Kubernetes Release Binaries Hands-On
     path: sections/section-050/module-02/course.md
@@ -1133,6 +1150,7 @@ modules:
     title: 'Knowledge Check: Verify Kubernetes Release Binaries Hands-On'
     path: sections/section-050/module-02/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Verify Packages, Images And Signatures
     path: sections/section-050/module-03/course.md
@@ -1197,6 +1215,7 @@ modules:
     title: 'Knowledge Check: Verify Packages, Images And Signatures'
     path: sections/section-050/module-03/quiz.yaml
     question_count: 10
+    pass_score: 70
   - type: reading
     title: Verify Before You Deploy Capstone — Task
     path: sections/section-050/capstone/labs/lab-01/question.md
@@ -1216,3 +1235,7 @@ modules:
   - type: reading
     title: Verify Before You Deploy Capstone — Solution
     path: sections/section-050/capstone/labs/lab-01/solution.md
+  - type: quiz
+    title: Final Domain Quiz
+    path: sections/final-domain-quiz.yaml
+    pass_score: 70

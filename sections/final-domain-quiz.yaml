@@ -1,0 +1,481 @@
+# Final domain knowledge check across all sections.
+schema_version: 1
+kind: question_bank
+id: ats031-final
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: domain
+  id: final
+  title: Final Domain Quiz
+questions:
+- id: ats031-final-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain which component enforces a NetworkPolicy.
+  source_readings:
+  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  prompt: You apply a NetworkPolicy and `kubectl apply` reports `created`, but traffic that the policy should block still flows. The cluster uses a network plugin that does not implement NetworkPolicy. What explains this?
+  options:
+  - id: a
+    text: The API server only stores the object; the network plugin must enforce it, and this one does not.
+    explanation: Correct. Enforcement is done by the network plugin on each node.
+  - id: b
+    text: The policy needs a restart of the `kube-apiserver` before it takes effect.
+    explanation: The API server does not filter traffic, so restarting it changes nothing.
+  - id: c
+    text: Policies only apply to pods created after the policy.
+    explanation: Policies apply to matching pods that already run, as long as a plugin enforces them.
+  correct_option: a
+  explanation: The API server validates and stores NetworkPolicy objects. The network plugin turns them into packet filtering rules, and without that support nothing is enforced.
+- id: ats031-final-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: State the default behaviour of pods that no policy selects.
+  source_readings:
+  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  prompt: In a namespace with no NetworkPolicy, a pod in another namespace sends a request to a pod in that namespace. What happens?
+  options:
+  - id: a
+    text: The request is dropped, because cross-namespace traffic is denied by default.
+    explanation: Kubernetes does not deny cross-namespace traffic by default.
+  - id: b
+    text: The request is allowed, because pods that no policy selects accept all traffic.
+    explanation: Correct. Isolation starts only when a policy selects a pod for a direction.
+  - id: c
+    text: The request is allowed only if both namespaces carry the same label.
+    explanation: Namespace labels play no part when no policy exists.
+  correct_option: b
+  explanation: Without a selecting policy a pod is not isolated and accepts all traffic in that direction.
+- id: ats031-final-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: State what a default-deny baseline policy selects.
+  source_readings:
+  - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+  prompt: Which `podSelector` makes a NetworkPolicy select every pod in its own namespace?
+  options:
+  - id: a
+    text: "`podSelector: {}`"
+    explanation: Correct. An empty selector matches all pods in the policy namespace.
+  - id: b
+    text: "`podSelector: {matchLabels: {}}` in another namespace"
+    explanation: A policy selects pods only in its own namespace.
+  - id: c
+    text: Omitting `podSelector` entirely
+    explanation: The field is required, so the object is rejected.
+  correct_option: a
+  explanation: An empty `podSelector` selects all pods in the namespace that holds the policy.
+- id: ats031-final-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain why a baseline is applied before allow rules.
+  source_readings:
+  - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+  prompt: A namespace has an allow policy for the `probe` pods but no baseline. A `drifter` pod in the same namespace requests a `shuttle` pod, which no policy selects. What happens?
+  options:
+  - id: a
+    text: The request is dropped, because the allow policy denies everything else.
+    explanation: A policy isolates only the pods it selects.
+  - id: b
+    text: The request is allowed, because no policy selects the `shuttle` pod.
+    explanation: Correct. Pods that no policy selects stay open in both directions.
+  - id: c
+    text: The request is dropped until the `drifter` pod gets a label.
+    explanation: Labels do not matter when no policy selects the destination.
+  correct_option: b
+  explanation: An allow policy only isolates the pods it selects. A baseline is what isolates the rest of the namespace.
+- id: ats031-final-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Select a namespace by name with the automatic label.
+  source_readings:
+  - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+  prompt: Which label does Kubernetes set on every namespace so that a `namespaceSelector` can select it by name?
+  options:
+  - id: a
+    text: "`name`"
+    explanation: Namespaces have no `name` label unless someone adds it.
+  - id: b
+    text: "`kubernetes.io/metadata.name`"
+    explanation: Correct. The control plane sets it automatically to the namespace name.
+  - id: c
+    text: "`app`"
+    explanation: This is a common pod label, not a namespace label.
+  correct_option: b
+  explanation: The label `kubernetes.io/metadata.name` holds the name of the namespace.
+- id: ats031-final-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: State where a podSelector without a namespaceSelector looks.
+  source_readings:
+  - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+  prompt: 'A peer entry has only `podSelector: {matchLabels: {app: shuttle}}`. In which namespace does it select pods?'
+  options:
+  - id: a
+    text: In every namespace.
+    explanation: 'That needs a `namespaceSelector: {}` in the same entry.'
+  - id: b
+    text: In the namespace of the policy.
+    explanation: Correct. Without a namespace selector the peer stays in the policy namespace.
+  - id: c
+    text: In `default`.
+    explanation: The default namespace has no special role here.
+  correct_option: b
+  explanation: A pod selector alone selects pods in the policy namespace only.
+- id: ats031-final-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Allow DNS to CoreDNS.
+  source_readings:
+  - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+  prompt: Which peer and ports allow a pod under an egress baseline to resolve names?
+  options:
+  - id: a
+    text: 'Pods labelled `k8s-app: kube-dns` in `kube-system`, on UDP and TCP port 53.'
+    explanation: Correct. The namespace and pod selectors sit in one entry.
+  - id: b
+    text: Any pod in `default` on TCP port 80.
+    explanation: CoreDNS does not run there and does not use port 80.
+  - id: c
+    text: The `kubernetes` Service on port 443.
+    explanation: That is the API server, not DNS.
+  correct_option: a
+  explanation: CoreDNS pods in `kube-system` listen on port 53 for UDP and TCP.
+- id: ats031-final-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Read the symptom of missing DNS.
+  source_readings:
+  - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+  prompt: A namespace has a default-deny egress baseline. A pod has a correct egress rule to the `probe` pods, but `nslookup probe` times out. What is missing?
+  options:
+  - id: a
+    text: A rule that allows the pod to reach CoreDNS on UDP and TCP port 53.
+    explanation: Correct. The lookup is an egress connection to the DNS pods and the baseline drops it.
+  - id: b
+    text: A second ingress rule on the `probe` pods.
+    explanation: Ingress on the destination does not affect the lookup.
+  - id: c
+    text: A label on the namespace.
+    explanation: Labels are not needed for a rule to work.
+  correct_option: a
+  explanation: Name resolution needs its own egress rule under a baseline, whatever the application rules allow.
+- id: ats031-final-q09
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain how the CIS benchmark is organised.
+  source_readings:
+  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  prompt: Which benchmark section covers the settings of the kubelet on worker nodes?
+  options:
+  - id: a
+    text: Section 1, the control plane components.
+    explanation: Section 1 covers the API server, controller manager and scheduler and their files.
+  - id: b
+    text: Section 4, the worker nodes.
+    explanation: Correct. Section 4 covers worker node files (4.1) and the kubelet (4.2).
+  - id: c
+    text: Section 2, etcd.
+    explanation: Section 2 covers the etcd data store only.
+  correct_option: b
+  explanation: Section 4 holds the worker node recommendations. Section 1 is the control plane, section 2 is etcd and section 5 is policies.
+- id: ats031-final-q10
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Find the manifests of control plane components on a kubeadm node.
+  source_readings:
+  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  prompt: On a kubeadm control plane node, where does the kubelet read the manifests that start `kube-apiserver` and `etcd`?
+  options:
+  - id: a
+    text: "/etc/kubernetes/manifests"
+    explanation: Correct. These are static pod manifests that the kubelet starts without the API server.
+  - id: b
+    text: "/var/lib/etcd"
+    explanation: This is the etcd data directory, not a manifest directory.
+  - id: c
+    text: "/etc/kubernetes/pki"
+    explanation: This directory holds certificates and keys.
+  correct_option: a
+  explanation: Static pod manifests live in /etc/kubernetes/manifests. A change to a file there makes the kubelet recreate the pod.
+- id: ats031-final-q11
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain where kube-bench gets the rules of the benchmark.
+  source_readings:
+  - sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
+  prompt: Where does `kube-bench` get the audit command and the expected value of each check?
+  options:
+  - id: a
+    text: From YAML definition files for one benchmark edition that ship with the program.
+    explanation: 'Correct. The checks are data: each record holds an audit command, a test and a remediation text.'
+  - id: b
+    text: From the API server, which stores the benchmark as a custom resource.
+    explanation: The API server does not store the benchmark.
+  - id: c
+    text: From the kubelet configuration file of the node.
+    explanation: The kubelet configuration is one of the things that some audits read, not the source of the rules.
+  - id: d
+    text: From values compiled into the Go code of each check.
+    explanation: The rules are not in the code. They are in definition files.
+  correct_option: a
+  explanation: The program reads definition files for the chosen edition and target, runs each audit command and compares the output with the expected value.
+- id: ats031-final-q12
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain why the kube-bench Job needs host access.
+  source_readings:
+  - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+  prompt: A `kube-bench` pod runs without `hostPID` and without host mounts. What goes wrong?
+  options:
+  - id: a
+    text: The pod cannot pull the image.
+    explanation: Image pulls do not depend on host access.
+  - id: b
+    text: The audits read the container and not the node, so many checks fail for the wrong reason.
+    explanation: Correct. The audits read processes and files, and without host access they see only the pod's own container.
+  - id: c
+    text: The pod runs the audits but prints no summary.
+    explanation: The summary is printed. The results are wrong.
+  - id: d
+    text: The Kubernetes API rejects the pod.
+    explanation: The API accepts a normal pod. The problem is what the audits can see.
+  correct_option: b
+  explanation: 'Flag checks read process arguments and file checks read host files, so the Job needs `hostPID: true` and read-only mounts of the host directories.'
+- id: ats031-final-q13
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Edit a static pod manifest without leaving stray files.
+  source_readings:
+  - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+  prompt: Where should a backup of `kube-apiserver.yaml` be kept before an edit?
+  options:
+  - id: a
+    text: In `/etc/kubernetes/manifests`, next to the original.
+    explanation: The kubelet reads every file in that directory, so a copy there can start a second pod.
+  - id: b
+    text: Outside `/etc/kubernetes/manifests`, for example in `/opt/training/backup`.
+    explanation: Correct. The kubelet ignores files outside the directory.
+  - id: c
+    text: Nowhere, because the kubelet keeps the old version.
+    explanation: The kubelet does not keep an old version of the file.
+  - id: d
+    text: In a ConfigMap, because the API server restores it.
+    explanation: A ConfigMap cannot restore a file when the API server is down.
+  correct_option: b
+  explanation: Edit a copy outside the manifests directory and move it into place, and keep the backup outside the directory too.
+- id: ats031-final-q14
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: Find the cause of a failed control plane component when the API is down.
+  source_readings:
+  - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+  prompt: After an edit, the API server does not start and `kubectl` cannot connect. Which command on the node shows why?
+  options:
+  - id: a
+    text: "`kubectl logs kube-apiserver`"
+    explanation: "`kubectl` needs the API server that is down."
+  - id: b
+    text: "`kubectl describe node`"
+    explanation: This also needs the API server.
+  - id: c
+    text: "`crictl ps -a` to find the container, then `crictl logs` for it"
+    explanation: Correct. `crictl` talks to the container runtime on the node, not to the API server.
+  - id: d
+    text: "`systemctl restart kube-apiserver`"
+    explanation: The API server is a static pod, not a systemd service.
+  correct_option: c
+  explanation: Use `crictl` on the node when the API server is down, and restore the backup if the log shows a bad flag.
+- id: ats031-final-q15
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name the only intended client of etcd.
+  source_readings:
+  - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+  prompt: Which component should be the only client of the etcd client port 2379 during normal operation?
+  options:
+  - id: a
+    text: The kubelet on each node.
+    explanation: The kubelet talks to the API server, not to etcd.
+  - id: b
+    text: The kube-apiserver.
+    explanation: Correct. The API server reads and writes all cluster state in etcd and every other component goes through the API server.
+  - id: c
+    text: The kube-scheduler.
+    explanation: The scheduler reads and writes objects through the API server.
+  correct_option: b
+  explanation: The API server is the single client of etcd. Other components use the API server, which authenticates and authorizes each request.
+- id: ats031-final-q16
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Tell the etcd client port from the peer port.
+  source_readings:
+  - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+  prompt: Which port do etcd members use to replicate data to each other?
+  options:
+  - id: a
+    text: '2379'
+    explanation: This is the client port used by the API server.
+  - id: b
+    text: '2380'
+    explanation: Correct. Port 2380 is the peer port.
+  - id: c
+    text: '2381'
+    explanation: On kubeadm this is a loopback metrics listener, not the peer port.
+  correct_option: b
+  explanation: Client traffic uses 2379, peer traffic uses 2380, and kubeadm adds a loopback metrics listener on 2381.
+- id: ats031-final-q17
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Tell which kubelet source wins.
+  source_readings:
+  - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+  prompt: A kubelet flag and a field in config.yaml set the same option to different values. Which value does the kubelet use?
+  options:
+  - id: a
+    text: The value in config.yaml.
+    explanation: The file has lower precedence than a flag.
+  - id: b
+    text: The value of the flag.
+    explanation: Correct. A flag overrides the same field in the file.
+  - id: c
+    text: The compiled default.
+    explanation: The default applies only when neither the flag nor the file sets the field.
+  correct_option: b
+  explanation: Flags override the file, and the file overrides the defaults.
+- id: ats031-final-q18
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Read the effective kubelet configuration.
+  source_readings:
+  - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+  prompt: Which request shows the configuration a kubelet really runs with?
+  options:
+  - id: a
+    text: A request to the configz path of the node through the API server proxy.
+    explanation: Correct. It returns the merged result of the file, the flags and the defaults.
+  - id: b
+    text: Reading /var/lib/kubelet/config.yaml only.
+    explanation: The file can be overridden by a flag.
+  - id: c
+    text: Listing the pods in kube-system.
+    explanation: This does not show kubelet settings.
+  correct_option: a
+  explanation: configz reports the effective values of the running kubelet.
+- id: ats031-final-q19
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain what an Ingress object does.
+  source_readings:
+  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+  prompt: What does an Ingress object do on its own, with no Ingress controller installed?
+  options:
+  - id: a
+    text: It routes HTTP requests to Services.
+    explanation: Routing is done by the controller. The object only stores the rules.
+  - id: b
+    text: It stores routing rules, and nothing acts on them until a controller reads them.
+    explanation: Correct. The Ingress is configuration. The controller, here Traefik, does the routing.
+  - id: c
+    text: It terminates TLS for every Service in the namespace.
+    explanation: TLS termination is done by the controller, and only for hosts listed in spec.tls.
+  correct_option: b
+  explanation: An Ingress is a set of rules. A controller of the matching class turns them into routing.
+- id: ats031-final-q20
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Choose the type of a TLS Secret.
+  source_readings:
+  - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+  prompt: Which Secret type and keys does an Ingress need for a certificate?
+  options:
+  - id: a
+    text: Type `kubernetes.io/tls` with the keys `tls.crt` and `tls.key`.
+    explanation: Correct. These are the type and key names the controller expects.
+  - id: b
+    text: Type `Opaque` with the keys `cert` and `key`.
+    explanation: Opaque Secrets can hold anything, but the controller looks for the TLS keys by name.
+  - id: c
+    text: Type `kubernetes.io/dockerconfigjson` with a `.dockerconfigjson` key.
+    explanation: That type holds registry credentials.
+  correct_option: a
+  explanation: Use kubernetes.io/tls with tls.crt and tls.key, in the namespace of the Ingress.
+- id: ats031-final-q21
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain how Traefik turns an Ingress into a route.
+  source_readings:
+  - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+  prompt: Which part of Traefik matches the host and path of a request on an entrypoint?
+  options:
+  - id: a
+    text: A router.
+    explanation: Correct. A router holds the match rule and passes the request to a service.
+  - id: b
+    text: A Kubernetes Secret.
+    explanation: A Secret holds a certificate or a credential, not a match rule.
+  - id: c
+    text: The IngressClass.
+    explanation: The class only names the controller that handles an Ingress.
+  correct_option: a
+  explanation: Traefik builds routers from Ingress rules. The router matches, and a Traefik service sends the request to the pod addresses.
+- id: ats031-final-q22
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Describe what happens to an Ingress whose class no controller serves.
+  source_readings:
+  - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+  prompt: 'An Ingress names `ingressClassName: nginx` but only Traefik runs. What happens?'
+  options:
+  - id: a
+    text: The API server rejects it.
+    explanation: The API server accepts the object. It does not check that a controller serves the class.
+  - id: b
+    text: It is accepted and ignored.
+    explanation: Correct. The object exists, and no controller builds a route from it.
+  - id: c
+    text: Traefik serves it as a fallback.
+    explanation: Traefik handles only the class it was started for.
+  correct_option: b
+  explanation: No controller picks up an Ingress of an unserved class, and the API reports no error.
+- id: ats031-final-q23
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Name what a client checks in a certificate.
+  source_readings:
+  - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+  prompt: Which field must contain the host name for modern clients?
+  options:
+  - id: a
+    text: The Subject Alternative Name.
+    explanation: Correct. Clients match the host name against the SAN.
+  - id: b
+    text: Only the Common Name.
+    explanation: Modern clients ignore a CN when the SAN is absent.
+  - id: c
+    text: The serial number.
+    explanation: The serial identifies the certificate. It carries no host name.
+  correct_option: a
+  explanation: A certificate must list the host in its SAN, be inside its dates and chain to a trusted CA.
+- id: ats031-final-q24
+  type: single_choice
+  difficulty: beginner
+  learning_objective: Explain trust in a self-signed certificate.
+  source_readings:
+  - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+  prompt: Why does `curl` reject a new self-signed certificate by default?
+  options:
+  - id: a
+    text: The key is too short.
+    explanation: Key length is not the reason here.
+  - id: b
+    text: No trusted CA signed it.
+    explanation: Correct. A self-signed certificate is its own CA, which the client does not trust until given the file.
+  - id: c
+    text: Self-signed certificates cannot contain a SAN.
+    explanation: They can; `-addext` adds one.
+  correct_option: b
+  explanation: Give the certificate file to `--cacert`, or use a CA that clients trust.
