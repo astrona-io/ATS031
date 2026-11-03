@@ -1,0 +1,237 @@
+# Knowledge check for section 040, module 03. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-040-03
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-040/module-03
+  title: Protect Node Endpoints And The Runtime
+placement:
+  position: after
+  reading: sections/section-040/module-03/course-07-summary.md
+questions:
+- id: ats031-040-03-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Read kubelet status codes."
+  source_readings:
+  - sections/section-040/module-03/course-01-the-kubelet-api-from-a-pod.md
+  prompt: "A pod sends an unauthenticated request to `https://<node>:10250/pods` and receives `401`. What does it show?"
+  options:
+  - id: a
+    text: "The port is closed."
+    explanation: "A closed port gives no HTTP answer."
+  - id: b
+    text: "The port is reachable and the kubelet refuses requests without credentials."
+    explanation: "Correct. Anonymous access is off, but the port is still reachable."
+  - id: c
+    text: "The caller is known but lacks permission."
+    explanation: "That is the meaning of 403."
+  - id: d
+    text: "The kubelet accepted the request."
+    explanation: "That would be 200."
+  correct_option: b
+  explanation: "401 means no valid credential. Reachability remains a separate issue."
+- id: ats031-040-03-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Identify the risk of the kubelet read-only port."
+  source_readings:
+  - sections/section-040/module-03/course-01-the-kubelet-api-from-a-pod.md
+  prompt: "Why is an enabled kubelet read-only port (10255) a finding even when port 10250 is secure?"
+  options:
+  - id: a
+    text: "It serves pod information without any authentication to every client that can reach it."
+    explanation: "Correct. Turn it off with `readOnlyPort: 0`."
+  - id: b
+    text: "It allows `exec` into containers."
+    explanation: "The read-only port does not offer `exec`."
+  - id: c
+    text: "It replaces the secure port."
+    explanation: "Both ports run at the same time."
+  - id: d
+    text: "It disables authorization on port 10250."
+    explanation: "The two ports are independent."
+  correct_option: a
+  explanation: "The read-only port needs no credential, so the settings of port 10250 do not protect it."
+- id: ats031-040-03-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Build a rule that closes the node ports."
+  source_readings:
+  - sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
+  prompt: "Which policy closes pod access to the kubelet ports on the nodes and keeps DNS and Services working?"
+  options:
+  - id: a
+    text: "Select all pods and allow only the node addresses."
+    explanation: "This allows the nodes and blocks everything else."
+  - id: b
+    text: "An ingress policy on the nodes."
+    explanation: "Pod policy does not select nodes."
+  - id: c
+    text: "A policy with an empty egress list."
+    explanation: "This blocks DNS and Services too."
+  - id: d
+    text: "Select all pods and allow `0.0.0.0/0` except the `/32` address of each node."
+    explanation: "Correct. Everything else stays open."
+  correct_option: d
+  explanation: "An `ipBlock` with the node addresses in `except` is the usual form."
+- id: ats031-040-03-q04
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Explain a side effect of excluding node addresses."
+  source_readings:
+  - sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
+  prompt: "An `except` entry for the control plane node address is added to a policy. What other effect can it have?"
+  options:
+  - id: a
+    text: "The kubelet restarts."
+    explanation: "A policy does not restart components."
+  - id: b
+    text: "DNS stops working for the namespace."
+    explanation: "DNS runs on pods, not on the node address."
+  - id: c
+    text: "Pods lose access to every port on that node, including the API server port 6443."
+    explanation: "Correct. An address entry blocks all ports on that address."
+  - id: d
+    text: "The entry is ignored for port 10250."
+    explanation: "It applies to every port."
+  correct_option: c
+  explanation: "Excluding an address blocks all its ports, so pods that call the API server need an explicit allow."
+- id: ats031-040-03-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Describe what NodeRestriction does."
+  source_readings:
+  - sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
+  prompt: "What does the `NodeRestriction` admission plugin do?"
+  options:
+  - id: a
+    text: "It blocks all traffic to the node."
+    explanation: "It is an admission plugin, not a network control."
+  - id: b
+    text: "It limits a kubelet to modifying its own Node object and pods bound to it, and protects some labels."
+    explanation: "Correct. It stops a node credential from changing other nodes."
+  - id: c
+    text: "It encrypts the kubelet certificate."
+    explanation: "It does not handle certificates."
+  - id: d
+    text: "It removes the read-only port."
+    explanation: "The read-only port is a kubelet setting."
+  correct_option: b
+  explanation: "`NodeRestriction` scopes writes of node credentials."
+- id: ats031-040-03-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Name the authorization modes a node needs."
+  source_readings:
+  - sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
+  prompt: "Which API server authorization mode list is correct for a kubeadm cluster?"
+  options:
+  - id: a
+    text: "`Node,RBAC`"
+    explanation: "Correct. The node authorizer scopes node reads, and RBAC covers users and workloads."
+  - id: b
+    text: "`AlwaysAllow`"
+    explanation: "This allows every request."
+  - id: c
+    text: "`RBAC` only"
+    explanation: "Kubelets would need RBAC rules for each of their pods."
+  - id: d
+    text: "`Webhook` only"
+    explanation: "A webhook alone does not replace the node authorizer."
+  correct_option: a
+  explanation: "The list should contain `Node` and `RBAC`."
+- id: ats031-040-03-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Spot indirect socket exposure."
+  source_readings:
+  - sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
+  prompt: "A pod mounts the host directory `/run/containerd` and not the socket file itself. What is the risk?"
+  options:
+  - id: a
+    text: "None, because only the socket file is dangerous."
+    explanation: "The socket appears inside the mounted directory."
+  - id: b
+    text: "The pod can restart the kubelet only."
+    explanation: "The risk is control of the runtime."
+  - id: c
+    text: "The pod gets more memory."
+    explanation: "A mount does not change resources."
+  - id: d
+    text: "The socket is inside the directory, so the pod can reach the runtime in the same way."
+    explanation: "Correct. Search for the directory as well as the socket path."
+  correct_option: d
+  explanation: "A mount of the parent directory exposes the same socket."
+- id: ats031-040-03-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Pick the control for socket mounts."
+  source_readings:
+  - sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
+  prompt: "Which control stops application pods from mounting host paths at creation time?"
+  options:
+  - id: a
+    text: "A NetworkPolicy in the namespace."
+    explanation: "The socket is a file, not network traffic."
+  - id: b
+    text: "A smaller `readOnlyPort`."
+    explanation: "This is a kubelet setting for another port."
+  - id: c
+    text: "Pod Security admission at the `baseline` level, or an equivalent admission policy."
+    explanation: "Correct. Baseline forbids host path volumes."
+  - id: d
+    text: "A ResourceQuota."
+    explanation: "A quota limits resources, not volumes."
+  correct_option: c
+  explanation: "Admission control acts when the pod is created."
+- id: ats031-040-03-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Explain the policy limit for host network pods."
+  source_readings:
+  - sections/section-040/module-03/course-05-hostnetwork-and-privileged-pods-bypass-policy.md
+  prompt: "With Calico, what happens when a NetworkPolicy selects a pod that uses `hostNetwork: true`?"
+  options:
+  - id: a
+    text: "The policy blocks all traffic of the node."
+    explanation: "Pod policy does not control node traffic."
+  - id: b
+    text: "The policy does not restrict that pod, because it has no pod interface."
+    explanation: "Correct. Plugins differ, and Calico does not enforce pod policy for it."
+  - id: c
+    text: "The pod is rejected."
+    explanation: "The pod is accepted."
+  - id: d
+    text: "The policy applies only to ingress."
+    explanation: "Neither direction is enforced for such a pod."
+  correct_option: b
+  explanation: "Host network pods need other controls: admission, host endpoints or a firewall."
+- id: ats031-040-03-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Choose a control outside the cluster."
+  source_readings:
+  - sections/section-040/module-03/course-06-controls-outside-the-cluster.md
+  prompt: "Which control reduces what a stolen node role can do, by giving each workload its own short-lived cloud identity?"
+  options:
+  - id: a
+    text: "Workload identity"
+    explanation: "Correct. Examples are IAM roles for service accounts, Workload Identity and Microsoft Entra Workload ID."
+  - id: b
+    text: "A larger hop limit"
+    explanation: "A larger hop limit lets more pods reach the metadata service."
+  - id: c
+    text: "The kubelet read-only port"
+    explanation: "This port gives information and no identity."
+  - id: d
+    text: "A NodePort Service"
+    explanation: "A Service type does not change cloud identity."
+  correct_option: a
+  explanation: "Workload identity moves permissions from the node role to the workload."

@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: shuttle-egress
+  namespace: outpost
+spec:
+  podSelector:
+    matchLabels:
+      app: shuttle
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: starfleet
+      podSelector:
+        matchLabels:
+          app: probe
+    ports:
+    - protocol: TCP
+      port: 8080
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  - to:
+    - ipBlock:
+        cidr: 203.0.113.0/24
+        except:
+        - 203.0.113.99/32
+    ports:
+    - protocol: TCP
+      port: 443

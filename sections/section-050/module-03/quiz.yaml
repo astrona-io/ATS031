@@ -1,0 +1,243 @@
+# Knowledge check for section 050, module 03. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-050-03
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-050/module-03
+  title: Verify Packages, Images And Signatures
+questions:
+  - id: ats031-050-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain what a repository signature covers."
+    source_readings:
+      - sections/section-050/module-03/course-01-gpg-signed-repositories.md
+    prompt: "In a signed apt repository, which file does the publisher sign?"
+    options:
+      - id: a
+        text: "The Release file, which lists the digests of the index files"
+        explanation: "Correct. The digests below it extend the signature to every package."
+      - id: b
+        text: "Every package separately, and nothing else"
+        explanation: "Packages are covered through digests listed in the signed chain."
+      - id: c
+        text: "Only the public key"
+        explanation: "The public key is not signed by this step."
+      - id: d
+        text: "The client's sources list"
+        explanation: "The client holds this file; the publisher does not sign it."
+    correct_option: a
+    explanation: "One signature on Release covers everything below it."
+
+  - id: ats031-050-03-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Read a gpg result correctly."
+    source_readings:
+      - sections/section-050/module-03/course-01-gpg-signed-repositories.md
+    prompt: "gpg --verify prints Good signature and a warning that the key is not certified with a trusted signature. What should a script test?"
+    options:
+      - id: a
+        text: "Whether the warning is absent"
+        explanation: "The warning appears for fixture keys and is not a failure."
+      - id: b
+        text: "The length of the output"
+        explanation: "Length says nothing about validity."
+      - id: c
+        text: "The file name of the signature"
+        explanation: "The name has no effect on validity."
+      - id: d
+        text: "The exit status of gpg"
+        explanation: "Correct. The status is 0 for a good signature, and the warning does not change it."
+    correct_option: d
+    explanation: "Test the exit status and the words Good signature."
+
+  - id: ats031-050-03-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Recognise a file changed after signing."
+    source_readings:
+      - sections/section-050/module-03/course-01-gpg-signed-repositories.md
+    prompt: "A file has one line added after it was signed. What does gpg --verify report with the original signature?"
+    options:
+      - id: a
+        text: "Good signature with a warning"
+        explanation: "The warning is about the key, not the content."
+      - id: b
+        text: "No output and exit status 0"
+        explanation: "A changed file does not pass."
+      - id: c
+        text: "BAD signature and a nonzero exit status"
+        explanation: "Correct. The signature covers the digest of the original bytes."
+      - id: d
+        text: "Good signature, because the key is the same"
+        explanation: "The same key does not help; the content differs."
+    correct_option: c
+    explanation: "A signature fits exact bytes only."
+
+  - id: ats031-050-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know the limits of package verification tools."
+    source_readings:
+      - sections/section-050/module-03/course-02-package-verification-on-a-node.md
+    prompt: "Why does dpkg --verify give weak evidence on a node that an attacker controls?"
+    options:
+      - id: a
+        text: "It needs a network connection"
+        explanation: "It works from local records."
+      - id: b
+        text: "The digest records are stored on the same machine as the files"
+        explanation: "Correct. An attacker with root access can change both."
+      - id: c
+        text: "It cannot read files in /usr/bin"
+        explanation: "It can read them."
+      - id: d
+        text: "It only checks file names"
+        explanation: "It compares digests, sizes and modes."
+    correct_option: b
+    explanation: "Local records can be changed with the files."
+
+  - id: ats031-050-03-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Know what package tools do not cover."
+    source_readings:
+      - sections/section-050/module-03/course-02-package-verification-on-a-node.md
+    prompt: "A kubelet binary was copied to /usr/bin by an image build, not by a package. What does a package verification show for it?"
+    options:
+      - id: a
+        text: "Nothing, because no package record exists for the file"
+        explanation: "Correct. You need an authenticated digest from the release."
+      - id: b
+        text: "A pass, because it is in /usr/bin"
+        explanation: "Location does not create a record."
+      - id: c
+        text: "A failure, because it has no record"
+        explanation: "It is simply not covered."
+      - id: d
+        text: "The release version"
+        explanation: "Package tools do not read the binary version."
+    correct_option: a
+    explanation: "Binaries outside packages need a digest comparison."
+
+  - id: ats031-050-03-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Verify a blob with cosign and a key."
+    source_readings:
+      - sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
+    prompt: "Which cosign command verifies a file against a signature with a local public key?"
+    options:
+      - id: a
+        text: "cosign generate-key-pair file"
+        explanation: "This creates a new key pair."
+      - id: b
+        text: "cosign sign-blob --key cosign.pub file"
+        explanation: "Signing needs the private key."
+      - id: c
+        text: "cosign verify --key cosign.pub file"
+        explanation: "verify checks images in a registry, not local blobs."
+      - id: d
+        text: "cosign verify-blob --key cosign.pub --signature file.sig file"
+        explanation: "Correct. It recomputes the digest and checks the signature."
+    correct_option: d
+    explanation: "verify-blob takes the key, the signature and the blob."
+
+  - id: ats031-050-03-q07
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Explain what ignoring the transparency log loses."
+    source_readings:
+      - sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
+    prompt: "What is lost when a key-based verification uses --insecure-ignore-tlog=true?"
+    options:
+      - id: a
+        text: "The need for a public key"
+        explanation: "The key is still required."
+      - id: b
+        text: "The ability to detect a forged file"
+        explanation: "A forged file still fails."
+      - id: c
+        text: "Evidence in the public log of when the signature was made"
+        explanation: "Correct. The signature check itself still works."
+      - id: d
+        text: "The check of the file content"
+        explanation: "The content is still checked against the signature."
+    correct_option: c
+    explanation: "Skipping the log removes the time evidence."
+
+  - id: ats031-050-03-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "State what a keyless verifier must supply."
+    source_readings:
+      - sections/section-050/module-03/course-04-keyless-verification-and-release-signatures.md
+    prompt: "What must a verifier state for a keyless cosign check to be meaningful?"
+    options:
+      - id: a
+        text: "The size of the artifact"
+        explanation: "Size does not identify a signer."
+      - id: b
+        text: "The expected certificate identity and the expected issuer"
+        explanation: "Correct. Otherwise any valid signer passes."
+      - id: c
+        text: "Only the file name"
+        explanation: "A file name does not identify a signer."
+      - id: d
+        text: "A private key"
+        explanation: "Verification uses certificates, not private keys."
+    correct_option: b
+    explanation: "State identity and issuer from a trusted source."
+
+  - id: ats031-050-03-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Pin an image and prove it runs."
+    source_readings:
+      - sections/section-050/module-03/course-05-image-digests-and-pinning.md
+    prompt: "After a Deployment is pinned with image@sha256:<digest>, which field of a pod proves what runs?"
+    options:
+      - id: a
+        text: "status.containerStatuses[].imageID, compared with the digest"
+        explanation: "Correct. It reports what the runtime started."
+      - id: b
+        text: "spec.containers[].image alone"
+        explanation: "This is what the manifest asked for, not what ran."
+      - id: c
+        text: "metadata.labels"
+        explanation: "Labels are free text."
+      - id: d
+        text: "The pod name"
+        explanation: "The name has no link to the image."
+    correct_option: a
+    explanation: "Compare the imageID with the pinned digest."
+
+  - id: ats031-050-03-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Know what admission verification does and does not do."
+    source_readings:
+      - sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
+    prompt: "A policy engine verifies image signatures at admission. Which statement is correct?"
+    options:
+      - id: a
+        text: "It proves that the image has no vulnerabilities"
+        explanation: "A signature shows who signed, not that the content is safe."
+      - id: b
+        text: "It replaces the need to pin by digest"
+        explanation: "Without a digest, a tag could resolve to another image."
+      - id: c
+        text: "It scans pods that already run"
+        explanation: "Admission acts on create and update requests."
+      - id: d
+        text: "It checks objects when they are created or updated, so older pods keep running"
+        explanation: "Correct. It also needs digests, an expected key or identity, and a closed failure mode."
+    correct_option: d
+    explanation: "Admission checks happen at creation and have limits."

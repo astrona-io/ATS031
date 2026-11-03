@@ -1,0 +1,59 @@
+{
+  "context": "kind-astro-ats-031-lab-030-04-01",
+  "resources": [
+    {
+      "kind": "ingress",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

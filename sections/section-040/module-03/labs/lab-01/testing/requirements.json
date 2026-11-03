@@ -1,0 +1,58 @@
+{
+  "context": "kind-astro-ats-031-lab-040-03-01",
+  "checks": [
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "https://{worker_ip}:10250/pods",
+      "expect": "denied",
+      "label": "drifter must not reach the worker kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "denied",
+      "label": "drifter must not reach the worker read-only port"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "https://{control_plane_ip}:10250/pods",
+      "expect": "denied",
+      "label": "drifter must not reach the control plane kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "http://probe/",
+      "expect": "200",
+      "label": "drifter must reach the probe Service"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "http://probe.starfleet.svc.cluster.local/",
+      "expect": "200",
+      "label": "DNS and cross-namespace Services must work"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "200",
+      "label": "starfleet must stay unchanged"
+    },
+    {
+      "type": "http",
+      "from": "metadata-stub/control",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "200",
+      "label": "control pod must still reach the read-only port"
+    },
+    {
+      "type": "selects_all",
+      "namespace": "outpost"
+    }
+  ]
+}

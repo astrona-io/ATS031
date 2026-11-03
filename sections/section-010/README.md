@@ -9,14 +9,13 @@ A pod holds a database password and a stranger pod from another namespace can st
 
 ## Learning Path
 
-1. Restrict Pod Traffic With NetworkPolicy: the landing page and the playground.
-2. How NetworkPolicy Isolation Works
-3. Allow One Peer With An Ingress Policy
-4. Restrict Egress And Allow DNS
-5. Default Deny And Troubleshooting Policies
-6. Summary, then the ten-question knowledge check.
+1. Restrict Pod Traffic With NetworkPolicy: isolation, ingress, egress with DNS, default deny and troubleshooting.
+2. Build Default-Deny Baselines For Namespaces: ingress and egress baselines, their side effects, and rolling them out to many namespaces.
+3. Select Peers And Ports Precisely: namespace and pod selectors, one entry versus two, `ipBlock` with `except`, ports, protocols, `endPort` and Services.
+4. Policy For Real Cluster Traffic And Troubleshooting: DNS, the API server, probes, `hostNetwork` pods, a test matrix and an audit method.
+5. Capstone: secure three namespaces with a complete policy set.
 
-The parts carry the hands-on steps. Each lab follows the part that practises its skill. The playground is a private `kind` cluster with Kubernetes v1.35; launch it from the landing page and keep it running while you read.
+Each module ends with a summary and a ten-question knowledge check. The parts carry the hands-on steps. Each lab follows the part that practises its skill. The playground is a private `kind` cluster with Kubernetes v1.35; launch it from the landing page and keep it running while you read.
 
 ## Learning Outcomes
 

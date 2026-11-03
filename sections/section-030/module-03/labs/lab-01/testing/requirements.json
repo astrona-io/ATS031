@@ -1,0 +1,72 @@
+{
+  "context": "kind-astro-ats-031-lab-030-03-01",
+  "resources": [
+    {
+      "kind": "ingress",
+      "name": "scout",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "scout",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "secret",
+      "name": "scout-tls",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "type": "kubernetes.io/tls",
+        "metadata": {
+          "name": "scout-tls",
+          "namespace": "starfleet"
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "scout",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "scout",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "scout"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "scout",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "scout",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "selector": {
+            "app": "scout"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

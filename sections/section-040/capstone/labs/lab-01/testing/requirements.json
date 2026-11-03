@@ -1,0 +1,187 @@
+{
+  "context": "kind-astro-ats-031-capstone-040",
+  "checks": [
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "denied",
+      "label": "starfleet/shuttle must not reach the metadata address"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "denied",
+      "label": "outpost/drifter must not reach the metadata address"
+    },
+    {
+      "type": "http",
+      "from": "dock/tender",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "denied",
+      "label": "dock/tender must not reach the metadata address"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/agent",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "agent must reach the metadata address"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "denied",
+      "label": "starfleet/shuttle must not reach the read-only port"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "https://{worker_ip}:10250/pods",
+      "expect": "denied",
+      "label": "starfleet/shuttle must not reach the worker kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "https://{control_plane_ip}:10250/pods",
+      "expect": "denied",
+      "label": "starfleet/shuttle must not reach the control plane kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "http://probe/",
+      "expect": "200",
+      "label": "starfleet/shuttle must reach its probe Service"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/agent",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "denied",
+      "label": "starfleet/agent must not reach the read-only port"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/agent",
+      "url": "https://{worker_ip}:10250/pods",
+      "expect": "denied",
+      "label": "starfleet/agent must not reach the worker kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/agent",
+      "url": "https://{control_plane_ip}:10250/pods",
+      "expect": "denied",
+      "label": "starfleet/agent must not reach the control plane kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/agent",
+      "url": "http://probe/",
+      "expect": "200",
+      "label": "starfleet/agent must reach its probe Service"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "denied",
+      "label": "outpost/drifter must not reach the read-only port"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "https://{worker_ip}:10250/pods",
+      "expect": "denied",
+      "label": "outpost/drifter must not reach the worker kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "https://{control_plane_ip}:10250/pods",
+      "expect": "denied",
+      "label": "outpost/drifter must not reach the control plane kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "http://probe/",
+      "expect": "200",
+      "label": "outpost/drifter must reach its probe Service"
+    },
+    {
+      "type": "http",
+      "from": "dock/tender",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "denied",
+      "label": "dock/tender must not reach the read-only port"
+    },
+    {
+      "type": "http",
+      "from": "dock/tender",
+      "url": "https://{worker_ip}:10250/pods",
+      "expect": "denied",
+      "label": "dock/tender must not reach the worker kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "dock/tender",
+      "url": "https://{control_plane_ip}:10250/pods",
+      "expect": "denied",
+      "label": "dock/tender must not reach the control plane kubelet port"
+    },
+    {
+      "type": "http",
+      "from": "dock/tender",
+      "url": "http://probe/",
+      "expect": "200",
+      "label": "dock/tender must reach its probe Service"
+    },
+    {
+      "type": "http",
+      "from": "metadata-stub/control",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "200",
+      "label": "control pod must still reach the read-only port"
+    },
+    {
+      "type": "http",
+      "from": "metadata-stub/control",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "control pod must still reach the metadata server"
+    },
+    {
+      "type": "no_socket_mount",
+      "namespace": "outpost",
+      "name": "runtime-peek"
+    },
+    {
+      "type": "labels",
+      "pod": "starfleet/agent",
+      "has": {
+        "role": "cloud-agent"
+      }
+    },
+    {
+      "type": "labels",
+      "pod": "starfleet/shuttle",
+      "lacks": [
+        "role"
+      ]
+    },
+    {
+      "type": "pods_exist",
+      "pods": [
+        "starfleet/shuttle",
+        "starfleet/agent",
+        "outpost/drifter",
+        "dock/tender"
+      ]
+    }
+  ]
+}

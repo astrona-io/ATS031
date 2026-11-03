@@ -1,0 +1,243 @@
+# Knowledge check for section 050, module 02. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-050-02
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-050/module-02
+  title: Verify Kubernetes Release Binaries Hands-On
+questions:
+  - id: ats031-050-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Build the path of a release file."
+    source_readings:
+      - sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
+    prompt: "Which facts select the directory of a Kubernetes release binary on the release site?"
+    options:
+      - id: a
+        text: "The version, the operating system and the CPU architecture"
+        explanation: "Correct. These three form the path, and the binary and its .sha256 file sit side by side in it."
+      - id: b
+        text: "The host name of the mirror only"
+        explanation: "The host name does not select the file."
+      - id: c
+        text: "The date of the download"
+        explanation: "The date is not part of the path."
+      - id: d
+        text: "The size of the file"
+        explanation: "The size is not part of the path."
+    correct_option: a
+    explanation: "The path is built from version, operating system and architecture."
+
+  - id: ats031-050-02-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Know the content of a .sha256 file."
+    source_readings:
+      - sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
+    prompt: "What does a published kubectl .sha256 file contain?"
+    options:
+      - id: a
+        text: "A line with the digest, two spaces and the file name"
+        explanation: "Not in the published file. You build that line yourself."
+      - id: b
+        text: "A signature made by the project"
+        explanation: "A checksum file is not a signature."
+      - id: c
+        text: "The version and the commit"
+        explanation: "Version and commit come from the binary, not from the checksum file."
+      - id: d
+        text: "Only the digest, without a file name"
+        explanation: "Correct. You must add the file name before sha256sum --check can read it."
+    correct_option: d
+    explanation: "The published file holds only the digest."
+
+  - id: ats031-050-02-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Write the check line correctly."
+    source_readings:
+      - sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+    prompt: "Which input does sha256sum --check read correctly for the file kubectl?"
+    options:
+      - id: a
+        text: "The digest, one space and kubectl"
+        explanation: "One space makes the line improperly formatted, so nothing is compared."
+      - id: b
+        text: "The file name and then the digest"
+        explanation: "The order is digest first."
+      - id: c
+        text: "The digest, two spaces and kubectl on one line"
+        explanation: "Correct. This is the format the tool parses."
+      - id: d
+        text: "The digest alone on one line"
+        explanation: "Without a name there is nothing to look up, and the line is improperly formatted."
+    correct_option: c
+    explanation: "Use digest, two spaces, file name."
+
+  - id: ats031-050-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Use the exit status in a script."
+    source_readings:
+      - sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+    prompt: "A deployment script must install a binary only when verification passed. What should it test?"
+    options:
+      - id: a
+        text: "The modification time of the file"
+        explanation: "A modification time can be set to any value."
+      - id: b
+        text: "The exit status of sha256sum --check, with --strict"
+        explanation: "Correct. The status is 0 only when every line was formatted and matched."
+      - id: c
+        text: "Whether the output contains text"
+        explanation: "Output text can be ignored or misread by a script."
+      - id: d
+        text: "The size of the file"
+        explanation: "Size says nothing about the content."
+    correct_option: b
+    explanation: "Read the exit status and use --strict."
+
+  - id: ats031-050-02-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Tell a tampered file from a download mistake."
+    source_readings:
+      - sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
+    prompt: "A check fails. The digest of the file matches no .sha256 file in the whole release tree. What does this show?"
+    options:
+      - id: a
+        text: "The bytes were changed and the file must be rejected"
+        explanation: "Correct. No published file has these bytes."
+      - id: b
+        text: "The file is for another architecture"
+        explanation: "That would match the digest file of the other architecture."
+      - id: c
+        text: "The checksum file is stale"
+        explanation: "A stale checksum file with genuine bytes would match a file in the tree."
+      - id: d
+        text: "The file is for an older version"
+        explanation: "An older release would match that release's digest file."
+    correct_option: a
+    explanation: "A digest that matches nothing means changed bytes."
+
+  - id: ats031-050-02-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Recognise a stale checksum file."
+    source_readings:
+      - sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
+    prompt: "The bytes of kubelet match the .sha256 of the newer release, but the checksum file next to it is the one of the older release. What is the correct action?"
+    options:
+      - id: a
+        text: "Delete the binary and report an attack"
+        explanation: "The bytes are the published ones, so this is a download mistake."
+      - id: b
+        text: "Regenerate the checksum file from the binary"
+        explanation: "That check would pass for any file and prove nothing."
+      - id: c
+        text: "Run the binary and read its version"
+        explanation: "Decide with digests, not by running an unverified file."
+      - id: d
+        text: "Fetch the checksum file again from the directory of the same version"
+        explanation: "Correct. The binary is genuine and the checksum file is wrong."
+    correct_option: d
+    explanation: "Genuine bytes with a stale checksum file need the right checksum file."
+
+  - id: ats031-050-02-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Spot a false version claim."
+    source_readings:
+      - sections/section-050/module-02/course-04-read-the-version-of-a-binary.md
+    prompt: "A file is named kubectl-v1.34.0, but kubectl version --client reports gitVersion v1.35.0. What does this show?"
+    options:
+      - id: a
+        text: "The binary is for the wrong operating system"
+        explanation: "That would appear in the platform field."
+      - id: b
+        text: "The file is signed"
+        explanation: "The version output says nothing about signatures."
+      - id: c
+        text: "The name made a false claim; the binary reports another version"
+        explanation: "Correct. The digest check decides which release the bytes belong to."
+      - id: d
+        text: "The version output is always wrong"
+        explanation: "It is usually correct, but a changed binary can print anything."
+    correct_option: c
+    explanation: "A file name is a claim, and so is the version output."
+
+  - id: ats031-050-02-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Understand the limit of version output."
+    source_readings:
+      - sections/section-050/module-02/course-04-read-the-version-of-a-binary.md
+    prompt: "Why is a matching version string not enough to trust a binary?"
+    options:
+      - id: a
+        text: "kubectl version never contacts a cluster"
+        explanation: "This is true only with --client, and is not the reason."
+      - id: b
+        text: "A changed binary can print any version it likes"
+        explanation: "Correct. The digest is the check."
+      - id: c
+        text: "The version string is encrypted"
+        explanation: "Version output is plain text."
+      - id: d
+        text: "The version is only printed by the server"
+        explanation: "The client prints its own version."
+    correct_option: b
+    explanation: "Only the digest ties the version to the bytes."
+
+  - id: ats031-050-02-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Resolve the running binary of a process."
+    source_readings:
+      - sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
+    prompt: "Which path shows the file from which a running process was started?"
+    options:
+      - id: a
+        text: "/proc/<pid>/exe"
+        explanation: "Correct. The kernel keeps this link for every process."
+      - id: b
+        text: "The output of command -v"
+        explanation: "It shows what a shell would start, not what already runs."
+      - id: c
+        text: "/etc/hostname"
+        explanation: "This file has no link to the process."
+      - id: d
+        text: "The current directory of the shell"
+        explanation: "The directory has no link to the process."
+    correct_option: a
+    explanation: "Follow /proc/<pid>/exe."
+
+  - id: ats031-050-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Know the limit of an on-node check."
+    source_readings:
+      - sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
+    prompt: "The running kubelet on a node matches the release digest, checked on that node. What does this not give you?"
+    options:
+      - id: a
+        text: "Evidence about the bytes of the running program"
+        explanation: "It does give this evidence, at that moment."
+      - id: b
+        text: "A way to select the digest by version"
+        explanation: "The version selects the digest; the check does use it."
+      - id: c
+        text: "A way to find the process"
+        explanation: "The process is found from /proc."
+      - id: d
+        text: "Strong evidence if an attacker controls the node and its tools"
+        explanation: "Correct. The tools and the kernel view on that node can be changed."
+    correct_option: d
+    explanation: "A clean result from a compromised node is weak evidence."

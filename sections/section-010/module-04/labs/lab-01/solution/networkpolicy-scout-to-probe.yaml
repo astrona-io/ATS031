@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: scout-to-probe
+  namespace: starfleet
+spec:
+  podSelector:
+    matchLabels:
+      app: scout
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: starfleet
+      podSelector:
+        matchLabels:
+          app: probe
+    ports:
+    - protocol: TCP
+      port: 8080

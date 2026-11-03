@@ -1,0 +1,116 @@
+{
+  "context": "kind-astro-ats-031-lab-010-04-01",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 2,
+          "selector": {
+            "matchLabels": {
+              "app": "probe",
+              "release": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "pod",
+      "name": "scout",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "scout",
+          "namespace": "starfleet",
+          "labels": {
+            "app": "scout"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "beacon",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "beacon",
+          "namespace": "starfleet",
+          "labels": {
+            "app": "beacon"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "drifter",
+      "namespace": "outpost",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "drifter",
+          "namespace": "outpost",
+          "labels": {
+            "app": "drifter"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "networkpolicy",
+      "name": "default-deny-all",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "default-deny-all",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "podSelector": {},
+          "policyTypes": [
+            "Ingress",
+            "Egress"
+          ]
+        }
+      }
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "scout",
+        "--",
+        "python",
+        "/app/check.py"
+      ],
+      "contains": [
+        "dns=ok probe=ok api=ok"
+      ]
+    }
+  ]
+}

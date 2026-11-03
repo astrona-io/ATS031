@@ -1,0 +1,207 @@
+# Knowledge check for section 020. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-020-04
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-020
+  title: "Review etcd Security Configuration"
+placement:
+  position: after
+  reading: sections/section-020/module-04/course-06-summary.md
+questions:
+- id: ats031-020-04-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Name the only intended client of etcd."
+  source_readings:
+  - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+  prompt: "Which component should be the only client of the etcd client port 2379 during normal operation?"
+  options:
+  - id: a
+    text: "The kubelet on each node."
+    explanation: "The kubelet talks to the API server, not to etcd."
+  - id: b
+    text: "The kube-apiserver."
+    explanation: "Correct. The API server reads and writes all cluster state in etcd and every other component goes through the API server."
+  - id: c
+    text: "The kube-scheduler."
+    explanation: "The scheduler reads and writes objects through the API server."
+  correct_option: b
+  explanation: "The API server is the single client of etcd. Other components use the API server, which authenticates and authorizes each request."
+- id: ats031-020-04-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Tell the etcd client port from the peer port."
+  source_readings:
+  - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+  prompt: "Which port do etcd members use to replicate data to each other?"
+  options:
+  - id: a
+    text: "2379"
+    explanation: "This is the client port used by the API server."
+  - id: b
+    text: "2380"
+    explanation: "Correct. Port 2380 is the peer port."
+  - id: c
+    text: "2381"
+    explanation: "On kubeadm this is a loopback metrics listener, not the peer port."
+  correct_option: b
+  explanation: "Client traffic uses 2379, peer traffic uses 2380, and kubeadm adds a loopback metrics listener on 2381."
+- id: ats031-020-04-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Explain what --client-cert-auth does."
+  source_readings:
+  - sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+  prompt: "What does `--client-cert-auth=true` change in etcd?"
+  options:
+  - id: a
+    text: "etcd encrypts values before it writes them to disk."
+    explanation: "That is encryption at rest, which the API server performs. The flag controls client authentication."
+  - id: b
+    text: "etcd requires a valid client certificate from every client on the client port."
+    explanation: "Correct. A client without a certificate signed by the trusted CA fails at the TLS handshake."
+  - id: c
+    text: "etcd creates a self-signed certificate for each client."
+    explanation: "That describes --auto-tls, which must not be enabled."
+  correct_option: b
+  explanation: "--client-cert-auth makes the TLS handshake the access control for port 2379."
+- id: ats031-020-04-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Judge an absent --auto-tls flag."
+  source_readings:
+  - sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+  prompt: "The etcd manifest has no `--auto-tls` flag. What does the benchmark result for that check show?"
+  options:
+  - id: a
+    text: "A finding, because the flag must be set to false explicitly."
+    explanation: "The default is false, so the absence gives the required state."
+  - id: b
+    text: "A pass, because the default is false."
+    explanation: "Correct. An absent --auto-tls and --peer-auto-tls keep the default false."
+  - id: c
+    text: "A manual check that cannot be decided."
+    explanation: "The flag and its default make the result clear."
+  correct_option: b
+  explanation: "The default of both auto-tls flags is false. Confirm it in the manifest and in the running pod command."
+- id: ats031-020-04-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Choose a proof for client authentication."
+  source_readings:
+  - sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+  prompt: "Which test proves that client certificate authentication works on port 2379?"
+  options:
+  - id: a
+    text: "Reading the flag in the manifest only."
+    explanation: "A flag in a file is a claim. The running pod and a request give proof."
+  - id: b
+    text: "A request without a client certificate fails, and a request with a certificate from the etcd CA succeeds."
+    explanation: "Correct. The pair of requests shows that the certificate decides access."
+  - id: c
+    text: "A request with the option -k that succeeds."
+    explanation: "The option -k skips verification of the server certificate. It says nothing about client authentication."
+  correct_option: b
+  explanation: "Test both sides: a request that must fail and a request that must succeed."
+- id: ats031-020-04-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "State the benchmark permission for the etcd data directory."
+  source_readings:
+  - sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
+  prompt: "Which mode does the benchmark require for the etcd data directory?"
+  options:
+  - id: a
+    text: "644"
+    explanation: "Mode 644 lets other users read the directory contents on most systems."
+  - id: b
+    text: "755"
+    explanation: "Mode 755 lets every user enter and read the directory."
+  - id: c
+    text: "700"
+    explanation: "Correct. Only the owner can read, write and enter the directory."
+  correct_option: c
+  explanation: "The data directory holds a full copy of the cluster, including Secrets, so only the owner may access it."
+- id: ats031-020-04-q07
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Decide when to change the etcd directory owner."
+  source_readings:
+  - sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
+  prompt: "etcd runs as root on a kubeadm node. What is the correct handling of the ownership recommendation etcd:etcd?"
+  options:
+  - id: a
+    text: "Run chown -R etcd:etcd on the directory and keep the pod unchanged."
+    explanation: "The process still runs as root, so nothing is gained, and a restart can fail if the process user cannot read the files."
+  - id: b
+    text: "Record the finding with its reason, or change the owner together with the user the etcd process runs as."
+    explanation: "Correct. Ownership and the process user must match."
+  - id: c
+    text: "Set the directory to mode 777 so every user can read it."
+    explanation: "This makes the finding worse."
+  correct_option: b
+  explanation: "The recommendation assumes a dedicated etcd user. Change the owner only together with the process user."
+- id: ats031-020-04-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Describe how Secrets are stored without encryption."
+  source_readings:
+  - sections/section-020/module-04/course-04-query-etcd-with-etcdctl.md
+  prompt: "A client with a valid etcd certificate reads the key of a Secret from etcd on a cluster with no EncryptionConfiguration. What does it see?"
+  options:
+  - id: a
+    text: "Ciphertext, because TLS encrypts stored values."
+    explanation: "TLS protects traffic on the network, not stored values."
+  - id: b
+    text: "The value in plain text, not protected by RBAC."
+    explanation: "Correct. The request does not go through the API server, so RBAC does not apply."
+  - id: c
+    text: "An error, because etcd refuses to return Secrets."
+    explanation: "etcd treats Secrets like any other key."
+  correct_option: b
+  explanation: "Without encryption at rest, the value is stored as plain text and an etcd certificate grants access to it."
+- id: ats031-020-04-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Explain provider order in an EncryptionConfiguration."
+  source_readings:
+  - sections/section-020/module-04/course-05-encryption-at-rest-check.md
+  prompt: "In an EncryptionConfiguration, `identity: {}` is listed before `aescbc`. What happens to a new Secret?"
+  options:
+  - id: a
+    text: "It is stored without encryption."
+    explanation: "Correct. The first provider encrypts new writes, and identity stores data unchanged."
+  - id: b
+    text: "It is encrypted with aescbc, because aescbc is the strongest provider."
+    explanation: "The provider order decides, not the strength."
+  - id: c
+    text: "The API server refuses to start."
+    explanation: "The configuration is valid, so the API server starts and stores data in plain text."
+  correct_option: a
+  explanation: "The first provider encrypts every write. Put the encrypting provider first and identity last."
+- id: ats031-020-04-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Prove encryption at rest and re-encrypt old data."
+  source_readings:
+  - sections/section-020/module-04/course-05-encryption-at-rest-check.md
+  prompt: "After you enable encryption at rest, the Secret created before the change is still plain text in etcd. What fixes it?"
+  options:
+  - id: a
+    text: "Restart the kubelet on the control plane node."
+    explanation: "A kubelet restart does not rewrite stored objects."
+  - id: b
+    text: "Remove the identity provider from the file."
+    explanation: "Existing values stay plain text until they are written again, and removing identity could make them unreadable."
+  - id: c
+    text: "Read each Secret through the API server and replace it unchanged."
+    explanation: "Correct. The write goes through the first provider and stores ciphertext."
+  correct_option: c
+  explanation: "Encryption applies on write. Replace the existing Secrets, then check the ciphertext prefix in etcd."

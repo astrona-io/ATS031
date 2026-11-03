@@ -1,0 +1,207 @@
+# Knowledge check for section 020. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-020-05
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-020
+  title: "Harden The kubelet And CoreDNS, Then Remediate End To End"
+placement:
+  position: after
+  reading: sections/section-020/module-05/course-07-summary.md
+questions:
+- id: ats031-020-05-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Tell which kubelet source wins."
+  source_readings:
+  - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+  prompt: "A kubelet flag and a field in config.yaml set the same option to different values. Which value does the kubelet use?"
+  options:
+  - id: a
+    text: "The value in config.yaml."
+    explanation: "The file has lower precedence than a flag."
+  - id: b
+    text: "The value of the flag."
+    explanation: "Correct. A flag overrides the same field in the file."
+  - id: c
+    text: "The compiled default."
+    explanation: "The default applies only when neither the flag nor the file sets the field."
+  correct_option: b
+  explanation: "Flags override the file, and the file overrides the defaults."
+- id: ats031-020-05-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Read the effective kubelet configuration."
+  source_readings:
+  - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+  prompt: "Which request shows the configuration a kubelet really runs with?"
+  options:
+  - id: a
+    text: "A request to the configz path of the node through the API server proxy."
+    explanation: "Correct. It returns the merged result of the file, the flags and the defaults."
+  - id: b
+    text: "Reading /var/lib/kubelet/config.yaml only."
+    explanation: "The file can be overridden by a flag."
+  - id: c
+    text: "Listing the pods in kube-system."
+    explanation: "This does not show kubelet settings."
+  correct_option: a
+  explanation: "configz reports the effective values of the running kubelet."
+- id: ats031-020-05-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Predict the status code of an anonymous request."
+  source_readings:
+  - sections/section-020/module-05/course-02-kubelet-authentication-and-authorization.md
+  prompt: "Anonymous authentication is off. What does an anonymous request to port 10250 of the kubelet return?"
+  options:
+  - id: a
+    text: "200, because authorization is AlwaysAllow."
+    explanation: "With anonymous authentication off the request never reaches authorization."
+  - id: b
+    text: "401 Unauthorized."
+    explanation: "Correct. The kubelet requires credentials and the request has none."
+  - id: c
+    text: "403 Forbidden."
+    explanation: "403 appears when anonymous access is on and Webhook authorization denies it."
+  correct_option: b
+  explanation: "Anonymous off gives 401. Anonymous on with Webhook gives 403 for a caller without permissions."
+- id: ats031-020-05-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Explain Webhook authorization."
+  source_readings:
+  - sections/section-020/module-05/course-02-kubelet-authentication-and-authorization.md
+  prompt: "What does `authorization.mode: Webhook` make the kubelet do for each request?"
+  options:
+  - id: a
+    text: "Send a SubjectAccessReview to the API server so RBAC decides."
+    explanation: "Correct. The kubelet asks the API server whether the caller may do the action."
+  - id: b
+    text: "Check the request against a local list of users."
+    explanation: "The kubelet keeps no local list for this mode."
+  - id: c
+    text: "Allow every authenticated request."
+    explanation: "That describes AlwaysAllow."
+  correct_option: a
+  explanation: "Webhook authorization delegates the decision to the API server and RBAC."
+- id: ats031-020-05-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Close the read-only port."
+  source_readings:
+  - sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
+  prompt: "Which setting closes the unauthenticated HTTP port 10255 of the kubelet?"
+  options:
+  - id: a
+    text: "readOnlyPort: 0"
+    explanation: "Correct. The value 0 disables the port."
+  - id: b
+    text: "readOnlyPort: 10250"
+    explanation: "This points the setting at the HTTPS port number and is not a valid way to close the port."
+  - id: c
+    text: "anonymous.enabled: false"
+    explanation: "This setting does not control the read-only port."
+  correct_option: a
+  explanation: "readOnlyPort: 0 disables the read-only port. Check that a request to port 10255 now fails."
+- id: ats031-020-05-q06
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Avoid a duplicate key in the kubelet file."
+  source_readings:
+  - sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
+  prompt: "You append `readOnlyPort: 0` to config.yaml, but the file already has a line `readOnlyPort: 10255`. What is the likely result after a restart?"
+  options:
+  - id: a
+    text: "The last line wins and the port closes."
+    explanation: "The kubelet parses the file strictly and does not accept duplicate keys."
+  - id: b
+    text: "The kubelet fails to start because of the duplicate key."
+    explanation: "Correct. Remove the old line before you add the new one."
+  - id: c
+    text: "Nothing changes, because the first line wins."
+    explanation: "A strict parser reports an error and does not choose a line."
+  correct_option: b
+  explanation: "Remove an existing key before you append it again, and check the file before the restart."
+- id: ats031-020-05-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Apply protectKernelDefaults with care."
+  source_readings:
+  - sections/section-020/module-05/course-04-other-kubelet-checks.md
+  prompt: "Why is it unsafe to set `protectKernelDefaults: true` on a kind node?"
+  options:
+  - id: a
+    text: "kind nodes cannot run the kubelet with a configuration file."
+    explanation: "They can. The problem is the kernel."
+  - id: b
+    text: "The setting deletes the pods of the node."
+    explanation: "The setting does not delete pods."
+  - id: c
+    text: "The node shares the kernel of the host, so the kubelet can refuse to start when kernel parameters differ from its expectations."
+    explanation: "Correct. A container cannot set the kernel parameters per node."
+  correct_option: c
+  explanation: "protectKernelDefaults needs kernel parameters that match the kubelet expectations. A kind node cannot guarantee that."
+- id: ats031-020-05-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Judge the kubelet file permission checks."
+  source_readings:
+  - sections/section-020/module-05/course-04-other-kubelet-checks.md
+  prompt: "Which mode does the benchmark ask for on /var/lib/kubelet/config.yaml?"
+  options:
+  - id: a
+    text: "600 or stricter, owned by root."
+    explanation: "Correct. Only root should read and write the kubelet configuration."
+  - id: b
+    text: "644 so that other users can read it."
+    explanation: "Mode 644 is a finding for this file."
+  - id: c
+    text: "777 so that the kubelet can write it."
+    explanation: "The kubelet runs as root, so a wide mode is not needed."
+  correct_option: a
+  explanation: "Use mode 600 and owner root for the kubelet configuration file and kubeconfig."
+- id: ats031-020-05-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Review the CoreDNS Deployment."
+  source_readings:
+  - sections/section-020/module-05/course-05-review-coredns-kube-dns.md
+  prompt: "What does a reviewer check first in the CoreDNS Deployment?"
+  options:
+  - id: a
+    text: "That the container has a minimal security context: no privilege escalation, dropped capabilities except NET_BIND_SERVICE, read-only root filesystem."
+    explanation: "Correct. CoreDNS needs only the capability to bind port 53."
+  - id: b
+    text: "That the container runs as privileged so it can bind port 53."
+    explanation: "Binding port 53 needs only NET_BIND_SERVICE, not a privileged container."
+  - id: c
+    text: "That the pod uses the host network."
+    explanation: "CoreDNS does not need the host network."
+  correct_option: a
+  explanation: "Minimal privileges and a protected ConfigMap are the main points for cluster DNS."
+- id: ats031-020-05-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Prove a remediation."
+  source_readings:
+  - sections/section-020/module-05/course-06-remediate-findings-end-to-end.md
+  prompt: "After you fix a kubelet setting and restart the kubelet, which evidence best proves the fix?"
+  options:
+  - id: a
+    text: "The edited line in config.yaml."
+    explanation: "A file edit does not show what the running kubelet uses."
+  - id: b
+    text: "The effective value from configz or a request that now fails, plus a node that is still Ready."
+    explanation: "Correct. The result is the effective value on the running process and a working node."
+  - id: c
+    text: "A restart of the kubelet without errors."
+    explanation: "A restart does not show which values the kubelet read."
+  correct_option: b
+  explanation: "Audit again after the restart and compare with the record from before."

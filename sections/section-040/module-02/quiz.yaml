@@ -1,0 +1,234 @@
+# Knowledge check for section 040, module 02. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-040-02
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-040/module-02
+  title: Block The Cloud Metadata Endpoint
+placement:
+  position: after
+  reading: sections/section-040/module-02/course-07-summary.md
+questions:
+- id: ats031-040-02-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Explain what the metadata service returns and why it is dangerous."
+  source_readings:
+  - sections/section-040/module-02/course-01-what-the-metadata-service-hands-out.md
+  prompt: "A pod has no permissions in the Kubernetes API. Why can it still be dangerous if it reaches `169.254.169.254`?"
+  options:
+  - id: a
+    text: "It can change its own ServiceAccount permissions."
+    explanation: "The metadata service does not change Kubernetes permissions."
+  - id: b
+    text: "It can restart the kubelet."
+    explanation: "The metadata service has no control over the kubelet."
+  - id: c
+    text: "It can fetch temporary credentials for the cloud role of the node and call the cloud API with them."
+    explanation: "Correct. The node role belongs to the cloud provider and RBAC does not govern it."
+  correct_option: c
+  explanation: "The metadata service hands out role credentials of the node, which are valid in the cloud provider API."
+- id: ats031-040-02-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Explain what the second version of the AWS metadata service changes."
+  source_readings:
+  - sections/section-040/module-02/course-01-what-the-metadata-service-hands-out.md
+  prompt: "What does the second version of the AWS metadata service (IMDSv2) require that the first version did not?"
+  options:
+  - id: a
+    text: "A session token obtained with a `PUT` request and sent in a header on later requests."
+    explanation: "Correct. This blocks simple URL fetches and many server-side request forgery attacks."
+  - id: b
+    text: "A client certificate signed by the cluster."
+    explanation: "IMDSv2 does not use cluster certificates."
+  - id: c
+    text: "A Kubernetes ServiceAccount token."
+    explanation: "The service is not part of Kubernetes and does not read ServiceAccount tokens."
+  - id: d
+    text: "A request from a pod in the `kube-system` namespace."
+    explanation: "The service does not know about namespaces."
+  correct_option: a
+  explanation: "IMDSv2 uses a token flow. It does not remove the need for a network rule."
+- id: ats031-040-02-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Explain why the playground target is a valid test of a NetworkPolicy."
+  source_readings:
+  - sections/section-040/module-02/course-02-the-playground-metadata-server.md
+  prompt: "The playground metadata server runs as a host network pod on the worker node. Why does a NetworkPolicy still apply to requests from client pods to it?"
+  options:
+  - id: a
+    text: "The server pod is selected by the policy."
+    explanation: "A host network pod is not selected by pod policy."
+  - id: b
+    text: "Calico blocks every link-local address by default."
+    explanation: "Calico does not block link-local addresses by default."
+  - id: c
+    text: "The policy is enforced by the cloud provider."
+    explanation: "The playground has no cloud provider."
+  - id: d
+    text: "Policy is enforced at the client pod, on its egress, before the packet reaches the node."
+    explanation: "Correct. The subject of the policy is the client pod."
+  correct_option: d
+  explanation: "Egress policy attaches to the client pod interface, so the location of the server does not matter."
+- id: ats031-040-02-q04
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Read the result of a request to a blocked address."
+  source_readings:
+  - sections/section-040/module-02/course-02-the-playground-metadata-server.md
+  prompt: "A `curl -s -m 3 -o /dev/null -w '%{http_code}\\n'` request prints `000` after a policy is applied. What does it mean?"
+  options:
+  - id: a
+    text: "The server answered with an empty body."
+    explanation: "An answer would print its own status code."
+  - id: b
+    text: "The server answered with status 000."
+    explanation: "000 is not an HTTP status. `curl` prints it when no response arrived."
+  - id: c
+    text: "No HTTP response arrived within the time limit."
+    explanation: "Correct. Together with a control request that returns 200, it shows the block works."
+  - id: d
+    text: "The request was redirected."
+    explanation: "A redirect would print a 3xx code."
+  correct_option: c
+  explanation: "`000` means no response. Keep a control request that returns 200 next to it."
+- id: ats031-040-02-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Write an ipBlock rule that blocks one address and keeps other egress."
+  source_readings:
+  - sections/section-040/module-02/course-03-block-with-an-ipblock-except-rule.md
+  prompt: "Which egress rule blocks `169.254.169.254` for every pod in a namespace and keeps other egress, including DNS, open?"
+  options:
+  - id: a
+    text: "`podSelector: {}` with an `ipBlock` of `169.254.169.254/32` only."
+    explanation: "This allows only the metadata address and blocks everything else."
+  - id: b
+    text: "`podSelector: {}` with an `ipBlock` of `0.0.0.0/0` and `except: [169.254.169.254/32]`."
+    explanation: "Correct. It selects all pods and allows every address except the one."
+  - id: c
+    text: "`podSelector: {}` with `egress: []`."
+    explanation: "An empty egress list blocks all egress, including DNS."
+  - id: d
+    text: "`podSelector: {}` with an `ipBlock` of `0.0.0.0/0` and no `except`."
+    explanation: "This allows every address, including the metadata address."
+  correct_option: b
+  explanation: "An allow of `0.0.0.0/0` with the metadata address in `except` blocks one address only."
+- id: ats031-040-02-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Explain why an ipBlock entry cannot be combined with a selector."
+  source_readings:
+  - sections/section-040/module-02/course-03-block-with-an-ipblock-except-rule.md
+  prompt: "A learner writes one `to` entry with both an `ipBlock` and a `podSelector`. What happens?"
+  options:
+  - id: a
+    text: "The API server rejects the policy, because the two cannot be in the same entry."
+    explanation: "Correct. Use separate entries."
+  - id: b
+    text: "The policy applies only to pods inside the block."
+    explanation: "The API server does not accept the combination at all."
+  - id: c
+    text: "The `ipBlock` is ignored."
+    explanation: "The object is rejected, not partly applied."
+  - id: d
+    text: "The policy blocks all egress."
+    explanation: "The object is rejected before it can have any effect."
+  correct_option: a
+  explanation: "An `ipBlock` must stand alone in its `to` entry."
+- id: ats031-040-02-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Explain how several policies on one pod combine."
+  source_readings:
+  - sections/section-040/module-02/course-04-default-deny-plus-a-selective-allow.md
+  prompt: "Pod A is selected by a policy that allows all egress except the metadata address, and by a second policy that allows only `169.254.169.254/32` port 80. Which egress can pod A send?"
+  options:
+  - id: a
+    text: "Everything except the metadata address, because the first policy wins."
+    explanation: "There is no order or winner between policies."
+  - id: b
+    text: "Only the metadata address."
+    explanation: "The second policy adds to the first. It does not replace it."
+  - id: c
+    text: "Nothing, because the policies conflict."
+    explanation: "Policies cannot conflict because they only allow."
+  - id: d
+    text: "Everything, including the metadata address, because allowed traffic from policies adds up."
+    explanation: "Correct. NetworkPolicy has no deny rule, so the union applies."
+  correct_option: d
+  explanation: "Policies add up. A selected pod may send whatever any one policy allows."
+- id: ats031-040-02-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Name the risk of a label that opens the metadata path."
+  source_readings:
+  - sections/section-040/module-02/course-04-default-deny-plus-a-selective-allow.md
+  prompt: "The metadata address is open only for pods with the label `role=cloud-agent`. What is the main risk?"
+  options:
+  - id: a
+    text: "Labels are removed when a pod restarts."
+    explanation: "Labels on a pod stay for its lifetime."
+  - id: b
+    text: "Calico ignores labels."
+    explanation: "Calico reads labels to apply selectors."
+  - id: c
+    text: "Anyone who can create or patch pods in the namespace can give a pod the label and open the path."
+    explanation: "Correct. The label is a control and needs protection."
+  - id: d
+    text: "The label must be on the node."
+    explanation: "The policy selects pods, not nodes."
+  correct_option: c
+  explanation: "Protect the label with RBAC and admission control, because it grants access."
+- id: ats031-040-02-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Find why a pod on the host network reaches the metadata address."
+  source_readings:
+  - sections/section-040/module-02/course-05-policy-pitfalls-for-the-metadata-address.md
+  prompt: "A namespace has a correct policy that blocks the metadata address for all pods. A pod with `hostNetwork: true` in that namespace still reaches the address. Why?"
+  options:
+  - id: a
+    text: "The policy has a wrong namespace."
+    explanation: "The policy applies to the other pods in the namespace correctly."
+  - id: b
+    text: "Pod NetworkPolicy does not apply to host network pods, which use the network namespace of the node."
+    explanation: "Correct. Remove the pod or reject such pods at admission."
+  - id: c
+    text: "`hostNetwork` pods are exempt only on the control plane."
+    explanation: "The behaviour does not depend on the node role."
+  - id: d
+    text: "The `except` list is too short."
+    explanation: "The same policy blocks other pods, so the list is correct."
+  correct_option: b
+  explanation: "A host network pod has no pod interface, so pod policy does not filter it."
+- id: ats031-040-02-q10
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Plan a coverage check across namespaces."
+  source_readings:
+  - sections/section-040/module-02/course-06-verify-coverage-across-namespaces.md
+  prompt: "Which approach gives the best evidence that no namespace leaves the metadata address open?"
+  options:
+  - id: a
+    text: "Send the request from a fresh pod in every namespace and compare with the list of policies and selectors."
+    explanation: "Correct. It tests a pod with no special labels and shows gaps."
+  - id: b
+    text: "List the policies and assume each namespace is covered."
+    explanation: "A policy with a narrow selector can leave pods open."
+  - id: c
+    text: "Test only from the namespace where the policy was written."
+    explanation: "Other namespaces stay untested."
+  - id: d
+    text: "Check that the `fake-imds` pod is running."
+    explanation: "This says nothing about the policies."
+  correct_option: a
+  explanation: "Test from every namespace with a fresh pod, and read the selectors of the policies."

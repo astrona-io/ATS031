@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fleet
+  namespace: starfleet
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: fleet.local
+    http:
+      paths:
+      - path: /probe
+        pathType: Prefix
+        backend:
+          service:
+            name: probe
+            port:
+              number: 80
+      - path: /scout
+        pathType: Prefix
+        backend:
+          service:
+            name: scout
+            port:
+              number: 80

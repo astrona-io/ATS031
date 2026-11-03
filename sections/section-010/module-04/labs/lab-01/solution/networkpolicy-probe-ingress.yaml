@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: probe-ingress
+  namespace: starfleet
+spec:
+  podSelector:
+    matchLabels:
+      app: probe
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: scout
+    ports:
+    - protocol: TCP
+      port: 8080

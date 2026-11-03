@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: starfleet
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: scout-egress
+  namespace: starfleet
+spec:
+  podSelector:
+    matchLabels:
+      app: scout
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: __API_IP__/32
+    ports:
+    - protocol: TCP
+      port: __API_PORT__
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: scout-to-probe
+  namespace: starfleet
+spec:
+  podSelector:
+    matchLabels:
+      app: scout
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: starfleet
+      podSelector:
+        matchLabels:
+          app: probe
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: probe-ingress
+  namespace: starfleet
+spec:
+  podSelector:
+    matchLabels:
+      app: probe
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: scoot
+    ports:
+    - protocol: TCP
+      port: 8080

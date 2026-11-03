@@ -1,0 +1,207 @@
+# Knowledge check for module 04. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-010-04
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-010/module-04
+  title: 'Policy For Real Cluster Traffic And Troubleshooting'
+placement:
+  position: after
+  reading: sections/section-010/module-04/course-06-summary.md
+questions:
+- id: ats031-010-04-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: 'Allow DNS to CoreDNS.'
+  source_readings:
+  - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+  prompt: 'Which peer and ports allow a pod under an egress baseline to resolve names?'
+  options:
+  - id: a
+    text: 'Pods labelled `k8s-app: kube-dns` in `kube-system`, on UDP and TCP port 53.'
+    explanation: 'Correct. The namespace and pod selectors sit in one entry.'
+  - id: b
+    text: 'Any pod in `default` on TCP port 80.'
+    explanation: 'CoreDNS does not run there and does not use port 80.'
+  - id: c
+    text: 'The `kubernetes` Service on port 443.'
+    explanation: 'That is the API server, not DNS.'
+  correct_option: a
+  explanation: 'CoreDNS pods in `kube-system` listen on port 53 for UDP and TCP.'
+- id: ats031-010-04-q02
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Read the symptom of missing DNS.'
+  source_readings:
+  - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+  prompt: 'A namespace has a default-deny egress baseline. A pod has a correct egress rule to the `probe` pods, but `nslookup probe` times out. What is missing?'
+  options:
+  - id: a
+    text: 'A rule that allows the pod to reach CoreDNS on UDP and TCP port 53.'
+    explanation: 'Correct. The lookup is an egress connection to the DNS pods and the baseline drops it.'
+  - id: b
+    text: 'A second ingress rule on the `probe` pods.'
+    explanation: 'Ingress on the destination does not affect the lookup.'
+  - id: c
+    text: 'A label on the namespace.'
+    explanation: 'Labels are not needed for a rule to work.'
+  correct_option: a
+  explanation: 'Name resolution needs its own egress rule under a baseline, whatever the application rules allow.'
+- id: ats031-010-04-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Allow egress to the API server.'
+  source_readings:
+  - sections/section-010/module-04/course-02-egress-to-the-api-server-and-other-dependencies.md
+  prompt: 'Which peer type allows a pod to reach the API server, and which address is allowed?'
+  options:
+  - id: a
+    text: '`podSelector`, using the label of the API server pod.'
+    explanation: 'The API server is not selected by pod policy in this setup; use an address.'
+  - id: b
+    text: '`ipBlock` with the endpoint address from the EndpointSlice as a `/32`, with the endpoint port.'
+    explanation: 'Correct. The plugin matches the endpoint address after translation.'
+  - id: c
+    text: '`namespaceSelector` for `default`.'
+    explanation: 'The `kubernetes` Service lives in `default`, but the traffic goes to a node address.'
+  correct_option: b
+  explanation: 'Use an `ipBlock` with the address and port found in the EndpointSlice of the `kubernetes` Service.'
+- id: ats031-010-04-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Separate network access from authorization.'
+  source_readings:
+  - sections/section-010/module-04/course-02-egress-to-the-api-server-and-other-dependencies.md
+  prompt: 'The API rule is correct and the connection works, but the call returns `Forbidden`. What must change?'
+  options:
+  - id: a
+    text: 'The NetworkPolicy must allow more ports.'
+    explanation: 'The connection already works.'
+  - id: b
+    text: 'The RBAC Role or RoleBinding of the ServiceAccount.'
+    explanation: 'Correct. NetworkPolicy opens the path; RBAC decides what the request may do.'
+  - id: c
+    text: 'The default-deny policy must be removed.'
+    explanation: 'The call reached the API server, so the network path is fine.'
+  correct_option: b
+  explanation: 'A `Forbidden` response comes from authorization, not from the network layer.'
+- id: ats031-010-04-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Know that kubelet probes can behave differently by plugin.'
+  source_readings:
+  - sections/section-010/module-04/course-03-probes-hostnetwork-and-node-traffic.md
+  prompt: 'Pods under a default-deny ingress baseline stay ready in the Calico playground. What is the correct conclusion?'
+  options:
+  - id: a
+    text: 'All network plugins let node probes pass.'
+    explanation: 'Some plugins apply policy to node traffic.'
+  - id: b
+    text: 'Calico lets the node reach local pods, but other plugins may need a rule for the node range.'
+    explanation: 'Correct. Test a baseline before a rollout.'
+  - id: c
+    text: 'Probes are not sent over the network.'
+    explanation: 'HTTP probes are real requests from the node.'
+  correct_option: b
+  explanation: 'Probe behavior depends on the plugin, so test it.'
+- id: ats031-010-04-q06
+  type: single_choice
+  difficulty: advanced
+  learning_objective: 'State the limit for hostNetwork pods.'
+  source_readings:
+  - sections/section-010/module-04/course-03-probes-hostnetwork-and-node-traffic.md
+  prompt: 'A baseline selects all pods in `starfleet`. A pod with `hostNetwork: true` there still answers a request from `outpost`. Why?'
+  options:
+  - id: a
+    text: 'The pod uses the node network, and pod policy does not select it in Calico.'
+    explanation: 'Correct. It has no pod interface and policy for node traffic uses separate host policy.'
+  - id: b
+    text: 'hostNetwork pods are exempt in the Kubernetes API.'
+    explanation: 'The API leaves the behavior to the plugin.'
+  - id: c
+    text: 'The baseline is for ingress only.'
+    explanation: 'The pod would still be isolated for ingress if policy applied.'
+  correct_option: a
+  explanation: 'Behavior for hostNetwork pods is plugin-defined. In Calico, pod policy does not apply to them.'
+- id: ats031-010-04-q07
+  type: single_choice
+  difficulty: beginner
+  learning_objective: 'Write a test matrix.'
+  source_readings:
+  - sections/section-010/module-04/course-04-test-matrix-for-a-policy-set.md
+  prompt: 'Why write the expected result of each path before the first test?'
+  options:
+  - id: a
+    text: 'So that the result cannot change the expectation.'
+    explanation: 'Correct. Otherwise the result confirms itself.'
+  - id: b
+    text: 'Because `kubectl` needs a file with the table.'
+    explanation: 'No file is needed.'
+  - id: c
+    text: 'Because NetworkPolicy has counters to compare.'
+    explanation: 'The API has no counters.'
+  correct_option: a
+  explanation: 'A table written first makes a test an honest comparison.'
+- id: ats031-010-04-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Use addresses for blocked rows.'
+  source_readings:
+  - sections/section-010/module-04/course-04-test-matrix-for-a-policy-set.md
+  prompt: 'Why does a test for a blocked path use a pod IP address instead of a name?'
+  options:
+  - id: a
+    text: 'Names cannot be resolved in a cluster.'
+    explanation: 'Names work in a cluster.'
+  - id: b
+    text: 'A failed name lookup would hide whether the connection itself is blocked.'
+    explanation: 'Correct. An address removes the DNS variable.'
+  - id: c
+    text: 'Addresses bypass the policy.'
+    explanation: 'Policy applies to addresses too.'
+  correct_option: b
+  explanation: 'With an address, a timeout can only be a policy drop of the connection.'
+- id: ats031-010-04-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Find a wrong direction in policyTypes.'
+  source_readings:
+  - sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
+  prompt: 'A policy named `probe-ingress` selects the `probe` pods and lists `policyTypes: [Egress]`. What follows?'
+  options:
+  - id: a
+    text: 'It allows ingress to the `probe` pods.'
+    explanation: 'The type is Egress, so it controls what they send.'
+  - id: b
+    text: 'It adds nothing for ingress, so the baseline still blocks incoming traffic.'
+    explanation: 'Correct. The name does not matter; types and sections do.'
+  - id: c
+    text: 'The API server rejects it.'
+    explanation: 'It is valid; it just does the wrong thing.'
+  correct_option: b
+  explanation: 'Read the types and rule sections, not the name.'
+- id: ats031-010-04-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: 'Apply the troubleshooting method.'
+  source_readings:
+  - sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
+  prompt: 'After you fix one fault, the script still fails. What is the best next step?'
+  options:
+  - id: a
+    text: 'Remove the baseline.'
+    explanation: 'That opens everything and hides the fault.'
+  - id: b
+    text: 'Repeat the method: list, read, compare labels, check types and direction, then test again.'
+    explanation: 'Correct. Faults hide each other, so test after each change.'
+  - id: c
+    text: 'Restart the nodes.'
+    explanation: 'Policy is not cached on the node in a way that needs a restart.'
+  correct_option: b
+  explanation: 'Work through the same steps after each change.'

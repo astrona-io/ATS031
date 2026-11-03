@@ -1,0 +1,243 @@
+# Knowledge check for section 020, module 02. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-020-02
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-020/module-02
+  title: "Run kube-bench And Read Its Output"
+questions:
+  - id: ats031-020-02-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain where kube-bench gets the rules of the benchmark."
+    source_readings:
+      - sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
+    prompt: "Where does `kube-bench` get the audit command and the expected value of each check?"
+    options:
+      - id: a
+        text: "From YAML definition files for one benchmark edition that ship with the program."
+        explanation: "Correct. The checks are data: each record holds an audit command, a test and a remediation text."
+      - id: b
+        text: "From the API server, which stores the benchmark as a custom resource."
+        explanation: "The API server does not store the benchmark."
+      - id: c
+        text: "From the kubelet configuration file of the node."
+        explanation: "The kubelet configuration is one of the things that some audits read, not the source of the rules."
+      - id: d
+        text: "From values compiled into the Go code of each check."
+        explanation: "The rules are not in the code. They are in definition files."
+    correct_option: a
+    explanation: "The program reads definition files for the chosen edition and target, runs each audit command and compares the output with the expected value."
+
+  - id: ats031-020-02-q02
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain why the kube-bench Job needs host access."
+    source_readings:
+      - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+    prompt: "A `kube-bench` pod runs without `hostPID` and without host mounts. What goes wrong?"
+    options:
+      - id: a
+        text: "The pod cannot pull the image."
+        explanation: "Image pulls do not depend on host access."
+      - id: b
+        text: "The audits read the container and not the node, so many checks fail for the wrong reason."
+        explanation: "Correct. The audits read processes and files, and without host access they see only the pod's own container."
+      - id: c
+        text: "The pod runs the audits but prints no summary."
+        explanation: "The summary is printed. The results are wrong."
+      - id: d
+        text: "The Kubernetes API rejects the pod."
+        explanation: "The API accepts a normal pod. The problem is what the audits can see."
+    correct_option: b
+    explanation: "Flag checks read process arguments and file checks read host files, so the Job needs `hostPID: true` and read-only mounts of the host directories."
+
+  - id: ats031-020-02-q03
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Choose the target that runs the etcd checks."
+    source_readings:
+      - sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
+    prompt: "A Job runs `kube-bench run --targets master`. Which statement about the etcd checks is correct?"
+    options:
+      - id: a
+        text: "They are included, because etcd runs on the control plane."
+        explanation: "The benchmark keeps etcd checks in their own target."
+      - id: b
+        text: "They are included only when `--json` is set."
+        explanation: "The output format does not change the targets."
+      - id: c
+        text: "They are not included. The `etcd` target runs them."
+        explanation: "Correct. The `etcd` target is separate from `master`."
+      - id: d
+        text: "They run only on worker nodes."
+        explanation: "etcd runs on the control plane."
+    correct_option: c
+    explanation: "A full review of a control plane node names the targets it needs, for example `master` and `etcd`."
+
+  - id: ats031-020-02-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Override the benchmark edition."
+    source_readings:
+      - sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
+    prompt: "The edition that `kube-bench` chose automatically does not fit the cluster. Which option names an edition directly?"
+    options:
+      - id: a
+        text: "`--targets`"
+        explanation: "`--targets` selects a group of checks, not an edition."
+      - id: b
+        text: "`--benchmark`"
+        explanation: "Correct. It skips the version mapping and uses the named edition."
+      - id: c
+        text: "`--json`"
+        explanation: "`--json` changes the output format."
+      - id: d
+        text: "`--group`"
+        explanation: "`--group` selects a block of checks inside an edition."
+    correct_option: b
+    explanation: "`--benchmark` names the edition. `--version` sets the Kubernetes version that the program maps to an edition."
+
+  - id: ats031-020-02-q05
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Report a version mismatch honestly."
+    source_readings:
+      - sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
+    prompt: "The cluster runs Kubernetes 1.35 and the newest benchmark edition in the tool was written for an older release. What should the review do?"
+    options:
+      - id: a
+        text: "Pick the edition with the fewest failures."
+        explanation: "The edition must be chosen for fit, not for a good score."
+      - id: b
+        text: "Hide the version difference, because the checks are the same."
+        explanation: "Some checks can fail only because a flag was removed. The gap must be visible."
+      - id: c
+        text: "Run the tool on a different cluster."
+        explanation: "The review is about this cluster."
+      - id: d
+        text: "Use the closest edition and state the edition and the version gap in the report."
+        explanation: "Correct. Readers must know which rules judged the cluster and where the gap may cause false results."
+    correct_option: d
+    explanation: "Name the edition in the report and mention the gap, so that failures caused by removed flags can be recognised."
+
+  - id: ats031-020-02-q06
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Read a report in a useful order."
+    source_readings:
+      - sections/section-020/module-02/course-04-read-a-result.md
+    prompt: "In what order should a reviewer read the text report of a long run?"
+    options:
+      - id: a
+        text: "The summary counts, then the failing checks, then the remediation of the failures that matter."
+        explanation: "Correct. Counts show the size, failures show the work, and remediation shows the fix."
+      - id: b
+        text: "Every line from the top, and fix each check in order."
+        explanation: "Reading from the top hides which results matter."
+      - id: c
+        text: "Only the `PASS` lines."
+        explanation: "`PASS` lines need no action."
+      - id: d
+        text: "Only the remediation block, without the check lines."
+        explanation: "The remediation block does not show the real value on the node."
+    correct_option: a
+    explanation: "Read counts first, then `FAIL` lines, then the remediation text for the failures you will fix."
+
+  - id: ats031-020-02-q07
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Explain WARN."
+    source_readings:
+      - sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
+    prompt: "A check prints `[WARN]`. What does it mean?"
+    options:
+      - id: a
+        text: "The check passed with a minor problem."
+        explanation: "A `WARN` is not a pass."
+      - id: b
+        text: "The check failed and `kube-bench` already fixed it."
+        explanation: "`kube-bench` never changes the node."
+      - id: c
+        text: "The check is manual or undecided, so a person must judge it."
+        explanation: "Correct. The reviewer follows the audit text and records a decision."
+      - id: d
+        text: "The check was skipped because of a timeout."
+        explanation: "A skipped check is not shown as `WARN`."
+    correct_option: c
+    explanation: "`WARN` marks work for a person. It is neither a pass nor a failure."
+
+  - id: ats031-020-02-q08
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Select single checks."
+    source_readings:
+      - sections/section-020/module-02/course-05-select-checks-and-export-results.md
+    prompt: "Which change to the command runs only the checks `1.2.1` and `1.2.2` of the control plane target?"
+    options:
+      - id: a
+        text: "Add `--check 1.2.1,1.2.2`."
+        explanation: "Correct. `--check` takes a comma-separated list of check numbers."
+      - id: b
+        text: "Add `--json 1.2.1,1.2.2`."
+        explanation: "`--json` takes no list. It changes the output format."
+      - id: c
+        text: "Add `--targets 1.2.1,1.2.2`."
+        explanation: "Targets are groups of components, not check numbers."
+      - id: d
+        text: "Add `--benchmark 1.2`."
+        explanation: "`--benchmark` names an edition."
+    correct_option: a
+    explanation: "`--check` runs single checks and `--group` runs a block. Use them to rerun a fixed check quickly."
+
+  - id: ats031-020-02-q09
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Filter JSON output."
+    source_readings:
+      - sections/section-020/module-02/course-05-select-checks-and-export-results.md
+    prompt: "Why does the lesson filter the JSON report with `.. | objects | select(has(\"test_number\"))` instead of a fixed path?"
+    options:
+      - id: a
+        text: "Because `jq` cannot read a fixed path."
+        explanation: "`jq` can read fixed paths."
+      - id: b
+        text: "Because the nesting of the document can change between versions, but the field names stay recognisable."
+        explanation: "Correct. Walking the whole document does not depend on the nesting depth."
+      - id: c
+        text: "Because a fixed path would return `WARN` results too."
+        explanation: "The status filter decides that, not the path."
+      - id: d
+        text: "Because `..` makes `jq` run the audit again."
+        explanation: "`jq` only reads the saved file."
+    correct_option: b
+    explanation: "Select on field names so that the filter survives changes in the layout of the document."
+
+  - id: ats031-020-02-q10
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Handle a false finding in a kind cluster."
+    source_readings:
+      - sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
+    prompt: "A file owner check fails on a kind node because the node container has other users than a real host. What is the right action?"
+    options:
+      - id: a
+        text: "Change the owner of the file until the check passes."
+        explanation: "Changing a working cluster only to clear a mismatched check adds risk."
+      - id: b
+        text: "Delete the result from the report."
+        explanation: "A finding must stay in the report with its reason."
+      - id: c
+        text: "Disable the whole `node` target."
+        explanation: "This removes valid checks too."
+      - id: d
+        text: "Read the audit, confirm the real value, and record that the finding does not apply and why."
+        explanation: "Correct. The record is as important as a fix."
+    correct_option: d
+    explanation: "A reviewer separates findings that apply from findings caused by the test setup, and writes down the reason for each exception."

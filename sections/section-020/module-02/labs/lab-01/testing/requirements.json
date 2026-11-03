@@ -1,0 +1,28 @@
+{
+  "context": "kind-astro-ats-031-lab-020-02-01",
+  "resources": [
+    {
+      "kind": "configmap",
+      "name": "failing-checks",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "failing-checks",
+          "namespace": "starfleet"
+        }
+      }
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "get",
+        "--raw=/readyz"
+      ],
+      "equals": "ok"
+    }
+  ]
+}

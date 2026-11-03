@@ -1,0 +1,80 @@
+{
+  "context": "kind-astro-ats-031-lab-030-03-02",
+  "resources": [
+    {
+      "kind": "ingress",
+      "name": "beacon",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "beacon",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "ingressClassName": "traefik",
+          "tls": [
+            {
+              "hosts": [
+                "beacon.example.test"
+              ],
+              "secretName": "beacon-tls"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "secret",
+      "name": "beacon-tls",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Secret",
+        "type": "kubernetes.io/tls",
+        "metadata": {
+          "name": "beacon-tls",
+          "namespace": "starfleet"
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "beacon",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "beacon",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "beacon"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "beacon",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "beacon",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "selector": {
+            "app": "beacon"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

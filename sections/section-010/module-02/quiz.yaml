@@ -1,0 +1,207 @@
+# Knowledge check for module 02. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-010-02
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-010/module-02
+  title: 'Build Default-Deny Baselines For Namespaces'
+placement:
+  position: after
+  reading: sections/section-010/module-02/course-06-summary.md
+questions:
+- id: ats031-010-02-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: 'State what a default-deny baseline policy selects.'
+  source_readings:
+  - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+  prompt: 'Which `podSelector` makes a NetworkPolicy select every pod in its own namespace?'
+  options:
+  - id: a
+    text: '`podSelector: {}`'
+    explanation: 'Correct. An empty selector matches all pods in the policy namespace.'
+  - id: b
+    text: '`podSelector: {matchLabels: {}}` in another namespace'
+    explanation: 'A policy selects pods only in its own namespace.'
+  - id: c
+    text: 'Omitting `podSelector` entirely'
+    explanation: 'The field is required, so the object is rejected.'
+  correct_option: a
+  explanation: 'An empty `podSelector` selects all pods in the namespace that holds the policy.'
+- id: ats031-010-02-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: 'Explain why a baseline is applied before allow rules.'
+  source_readings:
+  - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+  prompt: 'A namespace has an allow policy for the `probe` pods but no baseline. A `drifter` pod in the same namespace requests a `shuttle` pod, which no policy selects. What happens?'
+  options:
+  - id: a
+    text: 'The request is dropped, because the allow policy denies everything else.'
+    explanation: 'A policy isolates only the pods it selects.'
+  - id: b
+    text: 'The request is allowed, because no policy selects the `shuttle` pod.'
+    explanation: 'Correct. Pods that no policy selects stay open in both directions.'
+  - id: c
+    text: 'The request is dropped until the `drifter` pod gets a label.'
+    explanation: 'Labels do not matter when no policy selects the destination.'
+  correct_option: b
+  explanation: 'An allow policy only isolates the pods it selects. A baseline is what isolates the rest of the namespace.'
+- id: ats031-010-02-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: 'Write a default-deny ingress policy.'
+  source_readings:
+  - sections/section-010/module-02/course-02-deny-all-ingress.md
+  prompt: 'A policy has `podSelector: {}` and `policyTypes: [Ingress]` and no `ingress` section. What does it do?'
+  options:
+  - id: a
+    text: 'It allows all ingress traffic to every pod in the namespace.'
+    explanation: '`- {}` would do that; a missing section allows nothing.'
+  - id: b
+    text: 'It isolates every pod in the namespace for ingress and allows no incoming connection.'
+    explanation: 'Correct. Selected pods accept nothing in that direction until another policy allows it.'
+  - id: c
+    text: 'It blocks both ingress and egress.'
+    explanation: 'Egress is not in `policyTypes`, so egress stays open.'
+  correct_option: b
+  explanation: 'A selecting policy with the type Ingress and no rules denies all ingress to the selected pods. Egress is unchanged.'
+- id: ats031-010-02-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Diagnose the result of a default-deny ingress policy with request tests.'
+  source_readings:
+  - sections/section-010/module-02/course-02-deny-all-ingress.md
+  prompt: 'After a default-deny ingress policy in `outpost`, a request from `starfleet` to a `probe` pod in `outpost` runs for three seconds and ends with `download timed out`. What does this show?'
+  options:
+  - id: a
+    text: 'A pod answered and refused the connection.'
+    explanation: 'A refusal returns at once and means a pod answered.'
+  - id: b
+    text: 'The network plugin dropped the packets.'
+    explanation: 'Correct. A timeout is the sign of a drop.'
+  - id: c
+    text: 'The Service has no endpoints.'
+    explanation: 'That produces a different failure, not a timeout from a drop.'
+  correct_option: b
+  explanation: 'A timeout shows that packets were dropped. A refusal shows that a pod answered on a closed port.'
+- id: ats031-010-02-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Explain the side effect of a default-deny egress policy.'
+  source_readings:
+  - sections/section-010/module-02/course-03-deny-all-egress-and-its-side-effects.md
+  prompt: 'A default-deny egress policy is applied to `dock`. A `shuttle` pod there runs `wget http://probe.starfleet/`. The request fails before it opens any connection to `probe`. Why?'
+  options:
+  - id: a
+    text: 'The `probe` pods reject new connections.'
+    explanation: 'The request never reaches a `probe` pod.'
+  - id: b
+    text: 'The name lookup is blocked, because the egress to CoreDNS is dropped.'
+    explanation: 'Correct. Egress isolation also drops the DNS query on port 53.'
+  - id: c
+    text: 'Egress policies only apply to TCP port 80.'
+    explanation: 'Policies apply to all ports unless a rule limits them.'
+  correct_option: b
+  explanation: 'Name resolution is an egress connection to CoreDNS. A baseline without a DNS rule breaks every lookup.'
+- id: ats031-010-02-q06
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Tell which traffic a deny-all egress policy does not affect.'
+  source_readings:
+  - sections/section-010/module-02/course-03-deny-all-egress-and-its-side-effects.md
+  prompt: 'A default-deny egress policy selects all pods in `dock`. Which traffic is still allowed under this policy?'
+  options:
+  - id: a
+    text: 'A reply to a connection that another pod opened to a pod in `dock`.'
+    explanation: 'Correct. Return traffic of an allowed connection is not blocked by egress rules.'
+  - id: b
+    text: 'A new connection from a `dock` pod to a pod in `starfleet`.'
+    explanation: 'This is new egress and is dropped.'
+  - id: c
+    text: 'A DNS query from a `dock` pod.'
+    explanation: 'This is new egress and is dropped.'
+  correct_option: a
+  explanation: 'Policy applies to new connections. Replies to allowed connections pass without a separate rule.'
+- id: ats031-010-02-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Combine a baseline with allow rules for one path.'
+  source_readings:
+  - sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
+  prompt: 'A baseline isolates `outpost` in both directions. `shuttle` must reach `probe` on port 8080. Which set of rules is needed?'
+  options:
+  - id: a
+    text: 'An ingress rule on `probe` only.'
+    explanation: 'The source still needs egress, and DNS for the name.'
+  - id: b
+    text: 'An egress rule on `shuttle`, an ingress rule on `probe`, and a DNS rule for `shuttle`.'
+    explanation: 'Correct. Both ends are isolated, and the name lookup needs egress too.'
+  - id: c
+    text: 'An egress rule on `shuttle` only.'
+    explanation: 'The destination is isolated for ingress and would drop the request.'
+  correct_option: b
+  explanation: 'With both directions isolated, the path needs egress at the source, ingress at the destination and a DNS rule when a name is used.'
+- id: ats031-010-02-q08
+  type: single_choice
+  difficulty: advanced
+  learning_objective: 'Explain that policies add up.'
+  source_readings:
+  - sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
+  prompt: '`default-deny-all` and `probe-ingress` both select the `probe` pods in `outpost`. `probe-ingress` allows `shuttle` on TCP 8080. Does the baseline cancel the allow rule?'
+  options:
+  - id: a
+    text: 'Yes, the deny policy wins because it was applied first.'
+    explanation: 'There is no precedence and no deny rule.'
+  - id: b
+    text: 'No. Policies add up, so the connection is allowed.'
+    explanation: 'Correct. The allowed set is the union of all rules of the policies that select the pod.'
+  - id: c
+    text: 'Yes, unless the allow policy has a higher priority number.'
+    explanation: 'NetworkPolicy has no priority field.'
+  correct_option: b
+  explanation: 'NetworkPolicy has no deny rules and no order. The allowed connections are the union of all rules.'
+- id: ats031-010-02-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: 'Roll out a baseline across several namespaces.'
+  source_readings:
+  - sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
+  prompt: 'You apply the same baseline file to three namespaces with `kubectl apply -f`. What must each copy contain?'
+  options:
+  - id: a
+    text: 'The same `metadata.namespace` for all copies.'
+    explanation: 'Then only one namespace would receive a policy.'
+  - id: b
+    text: 'A different `metadata.namespace` for each copy, or the `-n` flag for each apply.'
+    explanation: 'Correct. A policy lives in exactly one namespace.'
+  - id: c
+    text: 'A `namespaceSelector` listing the three namespaces.'
+    explanation: '`namespaceSelector` is a peer field and does not place a policy.'
+  correct_option: b
+  explanation: 'A NetworkPolicy belongs to one namespace. Each namespace needs its own object.'
+- id: ats031-010-02-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: 'Audit which namespaces have no baseline.'
+  source_readings:
+  - sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
+  prompt: '`kubectl get networkpolicy --all-namespaces` lists policies for two of three application namespaces. What does the third namespace allow?'
+  options:
+  - id: a
+    text: 'Nothing, because there is no policy to allow it.'
+    explanation: 'With no policy, nothing is isolated.'
+  - id: b
+    text: 'All traffic to and from its pods, because no policy selects them.'
+    explanation: 'Correct. A namespace without a policy is open in both directions.'
+  - id: c
+    text: 'Only traffic from namespaces that have a baseline.'
+    explanation: 'Policies in other namespaces do not affect this one.'
+  correct_option: b
+  explanation: 'A namespace with no policy is open, so an audit looks for namespaces that are missing from the list.'

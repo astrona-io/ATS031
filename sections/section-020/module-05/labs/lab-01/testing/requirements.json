@@ -1,0 +1,134 @@
+{
+  "context": "kind-astro-ats-031-lab-020-05-01",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 2,
+          "selector": {
+            "matchLabels": {
+              "app": "probe",
+              "release": "probe"
+            }
+          },
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "probe",
+                "release": "probe"
+              }
+            },
+            "spec": {
+              "containers": [
+                {
+                  "name": "probe",
+                  "image": "docker.io/library/python:3.13-alpine",
+                  "command": [
+                    "python",
+                    "/app/server.py"
+                  ],
+                  "env": [
+                    {
+                      "name": "VERSION",
+                      "value": "v1"
+                    }
+                  ],
+                  "ports": [
+                    {
+                      "name": "http",
+                      "containerPort": 8080
+                    }
+                  ],
+                  "readinessProbe": {
+                    "httpGet": {
+                      "path": "/ready",
+                      "port": "http"
+                    },
+                    "periodSeconds": 2
+                  },
+                  "resources": {
+                    "requests": {
+                      "cpu": "10m",
+                      "memory": "32Mi"
+                    },
+                    "limits": {
+                      "memory": "128Mi"
+                    }
+                  },
+                  "volumeMounts": [
+                    {
+                      "name": "app",
+                      "mountPath": "/app",
+                      "readOnly": true
+                    }
+                  ]
+                }
+              ],
+              "volumes": [
+                {
+                  "name": "app",
+                  "configMap": {
+                    "name": "probe-code"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "pod",
+      "name": "shuttle",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "shuttle",
+          "namespace": "starfleet"
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "get",
+        "--raw=/readyz"
+      ],
+      "equals": "ok"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet",
+        "exec",
+        "shuttle",
+        "--",
+        "wget",
+        "-q",
+        "-T",
+        "3",
+        "-O-",
+        "http://probe/"
+      ],
+      "contains": [
+        "version=v1"
+      ]
+    }
+  ]
+}

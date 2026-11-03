@@ -1,0 +1,239 @@
+{
+  "context": "kind-astro-ats-031-capstone-010",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 2,
+          "selector": {
+            "matchLabels": {
+              "app": "probe",
+              "release": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "pod",
+      "name": "shuttle",
+      "namespace": "outpost",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "shuttle",
+          "namespace": "outpost",
+          "labels": {
+            "app": "shuttle"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "drifter",
+      "namespace": "outpost",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "drifter",
+          "namespace": "outpost",
+          "labels": {
+            "app": "drifter"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "telemetry",
+      "namespace": "dock",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "telemetry",
+          "namespace": "dock",
+          "labels": {
+            "app": "telemetry"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "scout",
+      "namespace": "dock",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "scout",
+          "namespace": "dock",
+          "labels": {
+            "app": "scout"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "networkpolicy",
+      "name": "default-deny-all",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "default-deny-all",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "podSelector": {},
+          "policyTypes": [
+            "Ingress",
+            "Egress"
+          ]
+        }
+      }
+    },
+    {
+      "kind": "networkpolicy",
+      "name": "default-deny-all",
+      "namespace": "outpost",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "default-deny-all",
+          "namespace": "outpost"
+        },
+        "spec": {
+          "podSelector": {},
+          "policyTypes": [
+            "Ingress",
+            "Egress"
+          ]
+        }
+      }
+    },
+    {
+      "kind": "networkpolicy",
+      "name": "default-deny-all",
+      "namespace": "dock",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "default-deny-all",
+          "namespace": "dock"
+        },
+        "spec": {
+          "podSelector": {},
+          "policyTypes": [
+            "Ingress",
+            "Egress"
+          ]
+        }
+      }
+    },
+    {
+      "kind": "networkpolicy",
+      "name": "probe-from-outpost",
+      "namespace": "starfleet",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "NetworkPolicy",
+        "metadata": {
+          "name": "probe-from-outpost",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "podSelector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          },
+          "policyTypes": [
+            "Ingress"
+          ],
+          "ingress": [
+            {
+              "from": [
+                {
+                  "namespaceSelector": {
+                    "matchLabels": {
+                      "kubernetes.io/metadata.name": "outpost"
+                    }
+                  },
+                  "podSelector": {
+                    "matchLabels": {
+                      "app": "shuttle"
+                    }
+                  }
+                }
+              ],
+              "ports": [
+                {
+                  "protocol": "TCP",
+                  "port": 8080
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "outpost",
+        "exec",
+        "shuttle",
+        "--",
+        "wget",
+        "-q",
+        "-T",
+        "3",
+        "-O-",
+        "http://probe.starfleet/"
+      ],
+      "contains": [
+        "version=v1"
+      ]
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "dock",
+        "exec",
+        "scout",
+        "--",
+        "python",
+        "/app/check.py"
+      ],
+      "contains": [
+        "dns=ok api=ok"
+      ]
+    }
+  ]
+}

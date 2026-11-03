@@ -1,0 +1,243 @@
+# Knowledge check for section 020, module 03. Contract:
+# schemas/question-bank.schema.json. Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-020-03
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: module
+  id: section-020/module-03
+  title: "Harden The API Server And Control Plane Components"
+questions:
+  - id: ats031-020-03-q01
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Edit a static pod manifest without leaving stray files."
+    source_readings:
+      - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+    prompt: "Where should a backup of `kube-apiserver.yaml` be kept before an edit?"
+    options:
+      - id: a
+        text: "In `/etc/kubernetes/manifests`, next to the original."
+        explanation: "The kubelet reads every file in that directory, so a copy there can start a second pod."
+      - id: b
+        text: "Outside `/etc/kubernetes/manifests`, for example in `/opt/training/backup`."
+        explanation: "Correct. The kubelet ignores files outside the directory."
+      - id: c
+        text: "Nowhere, because the kubelet keeps the old version."
+        explanation: "The kubelet does not keep an old version of the file."
+      - id: d
+        text: "In a ConfigMap, because the API server restores it."
+        explanation: "A ConfigMap cannot restore a file when the API server is down."
+    correct_option: b
+    explanation: "Edit a copy outside the manifests directory and move it into place, and keep the backup outside the directory too."
+
+  - id: ats031-020-03-q02
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Find the cause of a failed control plane component when the API is down."
+    source_readings:
+      - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+    prompt: "After an edit, the API server does not start and `kubectl` cannot connect. Which command on the node shows why?"
+    options:
+      - id: a
+        text: "`kubectl logs kube-apiserver`"
+        explanation: "`kubectl` needs the API server that is down."
+      - id: b
+        text: "`kubectl describe node`"
+        explanation: "This also needs the API server."
+      - id: c
+        text: "`crictl ps -a` to find the container, then `crictl logs` for it"
+        explanation: "Correct. `crictl` talks to the container runtime on the node, not to the API server."
+      - id: d
+        text: "`systemctl restart kube-apiserver`"
+        explanation: "The API server is a static pod, not a systemd service."
+    correct_option: c
+    explanation: "Use `crictl` on the node when the API server is down, and restore the backup if the log shows a bad flag."
+
+  - id: ats031-020-03-q03
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Set the authorization mode."
+    source_readings:
+      - sections/section-020/module-03/course-02-authentication-and-authorization-flags.md
+    prompt: "Which value of `--authorization-mode` do the benchmark and kubeadm use for the API server?"
+    options:
+      - id: a
+        text: "`AlwaysAllow`"
+        explanation: "This allows every request and fails the benchmark."
+      - id: b
+        text: "`Node,RBAC`"
+        explanation: "Correct. Node authorization restricts kubelets and RBAC covers other users."
+      - id: c
+        text: "`AlwaysDeny`"
+        explanation: "This denies every request and would stop the cluster."
+      - id: d
+        text: "`Webhook` only"
+        explanation: "Webhook alone drops the Node and RBAC authorizers that the cluster relies on."
+    correct_option: b
+    explanation: "`Node,RBAC` is the expected value. The check fails if `AlwaysAllow` is in the list."
+
+  - id: ats031-020-03-q04
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Set controller manager credentials."
+    source_readings:
+      - sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
+    prompt: "What does `--use-service-account-credentials=true` change in the controller manager?"
+    options:
+      - id: a
+        text: "Each controller uses its own service account instead of one shared identity."
+        explanation: "Correct. Access of each controller can then be limited and audited separately."
+      - id: b
+        text: "It disables authentication of the controller manager."
+        explanation: "It does not change authentication of clients."
+      - id: c
+        text: "It enables profiling."
+        explanation: "Profiling has its own flag."
+      - id: d
+        text: "It moves the manager to a worker node."
+        explanation: "The flag does not move components."
+    correct_option: a
+    explanation: "Separate identities per controller make RBAC rules and audit events more precise."
+
+  - id: ats031-020-03-q05
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain the NodeRestriction plugin."
+    source_readings:
+      - sections/section-020/module-03/course-03-admission-plugins.md
+    prompt: "What does the `NodeRestriction` admission plugin do?"
+    options:
+      - id: a
+        text: "It stops pods from using the node network."
+        explanation: "This is a different control."
+      - id: b
+        text: "It limits a kubelet to change only its own `Node` object and the pods bound to it."
+        explanation: "Correct. A stolen kubelet credential then cannot change other nodes or pods."
+      - id: c
+        text: "It limits how many nodes a cluster can have."
+        explanation: "It does not count nodes."
+      - id: d
+        text: "It encrypts traffic between nodes."
+        explanation: "Admission plugins do not encrypt traffic."
+    correct_option: b
+    explanation: "`NodeRestriction` narrows what a kubelet identity can write through the API."
+
+  - id: ats031-020-03-q06
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Explain AlwaysPullImages."
+    source_readings:
+      - sections/section-020/module-03/course-03-admission-plugins.md
+    prompt: "Why does the benchmark recommend the `AlwaysPullImages` admission plugin?"
+    options:
+      - id: a
+        text: "It makes every pod start faster."
+        explanation: "Pulling every time is slower."
+      - id: b
+        text: "It scans each image for vulnerabilities."
+        explanation: "The plugin does not scan images."
+      - id: c
+        text: "It forces every pod to check credentials with the registry, so a cached private image cannot be used without them."
+        explanation: "Correct. The plugin sets the pull policy to `Always` on new pods."
+      - id: d
+        text: "It blocks images from public registries."
+        explanation: "The plugin does not filter registries."
+    correct_option: c
+    explanation: "The cost is an image pull for each container start, and pods need access to the registry."
+
+  - id: ats031-020-03-q07
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Enable audit logging completely."
+    source_readings:
+      - sections/section-020/module-03/course-04-audit-logging.md
+    prompt: "Besides `--audit-policy-file` and `--audit-log-path`, what must the API server static pod manifest contain so that the audit log works and survives a restart?"
+    options:
+      - id: a
+        text: "A `hostPath` volume and mount for the policy file location and for the log directory."
+        explanation: "Correct. The API server runs in a container, so the policy must be mounted in and the log must be written to a host path."
+      - id: b
+        text: "A new `Service` for the audit log."
+        explanation: "A Service is not needed."
+      - id: c
+        text: "A `ConfigMap` with the audit events."
+        explanation: "Audit events are written to the log file."
+      - id: d
+        text: "A `NetworkPolicy` that allows the log."
+        explanation: "The log is a file, not network traffic."
+    correct_option: a
+    explanation: "Without the mounts the API server cannot read the policy, or it writes the log inside the container and loses it on restart."
+
+  - id: ats031-020-03-q08
+    type: single_choice
+    difficulty: advanced
+    learning_objective: "Read an audit policy."
+    source_readings:
+      - sections/section-020/module-03/course-04-audit-logging.md
+    prompt: "A policy has the rule `level: Metadata` for all requests first, and a later rule `level: None` for `/readyz`. What is logged for `/readyz`?"
+    options:
+      - id: a
+        text: "Nothing, because `None` is the more specific rule."
+        explanation: "Rules are not ranked by detail."
+      - id: b
+        text: "Metadata, because the first matching rule wins."
+        explanation: "Correct. The `None` rule is never reached. It must come first."
+      - id: c
+        text: "The request and response bodies."
+        explanation: "That needs the `RequestResponse` level."
+      - id: d
+        text: "The policy is rejected at start."
+        explanation: "The order of rules is valid."
+    correct_option: b
+    explanation: "The API server uses the first rule that matches a request, so specific rules must come before general ones."
+
+  - id: ats031-020-03-q09
+    type: single_choice
+    difficulty: intermediate
+    learning_objective: "Verify that profiling is off."
+    source_readings:
+      - sections/section-020/module-03/course-05-profiling-tls-and-service-account-flags.md
+    prompt: "Which result shows that the API server runs with profiling disabled?"
+    options:
+      - id: a
+        text: "The manifest file contains a comment about profiling."
+        explanation: "A comment changes nothing."
+      - id: b
+        text: "A backup copy of the manifest contains `--profiling=false`."
+        explanation: "The backup is not the running component."
+      - id: c
+        text: "The API server pod object, created from the running manifest, lists `--profiling=false` in its command."
+        explanation: "Correct. The pod object reflects what the kubelet started."
+      - id: d
+        text: "The API server answers `/readyz`."
+        explanation: "Readiness does not depend on profiling."
+    correct_option: c
+    explanation: "Check the live pod arguments after the restart. A missing flag means the default, which is `true`."
+
+  - id: ats031-020-03-q10
+    type: single_choice
+    difficulty: beginner
+    learning_objective: "Set the permissions of control plane manifests."
+    source_readings:
+      - sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
+    prompt: "Which mode and owner does the benchmark ask for on the static pod manifests of the control plane?"
+    options:
+      - id: a
+        text: "Mode `600` or stricter, owner `root:root`."
+        explanation: "Correct. Only root needs to read these files."
+      - id: b
+        text: "Mode `777`, owner `root:root`."
+        explanation: "This gives everyone write access."
+      - id: c
+        text: "Mode `644`, owner `nobody`."
+        explanation: "The owner must be root and the mode stricter."
+      - id: d
+        text: "Mode `755`, owner `root:root`."
+        explanation: "Mode `755` lets every user read the file. The benchmark asks for `600` or stricter."
+    correct_option: a
+    explanation: "After the change, check that the component is still ready, because the kubelet must keep reading the file."

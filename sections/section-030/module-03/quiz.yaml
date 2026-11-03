@@ -1,0 +1,207 @@
+# Knowledge check for section 030. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-030-03
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: Ingress With TLS
+placement:
+  position: after
+  reading: sections/section-030/module-03/course-07-summary.md
+questions:
+- id: ats031-030-03-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Name what a client checks in a certificate."
+  source_readings:
+  - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+  prompt: "Which field must contain the host name for modern clients?"
+  options:
+  - id: a
+    text: "The Subject Alternative Name."
+    explanation: "Correct. Clients match the host name against the SAN."
+  - id: b
+    text: "Only the Common Name."
+    explanation: "Modern clients ignore a CN when the SAN is absent."
+  - id: c
+    text: "The serial number."
+    explanation: "The serial identifies the certificate. It carries no host name."
+  correct_option: a
+  explanation: "A certificate must list the host in its SAN, be inside its dates and chain to a trusted CA."
+- id: ats031-030-03-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Explain trust in a self-signed certificate."
+  source_readings:
+  - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+  prompt: "Why does `curl` reject a new self-signed certificate by default?"
+  options:
+  - id: a
+    text: "The key is too short."
+    explanation: "Key length is not the reason here."
+  - id: b
+    text: "No trusted CA signed it."
+    explanation: "Correct. A self-signed certificate is its own CA, which the client does not trust until given the file."
+  - id: c
+    text: "Self-signed certificates cannot contain a SAN."
+    explanation: "They can; `-addext` adds one."
+  correct_option: b
+  explanation: "Give the certificate file to `--cacert`, or use a CA that clients trust."
+- id: ats031-030-03-q03
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Create a self-signed certificate with a SAN."
+  source_readings:
+  - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+  prompt: "Which option adds the SAN when you run `openssl req -x509`?"
+  options:
+  - id: a
+    text: "`-addext \"subjectAltName=DNS:name\"`"
+    explanation: "Correct. It adds the SAN extension to the certificate."
+  - id: b
+    text: "`-days 30`"
+    explanation: "This sets the validity, not the names."
+  - id: c
+    text: "`-nodes`"
+    explanation: "This leaves the key unencrypted."
+  correct_option: a
+  explanation: "The SAN is added with `-addext`, and the `-subj` CN alone is not enough."
+- id: ats031-030-03-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Describe the steps to issue a CA-signed certificate."
+  source_readings:
+  - sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
+  prompt: "Which sequence issues a server certificate from your own CA?"
+  options:
+  - id: a
+    text: "Create the CA, create a key and request, sign the request with the CA, verify."
+    explanation: "Correct. These are the four steps of the flow."
+  - id: b
+    text: "Create a Secret, then run `openssl verify`."
+    explanation: "The Secret needs the finished certificate first."
+  - id: c
+    text: "Sign the CA with the server key."
+    explanation: "The CA key signs the server request, not the other way round."
+  correct_option: a
+  explanation: "The CA key signs the request, and an extension file carries the SAN into the certificate."
+- id: ats031-030-03-q05
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Verify a chain with openssl."
+  source_readings:
+  - sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
+  prompt: "What does `openssl verify -CAfile ca.crt server.crt` prove?"
+  options:
+  - id: a
+    text: "That the server is running."
+    explanation: "It reads files only and tests no server."
+  - id: b
+    text: "That ca.crt signed server.crt and the dates are valid."
+    explanation: "Correct. It checks the chain and validity from the files."
+  - id: c
+    text: "That the key matches the certificate."
+    explanation: "This command does not read the key."
+  correct_option: b
+  explanation: "Verification of the chain is a file check. Matching key and host are separate checks."
+- id: ats031-030-03-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Choose the Secret type for TLS."
+  source_readings:
+  - sections/section-030/module-03/course-04-create-the-tls-secret.md
+  prompt: "Which command creates a Secret of type `kubernetes.io/tls`?"
+  options:
+  - id: a
+    text: "`kubectl create secret tls NAME --cert=... --key=...`"
+    explanation: "Correct. It sets the type and the keys `tls.crt` and `tls.key`."
+  - id: b
+    text: "`kubectl create configmap NAME --from-file=...`"
+    explanation: "A ConfigMap is not a Secret."
+  - id: c
+    text: "`kubectl create secret docker-registry NAME`"
+    explanation: "This holds registry credentials."
+  correct_option: a
+  explanation: "Use `create secret tls` in the namespace of the Ingress."
+- id: ats031-030-03-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Know what the API server checks in a TLS Secret."
+  source_readings:
+  - sections/section-030/module-03/course-04-create-the-tls-secret.md
+  prompt: "A TLS Secret holds a certificate and a key that do not belong together. What happens when you create it?"
+  options:
+  - id: a
+    text: "The API server rejects it."
+    explanation: "It does not compare the pair."
+  - id: b
+    text: "It is created, and the failure shows later in the controller."
+    explanation: "Correct. Compare the public keys yourself."
+  - id: c
+    text: "The key is replaced by a new one."
+    explanation: "Kubernetes never changes the data."
+  correct_option: b
+  explanation: "Only the presence of both keys is checked. Compare the public keys before you rely on the Secret."
+- id: ats031-030-03-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Apply the namespace rule."
+  source_readings:
+  - sections/section-030/module-03/course-04-create-the-tls-secret.md
+  prompt: "An Ingress in `starfleet` names `secretName: probe-tls`, but the Secret is in `default`. What happens?"
+  options:
+  - id: a
+    text: "Traefik finds it in any namespace."
+    explanation: "The Ingress cannot use a Secret from another namespace."
+  - id: b
+    text: "The Secret is not used, so no valid certificate is served for the host."
+    explanation: "Correct. The Secret must share the namespace of the Ingress."
+  - id: c
+    text: "Kubernetes copies the Secret."
+    explanation: "Kubernetes never copies Secrets."
+  correct_option: b
+  explanation: "Create the Secret in the namespace of the Ingress."
+- id: ats031-030-03-q09
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Verify the host name on the wire."
+  source_readings:
+  - sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
+  prompt: "Which check proves that the served certificate matches `probe.example.test`?"
+  options:
+  - id: a
+    text: "`curl -k https://...`"
+    explanation: "`-k` skips verification and proves nothing."
+  - id: b
+    text: "`openssl s_client -servername probe.example.test -CAfile ca.crt -verify_hostname probe.example.test`"
+    explanation: "Correct. It sends the name, checks the chain and checks the SAN."
+  - id: c
+    text: "`kubectl get ingress probe`"
+    explanation: "This shows the object, not the served certificate."
+  correct_option: b
+  explanation: "Verify with the trusted CA file and the right name. Repeat with a wrong name to see the mismatch."
+- id: ats031-030-03-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Redirect HTTP to HTTPS."
+  source_readings:
+  - sections/section-030/module-03/course-06-https-redirect-hsts-and-the-default-certificate.md
+  prompt: "Why is a JSON patch used to add the redirect arguments to the Traefik container?"
+  options:
+  - id: a
+    text: "Strategic merge would replace the whole args list."
+    explanation: "Correct. The args list is not merged by key, so a merge patch overwrites it."
+  - id: b
+    text: "JSON patch is the only format that kubectl accepts."
+    explanation: "Several patch types exist."
+  - id: c
+    text: "Redirects can only be set with JSON."
+    explanation: "The setting is a command-line argument; the patch type is a matter of safety."
+  correct_option: a
+  explanation: "A JSON patch with the add operation appends items without removing the others."

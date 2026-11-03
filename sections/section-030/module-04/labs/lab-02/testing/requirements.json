@@ -1,0 +1,104 @@
+{
+  "context": "kind-astro-ats-031-lab-030-04-02",
+  "resources": [
+    {
+      "kind": "ingress",
+      "name": "alpha",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "alpha",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "ingress",
+      "name": "bravo",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "bravo",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "ingress",
+      "name": "charlie",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "charlie",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "ingress",
+      "name": "delta",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "delta",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

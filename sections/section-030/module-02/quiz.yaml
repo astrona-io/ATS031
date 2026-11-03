@@ -1,0 +1,207 @@
+# Knowledge check for section 030. Contract: schemas/question-bank.schema.json.
+# Keep question ids stable once published.
+schema_version: 1
+kind: question_bank
+id: ats031-030-02
+course_id: ATS031
+exam_code: CKS
+status: draft
+provenance: Original practice material written for this course; not official exam questions.
+scope:
+  type: section
+  id: section-030
+  title: Ingress With TLS
+placement:
+  position: after
+  reading: sections/section-030/module-02/course-07-summary.md
+questions:
+- id: ats031-030-02-q01
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Explain how Traefik turns an Ingress into a route."
+  source_readings:
+  - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+  prompt: "Which part of Traefik matches the host and path of a request on an entrypoint?"
+  options:
+  - id: a
+    text: "A router."
+    explanation: "Correct. A router holds the match rule and passes the request to a service."
+  - id: b
+    text: "A Kubernetes Secret."
+    explanation: "A Secret holds a certificate or a credential, not a match rule."
+  - id: c
+    text: "The IngressClass."
+    explanation: "The class only names the controller that handles an Ingress."
+  correct_option: a
+  explanation: "Traefik builds routers from Ingress rules. The router matches, and a Traefik service sends the request to the pod addresses."
+- id: ats031-030-02-q02
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Describe what happens to an Ingress whose class no controller serves."
+  source_readings:
+  - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+  prompt: "An Ingress names `ingressClassName: nginx` but only Traefik runs. What happens?"
+  options:
+  - id: a
+    text: "The API server rejects it."
+    explanation: "The API server accepts the object. It does not check that a controller serves the class."
+  - id: b
+    text: "It is accepted and ignored."
+    explanation: "Correct. The object exists, and no controller builds a route from it."
+  - id: c
+    text: "Traefik serves it as a fallback."
+    explanation: "Traefik handles only the class it was started for."
+  correct_option: b
+  explanation: "No controller picks up an Ingress of an unserved class, and the API reports no error."
+- id: ats031-030-02-q03
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Name the objects of a Traefik installation."
+  source_readings:
+  - sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
+  prompt: "Which object gives Traefik permission to read Ingresses and Services?"
+  options:
+  - id: a
+    text: "A ClusterRole bound to its ServiceAccount."
+    explanation: "Correct. The ClusterRoleBinding connects the role to the ServiceAccount of the pod."
+  - id: b
+    text: "The IngressClass."
+    explanation: "The class only names the controller."
+  - id: c
+    text: "The Service of type ClusterIP."
+    explanation: "A Service gives network access to the pod. It grants no API permission."
+  correct_option: a
+  explanation: "RBAC grants the read access: a ClusterRole, a ClusterRoleBinding and the ServiceAccount used by the Deployment."
+- id: ats031-030-02-q04
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Identify the static configuration of the controller."
+  source_readings:
+  - sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
+  prompt: "Where does this Traefik installation set the ingress class it serves?"
+  options:
+  - id: a
+    text: "In the arguments of the container."
+    explanation: "Correct. The provider flag `--providers.kubernetesingress.ingressclass=traefik` filters the class."
+  - id: b
+    text: "In the Ingress annotations."
+    explanation: "Annotations tune a route. They do not choose the class served."
+  - id: c
+    text: "In the Service selector."
+    explanation: "A selector chooses pods for the Service only."
+  correct_option: a
+  explanation: "The container arguments are the static configuration: providers, class filter and entrypoints."
+- id: ats031-030-02-q05
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Test a route with a Host header."
+  source_readings:
+  - sections/section-030/module-02/course-03-first-ingress-and-host-header-testing.md
+  prompt: "How do you test an Ingress for `fleet.local` when that name is not in DNS?"
+  options:
+  - id: a
+    text: "Send the request to the controller with a `Host: fleet.local` header."
+    explanation: "Correct. The router matches on the Host header, so the name need not resolve."
+  - id: b
+    text: "Edit the Ingress to use an IP address."
+    explanation: "A host rule must be a DNS name. An address is not a valid host."
+  - id: c
+    text: "Wait until the name resolves."
+    explanation: "The name will never resolve in this cluster."
+  correct_option: a
+  explanation: "curl with `-H Host:` against the Traefik Service or a port forward tests a host rule without DNS."
+- id: ats031-030-02-q06
+  type: single_choice
+  difficulty: beginner
+  learning_objective: "Distinguish Exact and Prefix path types."
+  source_readings:
+  - sections/section-030/module-02/course-04-path-types-and-priority.md
+  prompt: "Which request does a `Prefix` rule for `/probe` match?"
+  options:
+  - id: a
+    text: "Only `/probe`."
+    explanation: "That describes Exact. Prefix also matches longer paths."
+  - id: b
+    text: "`/probe` and `/probe/status`."
+    explanation: "Correct. Prefix matches whole path elements below the path."
+  - id: c
+    text: "`/probe` and `/probefoo`."
+    explanation: "Prefix matches whole elements, so `/probefoo` does not match."
+  correct_option: b
+  explanation: "Prefix matches the path and everything below it by whole element. Exact matches the identical path only."
+- id: ats031-030-02-q07
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Predict which of two overlapping rules wins."
+  source_readings:
+  - sections/section-030/module-02/course-04-path-types-and-priority.md
+  prompt: "Two rules match a request: Prefix `/` and Prefix `/probe`. Which handles `/probe/x` by default?"
+  options:
+  - id: a
+    text: "The rule for `/`, because it was created first."
+    explanation: "Creation order does not decide. The longer rule wins."
+  - id: b
+    text: "The rule for `/probe`, because it is longer."
+    explanation: "Correct. A longer rule has the higher default priority."
+  - id: c
+    text: "Neither; Traefik returns an error."
+    explanation: "Overlapping rules are normal and resolved by priority."
+  correct_option: b
+  explanation: "Traefik gives the longer rule the higher priority, and a priority annotation can change that."
+- id: ats031-030-02-q08
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Use a default backend."
+  source_readings:
+  - sections/section-030/module-02/course-05-several-services-and-a-default-backend.md
+  prompt: "What does `spec.defaultBackend` do?"
+  options:
+  - id: a
+    text: "It sends requests that match no rule to a Service."
+    explanation: "Correct. It is the fallback for unmatched requests."
+  - id: b
+    text: "It sets the Service all rules use."
+    explanation: "Rules name their own backends."
+  - id: c
+    text: "It enables TLS for the namespace."
+    explanation: "TLS is set by `spec.tls`."
+  correct_option: a
+  explanation: "The default backend answers requests that no rule matched, instead of the controller 404."
+- id: ats031-030-02-q09
+  type: single_choice
+  difficulty: intermediate
+  learning_objective: "Read a controller 404."
+  source_readings:
+  - sections/section-030/module-02/course-06-inspect-the-running-controller.md
+  prompt: "Traefik answers `404 page not found`. What does it mean?"
+  options:
+  - id: a
+    text: "The application returned 404."
+    explanation: "An application 404 has its own body. This plain text comes from Traefik."
+  - id: b
+    text: "No router matched the request."
+    explanation: "Correct. The host, path or class did not produce a route."
+  - id: c
+    text: "The certificate expired."
+    explanation: "An expired certificate fails the handshake before any HTTP status."
+  correct_option: b
+  explanation: "A plain Traefik 404 means no router matched, so check the host, path and class."
+- id: ats031-030-02-q10
+  type: single_choice
+  difficulty: advanced
+  learning_objective: "Choose the evidence for a routing problem."
+  source_readings:
+  - sections/section-030/module-02/course-06-inspect-the-running-controller.md
+  prompt: "Which source shows every router Traefik has built?"
+  options:
+  - id: a
+    text: "The Traefik API at `/api/http/routers`."
+    explanation: "Correct. It lists the routers with their rules and status."
+  - id: b
+    text: "The IngressClass object."
+    explanation: "It names the controller and lists no routers."
+  - id: c
+    text: "`kubectl get nodes`."
+    explanation: "Nodes say nothing about routing."
+  correct_option: a
+  explanation: "The API router list, the access log and the Kubernetes objects together show what was built and what was hit."
