@@ -1,6 +1,6 @@
 schema_version: 1
 course_id: ATS031
-status: draft
+status: alpha
 banks:
 - id: ats031-domain-review
   path: assessments/domain-review.yaml

@@ -3,7 +3,7 @@ kind: question_bank
 id: ats031-domain-review
 course_id: ATS031
 exam_code: CKS
-status: draft
+status: alpha
 provenance: Original practice material; not official examination questions.
 scope:
   type: domain

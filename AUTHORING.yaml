@@ -65,14 +65,14 @@ sections:
       after_reading: sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
       objective: Enforce both an allowed same-namespace peer and a denied peer in
         another namespace.
-      status: draft
+      status: alpha
       runtime_verification: pending
     - id: lab-02
       path: sections/section-010/module-01/labs/lab-02
       after_reading: sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
       objective: Allow name resolution and application access while denying a healthy
         unrelated listener.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
@@ -150,7 +150,7 @@ sections:
       after_reading: sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
       objective: Review and correct one effective control-plane setting while keeping
         API access available.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
@@ -236,7 +236,7 @@ sections:
       after_reading: sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
       objective: Route HTTPS through the controller and verify both matching and mismatched
         certificate identities.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
@@ -311,7 +311,7 @@ sections:
       after_reading: sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
       objective: Separate permitted application dependencies from a metadata-style
         endpoint in the private network.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
@@ -379,7 +379,7 @@ sections:
       after_reading: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
       objective: Verify a signed checksum manifest and reject altered bytes before
         using a binary.
-      status: draft
+      status: alpha
       runtime_verification: pending
     practice_readings:
     - sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
