@@ -149,6 +149,7 @@ rules:
   - endpoints
   - secrets
   - namespaces
+  - nodes
   verbs:
   - get
   - list
