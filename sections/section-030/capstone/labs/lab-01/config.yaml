@@ -26,8 +26,29 @@ testing:
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: tls-secrets
+    description: probe-tls and scout-tls exist in starfleet as kubernetes.io/tls Secrets
+    type: file
+    source: validation/validate-tls-secrets.sh
+    points: 1
+  - name: ingress-routing
+    description: Both hosts answer 200 over HTTPS from their own backend and serve only their own certificate
+    type: file
+    source: validation/validate-ingress-routing.sh
+    points: 2
+  - name: tls13-minimum
+    description: Both hosts serve HTTPS and refuse TLS 1.2
+    type: file
+    source: validation/validate-tls13-minimum.sh
+    points: 1
+  - name: http-redirect
+    description: Plain HTTP on both hosts redirects to HTTPS on the same host
+    type: file
+    source: validation/validate-http-redirect.sh
+    points: 1

@@ -27,8 +27,34 @@ testing:
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: default-deny-all
+    description: default-deny-all in starfleet, outpost and dock denies ingress and egress
+    type: file
+    source: validation/validate-default-deny-all.sh
+    points: 1
+  - name: probe-from-outpost
+    description: probe-from-outpost admits only shuttle from outpost on TCP 8080
+    type: file
+    source: validation/validate-probe-from-outpost.sh
+    points: 1
+  - name: shuttle-egress
+    description: Shuttle egress allows probe, DNS and the external range only
+    type: file
+    source: validation/validate-shuttle-egress.sh
+    points: 1
+  - name: scout-egress
+    description: Scout egress allows DNS and the API server endpoint only
+    type: file
+    source: validation/validate-scout-egress.sh
+    points: 1
+  - name: traffic-enforced
+    description: Allowed requests succeed and the three denied requests time out
+    type: file
+    source: validation/validate-traffic-enforced.sh
+    points: 2

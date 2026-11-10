@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-env_name="ats-031-capstone-040"
-if [[ "$(kubectl config current-context)" != "kind-astro-$env_name" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-031-capstone-040}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-engine="${CONTAINER_ENGINE:-podman}"
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-capstone-040}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-worker_name="astro-$env_name-worker"
+worker_name="$cluster-worker"
 
 # Give the worker node the link-local metadata address. The fake server binds to it.
 "$engine" exec "$worker_name" sh -c "ip addr show dev lo | grep -q 169.254.169.254 || ip addr add 169.254.169.254/32 dev lo"

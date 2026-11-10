@@ -6,13 +6,9 @@ exam_objectives:
 ---
 # Disable Profiling And Restrict The API Server Manifest
 
-Allow about 8 minutes for the tasks.
+Solve this question on: `terminal`
 
-A benchmark run on this cluster reports two failing checks for the API server: profiling and the permissions of its manifest.
-
-## Starting state
-
-The kind cluster has two healthy `probe` replicas and a `shuttle` client pod in the `starfleet-031-020-03-02` namespace. The API server runs with profiling at its default value, and its static pod manifest has mode `644`. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
+A benchmark run on this cluster reports two failing checks for the API server: profiling and the permissions of its manifest. The kind cluster has two healthy `probe` replicas and a `shuttle` client pod in the namespace `starfleet-031-020-03-02`. The API server runs as a static pod with profiling at its default value, and its static pod manifest has mode `644`. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
 
 Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
@@ -22,12 +18,19 @@ test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-03-02" ||
 NODE=astro-ats-031-lab-020-03-02-control-plane
 ```
 
-## Required result
+Allow about 8 minutes for task work. Cluster startup adds time.
 
-- The API server runs with `--profiling=false`.
-- The file `/etc/kubernetes/manifests/kube-apiserver.yaml` has mode `600` and owner `root:root`.
-- The API server is ready and both `probe` replicas stay available.
+## Tasks
 
-## Verify The Result
+1. Set the flag `--profiling=false` in `/etc/kubernetes/manifests/kube-apiserver.yaml` on the control plane node.
+2. Give the file `/etc/kubernetes/manifests/kube-apiserver.yaml` mode `600` and owner `root:root`.
+3. Wait until the API server answers `ok` on `/readyz` and check that the running pod has the new flag.
 
-The grader reads the arguments of the running API server pod and the mode and owner of the manifest on the node. Wait until the API server answers `ok` on `/readyz` before you submit.
+## Constraints
+
+- Keep every backup outside `/etc/kubernetes/manifests`.
+- Keep the API server ready and both `probe` replicas available.
+
+## How the answer is checked
+
+The grader runs two checks. The first reads the command of the running API server pod and needs `--profiling=false` in it. The second reads the mode and owner of `/etc/kubernetes/manifests/kube-apiserver.yaml` on the control plane node and needs `600 root:root`. Both checks also need the API server pod running and ready, `/readyz` returning `ok`, and the `probe` Deployment fully rolled out.

@@ -5,17 +5,9 @@ exam_objectives:
 ---
 # Verify TLS Termination And Server Identity
 
-Allow about 6 minutes for the tasks.
+Solve this question on: `terminal`
 
-Route HTTPS through the controller and verify both matching and mismatched certificate identities. Use the isolated `starfleet-031-030-01-01` environment to verify the result.
-
-## Objective
-
-Route HTTPS through the controller and verify both matching and mismatched certificate identities.
-
-## Starting state
-
-The lab includes a working Traefik Ingress controller and healthy application. The required route has not been created.
+The namespace `starfleet-031-030-01-01` runs the healthy `probe` Deployment behind the Service `probe` on port 80. The Traefik Ingress controller, the component that receives HTTP and HTTPS requests and sends them to Services, runs in `ingress-system` with the IngressClass `traefik` and the HTTPS entrypoint `websecure`. The TLS Secret `probe-tls` in `starfleet-031-030-01-01` holds a certificate and key for `probe.local`. No Ingress exists yet.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
@@ -26,11 +18,21 @@ test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-01-01" ||
 
 Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
 
+Allow about 6 minutes for task work. Cluster startup adds time.
 
-## Required result
+## Tasks
 
-Create a TLS Ingress `probe` for class `traefik`, host `probe.local`, Prefix path `/` and backend Service `probe` port 80. Use the supplied TLS Secret `probe-tls` and websecure entrypoint. A client trusting the supplied certificate must receive version one for the matching server name and must reject a mismatched server name. Preserve the original application and Service.
+1. Look at the Secret `probe-tls` and the Service `probe` in `starfleet-031-030-01-01`.
+2. Create the Ingress `probe` in `starfleet-031-030-01-01` for class `traefik`. It has the host `probe.local`, a `Prefix` path `/` to the Service `probe` on port 80, and `spec.tls` with the host `probe.local` and the Secret `probe-tls`. Set the annotations `traefik.ingress.kubernetes.io/router.entrypoints: websecure` and `traefik.ingress.kubernetes.io/router.tls: "true"`.
+3. Prove the result. A client that trusts the certificate in `probe-tls` must get a response with `version=v1` from `https://probe.local`, and must reject the connection when it asks for a different server name.
 
-## Verify The Result
+## Constraints
 
-The grader checks the stated resource fields and live evidence. Wait for controller convergence before submitting. Inspect actual results rather than relying on a sample transcript.
+- Keep the `probe` Deployment and the Service `probe` unchanged.
+- Use the supplied Secret `probe-tls`. Do not create another certificate.
+
+## How the answer is checked
+
+The grader runs two checks. The first reads the Ingress `probe` and needs class `traefik`, the two Traefik annotations, the host `probe.local` with the `Prefix` path `/` to the Service `probe` on port 80, and `spec.tls` with `probe.local` and `probe-tls`. The second runs from inside the `probe` pod. It connects to the Traefik Service on port 443 with the certificate from `probe-tls` as its only trusted certificate. `https://probe.local` must answer with status 200 and `version=v1`, and a handshake for the server name `wrong.local` must be rejected. Both checks also need the `probe` Deployment fully rolled out.
+
+Hint: Traefik picks up a new Ingress a few seconds after you apply it. Repeat your test request before you submit.

@@ -36,6 +36,8 @@ A release is identified by the component, the version, the operating system and 
 
 As reference, the Kubernetes project publishes a digest file next to each binary on its download host. The documented pattern fetches the binary and its `.sha256` file for the same version and platform, then checks them together. These commands need network access to the real release host, so treat them as a pattern and do not expect to run them in the playground:
 
+<!-- astrona:playground:renew -->
+
 ```sh
 VERSION=v1.35.0
 curl -LO "https://dl.k8s.io/release/$VERSION/bin/linux/amd64/kubectl"

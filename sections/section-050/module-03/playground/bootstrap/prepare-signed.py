@@ -10,7 +10,10 @@ instead of failing in the playground; in lab mode it fails.
 """
 import random
 import subprocess
+import os
 import sys
+
+ENGINE = os.environ.get("ASTRONA_CONTAINER_ENGINE") or "podman"
 
 CLUSTER = sys.argv[1]
 MODE = sys.argv[2]
@@ -27,12 +30,12 @@ def run(*args, check=True):
 
 
 assert run("kubectl", "config", "current-context").stdout.strip() == CONTEXT, "Select the private environment"
-label = run("podman", "inspect", CONTROL, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}').stdout.strip()
+label = run(ENGINE, "inspect", CONTROL, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}').stdout.strip()
 assert label == "astro-" + CLUSTER, "Refusing an unrelated node container"
 
 
 def node(script, check=True):
-    return run("podman", "exec", CONTROL, "sh", "-c", script, check=check)
+    return run(ENGINE, "exec", CONTROL, "sh", "-c", script, check=check)
 
 
 # 1. Make the tools available. The node image may lack gpg. cosign is fetched

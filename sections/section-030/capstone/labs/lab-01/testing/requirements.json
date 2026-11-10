@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-capstone-030",
+  "cluster": "astro-ats-031-capstone-030",
+  "namespace": "starfleet",
   "resources": [
     {
       "kind": "ingress",
@@ -14,7 +16,8 @@
         "spec": {
           "ingressClassName": "traefik"
         }
-      }
+      },
+      "outcome": "ingress-routing"
     },
     {
       "kind": "ingress",
@@ -29,7 +32,8 @@
         "spec": {
           "ingressClassName": "traefik"
         }
-      }
+      },
+      "outcome": "ingress-routing"
     },
     {
       "kind": "secret",
@@ -42,7 +46,8 @@
           "name": "probe-tls",
           "namespace": "starfleet"
         }
-      }
+      },
+      "outcome": "tls-secrets"
     },
     {
       "kind": "secret",
@@ -55,7 +60,8 @@
           "name": "scout-tls",
           "namespace": "starfleet"
         }
-      }
+      },
+      "outcome": "tls-secrets"
     },
     {
       "kind": "deployment",

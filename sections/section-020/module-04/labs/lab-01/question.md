@@ -6,13 +6,9 @@ exam_objectives:
 ---
 # Enable Encryption At Rest For Secrets
 
-Allow about 12 minutes for the tasks.
+Solve this question on: `terminal`
 
-The security team found that the Secret `launch-code` in `starfleet-031-020-04-01` is stored in clear text in etcd. Enable encryption at rest for Secrets without stopping the cluster.
-
-## Starting state
-
-The isolated environment has two healthy probe replicas, an internal Service, two client Pods and the Secret `launch-code` in `starfleet-031-020-04-01`. The API server has no encryption configuration. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+The security team found that the Secret `launch-code` in `starfleet-031-020-04-01` is stored in clear text in etcd, the key-value store of the cluster. Enable encryption at rest for Secrets without stopping the cluster. The environment has two healthy `probe` replicas, an internal Service, two client pods and the Secret `launch-code`. The API server runs as a static pod and has no encryption configuration. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
 Use a host shell with the private kubeconfig for this independent kind environment.
 
@@ -25,13 +21,22 @@ worker_name="astro-ats-031-lab-020-04-01-worker"
 
 Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
 
-## Required result
+Allow about 12 minutes for task work. Cluster startup adds time.
 
-1. A file `/etc/kubernetes/enc/encryption-config.yaml` on the control plane node holds an `EncryptionConfiguration` for `secrets` with the `aescbc` provider first and the `identity` provider last. The file has mode `600`.
-2. The `kube-apiserver` static pod runs with `--encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml`, and the file is mounted into the pod.
-3. The Secret `launch-code` is stored encrypted in etcd: the stored value starts with the `aescbc` prefix and no longer holds the plain text code. The Secret still returns its original value through the API.
-4. The API stays ready and both application replicas stay available.
+## Tasks
 
-## Verify The Result
+1. Create the file `/etc/kubernetes/enc/encryption-config.yaml` on the control plane node with mode `600`. It holds an `EncryptionConfiguration` for `secrets` with the `aescbc` provider first and the `identity` provider last.
+2. Make the `kube-apiserver` static pod run with `--encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml`, and mount the file into the pod. Wait until the API server answers `ok` on `/readyz`.
+3. Rewrite the Secret `launch-code`, so that it is stored again with the new provider. The stored value in etcd must start with the `aescbc` prefix and must no longer hold the plain text code.
 
-The grader reads the API server pod, reads the stored value from etcd through the etcd pod, and reads the Secret through the API. Wait for the API server to restart before you submit. Keep a backup of the API server manifest outside `/etc/kubernetes/manifests`.
+## Constraints
+
+- The Secret `launch-code` must still return its original value through the API.
+- Keep the API ready and both application replicas available.
+- Keep a backup of the API server manifest outside `/etc/kubernetes/manifests`.
+
+## How the answer is checked
+
+The grader runs two checks. The first reads the command of the running API server pod and needs `--encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml` in it. The second reads the stored value of `/registry/secrets/starfleet-031-020-04-01/launch-code` from etcd through the etcd pod, and needs the prefix `k8s:enc:aescbc:v1:` and no plain text code in it. Both checks also need the Secret to return its original value through the API, `/readyz` to return `ok`, the `probe` Deployment fully rolled out, the `shuttle` pod running and ready, and a response with `version=v1` when `shuttle` requests `http://probe/`.
+
+Hint: `kubectl replace` with the output of `kubectl get secret -o json` writes the Secret again.

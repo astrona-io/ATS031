@@ -25,8 +25,24 @@ testing:
   - name: reference-result
     type: file
     source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: verify-section-050-capstone
+  - name: approved-binaries
+    description: The approved directory holds exactly the verified binary with its manifest digest
     type: file
-    source: validation/validate-completed.sh
+    source: validation/validate-approved-binaries.sh
+    points: 1
+  - name: relay-pinned
+    description: relay runs busybox pinned by digest and its pod runs that digest
+    type: file
+    source: validation/validate-relay-pinned.sh
+    points: 2
+  - name: verification-report
+    description: ConfigMap verification-report records the signature, binaries, kubelet and pinned image
+    type: file
+    source: validation/validate-verification-report.sh
+    points: 1
