@@ -19,10 +19,10 @@ Keep this connection selected throughout the task. Every script supplied by the 
 Run the script and read the policies. The script shows which of the three needs fails.
 
 ```sh
-kubectl -n starfleet exec scout -- python /app/check.py
-kubectl -n starfleet get networkpolicy
-kubectl -n starfleet describe networkpolicy scout-egress scout-to-probe probe-ingress
-kubectl get namespace starfleet --show-labels
+kubectl -n starfleet-031-010-04-01 exec scout -- python /app/check.py
+kubectl -n starfleet-031-010-04-01 get networkpolicy
+kubectl -n starfleet-031-010-04-01 describe networkpolicy scout-egress scout-to-probe probe-ingress
+kubectl get namespace starfleet-031-010-04-01 --show-labels
 ```
 
 Three kinds of fault explain the result. DNS fails because no policy lets `scout` reach CoreDNS, and the existing `scout-egress` policy holds only the API server rule. The `probe` step fails because `scout-to-probe` selects the namespace by a label named `name`, which the namespace does not have, and because `probe-ingress` has the type `Egress` with a peer that selects a mistyped pod label, so nothing opens ingress to the `probe` pods. The `api` step already works through the existing rule.
@@ -34,7 +34,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: scout-dns
-  namespace: starfleet
+  namespace: starfleet-031-010-04-01
 spec:
   podSelector:
     matchLabels:
@@ -69,7 +69,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: scout-to-probe
-  namespace: starfleet
+  namespace: starfleet-031-010-04-01
 spec:
   podSelector:
     matchLabels:
@@ -80,7 +80,7 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: starfleet
+          kubernetes.io/metadata.name: starfleet-031-010-04-01
       podSelector:
         matchLabels:
           app: probe
@@ -102,7 +102,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: probe-ingress
-  namespace: starfleet
+  namespace: starfleet-031-010-04-01
 spec:
   podSelector:
     matchLabels:
@@ -130,11 +130,11 @@ kubectl apply -f networkpolicy-probe-ingress.yaml
 The script must print `dns=ok probe=ok api=ok`. The two requests from `drifter` must time out. Run the checks one by one.
 
 ```sh
-kubectl -n starfleet exec scout -- python /app/check.py
-PROBE_IP=$(kubectl -n starfleet get pod -l app=probe -o jsonpath='{.items[0].status.podIP}')
-SCOUT_IP=$(kubectl -n starfleet get pod scout -o jsonpath='{.status.podIP}')
-kubectl -n outpost exec drifter -- wget -q -T 3 -O- "http://$PROBE_IP:8080/"
-kubectl -n outpost exec drifter -- wget -q -T 3 -O- "http://$SCOUT_IP:8080/"
+kubectl -n starfleet-031-010-04-01 exec scout -- python /app/check.py
+PROBE_IP=$(kubectl -n starfleet-031-010-04-01 get pod -l app=probe -o jsonpath='{.items[0].status.podIP}')
+SCOUT_IP=$(kubectl -n starfleet-031-010-04-01 get pod scout -o jsonpath='{.status.podIP}')
+kubectl -n outpost-031-010-04-01 exec drifter -- wget -q -T 3 -O- "http://$PROBE_IP:8080/"
+kubectl -n outpost-031-010-04-01 exec drifter -- wget -q -T 3 -O- "http://$SCOUT_IP:8080/"
 ```
 
 After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-04-01`.

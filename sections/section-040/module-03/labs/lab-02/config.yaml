@@ -26,11 +26,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: runtime-socket-pods
+    description: exposed-pods lists the pods that mount the container runtime socket
+    type: file
+    source: validation/validate-runtime-socket-pods.sh
+    points: 2
+  - name: host-network-pods
+    description: exposed-pods lists the pods that use the host network
+    type: file
+    source: validation/validate-host-network-pods.sh
+    points: 1

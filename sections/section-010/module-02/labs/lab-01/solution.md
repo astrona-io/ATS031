@@ -19,11 +19,11 @@ Keep this connection selected throughout the task. Every script supplied by the 
 Read the starting state. The pods have the labels the policies select on, and no policy exists yet.
 
 ```sh
-kubectl -n outpost get pods --show-labels
+kubectl -n outpost-031-010-02-01 get pods --show-labels
 kubectl get networkpolicy --all-namespaces
 ```
 
-The baseline comes first. It selects all pods in `outpost` and isolates them for both directions. The allow rules then open exactly one path. A connection between two isolated pods needs an egress rule at the source and an ingress rule at the destination, and the `shuttle` pod also needs DNS to resolve the name `probe`.
+The baseline comes first. It selects all pods in `outpost-031-010-02-01` and isolates them for both directions. The allow rules then open exactly one path. A connection between two isolated pods needs an egress rule at the source and an ingress rule at the destination, and the `shuttle` pod also needs DNS to resolve the name `probe`.
 
 Save this as `networkpolicy-default-deny-all.yaml`:
 
@@ -32,7 +32,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-all
-  namespace: outpost
+  namespace: outpost-031-010-02-01
 spec:
   podSelector: {}
   policyTypes:
@@ -53,7 +53,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: probe-ingress-from-shuttle
-  namespace: outpost
+  namespace: outpost-031-010-02-01
 spec:
   podSelector:
     matchLabels:
@@ -83,7 +83,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: shuttle-egress-to-probe
-  namespace: outpost
+  namespace: outpost-031-010-02-01
 spec:
   podSelector:
     matchLabels:
@@ -120,13 +120,13 @@ kubectl apply -f networkpolicy-shuttle-egress-to-probe.yaml
 
 ## Verify the result
 
-The first request must return the `probe` response. The next three must time out or, for the last one, return the response because `starfleet` has no policy. A denied request returns a nonzero status, so run the checks one by one.
+The first request must return the `probe` response. The next three must time out or, for the last one, return the response because `starfleet-031-010-02-01` has no policy. A denied request returns a nonzero status, so run the checks one by one.
 
 ```sh
-kubectl -n outpost exec shuttle -- wget -q -T 3 -O- http://probe/
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe.outpost/
-kubectl -n outpost exec shuttle -- wget -q -T 3 -O- http://probe.starfleet/
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n outpost-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-02-01/
+kubectl -n outpost-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe.starfleet-031-010-02-01/
+kubectl -n starfleet-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe/
 ```
 
 After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-02-01`.

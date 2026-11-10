@@ -8,14 +8,19 @@ The private keys are deleted after signing. If gpg or cosign cannot be made
 available on the node, the script prints a warning and writes a marker file
 instead of failing in the playground; in lab mode it fails.
 """
+import os
 import random
 import subprocess
 import sys
+CONTEXT = os.environ.get('ASTRONA_KUBE_CONTEXT') or 'kind-astro-ats-031-lab-050-03-01'
+if subprocess.run(['kubectl', 'config', 'current-context'], capture_output=True, text=True).stdout.strip() != CONTEXT:
+    sys.exit('Refusing to operate on another Kubernetes context')
 
-CLUSTER = sys.argv[1]
 MODE = sys.argv[2]
-CONTEXT = "kind-astro-" + CLUSTER
-CONTROL = "astro-%s-control-plane" % CLUSTER
+# setup.sh passes the cluster astrona created; the argument is the lab-mode fallback.
+CLUSTER = os.environ.get("ASTRONA_KIND_CLUSTER") or "astro-" + sys.argv[1]
+ENGINE = os.environ.get("ASTRONA_CONTAINER_ENGINE") or "podman"
+CONTROL = CLUSTER + "-control-plane"
 
 
 def run(*args, check=True):
@@ -26,17 +31,18 @@ def run(*args, check=True):
     return result
 
 
-assert run("kubectl", "config", "current-context").stdout.strip() == CONTEXT, "Select the private environment"
-label = run("podman", "inspect", CONTROL, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}').stdout.strip()
-assert label == "astro-" + CLUSTER, "Refusing an unrelated node container"
+label = run(ENGINE, "inspect", CONTROL, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}').stdout.strip()
+assert label == CLUSTER, "Refusing an unrelated node container"
 
 
 def node(script, check=True):
-    return run("podman", "exec", CONTROL, "sh", "-c", script, check=check)
+    return run(ENGINE, "exec", CONTROL, "sh", "-c", script, check=check)
 
 
 # 1. Make the tools available. The node image may lack gpg. cosign is fetched
-#    from the project release page when the node has a network path.
+#    from the project release page when the node has a network path. The
+#    version is pinned: cosign 3 signs into a bundle by default and rejects the
+#    --output-signature flags used below.
 tools = node(r"""
 S=/var/lib/training-release/signed
 mkdir -p "$S"
@@ -46,10 +52,16 @@ if ! command -v gpg >/dev/null 2>&1; then
 fi
 command -v gpg >/dev/null 2>&1 || touch "$S/NO-GPG"
 if ! command -v cosign >/dev/null 2>&1; then
-  case "$(uname -m)" in x86_64) A=amd64 ;; aarch64) A=arm64 ;; esac
-  curl -fsSL -o /usr/local/bin/cosign "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-$A" >/dev/null 2>&1 \
-    && chmod +x /usr/local/bin/cosign \
+  # SHA-256 sums from cosign_checksums.txt of the v2.4.1 release.
+  case "$(uname -m)" in
+    x86_64) A=amd64; SUM=8b24b946dd5809c6bd93de08033bcf6bc0ed7d336b7785787c080f574b89249b ;;
+    aarch64) A=arm64; SUM=3b2e2e3854d0356c45fe6607047526ccd04742d20bd44afb5be91fa2a6e7cb4a ;;
+  esac
+  curl -fsSL -o /tmp/cosign "https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-$A" >/dev/null 2>&1 \
+    && echo "$SUM  /tmp/cosign" | sha256sum -c - >/dev/null 2>&1 \
+    && install -m 0755 /tmp/cosign /usr/local/bin/cosign \
     && sha256sum /usr/local/bin/cosign > "$S/cosign.fetched.sha256" || true
+  rm -f /tmp/cosign
 fi
 command -v cosign >/dev/null 2>&1 || touch "$S/NO-COSIGN"
 ls "$S"

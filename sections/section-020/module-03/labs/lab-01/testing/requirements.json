@@ -1,30 +1,18 @@
 {
   "context": "kind-astro-ats-031-lab-020-03-01",
+  "cluster": "astro-ats-031-lab-020-03-01",
+  "namespace": "starfleet-031-020-03-01",
   "resources": [
-    {
-      "kind": "pod",
-      "name": "kube-apiserver-astro-ats-031-lab-020-03-01-control-plane",
-      "namespace": "kube-system",
-      "expected": {
-        "apiVersion": "v1",
-        "kind": "Pod",
-        "metadata": {
-          "name": "kube-apiserver-astro-ats-031-lab-020-03-01-control-plane",
-          "namespace": "kube-system"
-        }
-      },
-      "state": "pod"
-    },
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-020-03-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-020-03-01"
         }
       },
       "state": "deployment"

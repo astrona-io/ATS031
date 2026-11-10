@@ -1,18 +1,21 @@
 {
   "context": "kind-astro-ats-031-lab-020-02-01",
+  "cluster": "astro-ats-031-lab-020-02-01",
+  "namespace": "starfleet-031-020-02-01",
   "resources": [
     {
       "kind": "configmap",
       "name": "failing-checks",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-020-02-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {
           "name": "failing-checks",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-020-02-01"
         }
-      }
+      },
+      "outcome": "failing-checks-saved"
     }
   ],
   "behavior": [

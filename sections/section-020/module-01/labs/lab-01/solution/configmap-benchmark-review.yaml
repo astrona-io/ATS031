@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: benchmark-review
-  namespace: starfleet
+  namespace: starfleet-031-020-01-01
 data:
   component: kube-apiserver
   control: disable-profiling

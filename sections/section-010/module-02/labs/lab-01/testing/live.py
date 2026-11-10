@@ -35,12 +35,14 @@ def no_open_rules(rules):
             assert peer != {} and peer.get('ipBlock', {}).get('cidr') != '0.0.0.0/0', 'A peer matches every address'
         assert rule.get('ports'), 'A rule without ports allows every port'
 
-get('networkpolicy', 'shuttle-egress-to-probe', 'outpost')
-egress_rules = rules_for('outpost', {'app': 'shuttle'}, 'Egress')
-assert len(egress_rules) == 2, 'The shuttle pod needs exactly two egress rules'
-assert has_dns_rule(egress_rules), 'DNS to CoreDNS on UDP and TCP port 53 is missing'
-probe_rules = [rule for rule in egress_rules if any(peer == {'podSelector': {'matchLabels': {'app': 'probe'}}} for peer in peers_of(rule, 'to'))]
-assert len(probe_rules) == 1 and port_set(probe_rules[0]) == {('TCP', '8080', None)}, 'The probe egress rule must allow only TCP 8080'
-no_open_rules(egress_rules)
-behavior_check({'args': ['kubectl', '-n', 'outpost', 'exec', 'shuttle', '--', 'wget', '-q', '-T', '3', '-O-', 'http://probe.starfleet/'], 'denied': True, 'failure_markers': ['timed out']})
-behavior_check({'args': ['kubectl', '-n', 'dock', 'exec', 'shuttle', '--', 'wget', '-q', '-T', '3', '-O-', 'http://probe.outpost/'], 'denied': True, 'failure_markers': ['timed out']})
+if wants('shuttle-egress-to-probe'):
+    get('networkpolicy', 'shuttle-egress-to-probe', 'outpost-031-010-02-01')
+    egress_rules = rules_for('outpost-031-010-02-01', {'app': 'shuttle'}, 'Egress')
+    assert len(egress_rules) == 2, 'The shuttle pod needs exactly two egress rules'
+    assert has_dns_rule(egress_rules), 'DNS to CoreDNS on UDP and TCP port 53 is missing'
+    probe_rules = [rule for rule in egress_rules if any(peer == {'podSelector': {'matchLabels': {'app': 'probe'}}} for peer in peers_of(rule, 'to'))]
+    assert len(probe_rules) == 1 and port_set(probe_rules[0]) == {('TCP', '8080', None)}, 'The probe egress rule must allow only TCP 8080'
+    no_open_rules(egress_rules)
+    behavior_check({'args': ['kubectl', '-n', 'outpost-031-010-02-01', 'exec', 'shuttle', '--', 'wget', '-q', '-T', '3', '-O-', 'http://probe.starfleet-031-010-02-01/'], 'denied': True, 'failure_markers': ['timed out']})
+if wants('default-deny-all'):
+    behavior_check({'args': ['kubectl', '-n', 'dock-031-010-02-01', 'exec', 'shuttle', '--', 'wget', '-q', '-T', '3', '-O-', 'http://probe.outpost-031-010-02-01/'], 'denied': True, 'failure_markers': ['timed out']})

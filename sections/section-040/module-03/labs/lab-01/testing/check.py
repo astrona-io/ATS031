@@ -1,119 +1,138 @@
 #!/usr/bin/env python3
-"""Grader engine: reads requirements.json and runs bounded checks in one context."""
+"""Grade a lab: resource contracts, bounded behavior checks and live.py.
+
+Run with no argument to grade the whole lab, or with an outcome id to grade
+one outcome. Each entry in requirements.json and each `if wants(...)` block
+in live.py belongs to one outcome; an entry without an outcome is a guard
+and runs for every outcome. config.yaml lists one validation script per
+outcome (validation/validate-<id>.sh), each with its points. Like ATS020's
+graders it prints one `PASS:` or `FAIL:` line.
+
+Every run first checks that kubectl's current context is the lab's own:
+ASTRONA_KUBE_CONTEXT when astrona sets it (an exam cluster sets its own),
+otherwise the lab mode context in requirements.json. The node containers'
+names and the container engine come from the environment astrona sets too,
+so the same checks run on the lab's own cluster and on an exam cluster.
+"""
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 
 DIRECTORY = Path(__file__).resolve().parent
+REQUIREMENTS = json.loads((DIRECTORY / 'requirements.json').read_text())
+CONTEXT = os.environ.get('ASTRONA_KUBE_CONTEXT') or REQUIREMENTS['context']
+CLUSTER = os.environ.get('ASTRONA_KIND_CLUSTER') or REQUIREMENTS['cluster']
+ENGINE = os.environ.get('ASTRONA_CONTAINER_ENGINE') or 'podman'
+NAMESPACE = REQUIREMENTS['namespace']
+NODE = CLUSTER + '-control-plane'
+WORKER = CLUSTER + '-worker'
+SELECTED = sys.argv[1] if len(sys.argv) > 1 else None
+MATCHED = set()
 
 
-def run(args, timeout=20):
-    try:
-        return subprocess.run(args, capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        return None
+def wants(outcome):
+    """True when this outcome is being graded (or the whole lab is)."""
+    if SELECTED is None or SELECTED == outcome:
+        MATCHED.add(outcome)
+        return True
+    return False
 
 
-def kubectl(*args):
-    result = run(['kubectl', *args])
-    assert result is not None and result.returncode == 0, 'Required kubectl command failed: ' + ' '.join(args[:4])
-    return result.stdout.strip()
+def selected(check):
+    outcome = check.get('outcome')
+    return outcome is None or wants(outcome)
 
 
-def get_json(*args):
-    return json.loads(kubectl(*args, '-o', 'json'))
-
-
-def node_addresses():
-    nodes = get_json('get', 'nodes')['items']
-    result = {}
-    for node in nodes:
-        address = next(a['address'] for a in node['status']['addresses'] if a['type'] == 'InternalIP')
-        key = 'control_plane_ip' if 'node-role.kubernetes.io/control-plane' in node['metadata'].get('labels', {}) else 'worker_ip'
-        result[key] = address
+def command(args, *, success=True):
+    result = subprocess.run(args, capture_output=True, text=True, timeout=20)
+    if success:
+        assert result.returncode == 0, 'Required command failed: ' + args[0]
     return result
 
 
-def http_status(source, url):
-    namespace, pod = source.split('/')
-    result = run(['kubectl', '-n', namespace, 'exec', pod, '--', 'curl', '-sk', '-m', '3', '-o', '/dev/null', '-w', '%{http_code}', url], timeout=25)
-    if result is None:
-        return 'denied'
-    if result.returncode != 0 and result.stdout.strip() in ('', '000'):
-        return 'denied'
-    return result.stdout.strip()
+def kubectl(*args):
+    return command(['kubectl', *args]).stdout.strip()
 
 
-def check_http(check, addresses):
-    url = check['url'].format(**addresses)
-    actual = http_status(check['from'], url)
-    assert actual == check['expect'], '%s: request from %s to %s gave %s, expected %s' % (check['label'], check['from'], url, actual, check['expect'])
+def node_exec(node, *args, success=True):
+    """Run a command inside a node container (NODE or WORKER)."""
+    return command([ENGINE, 'exec', node, *args], success=success)
 
 
-def check_labels(check, addresses):
-    namespace, name = check['pod'].split('/')
-    labels = get_json('-n', namespace, 'get', 'pod', name)['metadata'].get('labels', {})
-    for key, value in check.get('has', {}).items():
-        assert labels.get(key) == value, 'Pod %s must keep label %s=%s' % (check['pod'], key, value)
-    for key in check.get('lacks', []):
-        assert key not in labels, 'Pod %s must not have label %s' % (check['pod'], key)
+def get(kind, name, namespace=NAMESPACE):
+    scope = ['-n', namespace] if namespace else []
+    result = command(['kubectl', *scope, 'get', kind, name, '-o', 'json'], success=False)
+    assert result.returncode == 0, f'Missing {kind} {name}' + (f' in namespace {namespace}' if namespace else '')
+    return json.loads(result.stdout)
 
 
-def check_selects_all(check, addresses):
-    policies = get_json('-n', check['namespace'], 'get', 'networkpolicy')['items']
-    assert any(not p['spec'].get('podSelector') and 'Egress' in p['spec'].get('policyTypes', []) for p in policies), \
-        'Namespace %s needs an egress policy that selects all pods' % check['namespace']
+def contains(actual, expected):
+    """Allow server-defaulted fields while preserving declared fields and lists."""
+    if isinstance(expected, dict):
+        return isinstance(actual, dict) and all(key in actual and contains(actual[key], value) for key, value in expected.items())
+    if isinstance(expected, list):
+        return isinstance(actual, list) and len(actual) == len(expected) and all(contains(left, right) for left, right in zip(actual, expected))
+    return actual == expected
 
 
-def check_configmap_lines(check, addresses):
-    data = get_json('-n', check['namespace'], 'get', 'configmap', check['name'])['data']
-    lines = sorted(line.strip() for line in data.get(check['key'], '').splitlines() if line.strip())
-    assert lines == sorted(check['expected']), 'ConfigMap %s key %s must list exactly: %s' % (check['name'], check['key'], ', '.join(sorted(check['expected'])))
+def resource_check(check):
+    resource = get(check['kind'], check['name'], check.get('namespace', NAMESPACE))
+    assert contains(resource, check['expected']), 'Required resource fields differ: ' + check['name']
+    state = check.get('state')
+    status = resource.get('status', {})
+    if state == 'deployment':
+        replicas = resource['spec'].get('replicas', 1)
+        assert status.get('observedGeneration', 0) >= resource['metadata']['generation'], 'Current generation has not been observed'
+        assert all(status.get(field, 0) == replicas for field in ('replicas', 'updatedReplicas', 'readyReplicas', 'availableReplicas')), 'Deployment rollout is incomplete'
+    elif state == 'pod':
+        assert status.get('phase') == 'Running' and any(condition['type'] == 'Ready' and condition['status'] == 'True' for condition in status.get('conditions', [])), 'Pod must be running and ready'
+    elif state == 'job':
+        assert status.get('succeeded', 0) == 1 and any(condition['type'] == 'Complete' and condition['status'] == 'True' for condition in status.get('conditions', [])), 'Job must complete successfully'
+    elif state == 'pvc':
+        assert status.get('phase') == 'Bound' and resource['spec'].get('volumeName'), 'Claim must bind to a volume'
+    elif state == 'daemonset':
+        desired = status.get('desiredNumberScheduled', 0)
+        assert desired >= 2 and status.get('numberReady', 0) == desired and status.get('updatedNumberScheduled', 0) == desired, 'DaemonSet must cover both eligible nodes'
+    return resource
 
 
-def check_pods_exist(check, addresses):
-    for pod in check['pods']:
-        namespace, name = pod.split('/')
-        phase = get_json('-n', namespace, 'get', 'pod', name)['status'].get('phase')
-        assert phase == 'Running', 'Pod %s must still be running' % pod
-
-
-def check_no_socket_mount(check, addresses):
-    deployment = get_json('-n', check['namespace'], 'get', 'deployment', check['name'])
-    spec = deployment['spec']['template']['spec']
-    for volume in spec.get('volumes', []):
-        path = volume.get('hostPath', {}).get('path', '')
-        assert 'containerd' not in path and 'docker.sock' not in path and 'crio' not in path, 'Deployment %s still mounts a runtime path' % check['name']
-    for container in spec['containers']:
-        for mount in container.get('volumeMounts', []):
-            assert 'containerd' not in mount['mountPath'], 'Deployment %s still mounts a runtime path' % check['name']
-    status = deployment['status']
-    assert status.get('readyReplicas', 0) == deployment['spec'].get('replicas', 1) == status.get('updatedReplicas', 0), 'Deployment %s must be rolled out and ready' % check['name']
-
-
-CHECKS = {
-    'http': check_http,
-    'labels': check_labels,
-    'selects_all': check_selects_all,
-    'configmap_lines': check_configmap_lines,
-    'pods_exist': check_pods_exist,
-    'no_socket_mount': check_no_socket_mount,
-}
+def behavior_check(check):
+    result = command(check['args'], success=not check.get('denied', False))
+    if check.get('denied'):
+        assert result.returncode == 1, 'Expected a bounded denied request, not a successful request or execution error'
+        output = result.stdout + result.stderr
+        assert any(marker in output.lower() for marker in check['failure_markers']), 'Request did not fail for the required reason'
+    output = result.stdout.strip()
+    if 'equals' in check:
+        assert output == check['equals'], 'Command returned an unexpected value'
+    for marker in check.get('contains', []):
+        assert marker in output, 'Command did not return the expected application evidence'
+    if 'json' in check:
+        assert contains(json.loads(output), check['json']), 'Command returned an unexpected JSON contract'
+    return result
 
 
 def main():
-    requirements = json.loads((DIRECTORY / 'requirements.json').read_text())
-    assert kubectl('config', 'current-context') == requirements['context'], 'Refusing to operate on another Kubernetes context'
-    addresses = node_addresses()
-    for check in requirements['checks']:
-        CHECKS[check['type']](check, addresses)
-    print('Required result verified')
+    if kubectl('config', 'current-context') != CONTEXT:
+        sys.exit('Refusing to operate on another Kubernetes context')
+    for check in REQUIREMENTS.get('resources', []):
+        if selected(check):
+            resource_check(check)
+    for check in REQUIREMENTS.get('behavior', []):
+        if selected(check):
+            behavior_check(check)
+    extra = DIRECTORY / 'live.py'
+    if extra.exists():
+        exec(compile(extra.read_text(), str(extra), 'exec'), globals())
+    assert SELECTED is None or SELECTED in MATCHED, 'Unknown outcome: ' + SELECTED
+    print('PASS: ' + (SELECTED or 'every outcome'))
 
 
 if __name__ == '__main__':
     try:
         main()
-    except (AssertionError, KeyError, ValueError, StopIteration, subprocess.SubprocessError) as error:
-        print(str(error), file=sys.stderr)
+    except (AssertionError, KeyError, ValueError, subprocess.SubprocessError) as error:
+        print('FAIL: ' + str(error))
         sys.exit(1)

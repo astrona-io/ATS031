@@ -37,18 +37,20 @@ def no_open_rules(rules):
 
 scout_labels = {'app': 'scout'}
 probe_labels = {'app': 'probe'}
-egress = rules_for('starfleet', scout_labels, 'Egress')
-ingress = rules_for('starfleet', probe_labels, 'Ingress')
-no_open_rules(egress)
-no_open_rules(ingress)
-assert has_dns_rule(egress), 'DNS to CoreDNS on UDP and TCP port 53 is missing'
-want_peer = {'namespaceSelector': {'matchLabels': {'kubernetes.io/metadata.name': 'starfleet'}}, 'podSelector': {'matchLabels': {'app': 'probe'}}}
-assert any(peer == want_peer and ('TCP', '8080', None) in port_set(rule) for rule in egress for peer in peers_of(rule, 'to')), 'The scout pod needs an egress rule to the probe pods on TCP 8080'
-assert any(peer.get('podSelector') == {'matchLabels': {'app': 'scout'}} and ('TCP', '8080', None) in port_set(rule) for rule in ingress for peer in peers_of(rule, 'from')), 'The probe pods need an ingress rule from the scout pod on TCP 8080'
-for rule in ingress:
-    for peer in peers_of(rule, 'from'):
-        assert peer.get('podSelector') == {'matchLabels': {'app': 'scout'}}, 'The probe pods may receive traffic from the scout pod only'
-probe_ip = kubectl('-n', 'starfleet', 'get', 'pod', '-l', 'app=probe', '-o', 'jsonpath={.items[0].status.podIP}')
-scout_ip = kubectl('-n', 'starfleet', 'get', 'pod', 'scout', '-o', 'jsonpath={.status.podIP}')
-for address in (probe_ip, scout_ip):
-    behavior_check({'args': ['kubectl', '-n', 'outpost', 'exec', 'drifter', '--', 'wget', '-q', '-T', '3', '-O-', 'http://' + address + ':8080/'], 'denied': True, 'failure_markers': ['timed out']})
+if wants('scout-dependencies'):
+    egress = rules_for('starfleet-031-010-04-01', scout_labels, 'Egress')
+    no_open_rules(egress)
+    assert has_dns_rule(egress), 'DNS to CoreDNS on UDP and TCP port 53 is missing'
+    want_peer = {'namespaceSelector': {'matchLabels': {'kubernetes.io/metadata.name': 'starfleet-031-010-04-01'}}, 'podSelector': {'matchLabels': {'app': 'probe'}}}
+    assert any(peer == want_peer and ('TCP', '8080', None) in port_set(rule) for rule in egress for peer in peers_of(rule, 'to')), 'The scout pod needs an egress rule to the probe pods on TCP 8080'
+if wants('probe-ingress'):
+    ingress = rules_for('starfleet-031-010-04-01', probe_labels, 'Ingress')
+    no_open_rules(ingress)
+    assert any(peer.get('podSelector') == {'matchLabels': {'app': 'scout'}} and ('TCP', '8080', None) in port_set(rule) for rule in ingress for peer in peers_of(rule, 'from')), 'The probe pods need an ingress rule from the scout pod on TCP 8080'
+    for rule in ingress:
+        for peer in peers_of(rule, 'from'):
+            assert peer.get('podSelector') == {'matchLabels': {'app': 'scout'}}, 'The probe pods may receive traffic from the scout pod only'
+    probe_ip = kubectl('-n', 'starfleet-031-010-04-01', 'get', 'pod', '-l', 'app=probe', '-o', 'jsonpath={.items[0].status.podIP}')
+    scout_ip = kubectl('-n', 'starfleet-031-010-04-01', 'get', 'pod', 'scout', '-o', 'jsonpath={.status.podIP}')
+    for address in (probe_ip, scout_ip):
+        behavior_check({'args': ['kubectl', '-n', 'outpost-031-010-04-01', 'exec', 'drifter', '--', 'wget', '-q', '-T', '3', '-O-', 'http://' + address + ':8080/'], 'denied': True, 'failure_markers': ['timed out']})

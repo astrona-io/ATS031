@@ -12,7 +12,7 @@ Check that nothing restricts the pods yet. Define a function that prints the sta
 ```sh
 check_metadata() { kubectl -n "$1" exec "$2" -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://169.254.169.254/latest/meta-data/; }
 kubectl get networkpolicy -A
-check_metadata outpost drifter
+check_metadata outpost-031-040-02-01 drifter
 ```
 
 The policy list is empty and the request prints `200`.
@@ -28,7 +28,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: block-metadata
-  namespace: outpost
+  namespace: outpost-031-040-02-01
 spec:
   podSelector: {}
   policyTypes:
@@ -52,11 +52,11 @@ kubectl apply -f networkpolicy-block-metadata.yaml
 Wait a few seconds, then check the blocked path, the two Services and the controls:
 
 ```sh
-check_metadata outpost drifter
-kubectl -n outpost exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe/
-kubectl -n outpost exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe.starfleet.svc.cluster.local/
-check_metadata starfleet shuttle
-check_metadata metadata-stub control
+check_metadata outpost-031-040-02-01 drifter
+kubectl -n outpost-031-040-02-01 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe/
+kubectl -n outpost-031-040-02-01 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe.starfleet-031-040-02-01.svc.cluster.local/
+check_metadata starfleet-031-040-02-01 shuttle
+check_metadata metadata-stub-031-040-02-01 control
 ```
 
 The first request prints `000` and `kubectl` reports exit code 28. The two Service requests and the two control requests print `200`. If the first request still prints `200`, wait and run it again before you look for a mistake.

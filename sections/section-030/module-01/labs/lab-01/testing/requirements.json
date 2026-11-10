@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-lab-030-01-01",
+  "cluster": "astro-ats-031-lab-030-01-01",
+  "namespace": "starfleet-031-030-01-01",
   "resources": [
     {
       "kind": "ingress",
@@ -9,7 +11,7 @@
         "kind": "Ingress",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-030-01-01",
           "annotations": {
             "traefik.ingress.kubernetes.io/router.entrypoints": "websecure",
             "traefik.ingress.kubernetes.io/router.tls": "true"
@@ -47,7 +49,8 @@
             }
           ]
         }
-      }
+      },
+      "outcome": "probe-ingress"
     },
     {
       "kind": "deployment",
@@ -57,7 +60,7 @@
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-01-01"
         },
         "spec": {
           "replicas": 2,

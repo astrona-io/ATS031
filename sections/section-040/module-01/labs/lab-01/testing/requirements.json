@@ -1,16 +1,18 @@
 {
   "context": "kind-astro-ats-031-lab-040-01-01",
+  "cluster": "astro-ats-031-lab-040-01-01",
+  "namespace": "starfleet-031-040-01-01",
   "resources": [
     {
       "kind": "pod",
       "name": "metadata-simulator",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-040-01-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "metadata-simulator",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-040-01-01",
           "labels": {
             "app": "metadata-simulator"
           }
@@ -31,18 +33,19 @@
           ]
         }
       },
-      "state": "pod"
+      "state": "pod",
+      "outcome": "metadata-simulator"
     },
     {
       "kind": "networkpolicy",
       "name": "shuttle-isolation",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-040-01-01",
       "expected": {
         "apiVersion": "networking.k8s.io/v1",
         "kind": "NetworkPolicy",
         "metadata": {
           "name": "shuttle-isolation",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-040-01-01"
         },
         "spec": {
           "podSelector": {
@@ -99,18 +102,19 @@
             }
           ]
         }
-      }
+      },
+      "outcome": "shuttle-isolation"
     },
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-040-01-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-040-01-01"
         },
         "spec": {
           "replicas": 2,
@@ -193,7 +197,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-031-040-01-01",
         "exec",
         "shuttle",
         "--",

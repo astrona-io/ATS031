@@ -23,11 +23,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: probe-ingress
+    description: Ingress probe routes probe.local over websecure with TLS from probe-tls
+    type: file
+    source: validation/validate-probe-ingress.sh
+    points: 1
+  - name: probe-https
+    description: https://probe.local returns version v1 and rejects a mismatched name
+    type: file
+    source: validation/validate-probe-https.sh
+    points: 1

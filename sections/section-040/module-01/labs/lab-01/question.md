@@ -5,6 +5,8 @@ exam_objectives:
 ---
 # Block A Simulated Metadata Endpoint
 
+Allow about 8 minutes for the tasks.
+
 Separate permitted application dependencies from a metadata-style endpoint in the private network.
 
 ## Starting state

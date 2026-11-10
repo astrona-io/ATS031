@@ -1,50 +1,6 @@
 {
   "context": "kind-astro-ats-031-lab-040-02-01",
-  "checks": [
-    {
-      "type": "http",
-      "from": "outpost/drifter",
-      "url": "http://169.254.169.254/latest/meta-data/",
-      "expect": "denied",
-      "label": "drifter must not reach the metadata address"
-    },
-    {
-      "type": "http",
-      "from": "outpost/drifter",
-      "url": "http://probe/",
-      "expect": "200",
-      "label": "drifter must reach the probe Service in its namespace"
-    },
-    {
-      "type": "http",
-      "from": "outpost/drifter",
-      "url": "http://probe.starfleet.svc.cluster.local/",
-      "expect": "200",
-      "label": "drifter must reach a Service in another namespace by DNS name"
-    },
-    {
-      "type": "http",
-      "from": "metadata-stub/control",
-      "url": "http://169.254.169.254/latest/meta-data/",
-      "expect": "200",
-      "label": "control pod must still reach the metadata server"
-    },
-    {
-      "type": "http",
-      "from": "starfleet/shuttle",
-      "url": "http://169.254.169.254/latest/meta-data/",
-      "expect": "200",
-      "label": "starfleet must stay unchanged"
-    },
-    {
-      "type": "selects_all",
-      "namespace": "outpost"
-    },
-    {
-      "type": "pods_exist",
-      "pods": [
-        "outpost/drifter"
-      ]
-    }
-  ]
+  "cluster": "astro-ats-031-lab-040-02-01",
+  "namespace": "starfleet-031-040-02-01",
+  "resources": []
 }

@@ -6,6 +6,8 @@ exam_objectives:
 ---
 # Disable API Server Profiling In A Private Node
 
+Allow about 8 minutes for the tasks.
+
 Review and correct one effective control-plane setting while keeping API access available.
 
 ## Starting state
@@ -25,7 +27,7 @@ Keep this connection selected. Host-level commands name only this environment's 
 
 ## Required result
 
-Set the isolated API server flag `--profiling=false`. Create ConfigMap `benchmark-review` recording `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`. Keep the API ready and both application replicas available. This is one scoped configuration review, not a claim of full Center for Internet Security (CIS) benchmark compliance.
+Set the isolated API server flag `--profiling=false`. Create ConfigMap `benchmark-review` in the `starfleet-031-020-01-01` namespace, recording `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`. Keep the API ready and both application replicas available. This is one scoped configuration review, not a claim of full Center for Internet Security (CIS) benchmark compliance.
 
 ## Verify The Result
 

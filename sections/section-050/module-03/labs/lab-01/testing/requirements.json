@@ -1,4 +1,6 @@
 {
   "context": "kind-astro-ats-031-lab-050-03-01",
-  "observations": "see check.py: checks run against the node containers and the cluster"
+  "cluster": "astro-ats-031-lab-050-03-01",
+  "namespace": "starfleet-031-050-03-01",
+  "resources": []
 }

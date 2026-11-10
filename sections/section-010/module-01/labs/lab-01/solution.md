@@ -21,9 +21,9 @@ The application and client fixtures are healthy. Complete the required change wi
 Inspect the relevant evidence:
 
 ```sh
-kubectl -n starfleet get pods --show-labels
-kubectl -n outpost get pods --show-labels
-kubectl -n starfleet get networkpolicy -o yaml
+kubectl -n starfleet-031-010-01-01 get pods --show-labels
+kubectl -n outpost-031-010-01-01 get pods --show-labels
+kubectl -n starfleet-031-010-01-01 get networkpolicy -o yaml
 ```
 
 A NetworkPolicy selects destination Pods and describes allowed ingress. A Pod selector in a peer rule without a namespace selector matches only that policy namespace. The policy-capable network plugin enforces the rule. A negative request must fail with a network timeout, not because the client Pod is absent.
@@ -36,7 +36,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: probe-shuttle
-  namespace: starfleet
+  namespace: starfleet-031-010-01-01
 spec:
   podSelector:
     matchLabels:
@@ -64,11 +64,11 @@ kubectl apply -f networkpolicy-probe-shuttle.yaml
 Observe the actual result. A denied-request command returns a nonzero status when the denial works. Run denial checks separately from a shell sequence that stops on the first nonzero status.
 
 ```sh
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
-kubectl -n outpost exec drifter -- wget -q -T 3 -O- http://probe.starfleet/
+kubectl -n starfleet-031-010-01-01 exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n outpost-031-010-01-01 exec drifter -- wget -q -T 3 -O- http://probe.starfleet-031-010-01-01/
 ```
 
-Create NetworkPolicy `probe-shuttle` selecting `app: probe` for ingress. Allow only same-namespace Pods labelled `app: shuttle` on TCP port 8080. Keep the original workload and clients healthy. Shuttle must receive version one through the Service; drifter in `outpost` must time out. Do not create any policy that also allows drifter.
+Create NetworkPolicy `probe-shuttle` selecting `app: probe` for ingress. Allow only same-namespace Pods labelled `app: shuttle` on TCP port 8080. Keep the original workload and clients healthy. Shuttle must receive version one through the Service; drifter in `outpost-031-010-01-01` must time out. Do not create any policy that also allows drifter.
 
 After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-01-01`.
 

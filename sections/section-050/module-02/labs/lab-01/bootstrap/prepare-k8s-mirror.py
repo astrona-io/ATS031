@@ -6,15 +6,20 @@ Usage: prepare-k8s-mirror.py <cluster-name> <playground|lab1|lab2>
 All digests are computed here at run time inside the node containers.
 Nothing is downloaded, and no digest is written in advance.
 """
+import os
 import random
 import subprocess
 import sys
+CONTEXT = os.environ.get('ASTRONA_KUBE_CONTEXT') or 'kind-astro-ats-031-lab-050-02-01'
+if subprocess.run(['kubectl', 'config', 'current-context'], capture_output=True, text=True).stdout.strip() != CONTEXT:
+    sys.exit('Refusing to operate on another Kubernetes context')
 
-CLUSTER = sys.argv[1]
+# The cluster comes from the environment astrona sets; the argument is the fallback.
+CLUSTER = os.environ.get("ASTRONA_KIND_CLUSTER") or "astro-" + sys.argv[1]
 MODE = sys.argv[2]
-CONTEXT = "kind-astro-" + CLUSTER
-CONTROL = "astro-%s-control-plane" % CLUSTER
-WORKER = "astro-%s-worker" % CLUSTER
+ENGINE = os.environ.get("ASTRONA_CONTAINER_ENGINE") or "podman"
+CONTROL = CLUSTER + "-control-plane"
+WORKER = CLUSTER + "-worker"
 
 
 def run(*args):
@@ -25,14 +30,13 @@ def run(*args):
     return result.stdout.strip()
 
 
-assert run("kubectl", "config", "current-context") == CONTEXT, "Select the private environment"
 for name in (CONTROL, WORKER):
-    label = run("podman", "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
-    assert label == "astro-" + CLUSTER, "Refusing an unrelated node container"
+    label = run(ENGINE, "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
+    assert label == CLUSTER, "Refusing an unrelated node container"
 
 
 def node(name, script):
-    return run("podman", "exec", name, "sh", "-ec", script)
+    return run(ENGINE, "exec", name, "sh", "-ec", script)
 
 
 # Shell fragment shared by the modes. It sets the version, the node architecture

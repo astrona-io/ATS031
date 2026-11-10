@@ -1,25 +1,6 @@
 {
   "context": "kind-astro-ats-031-lab-040-03-02",
-  "checks": [
-    {
-      "type": "configmap_lines",
-      "namespace": "dock",
-      "name": "exposed-pods",
-      "key": "pods",
-      "expected": [
-        "outpost/runtime-peek",
-        "starfleet/cri-helper",
-        "dock/net-tool"
-      ]
-    },
-    {
-      "type": "pods_exist",
-      "pods": [
-        "outpost/runtime-peek",
-        "starfleet/cri-helper",
-        "outpost/log-reader",
-        "dock/net-tool"
-      ]
-    }
-  ]
+  "cluster": "astro-ats-031-lab-040-03-02",
+  "namespace": "starfleet-031-040-03-02",
+  "resources": []
 }

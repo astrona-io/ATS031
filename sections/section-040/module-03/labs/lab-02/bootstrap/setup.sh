@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-env_name="ats-031-lab-040-03-02"
-if [[ "$(kubectl config current-context)" != "kind-astro-$env_name" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-031-lab-040-03-02}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-engine="${CONTAINER_ENGINE:-podman}"
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-040-03-02}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-worker_name="astro-$env_name-worker"
+worker_name="$cluster-worker"
 
 # Give the worker node the link-local metadata address. The fake server binds to it.
 "$engine" exec "$worker_name" sh -c "ip addr show dev lo | grep -q 169.254.169.254 || ip addr add 169.254.169.254/32 dev lo"
@@ -24,18 +25,18 @@ kubectl patch felixconfigurations.crd.projectcalico.org default --type merge -p 
   || printf 'Note: could not set the Calico host action; pod-to-node paths may be dropped\n' >&2
 
 kubectl apply -f "$lab_directory/bootstrap/manifests/start.yaml"
-kubectl -n metadata-stub wait --for=condition=Ready pod/fake-imds --timeout=180s
-kubectl -n metadata-stub wait --for=condition=Ready pod/control --timeout=120s
-for namespace in starfleet outpost dock; do
+kubectl -n metadata-stub-031-040-03-02 wait --for=condition=Ready pod/fake-imds --timeout=180s
+kubectl -n metadata-stub-031-040-03-02 wait --for=condition=Ready pod/control --timeout=120s
+for namespace in starfleet-031-040-03-02 outpost-031-040-03-02 dock-031-040-03-02; do
   kubectl -n "$namespace" rollout status deployment/probe --timeout=180s
 done
-kubectl -n starfleet wait --for=condition=Ready pod/shuttle pod/agent --timeout=120s
-kubectl -n outpost wait --for=condition=Ready pod/drifter --timeout=120s
-kubectl -n dock wait --for=condition=Ready pod/tender --timeout=120s
+kubectl -n starfleet-031-040-03-02 wait --for=condition=Ready pod/shuttle pod/agent --timeout=120s
+kubectl -n outpost-031-040-03-02 wait --for=condition=Ready pod/drifter --timeout=120s
+kubectl -n dock-031-040-03-02 wait --for=condition=Ready pod/tender --timeout=120s
 
 # Sanity check: an unrestricted pod must reach the fake metadata server.
 for attempt in $(seq 1 10); do
-  status="$(kubectl -n metadata-stub exec control -- curl -s -m 3 -o /dev/null -w '%{http_code}' http://169.254.169.254/latest/meta-data/ || true)"
+  status="$(kubectl -n metadata-stub-031-040-03-02 exec control -- curl -s -m 3 -o /dev/null -w '%{http_code}' http://169.254.169.254/latest/meta-data/ || true)"
   if [[ "$status" == "200" ]]; then exit 0; fi
   sleep 3
 done

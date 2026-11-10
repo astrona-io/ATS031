@@ -1,16 +1,18 @@
 {
   "context": "kind-astro-ats-031-lab-010-04-01",
+  "cluster": "astro-ats-031-lab-010-04-01",
+  "namespace": "starfleet-031-010-04-01",
   "resources": [
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-04-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-04-01"
         },
         "spec": {
           "replicas": 2,
@@ -27,13 +29,13 @@
     {
       "kind": "pod",
       "name": "scout",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-04-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "scout",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-010-04-01",
           "labels": {
             "app": "scout"
           }
@@ -44,13 +46,13 @@
     {
       "kind": "pod",
       "name": "beacon",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-04-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "beacon",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-010-04-01",
           "labels": {
             "app": "beacon"
           }
@@ -61,13 +63,13 @@
     {
       "kind": "pod",
       "name": "drifter",
-      "namespace": "outpost",
+      "namespace": "outpost-031-010-04-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "drifter",
-          "namespace": "outpost",
+          "namespace": "outpost-031-010-04-01",
           "labels": {
             "app": "drifter"
           }
@@ -78,13 +80,13 @@
     {
       "kind": "networkpolicy",
       "name": "default-deny-all",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-04-01",
       "expected": {
         "apiVersion": "networking.k8s.io/v1",
         "kind": "NetworkPolicy",
         "metadata": {
           "name": "default-deny-all",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-04-01"
         },
         "spec": {
           "podSelector": {},
@@ -101,7 +103,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-031-010-04-01",
         "exec",
         "scout",
         "--",
@@ -110,7 +112,8 @@
       ],
       "contains": [
         "dns=ok probe=ok api=ok"
-      ]
+      ],
+      "outcome": "scout-dependencies"
     }
   ]
 }

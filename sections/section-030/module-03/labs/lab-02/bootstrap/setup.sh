@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-031-lab-030-03-02" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-031-lab-030-03-02}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
 kubectl apply -f "$lab_directory/bootstrap/manifests/start.yaml"
-kubectl -n starfleet rollout status deployment/probe --timeout=180s
-kubectl -n starfleet rollout status deployment/scout --timeout=180s
-kubectl -n starfleet rollout status deployment/beacon --timeout=180s
+kubectl -n starfleet-031-030-03-02 rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-031-030-03-02 rollout status deployment/scout --timeout=180s
+kubectl -n starfleet-031-030-03-02 rollout status deployment/beacon --timeout=180s
 kubectl -n ingress-system rollout status deployment/traefik --timeout=180s
 certificate_directory="$(mktemp -d)"
 trap 'rm -rf "$certificate_directory"' EXIT
@@ -22,4 +23,4 @@ make_certificate() {
     -subj "/CN=$2" ${san_option[@]+"${san_option[@]}"} >/dev/null 2>&1
 }
 make_certificate beacon beacon.example.test 30 no_san
-kubectl -n outpost create secret tls beacon-tls --cert="$certificate_directory/beacon.crt" --key="$certificate_directory/beacon.key"
+kubectl -n outpost-031-030-03-02 create secret tls beacon-tls --cert="$certificate_directory/beacon.crt" --key="$certificate_directory/beacon.key"

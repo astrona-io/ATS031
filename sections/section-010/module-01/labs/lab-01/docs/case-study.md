@@ -7,4 +7,4 @@ exam_objectives:
 
 The application and client fixtures are healthy. Complete the required change without replacing unrelated resources.
 
-Create NetworkPolicy `probe-shuttle` selecting `app: probe` for ingress. Allow only same-namespace Pods labelled `app: shuttle` on TCP port 8080. Keep the original workload and clients healthy. Shuttle must receive version one through the Service; drifter in `outpost` must time out. Do not create any policy that also allows drifter.
+Create NetworkPolicy `probe-shuttle` selecting `app: probe` for ingress. Allow only same-namespace Pods labelled `app: shuttle` on TCP port 8080. Keep the original workload and clients healthy. Shuttle must receive version one through the Service; drifter in `outpost-031-010-01-01` must time out. Do not create any policy that also allows drifter.

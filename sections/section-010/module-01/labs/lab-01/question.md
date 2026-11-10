@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Allow One Peer And Deny Another
 
-Enforce both an allowed same-namespace peer and a denied peer in another namespace. Use the isolated `starfleet` environment to verify the result.
+Allow about 6 minutes for the tasks.
+
+Enforce both an allowed same-namespace peer and a denied peer in another namespace. Use the isolated `starfleet-031-010-01-01` environment to verify the result.
 
 ## Objective
 
@@ -27,7 +29,7 @@ Keep this connection selected throughout the task. Every script supplied by the 
 
 ## Required result
 
-Create NetworkPolicy `probe-shuttle` selecting `app: probe` for ingress. Allow only same-namespace Pods labelled `app: shuttle` on TCP port 8080. Keep the original workload and clients healthy. Shuttle must receive version one through the Service; drifter in `outpost` must time out. Do not create any policy that also allows drifter.
+Create NetworkPolicy `probe-shuttle` selecting `app: probe` for ingress. Allow only same-namespace Pods labelled `app: shuttle` on TCP port 8080. Keep the original workload and clients healthy. Shuttle must receive version one through the Service; drifter in `outpost-031-010-01-01` must time out. Do not create any policy that also allows drifter.
 
 ## Verify The Result
 

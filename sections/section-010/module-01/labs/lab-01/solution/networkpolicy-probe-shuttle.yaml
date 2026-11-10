@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: probe-shuttle
-  namespace: starfleet
+  namespace: starfleet-031-010-01-01
 spec:
   podSelector:
     matchLabels:

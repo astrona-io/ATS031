@@ -24,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: deployment-pinned
+    description: relay runs busybox pinned by the digest of the image it ran
+    type: file
+    source: validation/validate-deployment-pinned.sh
+    points: 2
+  - name: pin-review
+    description: image-pin-review records the digest and the imageID of the running pod
+    type: file
+    source: validation/validate-pin-review.sh
+    points: 1

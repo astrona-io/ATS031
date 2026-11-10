@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Allow DNS And One Application Dependency
 
-Allow name resolution and application access while denying a healthy unrelated listener. Use the isolated `starfleet` environment to verify the result.
+Allow about 8 minutes for the tasks.
+
+Allow name resolution and application access while denying a healthy unrelated listener. Use the isolated `starfleet-031-010-01-02` environment to verify the result.
 
 ## Objective
 

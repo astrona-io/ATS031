@@ -1,34 +1,37 @@
 {
   "context": "kind-astro-ats-031-lab-020-01-01",
+  "cluster": "astro-ats-031-lab-020-01-01",
+  "namespace": "starfleet-031-020-01-01",
   "resources": [
     {
       "kind": "configmap",
       "name": "benchmark-review",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-020-01-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "ConfigMap",
         "metadata": {
           "name": "benchmark-review",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-020-01-01"
         },
         "data": {
           "component": "kube-apiserver",
           "control": "disable-profiling",
           "result": "corrected"
         }
-      }
+      },
+      "outcome": "benchmark-review-record"
     },
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-020-01-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-020-01-01"
         },
         "spec": {
           "replicas": 2,
@@ -119,7 +122,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-031-020-01-01",
         "exec",
         "shuttle",
         "--",

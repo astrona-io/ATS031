@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: scout-to-probe
-  namespace: starfleet
+  namespace: starfleet-031-010-04-01
 spec:
   podSelector:
     matchLabels:
@@ -13,7 +13,7 @@ spec:
   - to:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: starfleet
+          kubernetes.io/metadata.name: starfleet-031-010-04-01
       podSelector:
         matchLabels:
           app: probe

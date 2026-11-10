@@ -24,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: encryption-provider
+    description: The API server loads an encryption configuration for Secrets
+    type: file
+    source: validation/validate-encryption-provider.sh
+    points: 1
+  - name: secret-encrypted
+    description: launch-code is stored in etcd with the aescbc provider
+    type: file
+    source: validation/validate-secret-encrypted.sh
+    points: 2

@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Verify TLS Termination And Server Identity
 
-Route HTTPS through the controller and verify both matching and mismatched certificate identities. Use the isolated `starfleet` environment to verify the result.
+Allow about 6 minutes for the tasks.
+
+Route HTTPS through the controller and verify both matching and mismatched certificate identities. Use the isolated `starfleet-031-030-01-01` environment to verify the result.
 
 ## Objective
 

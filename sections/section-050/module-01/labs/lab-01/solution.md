@@ -23,11 +23,11 @@ The isolated environment has two healthy probe replicas, an internal Service and
 Inspect the current objects before changing them:
 
 ```sh
-kubectl -n starfleet get pods -o wide
+kubectl -n starfleet-031-050-01-01 get pods -o wide
 kubectl get nodes -o wide
 ```
 
-Use the public key provisioned with the isolated fixture to verify checksums.sig over checksums.txt. Verify the staged kubectl digest matches the authenticated manifest and the tampered copy does not. Record artifact-review with result verified, tampered rejected and the exact sha256. The fixture key is a local exercise trust root, not proof of the upstream Kubernetes publisher identity.
+Use the public key provisioned with the isolated fixture to verify checksums.sig over checksums.txt. Verify the staged kubectl digest matches the authenticated manifest and the tampered copy does not. Record the ConfigMap `artifact-review` in the namespace `starfleet-031-050-01-01` with `result: verified`, `tampered: rejected` and the exact `sha256`. The fixture key is a local exercise trust root, not proof of the upstream Kubernetes publisher identity.
 
 Save this as `configmap-artifact-review.yaml`:
 
@@ -36,7 +36,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: artifact-review
-  namespace: starfleet
+  namespace: starfleet-031-050-01-01
 data:
   result: verified
   tampered: rejected
@@ -65,7 +65,7 @@ report_name='artifact-review';report={'result':'verified','tampered':'rejected',
 
 with tempfile.TemporaryDirectory(prefix='training-report-') as temporary:
     source=Path(temporary)/'configmap-report.json'
-    source.write_text(json.dumps({'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':report_name,'namespace':'starfleet'},'data':report}))
+    source.write_text(json.dumps({'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':report_name,'namespace':'starfleet-031-050-01-01'},'data':report}))
     run('kubectl','apply','-f',str(source))
 
 ```
@@ -81,8 +81,8 @@ python3 verify-release.py
 Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
 
 ```sh
-kubectl -n starfleet get configmaps
-kubectl -n starfleet get deployment probe -o yaml
+kubectl -n starfleet-031-050-01-01 get configmaps
+kubectl -n starfleet-031-050-01-01 get deployment probe -o yaml
 ```
 
 Verify a signed checksum manifest and reject altered bytes before using a binary. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.

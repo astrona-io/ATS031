@@ -5,6 +5,6 @@ exam_objectives:
 ---
 # Pin An Image By Digest And Prove It Runs
 
-Change the image of the `relay` Deployment in the `starfleet` namespace from `docker.io/library/busybox:1.37.0` to a reference that ends with `@sha256:<digest>`, where the digest is the one the currently running pod reports in its `imageID`.
+Change the image of the `relay` Deployment in the `starfleet-031-050-03-02` namespace from `docker.io/library/busybox:1.36.1` to a reference that ends with `@sha256:<digest>`, where the digest is the one the currently running pod reports in its `imageID`.
 
-The task and solution use a separate pinned kind cluster named `ats-031-lab-050-03-02`. Run `testing/smoke.sh` with its private kubeconfig to verify initial rejection and reference success. Static validation is not live evidence. Runtime verification remains pending.
+The task and solution use a separate pinned kind cluster named `ats-031-lab-050-03-02`. Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass.

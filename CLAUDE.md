@@ -197,6 +197,51 @@ Strict guidelines:
   names that say what they do (`check_route`, `count_versions`,
   `$SERVICE_URL`), never single letters.
 
+## Exam-ready labs (CKS trainings ATS031–ATS036)
+
+Graded labs in the CKS trainings also run in the full lab exam, where several
+labs share one kind cluster. The full convention, with a before and after
+example, is `authoring/exam-ready-labs.md` in `astrona-io/astrona-content`.
+ATS020 (CNPE: Observability and Operations) is the model training format:
+where this repo and ATS020 differ on grader layout, check style or the time
+line, follow ATS020. The context guard is the exception: ATS020 has none,
+the CKS labs keep theirs. ATS031 applies it to the CKS labs; copy from it. In short:
+
+- **Own namespaces.** Name each namespace `<role>-<training>-<section>-<module>-<lab>`
+  from the lab's `metadata.name`: `starfleet-031-020-05-02`,
+  `outpost-031-020-05-02`. Never a bare `starfleet`, `outpost` or `dock`.
+- **Keep the context guard; no hardcoded cluster.** Every script and helper
+  refuses to run unless `kubectl config current-context` is the lab's own
+  context, read from `${ASTRONA_KUBE_CONTEXT:-kind-astro-<lab>}` so the guard
+  also passes on an exam cluster. Never remove the guard to make a lab
+  portable. Scripts that exec into a node read `ASTRONA_KIND_CLUSTER` and
+  `ASTRONA_CONTAINER_ENGINE` with the lab mode value as fallback and run
+  `"$engine" exec "$cluster-worker"`, never `podman exec astro-<lab>-worker`.
+  `live.py` uses `NODE`, `WORKER`, `ENGINE` and `node_exec()`.
+- **One grader per outcome.** `config.yaml` lists `validation.scripts`, one
+  per outcome, each with `description` and `points`, sourced from
+  `validation/validate-<outcome>.sh` (ATS020's layout). Each is the same
+  wrapper that runs `validate.sh <outcome>` and `testing/check.py`, which
+  prints one `PASS:` or `FAIL:` line. `check.py`, `verify-start.sh`,
+  `wait-solved.sh` and the wrappers are identical in every lab; do not edit
+  them per lab. Tag `requirements.json` entries with `"outcome"` and put
+  `live.py` checks under `if wants('<id>'):`. Checks without an outcome are
+  guards and run with every outcome. Every outcome fails on the unsolved lab
+  and passes for the reference solution.
+- **`testing.init`.** `testing/verify-start.sh` (every outcome fails at the
+  start), then `solution/apply.sh`, then `testing/wait-solved.sh`.
+- **Time line.** `question.md` has `Allow about N minutes for the tasks.`
+  under its title, as in ATS020: the exam time for a prepared student. Over
+  20 minutes cannot join an exam.
+- **`examScope`.** Set `namespace` or `cluster` on the lab's `astrona.yaml`
+  entry only when its `runtime.kind` fits the exam profile in
+  `exams/kubestronaut/cks.yaml` (one control plane, one worker, kindnet).
+  Anything that changes nodes, static pods, the kubelet or other cluster-wide
+  state is `cluster`.
+- **Verify end to end.** `astrona validate <lab-dir>` and
+  `astrona test <lab-dir> --accept-terms --headless` must both pass.
+- **Hands off** `task_kind`, `tags` and `topic`: other tooling owns them.
+
 ## About this repo (ATS031 only)
 
 The course covers **Cluster Setup**, worth **15%** of

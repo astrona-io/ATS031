@@ -24,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: probe-shuttle-policy
+    description: NetworkPolicy probe-shuttle admits only shuttle on TCP 8080
+    type: file
+    source: validation/validate-probe-shuttle-policy.sh
+    points: 1
+  - name: drifter-denied
+    description: Shuttle reaches probe and drifter in outpost times out
+    type: file
+    source: validation/validate-drifter-denied.sh
+    points: 1

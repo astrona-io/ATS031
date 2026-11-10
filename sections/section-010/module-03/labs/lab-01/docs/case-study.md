@@ -5,4 +5,4 @@ exam_objectives:
 ---
 # Starting Environment
 
-The `starfleet` and `outpost` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The `dock` namespace has a `shuttle` pod and a `telemetry` pod. No NetworkPolicy exists.
+The `starfleet-031-010-03-01` and `outpost-031-010-03-01` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The `dock-031-010-03-01` namespace has a `shuttle` pod and a `telemetry` pod. No NetworkPolicy exists.

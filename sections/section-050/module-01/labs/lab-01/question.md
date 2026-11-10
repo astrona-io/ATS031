@@ -5,6 +5,8 @@ exam_objectives:
 ---
 # Verify Signed Artifact Checksums
 
+Allow about 8 minutes for the tasks.
+
 Verify a signed checksum manifest and reject altered bytes before using a binary.
 
 ## Starting state
@@ -24,7 +26,7 @@ Keep this connection selected. Host-level commands name only this environment's 
 
 ## Required result
 
-Use the public key provisioned with the isolated fixture to verify checksums.sig over checksums.txt. Verify the staged kubectl digest matches the authenticated manifest and the tampered copy does not. Record artifact-review with result verified, tampered rejected and the exact sha256. The fixture key is a local exercise trust root, not proof of the upstream Kubernetes publisher identity.
+Use the public key provisioned with the isolated fixture to verify checksums.sig over checksums.txt. Verify the staged kubectl digest matches the authenticated manifest and the tampered copy does not. Record the ConfigMap `artifact-review` in the namespace `starfleet-031-050-01-01` with `result: verified`, `tampered: rejected` and the exact `sha256`. The fixture key is a local exercise trust root, not proof of the upstream Kubernetes publisher identity.
 
 ## Verify The Result
 
