@@ -67,3 +67,8 @@ This course has 19 ungraded module playgrounds, 29 draft independent labs and 5 
 | 050/02 | Verify The Running kubelet Against A Release Checksum |
 | 050/03 | Identify The Forged Signature |
 | 050/03 | Pin An Image By Digest And Prove It Runs |
+
+## Authoring and verification
+
+See [AUTHORING.md](AUTHORING.md) for the lab lifecycle and review workflow, and
+[LAB-COVERAGE.md](LAB-COVERAGE.md) for preparation lessons and graded outcomes.
