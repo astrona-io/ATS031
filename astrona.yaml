@@ -57,6 +57,7 @@ modules:
   - type: lab
     title: Allow One Peer And Deny Another
     path: sections/section-010/module-01/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-ingress
@@ -78,6 +79,7 @@ modules:
   - type: lab
     title: Allow DNS And One Application Dependency
     path: sections/section-010/module-01/labs/lab-02
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-egress
@@ -123,6 +125,7 @@ modules:
   - type: lab
     title: Apply A Default-Deny Baseline And Allow One Path
     path: sections/section-010/module-02/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-default-deny
@@ -164,6 +167,7 @@ modules:
   - type: lab
     title: Allow One Pod From Another Namespace
     path: sections/section-010/module-03/labs/lab-01
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-peers
@@ -182,6 +186,7 @@ modules:
   - type: lab
     title: Repair A Two-Entry Peer Rule
     path: sections/section-010/module-03/labs/lab-02
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 20m
     topic: networkpolicy-peers
@@ -235,6 +240,7 @@ modules:
   - type: lab
     title: Repair A Broken Policy Set
     path: sections/section-010/module-04/labs/lab-01
+    examScope: namespace
     difficulty: advanced
     estimated_duration: 35m
     topic: networkpolicy-troubleshooting
