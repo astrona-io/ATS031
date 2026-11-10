@@ -185,7 +185,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 20m
     topic: networkpolicy-peers
-    task_kind: repair
+    task_kind: troubleshooting
     learning_goals:
     - Find and repair a rule whose two list entries admit too many peers.
     tags:
@@ -238,7 +238,7 @@ modules:
     difficulty: advanced
     estimated_duration: 35m
     topic: networkpolicy-troubleshooting
-    task_kind: repair
+    task_kind: troubleshooting
     learning_goals:
     - Repair DNS, peer and direction faults in a policy set without opening more than
       needed.
@@ -997,7 +997,7 @@ modules:
     difficulty: intermediate
     estimated_duration: 20m
     topic: host-exposure
-    task_kind: investigate
+    task_kind: troubleshooting
     learning_goals:
     - Find pods that mount the runtime socket or use the host network and record them.
     tags:
