@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-lab-030-04-02",
+  "cluster": "astro-ats-031-lab-030-04-02",
+  "namespace": "starfleet-031-030-04-02",
   "resources": [
     {
       "kind": "ingress",
@@ -9,7 +11,7 @@
         "kind": "Ingress",
         "metadata": {
           "name": "alpha",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-04-02"
         },
         "spec": {
           "ingressClassName": "traefik"
@@ -24,7 +26,7 @@
         "kind": "Ingress",
         "metadata": {
           "name": "bravo",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-04-02"
         },
         "spec": {
           "ingressClassName": "traefik"
@@ -39,7 +41,7 @@
         "kind": "Ingress",
         "metadata": {
           "name": "charlie",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-04-02"
         },
         "spec": {
           "ingressClassName": "traefik"
@@ -54,12 +56,13 @@
         "kind": "Ingress",
         "metadata": {
           "name": "delta",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-04-02"
         },
         "spec": {
           "ingressClassName": "traefik"
         }
-      }
+      },
+      "outcome": "delta-ingress"
     },
     {
       "kind": "deployment",
@@ -69,7 +72,7 @@
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-04-02"
         },
         "spec": {
           "replicas": 1,
@@ -90,7 +93,7 @@
         "kind": "Service",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-04-02"
         },
         "spec": {
           "selector": {

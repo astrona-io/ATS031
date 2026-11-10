@@ -42,7 +42,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kubelet-review
-  namespace: starfleet
+  namespace: starfleet-031-050-02-02
 data:
   version: <version>
   path: <path>
@@ -59,7 +59,7 @@ kubectl apply -f configmap-kubelet-review.yaml
 Then check the result:
 
 ```sh
-kubectl -n starfleet get configmap kubelet-review -o yaml
+kubectl -n starfleet-031-050-02-02 get configmap kubelet-review -o yaml
 ```
 
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-050-02-02`.

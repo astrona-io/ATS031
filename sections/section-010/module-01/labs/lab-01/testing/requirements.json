@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-lab-010-01-01",
+  "cluster": "astro-ats-031-lab-010-01-01",
+  "namespace": "starfleet-031-010-01-01",
   "resources": [
     {
       "kind": "networkpolicy",
@@ -9,7 +11,7 @@
         "kind": "NetworkPolicy",
         "metadata": {
           "name": "probe-shuttle",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-01-01"
         },
         "spec": {
           "podSelector": {
@@ -40,7 +42,8 @@
             }
           ]
         }
-      }
+      },
+      "outcome": "probe-shuttle-policy"
     },
     {
       "kind": "deployment",
@@ -50,7 +53,7 @@
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-01-01"
         },
         "spec": {
           "replicas": 2,
@@ -135,7 +138,7 @@
         "kind": "Pod",
         "metadata": {
           "name": "shuttle",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-010-01-01",
           "labels": {
             "app": "shuttle"
           }
@@ -165,7 +168,7 @@
         "kind": "Pod",
         "metadata": {
           "name": "drifter",
-          "namespace": "outpost",
+          "namespace": "outpost-031-010-01-01",
           "labels": {
             "app": "drifter"
           }
@@ -186,7 +189,7 @@
         }
       },
       "state": "pod",
-      "namespace": "outpost"
+      "namespace": "outpost-031-010-01-01"
     }
   ],
   "behavior": [
@@ -194,7 +197,7 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-031-010-01-01",
         "exec",
         "shuttle",
         "--",
@@ -207,13 +210,14 @@
       ],
       "contains": [
         "version=v1"
-      ]
+      ],
+      "outcome": "drifter-denied"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-031-010-01-01",
         "exec",
         "drifter",
         "--",
@@ -222,12 +226,13 @@
         "-T",
         "3",
         "-O-",
-        "http://probe.starfleet/"
+        "http://probe.starfleet-031-010-01-01/"
       ],
       "denied": true,
       "failure_markers": [
         "timed out"
-      ]
+      ],
+      "outcome": "drifter-denied"
     }
   ]
 }

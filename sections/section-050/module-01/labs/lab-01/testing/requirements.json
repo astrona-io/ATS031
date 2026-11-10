@@ -1,23 +1,7 @@
 {
   "context": "kind-astro-ats-031-lab-050-01-01",
-  "resources": [
-    {
-      "kind": "configmap",
-      "name": "artifact-review",
-      "namespace": "starfleet",
-      "expected": {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {
-          "name": "artifact-review",
-          "namespace": "starfleet"
-        },
-        "data": {
-          "result": "verified",
-          "tampered": "rejected"
-        }
-      }
-    }
-  ],
+  "cluster": "astro-ats-031-lab-050-01-01",
+  "namespace": "starfleet-031-050-01-01",
+  "resources": [],
   "behavior": []
 }

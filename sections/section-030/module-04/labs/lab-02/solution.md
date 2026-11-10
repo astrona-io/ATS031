@@ -17,14 +17,14 @@ Keep this connection selected throughout the task. Every script supplied by the 
 ## Find the cause for each Ingress
 
 ```sh
-kubectl -n starfleet get ingress
-kubectl -n starfleet get secret
+kubectl -n starfleet-031-030-04-02 get ingress
+kubectl -n starfleet-031-030-04-02 get secret
 for name in alpha bravo charlie delta; do
   echo "== $name"
-  kubectl -n starfleet get ingress $name -o jsonpath='class={.spec.ingressClassName} host={.spec.rules[0].host} tls-hosts={.spec.tls[0].hosts} secret={.spec.tls[0].secretName}{"\n"}'
+  kubectl -n starfleet-031-030-04-02 get ingress $name -o jsonpath='class={.spec.ingressClassName} host={.spec.rules[0].host} tls-hosts={.spec.tls[0].hosts} secret={.spec.tls[0].secretName}{"\n"}'
 done
-kubectl -n starfleet get secret bravo-tls -o jsonpath='{.data.tls\.crt}' | base64 --decode | openssl x509 -noout -pubkey | openssl sha256
-kubectl -n starfleet get secret bravo-tls -o jsonpath='{.data.tls\.key}' | base64 --decode | openssl pkey -pubout | openssl sha256
+kubectl -n starfleet-031-030-04-02 get secret bravo-tls -o jsonpath='{.data.tls\.crt}' | base64 --decode | openssl x509 -noout -pubkey | openssl sha256
+kubectl -n starfleet-031-030-04-02 get secret bravo-tls -o jsonpath='{.data.tls\.key}' | base64 --decode | openssl pkey -pubout | openssl sha256
 ```
 
 The four causes are these:
@@ -37,12 +37,12 @@ The four causes are these:
 ## Repair them
 
 ```sh
-kubectl -n starfleet patch ingress alpha --type=json -p '[{"op":"replace","path":"/spec/tls/0/secretName","value":"alpha-cert"}]'
-kubectl -n starfleet delete secret bravo-tls
+kubectl -n starfleet-031-030-04-02 patch ingress alpha --type=json -p '[{"op":"replace","path":"/spec/tls/0/secretName","value":"alpha-cert"}]'
+kubectl -n starfleet-031-030-04-02 delete secret bravo-tls
 openssl req -x509 -nodes -newkey rsa:2048 -days 30 -keyout bravo.key -out bravo.crt -subj "/CN=bravo.example.test" -addext "subjectAltName=DNS:bravo.example.test"
-kubectl -n starfleet create secret tls bravo-tls --cert=bravo.crt --key=bravo.key
-kubectl -n starfleet patch ingress charlie --type=json -p '[{"op":"replace","path":"/spec/rules/0/host","value":"charlie.example.test"}]'
-kubectl -n starfleet patch ingress delta --type=json -p '[{"op":"replace","path":"/spec/ingressClassName","value":"traefik"}]'
+kubectl -n starfleet-031-030-04-02 create secret tls bravo-tls --cert=bravo.crt --key=bravo.key
+kubectl -n starfleet-031-030-04-02 patch ingress charlie --type=json -p '[{"op":"replace","path":"/spec/rules/0/host","value":"charlie.example.test"}]'
+kubectl -n starfleet-031-030-04-02 patch ingress delta --type=json -p '[{"op":"replace","path":"/spec/ingressClassName","value":"traefik"}]'
 ```
 
 ## Verify
@@ -51,7 +51,7 @@ Open a port forward in a second terminal. The Secrets for `alpha` and `bravo` ho
 
 ```sh
 kubectl -n ingress-system port-forward service/traefik 8443:443
-kubectl -n starfleet get secret alpha-cert -o jsonpath='{.data.tls\.crt}' | base64 --decode > alpha.crt
+kubectl -n starfleet-031-030-04-02 get secret alpha-cert -o jsonpath='{.data.tls\.crt}' | base64 --decode > alpha.crt
 curl -s --cacert alpha.crt --resolve alpha.example.test:8443:127.0.0.1 https://alpha.example.test:8443/
 ```
 

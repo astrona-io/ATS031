@@ -24,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: probe-from-outpost-policy
+    description: NetworkPolicy probe-from-outpost selects outpost shuttle in one entry
+    type: file
+    source: validation/validate-probe-from-outpost-policy.sh
+    points: 1
+  - name: only-outpost-shuttle
+    description: Only shuttle in outpost reaches probe in starfleet
+    type: file
+    source: validation/validate-only-outpost-shuttle.sh
+    points: 2

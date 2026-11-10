@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-lab-010-01-02",
+  "cluster": "astro-ats-031-lab-010-01-02",
+  "namespace": "starfleet-031-010-01-02",
   "resources": [
     {
       "kind": "networkpolicy",
@@ -9,7 +11,7 @@
         "kind": "NetworkPolicy",
         "metadata": {
           "name": "shuttle-egress",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-01-02"
         },
         "spec": {
           "podSelector": {
@@ -66,7 +68,8 @@
             }
           ]
         }
-      }
+      },
+      "outcome": "shuttle-egress-policy"
     },
     {
       "kind": "pod",
@@ -76,7 +79,7 @@
         "kind": "Pod",
         "metadata": {
           "name": "blocked-server",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-010-01-02",
           "labels": {
             "app": "blocked-server"
           }
@@ -97,7 +100,8 @@
           ]
         }
       },
-      "state": "pod"
+      "state": "pod",
+      "outcome": "blocked-server"
     },
     {
       "kind": "deployment",
@@ -107,7 +111,7 @@
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-01-02"
         },
         "spec": {
           "replicas": 2,
@@ -190,22 +194,23 @@
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-031-010-01-02",
         "exec",
         "shuttle",
         "--",
         "nslookup",
-        "probe.starfleet.svc.cluster.local"
+        "probe.starfleet-031-010-01-02.svc.cluster.local"
       ],
       "contains": [
         "Address"
-      ]
+      ],
+      "outcome": "shuttle-egress-enforced"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-031-010-01-02",
         "exec",
         "shuttle",
         "--",
@@ -218,7 +223,8 @@
       ],
       "contains": [
         "version=v1"
-      ]
+      ],
+      "outcome": "shuttle-egress-enforced"
     }
   ]
 }

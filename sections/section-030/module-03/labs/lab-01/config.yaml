@@ -23,11 +23,31 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: scout-tls-secret
+    description: TLS Secret scout-tls exists
+    type: file
+    source: validation/validate-scout-tls-secret.sh
+    points: 1
+  - name: scout-ingress
+    description: Ingress scout routes scout.example.test over websecure with TLS
+    type: file
+    source: validation/validate-scout-ingress.sh
+    points: 1
+  - name: scout-https
+    description: https://scout.example.test is served with the scout-tls certificate
+    type: file
+    source: validation/validate-scout-https.sh
+    points: 1

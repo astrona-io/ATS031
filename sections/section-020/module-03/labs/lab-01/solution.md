@@ -82,7 +82,7 @@ Check the flags of the running pod, make a request, and find it in the log:
 
 ```sh
 kubectl -n kube-system get pod kube-apiserver-$NODE -o jsonpath='{.spec.containers[0].command}' | tr ',' '\n' | grep audit
-kubectl -n starfleet get pods
+kubectl -n starfleet-031-020-03-01 get pods
 podman exec $NODE tail -n 20 /var/log/kubernetes/audit/audit.log
 ```
 

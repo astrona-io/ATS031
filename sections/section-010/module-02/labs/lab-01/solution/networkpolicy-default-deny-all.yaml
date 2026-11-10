@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-all
-  namespace: outpost
+  namespace: outpost-031-010-02-01
 spec:
   podSelector: {}
   policyTypes:

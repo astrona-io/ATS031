@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-lab-030-03-01",
+  "cluster": "astro-ats-031-lab-030-03-01",
+  "namespace": "starfleet-031-030-03-01",
   "resources": [
     {
       "kind": "ingress",
@@ -9,12 +11,13 @@
         "kind": "Ingress",
         "metadata": {
           "name": "scout",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-03-01"
         },
         "spec": {
           "ingressClassName": "traefik"
         }
-      }
+      },
+      "outcome": "scout-ingress"
     },
     {
       "kind": "secret",
@@ -25,9 +28,10 @@
         "type": "kubernetes.io/tls",
         "metadata": {
           "name": "scout-tls",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-03-01"
         }
-      }
+      },
+      "outcome": "scout-tls-secret"
     },
     {
       "kind": "deployment",
@@ -37,7 +41,7 @@
         "kind": "Deployment",
         "metadata": {
           "name": "scout",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-03-01"
         },
         "spec": {
           "replicas": 1,
@@ -58,7 +62,7 @@
         "kind": "Service",
         "metadata": {
           "name": "scout",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-030-03-01"
         },
         "spec": {
           "selector": {

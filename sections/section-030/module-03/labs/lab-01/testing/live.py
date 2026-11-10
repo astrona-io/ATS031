@@ -1,6 +1,7 @@
-certificates = []
-certificates.append(get('secret', 'scout-tls')['data']['tls.crt'])
-script = r"""
+# Live checks: Python run inside the probe Pod against the Traefik Service.
+# HELPERS is shared by every check; live() runs one check and reports the
+# first failed assertion.
+HELPERS = r"""
 import base64, socket, ssl, sys
 
 TRAEFIK = 'traefik.ingress-system.svc'
@@ -47,13 +48,35 @@ pems = [base64.b64decode(argument).decode() for argument in sys.argv[1:]]
 def status_of(response):
     return response.split('\r\n')[0]
 
-pem = pems[0]
-response = https_get('scout.example.test', pem)
-assert ' 200 ' in status_of(response) + ' ', 'Expected 200 over HTTPS'
-assert 'app=scout ' in response, 'Wrong backend'
-assert refused(lambda: https_get('scout.example.test', pem, sni='wrong.example.test')), 'A wrong server name must be rejected'
-print('verified')
-
+def answer(host, pem):
+    try:
+        return https_get(host, pem)
+    except (ssl.SSLError, OSError) as error:
+        raise AssertionError('https://%s did not complete a verified TLS handshake: %s' % (host, getattr(error, 'reason', None) or error))
 """
-output = kubectl('-n', 'starfleet', 'exec', 'deployment/probe', '--', 'python', '-c', script, *certificates)
-assert output == 'verified', 'Live verification failed: ' + output
+
+
+def live(body, certificates=()):
+    result = command(['kubectl', '-n', NAMESPACE, 'exec', 'deployment/probe', '--', 'python', '-c',
+                      HELPERS + body + "\nprint('verified')\n", *certificates], success=False)
+    if result.returncode == 0 and result.stdout.strip() == 'verified':
+        return
+    lines = [line for line in (result.stderr + result.stdout).splitlines()
+             if line.strip() and not line.startswith('command terminated with exit code')]
+    raise AssertionError(lines[-1].removeprefix('AssertionError: ') if lines else 'Live check failed without output')
+
+
+def certificate(secret):
+    """The base64 tls.crt of a Secret in the lab namespace, or fail with a reason."""
+    result = command(['kubectl', '-n', NAMESPACE, 'get', 'secret', secret, '-o', 'jsonpath={.data.tls\\.crt}'], success=False)
+    assert result.returncode == 0 and result.stdout.strip(), 'The TLS Secret ' + secret + ' must exist with a certificate'
+    return result.stdout.strip()
+
+if wants('scout-https'):
+    live(r"""
+pem = pems[0]
+response = answer('scout.example.test', pem)
+assert ' 200 ' in status_of(response) + ' ', 'https://scout.example.test must answer 200 with the scout-tls certificate'
+assert 'app=scout ' in response, 'https://scout.example.test must reach the Service scout'
+assert refused(lambda: https_get('scout.example.test', pem, sni='wrong.example.test')), 'A wrong server name must be rejected'
+""", [certificate('scout-tls')])

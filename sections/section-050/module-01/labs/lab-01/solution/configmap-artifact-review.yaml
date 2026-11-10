@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: artifact-review
-  namespace: starfleet
+  namespace: starfleet-031-050-01-01
 data:
   result: verified
   tampered: rejected

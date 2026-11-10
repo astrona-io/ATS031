@@ -24,11 +24,31 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: default-deny-all
+    description: default-deny-all isolates outpost for ingress and egress
+    type: file
+    source: validation/validate-default-deny-all.sh
+    points: 1
+  - name: probe-ingress-from-shuttle
+    description: probe in outpost admits shuttle on TCP 8080
+    type: file
+    source: validation/validate-probe-ingress-from-shuttle.sh
+    points: 1
+  - name: shuttle-egress-to-probe
+    description: shuttle in outpost reaches probe and DNS only
+    type: file
+    source: validation/validate-shuttle-egress-to-probe.sh
+    points: 2

@@ -6,6 +6,8 @@ exam_objectives:
 ---
 # Close Anonymous And Open Access On The Kubelet
 
+Allow about 8 minutes for the tasks.
+
 An audit found that the kubelet on the worker node accepts anonymous requests, authorizes every authenticated request and listens on the unauthenticated read-only port. Fix these three findings without taking the node out of service.
 
 ## Starting state

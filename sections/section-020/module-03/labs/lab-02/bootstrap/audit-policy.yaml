@@ -13,7 +13,7 @@ rules:
   - group: ""
     resources: ["secrets"]
 - level: Request
-  namespaces: ["starfleet"]
+  namespaces: ["starfleet-031-020-03-02"]
   resources:
   - group: ""
     resources: ["pods"]

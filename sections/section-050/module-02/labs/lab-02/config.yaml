@@ -24,11 +24,31 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: kubelet-binary
+    description: The review records the version and binary path of the running kubelet
+    type: file
+    source: validation/validate-kubelet-binary.sh
+    points: 1
+  - name: kubelet-digest
+    description: The review records the digest of the running kubelet binary
+    type: file
+    source: validation/validate-kubelet-digest.sh
+    points: 1
+  - name: checksum-result
+    description: The review states whether the digest matches the staged checksum for that version
+    type: file
+    source: validation/validate-checksum-result.sh
+    points: 1

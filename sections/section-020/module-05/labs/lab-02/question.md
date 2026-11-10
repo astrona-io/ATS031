@@ -6,6 +6,8 @@ exam_objectives:
 ---
 # Remediate Five Kubelet Benchmark Findings
 
+Allow about 12 minutes for the tasks.
+
 A benchmark review of the worker node lists five findings for the kubelet. Remediate all of them and keep the node in service.
 
 ## Starting state

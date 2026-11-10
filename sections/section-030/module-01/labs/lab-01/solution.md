@@ -21,8 +21,8 @@ The lab includes a working Traefik Ingress controller and healthy application. T
 Inspect the relevant evidence:
 
 ```sh
-kubectl -n starfleet get ingress
-kubectl -n starfleet get service probe
+kubectl -n starfleet-031-030-01-01 get ingress
+kubectl -n starfleet-031-030-01-01 get service probe
 kubectl -n ingress-system logs deployment/traefik --tail=20
 ```
 
@@ -36,7 +36,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-031-030-01-01
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: 'true'
@@ -70,7 +70,7 @@ kubectl apply -f ingress-probe.yaml
 Observe the actual result. A denied-request command returns a nonzero status when the denial works. Run denial checks separately from a shell sequence that stops on the first nonzero status.
 
 ```sh
-kubectl -n starfleet get deployment probe -o yaml
+kubectl -n starfleet-031-030-01-01 get deployment probe -o yaml
 ```
 
 Create a TLS Ingress `probe` for class `traefik`, host `probe.local`, Prefix path `/` and backend Service `probe` port 80. Use the supplied TLS Secret `probe-tls` and websecure entrypoint. A client trusting the supplied certificate must receive version one for the matching server name and must reject a mismatched server name. Preserve the original application and Service.

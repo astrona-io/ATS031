@@ -18,7 +18,7 @@ Keep this connection selected throughout the task. Every script supplied by the 
 
 ```sh
 openssl req -x509 -nodes -newkey rsa:2048 -days 30 -keyout scout.key -out scout.crt -subj "/CN=scout.example.test" -addext "subjectAltName=DNS:scout.example.test"
-kubectl -n starfleet create secret tls scout-tls --cert=scout.crt --key=scout.key
+kubectl -n starfleet-031-030-03-01 create secret tls scout-tls --cert=scout.crt --key=scout.key
 ```
 
 On macOS the system `openssl` may not support `-addext`. Use a current OpenSSL, for example one installed with a package manager.
@@ -32,7 +32,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: scout
-  namespace: starfleet
+  namespace: starfleet-031-030-03-01
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: 'true'
@@ -74,7 +74,7 @@ The first command prints the `scout` response. The second reports a host name mi
 
 > [!WARNING]
 > - **A certificate with a CN and no SAN.** Modern clients reject it.
-> - **A Secret in the wrong namespace.** It must be in `starfleet`.
+> - **A Secret in the wrong namespace.** It must be in `starfleet-031-030-03-01`.
 > - **Using `curl -k` to check.** It proves nothing about identity.
 
 ## Clean up

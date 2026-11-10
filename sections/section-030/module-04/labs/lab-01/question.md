@@ -5,11 +5,13 @@ exam_objectives:
 ---
 # Require TLS 1.3 And Strict Server Names
 
+Allow about 8 minutes for the tasks.
+
 Security policy now says that the Ingress controller must refuse TLS 1.2 and must refuse server names it has no certificate for. The route `probe.example.test` already works.
 
 ## Starting state
 
-Traefik reads its TLS options from the ConfigMap `traefik-dynamic` in `ingress-system`. The default option sets `minVersion: VersionTLS12`. The Ingress `probe` and its Secret `probe-tls` in `starfleet` work.
+Traefik reads its TLS options from the ConfigMap `traefik-dynamic` in `ingress-system`. The default option sets `minVersion: VersionTLS12`. The Ingress `probe` and its Secret `probe-tls` in `starfleet-031-030-04-01` work.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 

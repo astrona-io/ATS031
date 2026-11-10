@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Pin An Image By Digest And Prove It Runs
 
-The `relay` Deployment in `starfleet` runs `busybox` from a tag. The team wants the Deployment to run the exact image it runs now, whatever the tag points to later.
+Allow about 8 minutes for the tasks.
+
+The `relay` Deployment in `starfleet-031-050-03-02` runs `busybox` from a tag. The team wants the Deployment to run the exact image it runs now, whatever the tag points to later.
 
 ## Starting state
 
@@ -22,7 +24,7 @@ Keep this connection selected. Host-level commands name only the node containers
 
 ## Required result
 
-Change the image of the `relay` Deployment in the `starfleet` namespace from `docker.io/library/busybox:1.37.0` to a reference that ends with `@sha256:<digest>`, where the digest is the one the currently running pod reports in its `imageID`. Keep the busybox repository. Wait for the rollout. Then record the result in a ConfigMap named `image-pin-review` in `starfleet` with the keys `digest` (the value `sha256:<digest>`) and `imageID` (the `imageID` that the new pod reports). The new pod must report an `imageID` with the same digest.
+Change the image of the `relay` Deployment in the `starfleet-031-050-03-02` namespace from `docker.io/library/busybox:1.36.1` to a reference that ends with `@sha256:<digest>`, where the digest is the one the currently running pod reports in its `imageID`. Keep the busybox repository. Wait for the rollout. Then record the result in a ConfigMap named `image-pin-review` in `starfleet-031-050-03-02` with the keys `digest` (the value `sha256:<digest>`) and `imageID` (the `imageID` that the new pod reports). The new pod must report an `imageID` with the same digest.
 
 ## Verify The Result
 

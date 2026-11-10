@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Identify The Forged Signature
 
-Two release notes arrived with detached signatures, one made with GPG and one made with cosign. The `starfleet` team suspects that one file was changed after signing.
+Allow about 8 minutes for the tasks.
+
+Two release notes arrived with detached signatures, one made with GPG and one made with cosign. The Starfleet team suspects that one file was changed after signing.
 
 ## Starting state
 

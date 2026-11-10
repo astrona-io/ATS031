@@ -1,22 +1,22 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: starfleet
+  name: starfleet-031-030-03-02
   labels:
     project: cks
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: outpost
+  name: outpost-031-030-03-02
   labels:
-    project: outpost
+    project: outpost-031-030-03-02
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: web-code
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
 data:
   server.py: |
     from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -53,7 +53,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
 spec:
   replicas: 1
   selector:
@@ -100,7 +100,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
 spec:
   selector:
     app: probe
@@ -113,7 +113,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scout
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
 spec:
   replicas: 1
   selector:
@@ -160,7 +160,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: scout
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
 spec:
   selector:
     app: scout
@@ -173,7 +173,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: beacon
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
 spec:
   replicas: 1
   selector:
@@ -220,7 +220,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: beacon
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
 spec:
   selector:
     app: beacon
@@ -233,7 +233,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: beacon
-  namespace: starfleet
+  namespace: starfleet-031-030-03-02
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: 'true'
@@ -278,6 +278,7 @@ rules:
   - endpoints
   - secrets
   - namespaces
+  - nodes
   verbs:
   - get
   - list

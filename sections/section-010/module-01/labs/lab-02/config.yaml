@@ -24,11 +24,31 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: shuttle-egress-policy
+    description: NetworkPolicy shuttle-egress allows only DNS and probe on TCP 8080
+    type: file
+    source: validation/validate-shuttle-egress-policy.sh
+    points: 1
+  - name: blocked-server
+    description: Pod blocked-server is running with its own label
+    type: file
+    source: validation/validate-blocked-server.sh
+    points: 1
+  - name: shuttle-egress-enforced
+    description: Shuttle resolves and reaches probe and times out on blocked-server
+    type: file
+    source: validation/validate-shuttle-egress-enforced.sh
+    points: 2

@@ -19,12 +19,12 @@ Keep this connection selected throughout the task. Every script supplied by the 
 Read the existing policy and test the paths. The request tests show which pods get through.
 
 ```sh
-kubectl -n outpost get networkpolicy probe-from-starfleet -o yaml
-kubectl -n starfleet exec drifter -- wget -q -T 3 -O- http://probe.outpost/
-kubectl -n outpost exec shuttle -- wget -q -T 3 -O- http://probe.outpost/
+kubectl -n outpost-031-010-03-02 get networkpolicy probe-from-starfleet -o yaml
+kubectl -n starfleet-031-010-03-02 exec drifter -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
+kubectl -n outpost-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
 ```
 
-The `from` list has two entries: one `namespaceSelector` and one `podSelector`, each started by its own dash. The first entry allows every pod in `starfleet`. The second allows every `shuttle` pod in `outpost`. Both requests above are therefore allowed, and the task wants neither. The repair puts both selectors into one entry. Applying the corrected file with the same name replaces the rule list.
+The `from` list has two entries: one `namespaceSelector` and one `podSelector`, each started by its own dash. The first entry allows every pod in `starfleet-031-010-03-02`. The second allows every `shuttle` pod in `outpost-031-010-03-02`. Both requests above are therefore allowed, and the task wants neither. The repair puts both selectors into one entry. Applying the corrected file with the same name replaces the rule list.
 
 Save this as `networkpolicy-probe-from-starfleet.yaml`:
 
@@ -33,7 +33,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: probe-from-starfleet
-  namespace: outpost
+  namespace: outpost-031-010-03-02
 spec:
   podSelector:
     matchLabels:
@@ -44,7 +44,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: starfleet
+          kubernetes.io/metadata.name: starfleet-031-010-03-02
       podSelector:
         matchLabels:
           app: shuttle
@@ -64,10 +64,10 @@ kubectl apply -f networkpolicy-probe-from-starfleet.yaml
 The first request must return the `probe` response. The other three must time out. Run the checks one by one.
 
 ```sh
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe.outpost/
-kubectl -n starfleet exec drifter -- wget -q -T 3 -O- http://probe.outpost/
-kubectl -n outpost exec shuttle -- wget -q -T 3 -O- http://probe.outpost/
-kubectl -n dock exec shuttle -- wget -q -T 3 -O- http://probe.outpost/
+kubectl -n starfleet-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
+kubectl -n starfleet-031-010-03-02 exec drifter -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
+kubectl -n outpost-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
+kubectl -n dock-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
 ```
 
 After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-03-02`.

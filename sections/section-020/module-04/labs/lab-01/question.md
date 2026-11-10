@@ -6,11 +6,13 @@ exam_objectives:
 ---
 # Enable Encryption At Rest For Secrets
 
-The security team found that the Secret `launch-code` in `starfleet` is stored in clear text in etcd. Enable encryption at rest for Secrets without stopping the cluster.
+Allow about 12 minutes for the tasks.
+
+The security team found that the Secret `launch-code` in `starfleet-031-020-04-01` is stored in clear text in etcd. Enable encryption at rest for Secrets without stopping the cluster.
 
 ## Starting state
 
-The isolated environment has two healthy probe replicas, an internal Service, two client Pods and the Secret `launch-code` in `starfleet`. The API server has no encryption configuration. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+The isolated environment has two healthy probe replicas, an internal Service, two client Pods and the Secret `launch-code` in `starfleet-031-020-04-01`. The API server has no encryption configuration. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
 Use a host shell with the private kubeconfig for this independent kind environment.
 

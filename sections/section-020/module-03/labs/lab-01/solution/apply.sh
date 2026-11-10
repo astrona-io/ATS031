@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-031-lab-020-03-01" ]]; then
+context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-031-lab-020-03-01}"
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-020-03-01}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
 solution_directory="$lab_directory/solution"
-node_name="astro-ats-031-lab-020-03-01-control-plane"
+node_name="$cluster-control-plane"
 python3 "$solution_directory/configure-audit.py"
 api_ready=0
 for attempt in $(seq 1 80); do

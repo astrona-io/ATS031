@@ -24,11 +24,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: api-profiling-disabled
+    description: The API server runs with --profiling=false
+    type: file
+    source: validation/validate-api-profiling-disabled.sh
+    points: 2
+  - name: benchmark-review-record
+    description: ConfigMap benchmark-review records the corrected control
+    type: file
+    source: validation/validate-benchmark-review-record.sh
+    points: 1

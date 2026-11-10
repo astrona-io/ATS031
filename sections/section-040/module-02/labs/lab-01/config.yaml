@@ -26,11 +26,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: metadata-blocked
+    description: drifter cannot reach 169.254.169.254 while other egress still works
+    type: file
+    source: validation/validate-metadata-blocked.sh
+    points: 1
+  - name: whole-namespace
+    description: An egress policy selects every pod in drifter's namespace
+    type: file
+    source: validation/validate-whole-namespace.sh
+    points: 1

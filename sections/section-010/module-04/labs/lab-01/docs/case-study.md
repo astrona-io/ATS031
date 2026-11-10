@@ -5,4 +5,4 @@ exam_objectives:
 ---
 # Starting Environment
 
-The `starfleet` namespace holds a default-deny baseline and three policies with mistakes. The `scout`, `beacon` and `probe` workloads and the `drifter` pod in `outpost` are ready.
+The `starfleet-031-010-04-01` namespace holds a default-deny baseline and three policies with mistakes. The `scout`, `beacon` and `probe` workloads and the `drifter` pod in `outpost-031-010-04-01` are ready.

@@ -17,7 +17,7 @@ WORKER=astro-ats-031-lab-050-03-02-worker
 Read the `imageID` of the running pod. The text after `@sha256:` is the digest to use:
 
 ```sh
-kubectl -n starfleet get pods -l app=relay -o jsonpath='{.items[0].status.containerStatuses[0].imageID}{"\n"}'
+kubectl -n starfleet-031-050-03-02 get pods -l app=relay -o jsonpath='{.items[0].status.containerStatuses[0].imageID}{"\n"}'
 ```
 
 If the value has the form `docker.io/library/busybox@sha256:<digest>`, copy the digest. If it shows only `sha256:` followed by a value, the runtime does not report a registry digest for this image and a pin cannot be built from it; in that case read the digest column of `crictl images --digests` on the node that runs the pod.
@@ -25,14 +25,14 @@ If the value has the form `docker.io/library/busybox@sha256:<digest>`, copy the 
 Pin the Deployment to the digest. Replace `<digest>` with the 64 characters:
 
 ```sh
-kubectl -n starfleet set image deployment/relay relay=docker.io/library/busybox:1.37.0@sha256:<digest>
-kubectl -n starfleet rollout status deployment/relay
+kubectl -n starfleet-031-050-03-02 set image deployment/relay relay=docker.io/library/busybox:1.36.1@sha256:<digest>
+kubectl -n starfleet-031-050-03-02 rollout status deployment/relay
 ```
 
 Read the `imageID` of the new pod and compare its digest with the one you pinned:
 
 ```sh
-kubectl -n starfleet get pods -l app=relay -o jsonpath='{.items[0].status.containerStatuses[0].imageID}{"\n"}'
+kubectl -n starfleet-031-050-03-02 get pods -l app=relay -o jsonpath='{.items[0].status.containerStatuses[0].imageID}{"\n"}'
 ```
 
 Record the review. Save this as `configmap-image-pin-review.yaml`, with your own values:
@@ -42,7 +42,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: image-pin-review
-  namespace: starfleet
+  namespace: starfleet-031-050-03-02
 data:
   digest: sha256:<digest>
   imageID: <imageID>

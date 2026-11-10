@@ -17,19 +17,19 @@ Keep this connection selected throughout the task. Every script supplied by the 
 ## Find the cause
 
 ```sh
-kubectl -n starfleet get ingress beacon -o jsonpath='{.spec.tls[0].secretName}{"\n"}'
-kubectl -n starfleet get secret
+kubectl -n starfleet-031-030-03-02 get ingress beacon -o jsonpath='{.spec.tls[0].secretName}{"\n"}'
+kubectl -n starfleet-031-030-03-02 get secret
 kubectl get secret --all-namespaces | grep beacon-tls
-kubectl -n outpost get secret beacon-tls -o jsonpath='{.data.tls\.crt}' | base64 --decode | openssl x509 -noout -subject -ext subjectAltName
+kubectl -n outpost-031-030-03-02 get secret beacon-tls -o jsonpath='{.data.tls\.crt}' | base64 --decode | openssl x509 -noout -subject -ext subjectAltName
 ```
 
-The Ingress names `beacon-tls`, the Secret does not exist in `starfleet` and the copy in `outpost` has no SAN extension. An Ingress cannot use a Secret from another namespace, and a certificate without a SAN is not accepted by current clients.
+The Ingress names `beacon-tls`, the Secret does not exist in `starfleet-031-030-03-02` and the copy in `outpost-031-030-03-02` has no SAN extension. An Ingress cannot use a Secret from another namespace, and a certificate without a SAN is not accepted by current clients.
 
 ## Create the correct Secret
 
 ```sh
 openssl req -x509 -nodes -newkey rsa:2048 -days 30 -keyout beacon.key -out beacon.crt -subj "/CN=beacon.example.test" -addext "subjectAltName=DNS:beacon.example.test"
-kubectl -n starfleet create secret tls beacon-tls --cert=beacon.crt --key=beacon.key
+kubectl -n starfleet-031-030-03-02 create secret tls beacon-tls --cert=beacon.crt --key=beacon.key
 ```
 
 ## Verify
@@ -43,7 +43,7 @@ The command prints the `beacon` response. The Ingress itself needs no change, be
 ## Common pitfalls
 
 > [!WARNING]
-> - **Copying the Secret from `outpost`.** Its certificate has no SAN.
+> - **Copying the Secret from `outpost-031-030-03-02`.** Its certificate has no SAN.
 > - **Editing the Ingress to a new Secret name.** The required result keeps `beacon-tls`.
 > - **Waiting without checking.** If the response is still wrong, read the Traefik log.
 

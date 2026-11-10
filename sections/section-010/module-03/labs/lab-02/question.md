@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Repair A Two-Entry Peer Rule
 
-The `shuttle` pod in `starfleet` must reach the `probe` pods in `outpost`, but the policy that guards them lets in more pods than intended.
+Allow about 7 minutes for the tasks.
+
+The `shuttle` pod in `starfleet-031-010-03-02` must reach the `probe` pods in `outpost-031-010-03-02`, but the policy that guards them lets in more pods than intended.
 
 ## Objective
 
@@ -13,7 +15,7 @@ Find why an existing policy admits too many peers, repair it so that only the in
 
 ## Starting state
 
-The `starfleet` and `outpost` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The `dock` namespace has a `shuttle` pod and a `telemetry` pod. The policy `probe-from-starfleet` already exists in `outpost`. It selects the `probe` pods and allows TCP port 8080.
+The `starfleet-031-010-03-02` and `outpost-031-010-03-02` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The `dock-031-010-03-02` namespace has a `shuttle` pod and a `telemetry` pod. The policy `probe-from-starfleet` already exists in `outpost-031-010-03-02`. It selects the `probe` pods and allows TCP port 8080.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
@@ -26,9 +28,9 @@ Keep this connection selected throughout the task. Every script supplied by the 
 
 ## Required result
 
-Repair the existing NetworkPolicy `probe-from-starfleet` in the `outpost` namespace. After the repair it keeps the same name and the same pod selector, covers ingress only, and has one rule with one `from` entry. That entry holds a `namespaceSelector` for the namespace named `starfleet` (use the label `kubernetes.io/metadata.name`) and a `podSelector` for pods labelled `app: shuttle`, in the same entry. The rule allows TCP port 8080 only.
+Repair the existing NetworkPolicy `probe-from-starfleet` in the `outpost-031-010-03-02` namespace. After the repair it keeps the same name and the same pod selector, covers ingress only, and has one rule with one `from` entry. That entry holds a `namespaceSelector` for the namespace named `starfleet-031-010-03-02` (use the label `kubernetes.io/metadata.name`) and a `podSelector` for pods labelled `app: shuttle`, in the same entry. The rule allows TCP port 8080 only.
 
-Then the following must hold. The `shuttle` pod in `starfleet` gets the `probe` response from `http://probe.outpost/`. The `drifter` pod in `starfleet`, the `shuttle` pod in `outpost` and the `shuttle` pod in `dock` all time out when they request the same address. Do not create a second policy.
+Then the following must hold. The `shuttle` pod in `starfleet-031-010-03-02` gets the `probe` response from `http://probe.outpost-031-010-03-02/`. The `drifter` pod in `starfleet-031-010-03-02`, the `shuttle` pod in `outpost-031-010-03-02` and the `shuttle` pod in `dock-031-010-03-02` all time out when they request the same address. Do not create a second policy.
 
 ## Verify The Result
 

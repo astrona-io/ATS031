@@ -1,6 +1,7 @@
-certificates = []
-
-script = r"""
+# Live checks: Python run inside the probe Pod against the Traefik Service.
+# HELPERS is shared by every check; live() runs one check and reports the
+# first failed assertion.
+HELPERS = r"""
 import base64, socket, ssl, sys
 
 TRAEFIK = 'traefik.ingress-system.svc'
@@ -47,14 +48,36 @@ pems = [base64.b64decode(argument).decode() for argument in sys.argv[1:]]
 def status_of(response):
     return response.split('\r\n')[0]
 
+def answer(host, pem):
+    try:
+        return https_get(host, pem)
+    except (ssl.SSLError, OSError) as error:
+        raise AssertionError('https://%s did not complete a verified TLS handshake: %s' % (host, getattr(error, 'reason', None) or error))
+"""
+
+
+def live(body, certificates=()):
+    result = command(['kubectl', '-n', NAMESPACE, 'exec', 'deployment/probe', '--', 'python', '-c',
+                      HELPERS + body + "\nprint('verified')\n", *certificates], success=False)
+    if result.returncode == 0 and result.stdout.strip() == 'verified':
+        return
+    lines = [line for line in (result.stderr + result.stdout).splitlines()
+             if line.strip() and not line.startswith('command terminated with exit code')]
+    raise AssertionError(lines[-1].removeprefix('AssertionError: ') if lines else 'Live check failed without output')
+
+
+def certificate(secret):
+    """The base64 tls.crt of a Secret in the lab namespace, or fail with a reason."""
+    result = command(['kubectl', '-n', NAMESPACE, 'get', 'secret', secret, '-o', 'jsonpath={.data.tls\\.crt}'], success=False)
+    assert result.returncode == 0 and result.stdout.strip(), 'The TLS Secret ' + secret + ' must exist with a certificate'
+    return result.stdout.strip()
+
+if wants('path-routing'):
+    live(r"""
 for path, application in (('/probe', 'probe'), ('/scout', 'scout')):
     response = http_get('fleet.local', path)
-    assert ' 200 ' in status_of(response) + ' ', 'Expected 200 for ' + path
-    assert 'app=' + application + ' ' in response, 'Wrong backend for ' + path
+    assert ' 200 ' in status_of(response) + ' ', 'fleet.local' + path + ' must answer 200'
+    assert 'app=' + application + ' ' in response, 'fleet.local' + path + ' must reach the Service ' + application
 assert ' 404 ' in status_of(http_get('other.local', '/probe')) + ' ', 'A different host must not match'
 assert ' 404 ' in status_of(http_get('fleet.local', '/other')) + ' ', 'An unknown path must not match'
-print('verified')
-
-"""
-output = kubectl('-n', 'starfleet', 'exec', 'deployment/probe', '--', 'python', '-c', script, *certificates)
-assert output == 'verified', 'Live verification failed: ' + output
+""")

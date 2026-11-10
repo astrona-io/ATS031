@@ -5,4 +5,4 @@ exam_objectives:
 ---
 # Starting Environment
 
-The `starfleet` and `outpost` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The policy `probe-from-starfleet` exists in `outpost` with two list entries.
+The `starfleet-031-010-03-02` and `outpost-031-010-03-02` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The policy `probe-from-starfleet` exists in `outpost-031-010-03-02` with two list entries.

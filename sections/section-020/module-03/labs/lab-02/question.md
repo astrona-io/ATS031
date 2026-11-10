@@ -6,11 +6,13 @@ exam_objectives:
 ---
 # Disable Profiling And Restrict The API Server Manifest
 
-A benchmark run on the `starfleet` cluster reports two failing checks for the API server: profiling and the permissions of its manifest.
+Allow about 8 minutes for the tasks.
+
+A benchmark run on this cluster reports two failing checks for the API server: profiling and the permissions of its manifest.
 
 ## Starting state
 
-The kind cluster has two healthy `probe` replicas and a `shuttle` client pod. The API server runs with profiling at its default value, and its static pod manifest has mode `644`. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
+The kind cluster has two healthy `probe` replicas and a `shuttle` client pod in the `starfleet-031-020-03-02` namespace. The API server runs with profiling at its default value, and its static pod manifest has mode `644`. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
 
 Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 

@@ -23,7 +23,7 @@ The isolated environment has two healthy probe replicas, an internal Service and
 Inspect the current objects before changing them:
 
 ```sh
-kubectl -n starfleet get pods -o wide
+kubectl -n starfleet-031-040-01-01 get pods -o wide
 kubectl get nodes -o wide
 ```
 
@@ -36,7 +36,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: metadata-simulator
-  namespace: starfleet
+  namespace: starfleet-031-040-01-01
   labels:
     app: metadata-simulator
 spec:
@@ -54,7 +54,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: shuttle-isolation
-  namespace: starfleet
+  namespace: starfleet-031-040-01-01
 spec:
   podSelector:
     matchLabels:
@@ -94,8 +94,8 @@ kubectl apply -f pod-metadata-simulator.yaml
 Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
 
 ```sh
-kubectl -n starfleet wait --for=condition=Ready pod/metadata-simulator --timeout=180s
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-031-040-01-01 wait --for=condition=Ready pod/metadata-simulator --timeout=180s
+kubectl -n starfleet-031-040-01-01 exec shuttle -- wget -q -T 3 -O- http://probe/
 ```
 
 Separate permitted application dependencies from a metadata-style endpoint in the private network. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.

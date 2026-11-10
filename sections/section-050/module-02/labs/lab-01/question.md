@@ -5,7 +5,9 @@ exam_objectives:
 ---
 # Find The Binary That Fails Verification
 
-The release team staged the three binaries `kubectl`, `kubeadm` and `kubelet` for the `starfleet` clusters. Each has a published checksum file. One of the three was changed after its checksum was published.
+Allow about 6 minutes for the tasks.
+
+The release team staged the three binaries `kubectl`, `kubeadm` and `kubelet` for the Starfleet clusters. Each has a published checksum file. One of the three was changed after its checksum was published.
 
 ## Starting state
 

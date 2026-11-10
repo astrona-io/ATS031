@@ -24,7 +24,7 @@ The isolated environment has two healthy probe replicas, an internal Service and
 Inspect the current objects before changing them:
 
 ```sh
-kubectl -n starfleet get pods -o wide
+kubectl -n starfleet-031-020-01-01 get pods -o wide
 kubectl get nodes -o wide
 ```
 
@@ -37,7 +37,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: benchmark-review
-  namespace: starfleet
+  namespace: starfleet-031-020-01-01
 data:
   component: kube-apiserver
   control: disable-profiling
@@ -94,7 +94,7 @@ Observe the actual result. A denied request returns a nonzero status when the de
 
 ```sh
 kubectl get --raw=/readyz
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-031-020-01-01 exec shuttle -- wget -q -T 3 -O- http://probe/
 ```
 
 Review and correct one effective control-plane setting while keeping API access available. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.

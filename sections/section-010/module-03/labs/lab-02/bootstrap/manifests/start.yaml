@@ -1,23 +1,23 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: starfleet
+  name: starfleet-031-010-03-02
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: outpost
+  name: outpost-031-010-03-02
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: dock
+  name: dock-031-010-03-02
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: probe-code
-  namespace: starfleet
+  namespace: starfleet-031-010-03-02
 data:
   server.py: "from http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib\
     \ import Path\nimport os\nimport socket\n\nclass Handler(BaseHTTPRequestHandler):\n\
@@ -34,7 +34,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-031-010-03-02
 spec:
   replicas: 2
   selector:
@@ -83,7 +83,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: probe
-  namespace: starfleet
+  namespace: starfleet-031-010-03-02
 spec:
   selector:
     app: probe
@@ -97,7 +97,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: probe-code
-  namespace: outpost
+  namespace: outpost-031-010-03-02
 data:
   server.py: "from http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib\
     \ import Path\nimport os\nimport socket\n\nclass Handler(BaseHTTPRequestHandler):\n\
@@ -114,7 +114,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: probe
-  namespace: outpost
+  namespace: outpost-031-010-03-02
 spec:
   replicas: 2
   selector:
@@ -163,7 +163,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: probe
-  namespace: outpost
+  namespace: outpost-031-010-03-02
 spec:
   selector:
     app: probe
@@ -177,7 +177,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: shuttle
-  namespace: starfleet
+  namespace: starfleet-031-010-03-02
   labels:
     app: shuttle
 spec:
@@ -194,7 +194,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: drifter
-  namespace: starfleet
+  namespace: starfleet-031-010-03-02
   labels:
     app: drifter
 spec:
@@ -211,7 +211,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: shuttle
-  namespace: outpost
+  namespace: outpost-031-010-03-02
   labels:
     app: shuttle
 spec:
@@ -228,7 +228,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: drifter
-  namespace: outpost
+  namespace: outpost-031-010-03-02
   labels:
     app: drifter
 spec:
@@ -245,7 +245,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: shuttle
-  namespace: dock
+  namespace: dock-031-010-03-02
   labels:
     app: shuttle
 spec:
@@ -262,7 +262,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: telemetry-code
-  namespace: dock
+  namespace: dock-031-010-03-02
 data:
   server.py: |
     import socket
@@ -292,7 +292,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: telemetry
-  namespace: dock
+  namespace: dock-031-010-03-02
   labels:
     app: telemetry
 spec:
@@ -323,7 +323,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: probe-from-starfleet
-  namespace: outpost
+  namespace: outpost-031-010-03-02
 spec:
   podSelector:
     matchLabels:
@@ -334,7 +334,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: starfleet
+          kubernetes.io/metadata.name: starfleet-031-010-03-02
     - podSelector:
         matchLabels:
           app: shuttle

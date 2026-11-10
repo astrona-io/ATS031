@@ -57,7 +57,6 @@ modules:
   - type: lab
     title: Allow One Peer And Deny Another
     path: sections/section-010/module-01/labs/lab-01
-    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-ingress
@@ -79,7 +78,6 @@ modules:
   - type: lab
     title: Allow DNS And One Application Dependency
     path: sections/section-010/module-01/labs/lab-02
-    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-egress
@@ -125,7 +123,6 @@ modules:
   - type: lab
     title: Apply A Default-Deny Baseline And Allow One Path
     path: sections/section-010/module-02/labs/lab-01
-    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-default-deny
@@ -167,7 +164,6 @@ modules:
   - type: lab
     title: Allow One Pod From Another Namespace
     path: sections/section-010/module-03/labs/lab-01
-    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: networkpolicy-peers
@@ -186,7 +182,6 @@ modules:
   - type: lab
     title: Repair A Two-Entry Peer Rule
     path: sections/section-010/module-03/labs/lab-02
-    examScope: namespace
     difficulty: intermediate
     estimated_duration: 20m
     topic: networkpolicy-peers
@@ -240,7 +235,6 @@ modules:
   - type: lab
     title: Repair A Broken Policy Set
     path: sections/section-010/module-04/labs/lab-01
-    examScope: namespace
     difficulty: advanced
     estimated_duration: 35m
     topic: networkpolicy-troubleshooting
@@ -313,6 +307,7 @@ modules:
   - type: lab
     title: Disable API Server Profiling In A Private Node
     path: sections/section-020/module-01/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: api-profiling
@@ -358,6 +353,7 @@ modules:
   - type: lab
     title: Save The Failing API Server Check Ids
     path: sections/section-020/module-02/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: kube-bench-master
@@ -402,6 +398,7 @@ modules:
   - type: lab
     title: Enable Audit Logging On The API Server
     path: sections/section-020/module-03/labs/lab-01
+    examScope: cluster
     difficulty: advanced
     estimated_duration: 30m
     topic: api-audit-logging
@@ -426,6 +423,7 @@ modules:
   - type: lab
     title: Disable Profiling And Restrict The API Server Manifest
     path: sections/section-020/module-03/labs/lab-02
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: api-profiling-permissions
@@ -471,6 +469,7 @@ modules:
   - type: lab
     title: Enable Encryption At Rest For Secrets
     path: sections/section-020/module-04/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 30m
     topic: etcd-encryption
@@ -511,6 +510,7 @@ modules:
   - type: lab
     title: Close Anonymous And Open Access On The Kubelet
     path: sections/section-020/module-05/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: kubelet-authentication
@@ -541,6 +541,7 @@ modules:
   - type: lab
     title: Remediate Five Kubelet Benchmark Findings
     path: sections/section-020/module-05/labs/lab-02
+    examScope: cluster
     difficulty: advanced
     estimated_duration: 30m
     topic: kubelet-hardening
@@ -1072,6 +1073,7 @@ modules:
   - type: lab
     title: Verify Signed Artifact Checksums
     path: sections/section-050/module-01/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: artifact-authenticity
@@ -1113,6 +1115,7 @@ modules:
   - type: lab
     title: Find The Binary That Fails Verification
     path: sections/section-050/module-02/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 20m
     topic: release-binary-verification
@@ -1137,6 +1140,7 @@ modules:
   - type: lab
     title: Verify The Running kubelet Against A Release Checksum
     path: sections/section-050/module-02/labs/lab-02
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 25m
     topic: release-binary-verification
@@ -1175,6 +1179,7 @@ modules:
   - type: lab
     title: Identify The Forged Signature
     path: sections/section-050/module-03/labs/lab-01
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 20m
     topic: signature-verification
@@ -1199,6 +1204,7 @@ modules:
   - type: lab
     title: Pin An Image By Digest And Prove It Runs
     path: sections/section-050/module-03/labs/lab-02
+    examScope: namespace
     difficulty: intermediate
     estimated_duration: 25m
     topic: image-digest-pinning

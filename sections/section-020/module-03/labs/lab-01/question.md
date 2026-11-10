@@ -6,11 +6,13 @@ exam_objectives:
 ---
 # Enable Audit Logging On The API Server
 
-The API server of the `starfleet` cluster keeps no record of requests. Turn on audit logging with the staged policy and prove that an event is written.
+Allow about 15 minutes for the tasks.
+
+The API server of this cluster keeps no record of requests. Turn on audit logging with the staged policy and prove that an event is written.
 
 ## Starting state
 
-The kind cluster has two healthy `probe` replicas, a `shuttle` client pod, and a control plane node. The API server runs without an audit policy and without an audit log. A policy file is staged on the control plane node at `/opt/training/audit-policy.yaml`, and no component uses it. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
+The kind cluster has two healthy `probe` replicas and a `shuttle` client pod in the `starfleet-031-020-03-01` namespace, and a control plane node. The API server runs without an audit policy and without an audit log. A policy file is staged on the control plane node at `/opt/training/audit-policy.yaml`, and no component uses it. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
 
 Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 

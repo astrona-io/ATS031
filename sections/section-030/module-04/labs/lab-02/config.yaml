@@ -23,11 +23,36 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: alpha-ingress
+    description: https://alpha.example.test is served with a matching certificate
+    type: file
+    source: validation/validate-alpha-ingress.sh
+    points: 1
+  - name: bravo-ingress
+    description: https://bravo.example.test is served with a matching certificate
+    type: file
+    source: validation/validate-bravo-ingress.sh
+    points: 1
+  - name: charlie-ingress
+    description: https://charlie.example.test is served with a matching certificate
+    type: file
+    source: validation/validate-charlie-ingress.sh
+    points: 1
+  - name: delta-ingress
+    description: https://delta.example.test is served with a matching certificate
+    type: file
+    source: validation/validate-delta-ingress.sh
+    points: 1

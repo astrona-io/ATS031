@@ -18,8 +18,8 @@ Keep this connection selected throughout the task. Every script supplied by the 
 
 ```sh
 kubectl get ingressclass
-kubectl -n starfleet get service
-kubectl -n starfleet get ingress
+kubectl -n starfleet-031-030-02-01 get service
+kubectl -n starfleet-031-030-02-01 get ingress
 ```
 
 The class `traefik` exists, both Services listen on port 80 and no Ingress is present.
@@ -33,7 +33,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: fleet
-  namespace: starfleet
+  namespace: starfleet-031-030-02-01
 spec:
   ingressClassName: traefik
   rules:

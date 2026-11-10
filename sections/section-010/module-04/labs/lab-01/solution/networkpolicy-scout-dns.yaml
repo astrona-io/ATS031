@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: scout-dns
-  namespace: starfleet
+  namespace: starfleet-031-010-04-01
 spec:
   podSelector:
     matchLabels:

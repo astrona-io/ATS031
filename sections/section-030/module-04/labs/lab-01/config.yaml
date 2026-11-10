@@ -23,11 +23,26 @@ teardown:
   keepCluster: false
 testing:
   init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-contract-and-behavior
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: tls13-minimum
+    description: The default TLS option refuses TLS 1.2
+    type: file
+    source: validation/validate-tls13-minimum.sh
+    points: 1
+  - name: sni-strict
+    description: The default TLS option refuses an unknown server name
+    type: file
+    source: validation/validate-sni-strict.sh
+    points: 1

@@ -79,7 +79,7 @@ The file should show one check number on each line, all starting with `1.2.`. If
 Create the ConfigMap from the file. The key must be `ids`:
 
 ```sh
-kubectl -n starfleet create configmap failing-checks --from-file=ids=failing-1-2.txt
+kubectl -n starfleet-031-020-02-01 create configmap failing-checks --from-file=ids=failing-1-2.txt
 ```
 
 ## Verify The Result
@@ -87,7 +87,7 @@ kubectl -n starfleet create configmap failing-checks --from-file=ids=failing-1-2
 Read the ConfigMap back and compare it with the file:
 
 ```sh
-kubectl -n starfleet get configmap failing-checks -o jsonpath='{.data.ids}'
+kubectl -n starfleet-031-020-02-01 get configmap failing-checks -o jsonpath='{.data.ids}'
 ```
 
 Do not change any cluster setting before you submit, because the grader compares your list with a new audit run. The JSON route with `jq` gives the same list.

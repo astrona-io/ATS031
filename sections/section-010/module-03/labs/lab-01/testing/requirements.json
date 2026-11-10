@@ -1,16 +1,18 @@
 {
   "context": "kind-astro-ats-031-lab-010-03-01",
+  "cluster": "astro-ats-031-lab-010-03-01",
+  "namespace": "starfleet-031-010-03-01",
   "resources": [
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-03-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-03-01"
         },
         "spec": {
           "replicas": 2,
@@ -27,13 +29,13 @@
     {
       "kind": "deployment",
       "name": "probe",
-      "namespace": "outpost",
+      "namespace": "outpost-031-010-03-01",
       "expected": {
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
           "name": "probe",
-          "namespace": "outpost"
+          "namespace": "outpost-031-010-03-01"
         },
         "spec": {
           "replicas": 2,
@@ -50,13 +52,13 @@
     {
       "kind": "pod",
       "name": "shuttle",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "shuttle",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-010-03-01",
           "labels": {
             "app": "shuttle"
           }
@@ -67,13 +69,13 @@
     {
       "kind": "pod",
       "name": "drifter",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "drifter",
-          "namespace": "starfleet",
+          "namespace": "starfleet-031-010-03-01",
           "labels": {
             "app": "drifter"
           }
@@ -84,13 +86,13 @@
     {
       "kind": "pod",
       "name": "shuttle",
-      "namespace": "outpost",
+      "namespace": "outpost-031-010-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "shuttle",
-          "namespace": "outpost",
+          "namespace": "outpost-031-010-03-01",
           "labels": {
             "app": "shuttle"
           }
@@ -101,13 +103,13 @@
     {
       "kind": "pod",
       "name": "drifter",
-      "namespace": "outpost",
+      "namespace": "outpost-031-010-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "drifter",
-          "namespace": "outpost",
+          "namespace": "outpost-031-010-03-01",
           "labels": {
             "app": "drifter"
           }
@@ -118,13 +120,13 @@
     {
       "kind": "pod",
       "name": "shuttle",
-      "namespace": "dock",
+      "namespace": "dock-031-010-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "shuttle",
-          "namespace": "dock",
+          "namespace": "dock-031-010-03-01",
           "labels": {
             "app": "shuttle"
           }
@@ -135,13 +137,13 @@
     {
       "kind": "pod",
       "name": "telemetry",
-      "namespace": "dock",
+      "namespace": "dock-031-010-03-01",
       "expected": {
         "apiVersion": "v1",
         "kind": "Pod",
         "metadata": {
           "name": "telemetry",
-          "namespace": "dock",
+          "namespace": "dock-031-010-03-01",
           "labels": {
             "app": "telemetry"
           }
@@ -152,13 +154,13 @@
     {
       "kind": "networkpolicy",
       "name": "probe-from-outpost",
-      "namespace": "starfleet",
+      "namespace": "starfleet-031-010-03-01",
       "expected": {
         "apiVersion": "networking.k8s.io/v1",
         "kind": "NetworkPolicy",
         "metadata": {
           "name": "probe-from-outpost",
-          "namespace": "starfleet"
+          "namespace": "starfleet-031-010-03-01"
         },
         "spec": {
           "podSelector": {
@@ -175,7 +177,7 @@
                 {
                   "namespaceSelector": {
                     "matchLabels": {
-                      "kubernetes.io/metadata.name": "outpost"
+                      "kubernetes.io/metadata.name": "outpost-031-010-03-01"
                     }
                   },
                   "podSelector": {
@@ -194,7 +196,8 @@
             }
           ]
         }
-      }
+      },
+      "outcome": "probe-from-outpost-policy"
     }
   ],
   "behavior": [
@@ -202,7 +205,7 @@
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-031-010-03-01",
         "exec",
         "shuttle",
         "--",
@@ -211,17 +214,18 @@
         "-T",
         "3",
         "-O-",
-        "http://probe.starfleet/"
+        "http://probe.starfleet-031-010-03-01/"
       ],
       "contains": [
         "version=v1"
-      ]
+      ],
+      "outcome": "only-outpost-shuttle"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "outpost",
+        "outpost-031-010-03-01",
         "exec",
         "drifter",
         "--",
@@ -230,18 +234,19 @@
         "-T",
         "3",
         "-O-",
-        "http://probe.starfleet/"
+        "http://probe.starfleet-031-010-03-01/"
       ],
       "denied": true,
       "failure_markers": [
         "timed out"
-      ]
+      ],
+      "outcome": "only-outpost-shuttle"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "dock",
+        "dock-031-010-03-01",
         "exec",
         "shuttle",
         "--",
@@ -250,18 +255,19 @@
         "-T",
         "3",
         "-O-",
-        "http://probe.starfleet/"
+        "http://probe.starfleet-031-010-03-01/"
       ],
       "denied": true,
       "failure_markers": [
         "timed out"
-      ]
+      ],
+      "outcome": "only-outpost-shuttle"
     },
     {
       "args": [
         "kubectl",
         "-n",
-        "starfleet",
+        "starfleet-031-010-03-01",
         "exec",
         "shuttle",
         "--",
@@ -275,7 +281,8 @@
       "denied": true,
       "failure_markers": [
         "timed out"
-      ]
+      ],
+      "outcome": "only-outpost-shuttle"
     }
   ]
 }

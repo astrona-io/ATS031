@@ -1,54 +1,6 @@
 {
   "context": "kind-astro-ats-031-lab-040-02-02",
-  "checks": [
-    {
-      "type": "http",
-      "from": "starfleet/agent",
-      "url": "http://169.254.169.254/latest/meta-data/",
-      "expect": "200",
-      "label": "agent must reach the metadata address"
-    },
-    {
-      "type": "http",
-      "from": "starfleet/shuttle",
-      "url": "http://169.254.169.254/latest/meta-data/",
-      "expect": "denied",
-      "label": "shuttle must not reach the metadata address"
-    },
-    {
-      "type": "http",
-      "from": "starfleet/shuttle",
-      "url": "http://probe/",
-      "expect": "200",
-      "label": "shuttle must reach the probe Service"
-    },
-    {
-      "type": "http",
-      "from": "starfleet/agent",
-      "url": "http://probe/",
-      "expect": "200",
-      "label": "agent must reach the probe Service"
-    },
-    {
-      "type": "http",
-      "from": "outpost/drifter",
-      "url": "http://169.254.169.254/latest/meta-data/",
-      "expect": "200",
-      "label": "outpost must stay unchanged"
-    },
-    {
-      "type": "labels",
-      "pod": "starfleet/agent",
-      "has": {
-        "role": "cloud-agent"
-      }
-    },
-    {
-      "type": "labels",
-      "pod": "starfleet/shuttle",
-      "lacks": [
-        "role"
-      ]
-    }
-  ]
+  "cluster": "astro-ats-031-lab-040-02-02",
+  "namespace": "starfleet-031-040-02-02",
+  "resources": []
 }

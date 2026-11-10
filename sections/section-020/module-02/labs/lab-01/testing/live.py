@@ -31,8 +31,14 @@ def _failing_ids_now():
     walk(report)
     return {item for item in found if re.fullmatch(r'1\.2\.\d+', item)}
 
-_saved = get('configmap', 'failing-checks')
-_learner = {line.strip() for line in _saved.get('data', {}).get('ids', '').splitlines() if line.strip()}
-assert _learner, 'The ConfigMap key ids is empty'
-assert all(re.fullmatch(r'1\.2\.\d+', item) for item in _learner), 'The list may hold only 1.2.x check ids'
-assert _learner == _failing_ids_now(), 'The saved list differs from the failing 1.2.x checks of the control plane'
+def _learner_ids():
+    _saved = get('configmap', 'failing-checks')
+    _learner = {line.strip() for line in _saved.get('data', {}).get('ids', '').splitlines() if line.strip()}
+    assert _learner, 'The ConfigMap key ids is empty'
+    assert all(re.fullmatch(r'1\.2\.\d+', item) for item in _learner), 'The list may hold only 1.2.x check ids'
+    return _learner
+
+if wants('failing-checks-saved'):
+    _learner_ids()
+if wants('failing-checks-match'):
+    assert _learner_ids() == _failing_ids_now(), 'The saved list differs from the failing 1.2.x checks of the control plane'

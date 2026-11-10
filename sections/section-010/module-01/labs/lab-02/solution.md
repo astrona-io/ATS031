@@ -21,8 +21,8 @@ The application and client fixtures are healthy. Complete the required change wi
 Inspect the relevant evidence:
 
 ```sh
-kubectl -n starfleet get pods
-kubectl -n starfleet get deployment probe -o yaml
+kubectl -n starfleet-031-010-01-02 get pods
+kubectl -n starfleet-031-010-01-02 get deployment probe -o yaml
 ```
 
 DNS lookup and application traffic are separate dependencies. Both need an allowance when the client is isolated for egress. Namespace and Pod selectors in the same peer item combine their requirements. Test a healthy denied listener as well as the intended Service so an overly broad policy cannot pass.
@@ -35,7 +35,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: blocked-server
-  namespace: starfleet
+  namespace: starfleet-031-010-01-02
   labels:
     app: blocked-server
 spec:
@@ -53,7 +53,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: shuttle-egress
-  namespace: starfleet
+  namespace: starfleet-031-010-01-02
 spec:
   podSelector:
     matchLabels:
@@ -93,9 +93,9 @@ kubectl apply -f pod-blocked-server.yaml
 Observe the actual result. A denied-request command returns a nonzero status when the denial works. Run denial checks separately from a shell sequence that stops on the first nonzero status.
 
 ```sh
-kubectl -n starfleet wait --for=condition=Ready pod/blocked-server --timeout=180s
-kubectl -n starfleet exec shuttle -- nslookup probe.starfleet.svc.cluster.local
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-031-010-01-02 wait --for=condition=Ready pod/blocked-server --timeout=180s
+kubectl -n starfleet-031-010-01-02 exec shuttle -- nslookup probe.starfleet-031-010-01-02.svc.cluster.local
+kubectl -n starfleet-031-010-01-02 exec shuttle -- wget -q -T 3 -O- http://probe/
 ```
 
 Create `shuttle-egress` selecting `app: shuttle`. Allow DNS on TCP and UDP port 53 only to kube-system Pods labelled `k8s-app: kube-dns`, and allow TCP 8080 only to same-namespace Pods labelled `app: probe`. Keep a healthy `blocked-server` Pod with a different label. Shuttle must resolve and reach probe, while a direct request to the running blocked server must time out.
