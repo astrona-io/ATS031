@@ -8,7 +8,10 @@ Nothing is downloaded, and no digest is written in advance.
 """
 import random
 import subprocess
+import os
 import sys
+
+ENGINE = os.environ.get("ASTRONA_CONTAINER_ENGINE") or "podman"
 
 CLUSTER = sys.argv[1]
 MODE = sys.argv[2]
@@ -27,12 +30,12 @@ def run(*args):
 
 assert run("kubectl", "config", "current-context") == CONTEXT, "Select the private environment"
 for name in (CONTROL, WORKER):
-    label = run("podman", "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
+    label = run(ENGINE, "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
     assert label == "astro-" + CLUSTER, "Refusing an unrelated node container"
 
 
 def node(name, script):
-    return run("podman", "exec", name, "sh", "-ec", script)
+    return run(ENGINE, "exec", name, "sh", "-ec", script)
 
 
 # Shell fragment shared by the modes. It sets the version, the node architecture

@@ -33,11 +33,11 @@ The pod address printed by the first command is the address of the node that run
 
 ## See it with a request
 
-The namespace `starfleet` is under a baseline, so a request from `outpost` to any normal pod in `starfleet` times out. Request the `beacon` pod from the unprotected `drifter` pod in `outpost`. The `beacon` pod serves a web page on port 9099.
+The namespace `starfleet` is under a baseline, so a request from `outpost` to any normal pod in `starfleet` times out. Request the `beacon` pod from the unprotected `drifter` pod in `outpost`. The `beacon` pod serves a web page on port 19099.
 
 ```sh
 BEACON_IP=$(kubectl -n starfleet get pod beacon -o jsonpath='{.status.podIP}')
-kubectl -n outpost exec drifter -- wget -q -T 3 -O- "http://$BEACON_IP:9099/"
+kubectl -n outpost exec drifter -- wget -q -T 3 -O- "http://$BEACON_IP:19099/"
 ```
 
 With Calico the request is expected to succeed even though the baseline selects every pod. If your result differs, record it and check how your plugin treats host-networked pods. The lesson holds either way: a baseline is not proof that every workload is closed.
@@ -64,7 +64,7 @@ Apply it and repeat the request:
 
 ```sh
 kubectl apply -f networkpolicy-beacon-deny.yaml
-kubectl -n outpost exec drifter -- wget -q -T 3 -O- "http://$BEACON_IP:9099/"
+kubectl -n outpost exec drifter -- wget -q -T 3 -O- "http://$BEACON_IP:19099/"
 ```
 
 With Calico the request is expected to work as before, because the pod policy does not select the host-networked pod. Remove the policy with `kubectl -n starfleet delete networkpolicy beacon-deny` when you are done.

@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-capstone-010",
+  "cluster": "astro-ats-031-capstone-010",
+  "namespace": "starfleet",
   "resources": [
     {
       "kind": "deployment",
@@ -110,7 +112,8 @@
             "Egress"
           ]
         }
-      }
+      },
+      "outcome": "default-deny-all"
     },
     {
       "kind": "networkpolicy",
@@ -130,7 +133,8 @@
             "Egress"
           ]
         }
-      }
+      },
+      "outcome": "default-deny-all"
     },
     {
       "kind": "networkpolicy",
@@ -150,7 +154,8 @@
             "Egress"
           ]
         }
-      }
+      },
+      "outcome": "default-deny-all"
     },
     {
       "kind": "networkpolicy",
@@ -197,7 +202,8 @@
             }
           ]
         }
-      }
+      },
+      "outcome": "probe-from-outpost"
     }
   ],
   "behavior": [
@@ -218,7 +224,8 @@
       ],
       "contains": [
         "version=v1"
-      ]
+      ],
+      "outcome": "traffic-enforced"
     },
     {
       "args": [
@@ -233,7 +240,8 @@
       ],
       "contains": [
         "dns=ok api=ok"
-      ]
+      ],
+      "outcome": "traffic-enforced"
     }
   ]
 }

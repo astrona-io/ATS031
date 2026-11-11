@@ -5,17 +5,11 @@ exam_objectives:
 ---
 # Repair A Two-Entry Peer Rule
 
-Allow about 7 minutes for the tasks.
+Solve this question on: `terminal`
 
-The `shuttle` pod in `starfleet-031-010-03-02` must reach the `probe` pods in `outpost-031-010-03-02`, but the policy that guards them lets in more pods than intended.
+The `starfleet-031-010-03-02` and `outpost-031-010-03-02` namespaces each run the `probe` Deployment (pods labelled `app: probe`, port 8080) with its `probe` Service, a `shuttle` pod labelled `app: shuttle` and a `drifter` pod. The `dock-031-010-03-02` namespace has a `shuttle` pod and a `telemetry` pod. Calico, the network plugin of this cluster, enforces NetworkPolicy.
 
-## Objective
-
-Find why an existing policy admits too many peers, repair it so that only the intended pod gets through, and prove the result with requests.
-
-## Starting state
-
-The `starfleet-031-010-03-02` and `outpost-031-010-03-02` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The `dock-031-010-03-02` namespace has a `shuttle` pod and a `telemetry` pod. The policy `probe-from-starfleet` already exists in `outpost-031-010-03-02`. It selects the `probe` pods and allows TCP port 8080.
+The `shuttle` pod in `starfleet-031-010-03-02` must reach the `probe` pods in `outpost-031-010-03-02`. The policy `probe-from-starfleet` in `outpost-031-010-03-02` already selects the `probe` pods and allows TCP port 8080, but it lets in more pods than intended.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
@@ -26,12 +20,21 @@ test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-02" ||
 
 Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
 
-## Required result
+Allow about 7 minutes for task work. Cluster startup adds time.
 
-Repair the existing NetworkPolicy `probe-from-starfleet` in the `outpost-031-010-03-02` namespace. After the repair it keeps the same name and the same pod selector, covers ingress only, and has one rule with one `from` entry. That entry holds a `namespaceSelector` for the namespace named `starfleet-031-010-03-02` (use the label `kubernetes.io/metadata.name`) and a `podSelector` for pods labelled `app: shuttle`, in the same entry. The rule allows TCP port 8080 only.
+## Tasks
 
-Then the following must hold. The `shuttle` pod in `starfleet-031-010-03-02` gets the `probe` response from `http://probe.outpost-031-010-03-02/`. The `drifter` pod in `starfleet-031-010-03-02`, the `shuttle` pod in `outpost-031-010-03-02` and the `shuttle` pod in `dock-031-010-03-02` all time out when they request the same address. Do not create a second policy.
+1. Read the NetworkPolicy `probe-from-starfleet` in `outpost-031-010-03-02` and find why it admits too many peers.
+2. Repair `probe-from-starfleet` in place. After the repair it keeps the same name and the same pod selector, covers ingress only, and has one rule with one `from` entry. That entry holds a `namespaceSelector` for the namespace named `starfleet-031-010-03-02` (use the label `kubernetes.io/metadata.name`) and a `podSelector` for pods labelled `app: shuttle`, in the same entry. The rule allows TCP port 8080 only.
+3. Prove the result. The `shuttle` pod in `starfleet-031-010-03-02` gets a response with `version=v1` from `http://probe.outpost-031-010-03-02/`. The `drifter` pod in `starfleet-031-010-03-02`, the `shuttle` pod in `outpost-031-010-03-02` and the `shuttle` pod in `dock-031-010-03-02` all time out when they request the same Service.
 
-## Verify The Result
+## Constraints
 
-The grader checks the stated resource fields and live requests. Wait a few seconds after the last change so the network plugin can update its rules, then repeat your own test requests before you submit. Inspect actual results rather than relying on a sample transcript.
+- Repair the existing policy. Do not create a second policy.
+- Keep every Deployment and pod running and unchanged.
+
+## How the answer is checked
+
+The grader runs two checks. The first reads the NetworkPolicy `probe-from-starfleet` and needs the pod selector `app: probe`, the policy type `Ingress` only, and one rule with exactly one `from` entry that holds both the namespace name `starfleet-031-010-03-02` and the pod label `app: shuttle`, on TCP port 8080. The second sends a request to the `probe` Service in `outpost-031-010-03-02` from four pods: `shuttle` in `starfleet-031-010-03-02` must get `version=v1`, and `drifter` in `starfleet-031-010-03-02`, `shuttle` in `outpost-031-010-03-02` and `shuttle` in `dock-031-010-03-02` must each time out after 3 seconds. Both checks also need both `probe` Deployments fully rolled out and every client pod running and ready.
+
+Hint: two entries in a `from` list are joined with OR, and one entry with two selectors is joined with AND.

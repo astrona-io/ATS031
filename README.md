@@ -30,7 +30,7 @@ Developed reading explains mechanisms, responsible components, examples and limi
 
 ## Author Review
 
-See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [question-bank documentation](ASSESSMENTS.md) and [contribution instructions](CONTRIBUTING.md). No runtime execution is claimed.
+See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [question-bank documentation](ASSESSMENTS.md) and [contribution instructions](CONTRIBUTING.md). Runtime results are recorded in the PR and GitHub Actions.
 
 ## Hands-On Coverage
 
@@ -67,3 +67,10 @@ This course has 19 ungraded module playgrounds, 29 draft independent labs and 5 
 | 050/02 | Verify The Running kubelet Against A Release Checksum |
 | 050/03 | Identify The Forged Signature |
 | 050/03 | Pin An Image By Digest And Prove It Runs |
+
+## Authoring and verification
+
+See [AUTHORING.md](AUTHORING.md) for the lab lifecycle and review workflow, and
+[LAB-COVERAGE.md](LAB-COVERAGE.md) for preparation lessons and graded outcomes.
+
+See [lesson and lab links](LAB-COVERAGE.md) and [remaining practical gaps](COVERAGE-REVIEW.md) for the current assessment scope.

@@ -10,7 +10,6 @@ runtime:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
     - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     nodes:
       workers: 1
 bootstrap:
@@ -25,8 +24,24 @@ testing:
   - name: reference-result
     type: file
     source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: verify-section-050-capstone
+  - name: approved-binaries
+    description: The approved directory holds exactly the verified binary with its manifest digest
     type: file
-    source: validation/validate-completed.sh
+    source: validation/validate-approved-binaries.sh
+    points: 1
+  - name: relay-pinned
+    description: relay runs busybox pinned by digest and its pod runs that digest
+    type: file
+    source: validation/validate-relay-pinned.sh
+    points: 2
+  - name: verification-report
+    description: ConfigMap verification-report records the signature, binaries, kubelet and pinned image
+    type: file
+    source: validation/validate-verification-report.sh
+    points: 1

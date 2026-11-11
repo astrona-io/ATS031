@@ -1,0 +1,288 @@
+version: 1
+labs:
+  sections/section-010/module-01/labs/lab-01:
+    preparation:
+    - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+    - sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
+  sections/section-010/module-01/labs/lab-02:
+    preparation:
+    - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+    - sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+  sections/section-010/module-02/labs/lab-01:
+    preparation:
+    - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+    - sections/section-010/module-02/course-02-deny-all-ingress.md
+    - sections/section-010/module-02/course-03-deny-all-egress-and-its-side-effects.md
+    - sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
+  sections/section-010/module-03/labs/lab-01:
+    preparation:
+    - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+    - sections/section-010/module-03/course-02-cross-namespace-ingress.md
+    - sections/section-010/module-03/course-03-one-entry-versus-two-entries.md
+  sections/section-010/module-03/labs/lab-02:
+    preparation:
+    - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+    - sections/section-010/module-03/course-02-cross-namespace-ingress.md
+    - sections/section-010/module-03/course-03-one-entry-versus-two-entries.md
+  sections/section-010/module-04/labs/lab-01:
+    preparation:
+    - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+    - sections/section-010/module-04/course-02-egress-to-the-api-server-and-other-dependencies.md
+    - sections/section-010/module-04/course-04-test-matrix-for-a-policy-set.md
+    - sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
+  sections/section-010/capstone/labs/lab-01:
+    preparation:
+    - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+    - sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
+    - sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+    - sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
+    - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+    - sections/section-010/module-02/course-02-deny-all-ingress.md
+    - sections/section-010/module-02/course-03-deny-all-egress-and-its-side-effects.md
+    - sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
+    - sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
+    - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+    - sections/section-010/module-03/course-02-cross-namespace-ingress.md
+    - sections/section-010/module-03/course-03-one-entry-versus-two-entries.md
+    - sections/section-010/module-03/course-04-ipblock-and-except.md
+    - sections/section-010/module-03/course-05-ports-protocols-and-endport.md
+    - sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
+    - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+    - sections/section-010/module-04/course-02-egress-to-the-api-server-and-other-dependencies.md
+    - sections/section-010/module-04/course-03-probes-hostnetwork-and-node-traffic.md
+    - sections/section-010/module-04/course-04-test-matrix-for-a-policy-set.md
+    - sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
+  sections/section-020/module-01/labs/lab-01:
+    preparation:
+    - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+    - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+    - sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
+  sections/section-020/module-02/labs/lab-01:
+    preparation:
+    - sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
+    - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+    - sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
+    - sections/section-020/module-02/course-04-read-a-result.md
+    - sections/section-020/module-02/course-05-select-checks-and-export-results.md
+  sections/section-020/module-03/labs/lab-01:
+    preparation:
+    - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+    - sections/section-020/module-03/course-04-audit-logging.md
+  sections/section-020/module-03/labs/lab-02:
+    preparation:
+    - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+    - sections/section-020/module-03/course-05-profiling-tls-and-service-account-flags.md
+    - sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
+  sections/section-020/module-04/labs/lab-01:
+    preparation:
+    - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+    - sections/section-020/module-04/course-04-query-etcd-with-etcdctl.md
+    - sections/section-020/module-04/course-05-encryption-at-rest-check.md
+  sections/section-020/module-05/labs/lab-01:
+    preparation:
+    - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+    - sections/section-020/module-05/course-02-kubelet-authentication-and-authorization.md
+    - sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
+  sections/section-020/module-05/labs/lab-02:
+    preparation:
+    - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+    - sections/section-020/module-05/course-04-other-kubelet-checks.md
+    - sections/section-020/module-05/course-06-remediate-findings-end-to-end.md
+  sections/section-020/capstone/labs/lab-01:
+    preparation:
+    - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+    - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+    - sections/section-020/module-01/course-03-reviewing-the-kubelet.md
+    - sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
+    - sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
+    - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+    - sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
+    - sections/section-020/module-02/course-04-read-a-result.md
+    - sections/section-020/module-02/course-05-select-checks-and-export-results.md
+    - sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
+    - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+    - sections/section-020/module-03/course-02-authentication-and-authorization-flags.md
+    - sections/section-020/module-03/course-03-admission-plugins.md
+    - sections/section-020/module-03/course-04-audit-logging.md
+    - sections/section-020/module-03/course-05-profiling-tls-and-service-account-flags.md
+    - sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
+    - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+    - sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+    - sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
+    - sections/section-020/module-04/course-04-query-etcd-with-etcdctl.md
+    - sections/section-020/module-04/course-05-encryption-at-rest-check.md
+    - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+    - sections/section-020/module-05/course-02-kubelet-authentication-and-authorization.md
+    - sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
+    - sections/section-020/module-05/course-04-other-kubelet-checks.md
+    - sections/section-020/module-05/course-05-review-coredns-kube-dns.md
+    - sections/section-020/module-05/course-06-remediate-findings-end-to-end.md
+  sections/section-030/module-01/labs/lab-01:
+    preparation:
+    - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+    - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+    - sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
+  sections/section-030/module-02/labs/lab-01:
+    preparation:
+    - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+    - sections/section-030/module-02/course-03-first-ingress-and-host-header-testing.md
+    - sections/section-030/module-02/course-04-path-types-and-priority.md
+    - sections/section-030/module-02/course-05-several-services-and-a-default-backend.md
+  sections/section-030/module-03/labs/lab-01:
+    preparation:
+    - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+    - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+    - sections/section-030/module-03/course-04-create-the-tls-secret.md
+    - sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
+  sections/section-030/module-03/labs/lab-02:
+    preparation:
+    - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+    - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+    - sections/section-030/module-03/course-04-create-the-tls-secret.md
+    - sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
+    - sections/section-030/module-03/course-06-https-redirect-hsts-and-the-default-certificate.md
+  sections/section-030/module-04/labs/lab-01:
+    preparation:
+    - sections/section-030/module-04/course-01-tls-versions-ciphers-and-server-names.md
+  sections/section-030/module-04/labs/lab-02:
+    preparation:
+    - sections/section-030/module-04/course-01-tls-versions-ciphers-and-server-names.md
+    - sections/section-030/module-04/course-04-rotate-and-replace-certificates.md
+    - sections/section-030/module-04/course-05-troubleshoot-tls-ingress-failures.md
+  sections/section-030/capstone/labs/lab-01:
+    preparation:
+    - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+    - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+    - sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
+    - sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
+    - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+    - sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
+    - sections/section-030/module-02/course-03-first-ingress-and-host-header-testing.md
+    - sections/section-030/module-02/course-04-path-types-and-priority.md
+    - sections/section-030/module-02/course-05-several-services-and-a-default-backend.md
+    - sections/section-030/module-02/course-06-inspect-the-running-controller.md
+    - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+    - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+    - sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
+    - sections/section-030/module-03/course-04-create-the-tls-secret.md
+    - sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
+    - sections/section-030/module-03/course-06-https-redirect-hsts-and-the-default-certificate.md
+    - sections/section-030/module-04/course-01-tls-versions-ciphers-and-server-names.md
+    - sections/section-030/module-04/course-02-mutual-tls-with-client-certificates.md
+    - sections/section-030/module-04/course-03-shrink-the-controller-attack-surface.md
+    - sections/section-030/module-04/course-04-rotate-and-replace-certificates.md
+    - sections/section-030/module-04/course-05-troubleshoot-tls-ingress-failures.md
+  sections/section-040/module-01/labs/lab-01:
+    preparation:
+    - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+    - sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
+    - sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
+  sections/section-040/module-02/labs/lab-01:
+    preparation:
+    - sections/section-040/module-02/course-01-what-the-metadata-service-hands-out.md
+    - sections/section-040/module-02/course-02-the-playground-metadata-server.md
+    - sections/section-040/module-02/course-03-block-with-an-ipblock-except-rule.md
+  sections/section-040/module-02/labs/lab-02:
+    preparation:
+    - sections/section-040/module-02/course-01-what-the-metadata-service-hands-out.md
+    - sections/section-040/module-02/course-02-the-playground-metadata-server.md
+    - sections/section-040/module-02/course-04-default-deny-plus-a-selective-allow.md
+  sections/section-040/module-03/labs/lab-01:
+    preparation:
+    - sections/section-040/module-03/course-01-the-kubelet-api-from-a-pod.md
+    - sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
+  sections/section-040/module-03/labs/lab-02:
+    preparation:
+    - sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
+    - sections/section-040/module-03/course-05-hostnetwork-and-privileged-pods-bypass-policy.md
+  sections/section-040/capstone/labs/lab-01:
+    preparation:
+    - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+    - sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
+    - sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
+    - sections/section-040/module-02/course-01-what-the-metadata-service-hands-out.md
+    - sections/section-040/module-02/course-02-the-playground-metadata-server.md
+    - sections/section-040/module-02/course-03-block-with-an-ipblock-except-rule.md
+    - sections/section-040/module-02/course-04-default-deny-plus-a-selective-allow.md
+    - sections/section-040/module-02/course-05-policy-pitfalls-for-the-metadata-address.md
+    - sections/section-040/module-02/course-06-verify-coverage-across-namespaces.md
+    - sections/section-040/module-03/course-01-the-kubelet-api-from-a-pod.md
+    - sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
+    - sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
+    - sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
+    - sections/section-040/module-03/course-05-hostnetwork-and-privileged-pods-bypass-policy.md
+    - sections/section-040/module-03/course-06-controls-outside-the-cluster.md
+  sections/section-050/module-01/labs/lab-01:
+    preparation:
+    - sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
+    - sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
+    - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+  sections/section-050/module-02/labs/lab-01:
+    preparation:
+    - sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
+    - sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+    - sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
+  sections/section-050/module-02/labs/lab-02:
+    preparation:
+    - sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
+    - sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+    - sections/section-050/module-02/course-04-read-the-version-of-a-binary.md
+    - sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
+  sections/section-050/module-03/labs/lab-01:
+    preparation:
+    - sections/section-050/module-03/course-01-gpg-signed-repositories.md
+    - sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
+  sections/section-050/module-03/labs/lab-02:
+    preparation:
+    - sections/section-050/module-03/course-05-image-digests-and-pinning.md
+  sections/section-050/capstone/labs/lab-01:
+    preparation:
+    - sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
+    - sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
+    - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+    - sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
+    - sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
+    - sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+    - sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
+    - sections/section-050/module-02/course-04-read-the-version-of-a-binary.md
+    - sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
+    - sections/section-050/module-03/course-01-gpg-signed-repositories.md
+    - sections/section-050/module-03/course-02-package-verification-on-a-node.md
+    - sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
+    - sections/section-050/module-03/course-04-keyless-verification-and-release-signatures.md
+    - sections/section-050/module-03/course-05-image-digests-and-pinning.md
+    - sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
+  sections/section-010/module-03/labs/lab-03:
+    preparation:
+    - sections/section-010/module-03/course-06a-verify-cidr-and-port-boundaries.md
+  sections/section-030/module-04/labs/lab-03:
+    preparation:
+    - sections/section-030/module-04/course-04a-verify-live-certificate-rotation.md
+additional_readings:
+- sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
+- sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
+- sections/section-010/module-03/course-04-ipblock-and-except.md
+- sections/section-010/module-03/course-05-ports-protocols-and-endport.md
+- sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
+- sections/section-010/module-04/course-03-probes-hostnetwork-and-node-traffic.md
+- sections/section-020/module-01/course-03-reviewing-the-kubelet.md
+- sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
+- sections/section-020/module-03/course-02-authentication-and-authorization-flags.md
+- sections/section-020/module-03/course-03-admission-plugins.md
+- sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+- sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
+- sections/section-020/module-05/course-05-review-coredns-kube-dns.md
+- sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
+- sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
+- sections/section-030/module-02/course-06-inspect-the-running-controller.md
+- sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
+- sections/section-030/module-04/course-02-mutual-tls-with-client-certificates.md
+- sections/section-030/module-04/course-03-shrink-the-controller-attack-surface.md
+- sections/section-040/module-02/course-05-policy-pitfalls-for-the-metadata-address.md
+- sections/section-040/module-02/course-06-verify-coverage-across-namespaces.md
+- sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
+- sections/section-040/module-03/course-06-controls-outside-the-cluster.md
+- sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
+- sections/section-050/module-03/course-02-package-verification-on-a-node.md
+- sections/section-050/module-03/course-04-keyless-verification-and-release-signatures.md
+- sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md

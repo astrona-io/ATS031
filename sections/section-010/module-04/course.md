@@ -26,7 +26,7 @@ Your playground is a `kind` cluster running Kubernetes v1.35 with the Calico net
 | --- | --- | --- |
 | `starfleet` | `probe` Deployment, two pods, and `probe` Service | A web server on port 8080 behind a Service on port 80 |
 | `starfleet` | `scout` pod, label `app: scout` | Resolves a name, calls the `probe` Service and lists pods through the API server with its ServiceAccount |
-| `starfleet` | `beacon` pod, label `app: beacon` | Runs with `hostNetwork: true` and listens on node port 9099 |
+| `starfleet` | `beacon` pod, label `app: beacon` | Runs with `hostNetwork: true` and listens on node port 19099 |
 | `outpost` | `drifter` pod, label `app: drifter` | A client pod with `wget`; no policy selects it |
 
 The policies in `starfleet` are `default-deny-all`, `scout-egress`, `scout-to-probe` and `probe-ingress`. They contain several mistakes, which the parts find one by one. The `scout` pod has a test script, `python /app/check.py`, that prints one result for each of its three needs: `dns`, `probe` and `api`.

@@ -5,17 +5,11 @@ exam_objectives:
 ---
 # Allow One Pod From Another Namespace
 
-Allow about 7 minutes for the tasks.
+Solve this question on: `terminal`
+
+The `starfleet-031-010-03-01` and `outpost-031-010-03-01` namespaces each run the `probe` Deployment (two pods labelled `app: probe`, port 8080), the `probe` Service (port 80), a `shuttle` pod labelled `app: shuttle` and a `drifter` pod. The `dock-031-010-03-01` namespace has a `shuttle` pod and a `telemetry` pod. No NetworkPolicy exists. Calico, the network plugin of this cluster, enforces policy.
 
 The `shuttle` pod in `outpost-031-010-03-01` must reach the `probe` pods in `starfleet-031-010-03-01`. No other pod may reach them.
-
-## Objective
-
-Write one NetworkPolicy with a single combined peer entry and prove with requests that only the intended pod gets through.
-
-## Starting state
-
-The `starfleet-031-010-03-01` and `outpost-031-010-03-01` namespaces each run the `probe` Deployment (two pods, port 8080), the `probe` Service (port 80), a `shuttle` pod and a `drifter` pod. The `dock-031-010-03-01` namespace has a `shuttle` pod and a `telemetry` pod. No NetworkPolicy exists. Calico enforces policy in this cluster.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
@@ -26,12 +20,21 @@ test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-01" ||
 
 Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
 
-## Required result
+Allow about 7 minutes for task work. Cluster startup adds time.
 
-Create the NetworkPolicy `probe-from-outpost` in the `starfleet-031-010-03-01` namespace. It selects pods labelled `app: probe`, covers ingress only, and has one rule with one `from` entry. That entry holds a `namespaceSelector` for the namespace named `outpost-031-010-03-01` (use the label `kubernetes.io/metadata.name`) and a `podSelector` for pods labelled `app: shuttle`, in the same entry. The rule allows TCP port 8080 only.
+## Tasks
 
-Then the following must hold. The `shuttle` pod in `outpost-031-010-03-01` gets the `probe` response from `http://probe.starfleet-031-010-03-01/`. The `drifter` pod in `outpost-031-010-03-01`, the `shuttle` pod in `dock-031-010-03-01` and the `shuttle` pod in `starfleet-031-010-03-01` all time out when they request the same address. Do not change any other namespace.
+1. Look at the labels of the namespace `outpost-031-010-03-01` and of the pods in it, so you know which labels select the one allowed client.
+2. Create the NetworkPolicy `probe-from-outpost` in `starfleet-031-010-03-01`. It selects the pods labelled `app: probe`, covers ingress only, and has one rule with one `from` entry. That entry holds a `namespaceSelector` for the namespace named `outpost-031-010-03-01` (use the label `kubernetes.io/metadata.name`) and a `podSelector` for pods labelled `app: shuttle`, in the same entry. The rule allows TCP port 8080 only.
+3. Prove the result. The `shuttle` pod in `outpost-031-010-03-01` gets a response with `version=v1` from `http://probe.starfleet-031-010-03-01/`. The `drifter` pod in `outpost-031-010-03-01`, the `shuttle` pod in `dock-031-010-03-01` and the `shuttle` pod in `starfleet-031-010-03-01` all time out when they request the same Service.
 
-## Verify The Result
+## Constraints
 
-The grader checks the stated resource fields and live requests. Wait a few seconds after the last change so the network plugin can update its rules, then repeat your own test requests before you submit. Inspect actual results rather than relying on a sample transcript.
+- Create the policy in `starfleet-031-010-03-01` only. Do not change any other namespace.
+- Keep every Deployment and pod running and unchanged.
+
+## How the answer is checked
+
+The grader runs two checks. The first reads the NetworkPolicy `probe-from-outpost` and needs the pod selector `app: probe`, the policy type `Ingress` only, and one rule with exactly one `from` entry that holds both the namespace name `outpost-031-010-03-01` and the pod label `app: shuttle`, on TCP port 8080. The second sends a request to the `probe` Service in `starfleet-031-010-03-01` from four pods: `shuttle` in `outpost-031-010-03-01` must get `version=v1`, and `drifter` in `outpost-031-010-03-01`, `shuttle` in `dock-031-010-03-01` and `shuttle` in `starfleet-031-010-03-01` must each time out after 3 seconds. Both checks also need both `probe` Deployments fully rolled out and every client pod running and ready.
+
+Hint: Calico updates its rules a few seconds after you apply a policy. Repeat your test requests before you submit.

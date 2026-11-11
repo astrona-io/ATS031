@@ -5,13 +5,9 @@ exam_objectives:
 ---
 # Repair Four Broken TLS Ingresses
 
-Allow about 12 minutes for the tasks.
+Solve this question on: `terminal`
 
-Four Ingresses in `starfleet-031-030-04-02` were deployed with a different mistake each: `alpha`, `bravo`, `charlie` and `delta`. Find each cause and repair it so that every host serves a valid certificate.
-
-## Starting state
-
-Traefik runs in `ingress-system`. The Ingresses `alpha` (host `alpha.example.test`), `bravo`, `charlie` and `delta` exist and send traffic to the Service `probe`. None of them works. The Secrets `alpha-cert`, `bravo-tls`, `charlie-tls` and `delta-tls` exist in `starfleet-031-030-04-02`.
+Four Ingresses in `starfleet-031-030-04-02` were deployed with a different mistake each: `alpha` (host `alpha.example.test`), `bravo`, `charlie` and `delta`. They send traffic to the Service `probe`, and none of them works. The Secrets `alpha-cert`, `bravo-tls`, `charlie-tls` and `delta-tls` exist in `starfleet-031-030-04-02`. The Traefik Ingress controller runs in `ingress-system`.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
@@ -22,10 +18,20 @@ test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-04-02" ||
 
 Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
 
-## Required result
+Allow about 12 minutes for task work. Cluster startup adds time.
 
-Repair the four Ingresses. Each one must keep its own host name pattern `<name>.example.test` and use class `traefik`. Each must name a Secret in `starfleet-031-030-04-02` whose certificate matches its host and whose key matches its certificate, and the host in `rules` and in `tls` must be the correct name. Preserve the Deployment and the Service, and do not delete an Ingress.
+## Tasks
 
-## Verify the result
+1. For each Ingress, compare its host in `rules` and in `tls`, the Secret it names, and the names in that Secret's certificate.
+2. Repair `alpha` and `bravo`. Each must name a Secret in `starfleet-031-030-04-02` whose certificate matches its host and whose key matches its certificate, and the host in `rules` and in `tls` must be the correct name.
+3. Repair `charlie` and `delta` the same way.
+4. Prove the result. A client that trusts each Secret's certificate must get the `probe` response from each `https://<name>.example.test`, and must reject the connection for a wrong server name.
 
-The grader reads the four Ingresses and Secrets and then connects to each host from inside the cluster with the certificate from its Secret as the trust anchor. It expects the `probe` response for each host and a rejection for a wrong name.
+## Constraints
+
+- Each Ingress keeps its own host name pattern `<name>.example.test` and class `traefik`.
+- Do not delete an Ingress. Keep the Deployment and the Service unchanged.
+
+## How the answer is checked
+
+The grader runs four checks, one for each Ingress: `alpha`, `bravo`, `charlie` and `delta`. Each check reads the Secret named in the first `spec.tls` entry of that Ingress, then connects from inside the `probe` pod to the Traefik Service on port 443 with that certificate as its only trusted certificate. `https://<name>.example.test` must answer 200 from the Service `probe`, and a handshake for the server name `wrong.example.test` must be rejected. Every check also needs the four Ingresses with class `traefik`, the `probe` Deployment fully rolled out and the Service `probe` selecting `app: probe`.
