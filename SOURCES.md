@@ -28,3 +28,10 @@ Applied the local astrona-course-expand-material skill with CLAUDE.md plain-Engl
 - https://kubernetes.io/docs/tutorials/security/seccomp/
 - https://kubernetes.io/docs/tutorials/security/apparmor/
 - https://falco.org/docs/concepts/
+
+## Live assessment review — 2026-11-11
+
+Calico and Traefik retain their pinned fixture versions. QEMU fixtures pin the Ubuntu image and verify architecture-specific downloads where supplied. Package repositories and vulnerability data remain time-dependent.
+
+- [Kubernetes NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [TLS Secrets](https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets)
