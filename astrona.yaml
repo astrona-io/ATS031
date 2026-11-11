@@ -1,8 +1,8 @@
 training:
   id: ATS031
   title: 'CKS: Cluster Setup'
-  description: 'Detailed reading material, labs and reusable YAML knowledge checks
-    for CKS: Cluster Setup. Technical content remains draft.'
+  description: 'Detailed reading material, labs and reusable YAML knowledge checks for CKS: Cluster Setup.
+    Technical content remains draft.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -11,8 +11,8 @@ training:
     weight: 15
     competencies:
     - Use Network security policies to restrict cluster level access
-    - Use CIS benchmark to review the security configuration of Kubernetes components
-      (etcd, kubelet, kubedns, kubeapi)
+    - Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet,
+      kubedns, kubeapi)
     - Properly set up Ingress with TLS
     - Protect node metadata and endpoints
     - Verify platform binaries before deploying
@@ -35,8 +35,8 @@ modules:
     path: sections/intro/course-03-how-this-course-is-made.md
 - id: module-010
   title: Use Network security policies to restrict cluster level access
-  description: Developed reading and reasoning for Use Network security policies to
-    restrict cluster level access.
+  description: Developed reading and reasoning for Use Network security policies to restrict cluster level
+    access.
   status: alpha
   content:
   - type: reading
@@ -52,7 +52,7 @@ modules:
     title: Allow One Peer With An Ingress Policy
     path: sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
   - type: reading
-    title: Allow One Peer And Deny Another — Task
+    title: "Allow One Peer And Deny Another \u2014 Task"
     path: sections/section-010/module-01/labs/lab-01/question.md
   - type: lab
     title: Allow One Peer And Deny Another
@@ -67,13 +67,13 @@ modules:
     - cks
     - networkpolicy-ingress
   - type: reading
-    title: Allow One Peer And Deny Another — Solution
+    title: "Allow One Peer And Deny Another \u2014 Solution"
     path: sections/section-010/module-01/labs/lab-01/solution.md
   - type: reading
     title: Restrict Egress And Allow DNS
     path: sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
   - type: reading
-    title: Allow DNS And One Application Dependency — Task
+    title: "Allow DNS And One Application Dependency \u2014 Task"
     path: sections/section-010/module-01/labs/lab-02/question.md
   - type: lab
     title: Allow DNS And One Application Dependency
@@ -83,13 +83,12 @@ modules:
     topic: networkpolicy-egress
     task_kind: build
     learning_goals:
-    - Allow name resolution and application access while denying a healthy unrelated
-      listener.
+    - Allow name resolution and application access while denying a healthy unrelated listener.
     tags:
     - cks
     - networkpolicy-egress
   - type: reading
-    title: Allow DNS And One Application Dependency — Solution
+    title: "Allow DNS And One Application Dependency \u2014 Solution"
     path: sections/section-010/module-01/labs/lab-02/solution.md
   - type: reading
     title: Default Deny And Troubleshooting Policies
@@ -118,7 +117,7 @@ modules:
     title: Combine Baselines With Allow Rules
     path: sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
   - type: reading
-    title: Apply A Default-Deny Baseline And Allow One Path — Task
+    title: "Apply A Default-Deny Baseline And Allow One Path \u2014 Task"
     path: sections/section-010/module-02/labs/lab-01/question.md
   - type: lab
     title: Apply A Default-Deny Baseline And Allow One Path
@@ -133,7 +132,7 @@ modules:
     - cks
     - networkpolicy-default-deny
   - type: reading
-    title: Apply A Default-Deny Baseline And Allow One Path — Solution
+    title: "Apply A Default-Deny Baseline And Allow One Path \u2014 Solution"
     path: sections/section-010/module-02/labs/lab-01/solution.md
   - type: reading
     title: Baselines Across Many Namespaces
@@ -159,7 +158,7 @@ modules:
     title: One Entry Versus Two Entries
     path: sections/section-010/module-03/course-03-one-entry-versus-two-entries.md
   - type: reading
-    title: Allow One Pod From Another Namespace — Task
+    title: "Allow One Pod From Another Namespace \u2014 Task"
     path: sections/section-010/module-03/labs/lab-01/question.md
   - type: lab
     title: Allow One Pod From Another Namespace
@@ -174,10 +173,10 @@ modules:
     - cks
     - networkpolicy-peers
   - type: reading
-    title: Allow One Pod From Another Namespace — Solution
+    title: "Allow One Pod From Another Namespace \u2014 Solution"
     path: sections/section-010/module-03/labs/lab-01/solution.md
   - type: reading
-    title: Repair A Two-Entry Peer Rule — Task
+    title: "Repair A Two-Entry Peer Rule \u2014 Task"
     path: sections/section-010/module-03/labs/lab-02/question.md
   - type: lab
     title: Repair A Two-Entry Peer Rule
@@ -192,7 +191,7 @@ modules:
     - cks
     - networkpolicy-peers
   - type: reading
-    title: Repair A Two-Entry Peer Rule — Solution
+    title: "Repair A Two-Entry Peer Rule \u2014 Solution"
     path: sections/section-010/module-03/labs/lab-02/solution.md
   - type: reading
     title: ipBlock And Except
@@ -203,6 +202,23 @@ modules:
   - type: reading
     title: Policies On Services And Replicas
     path: sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
+  - type: reading
+    title: Verify CIDR Exceptions And Port Ranges
+    path: sections/section-010/module-03/course-06a-verify-cidr-and-port-boundaries.md
+  - type: reading
+    title: "Enforce An Address Exception And Port Range \u2014 Task"
+    path: sections/section-010/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Enforce An Address Exception And Port Range
+    path: sections/section-010/module-03/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    learning_goals:
+    - The permitted client connects and the excluded address cannot
+    - Every port in the requested range works and adjacent ports remain denied
+  - type: reading
+    title: "Enforce An Address Exception And Port Range \u2014 Solution"
+    path: sections/section-010/module-03/labs/lab-03/solution.md
   - type: reading
     title: Summary
     path: sections/section-010/module-03/course-07-summary.md
@@ -230,7 +246,7 @@ modules:
     title: Audit And Troubleshoot Policies
     path: sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
   - type: reading
-    title: Repair A Broken Policy Set — Task
+    title: "Repair A Broken Policy Set \u2014 Task"
     path: sections/section-010/module-04/labs/lab-01/question.md
   - type: lab
     title: Repair A Broken Policy Set
@@ -240,13 +256,12 @@ modules:
     topic: networkpolicy-troubleshooting
     task_kind: troubleshooting
     learning_goals:
-    - Repair DNS, peer and direction faults in a policy set without opening more than
-      needed.
+    - Repair DNS, peer and direction faults in a policy set without opening more than needed.
     tags:
     - cks
     - networkpolicy-troubleshooting
   - type: reading
-    title: Repair A Broken Policy Set — Solution
+    title: "Repair A Broken Policy Set \u2014 Solution"
     path: sections/section-010/module-04/labs/lab-01/solution.md
   - type: reading
     title: Summary
@@ -257,7 +272,7 @@ modules:
     question_count: 10
     pass_score: 70
   - type: reading
-    title: Secure Three Namespaces With Network Policies — Task
+    title: "Secure Three Namespaces With Network Policies \u2014 Task"
     path: sections/section-010/capstone/labs/lab-01/question.md
   - type: lab
     title: Secure Three Namespaces With Network Policies
@@ -267,24 +282,24 @@ modules:
     topic: networkpolicy-capstone
     task_kind: build
     learning_goals:
-    - Combine baselines, a repaired peer rule, DNS, an external range and an API server
-      rule across three namespaces.
+    - Combine baselines, a repaired peer rule, DNS, an external range and an API server rule across three
+      namespaces.
     tags:
     - cks
     - networkpolicy-capstone
   - type: reading
-    title: Secure Three Namespaces With Network Policies — Solution
+    title: "Secure Three Namespaces With Network Policies \u2014 Solution"
     path: sections/section-010/capstone/labs/lab-01/solution.md
 - id: module-020
-  title: Use CIS benchmark to review the security configuration of Kubernetes components
-    (etcd, kubelet, kubedns, kubeapi)
-  description: Developed reading and reasoning for Use CIS benchmark to review the
-    security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi).
+  title: Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet,
+    kubedns, kubeapi)
+  description: Developed reading and reasoning for Use CIS benchmark to review the security configuration
+    of Kubernetes components (etcd, kubelet, kubedns, kubeapi).
   status: alpha
   content:
   - type: reading
-    title: Use CIS benchmark to review the security configuration of Kubernetes components
-      (etcd, kubelet, kubedns, kubeapi)
+    title: Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet,
+      kubedns, kubeapi)
     path: sections/section-020/README.md
   - type: reading
     title: Review Kubernetes Components With The CIS Benchmark
@@ -302,7 +317,7 @@ modules:
     title: Correct A Finding Safely And Record It
     path: sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
   - type: reading
-    title: Disable API Server Profiling In A Private Node — Task
+    title: "Disable API Server Profiling In A Private Node \u2014 Task"
     path: sections/section-020/module-01/labs/lab-01/question.md
   - type: lab
     title: Disable API Server Profiling In A Private Node
@@ -313,13 +328,12 @@ modules:
     topic: api-profiling
     task_kind: build
     learning_goals:
-    - Review and correct one effective control-plane setting while keeping API access
-      available.
+    - Review and correct one effective control-plane setting while keeping API access available.
     tags:
     - cks
     - api-profiling
   - type: reading
-    title: Disable API Server Profiling In A Private Node — Solution
+    title: "Disable API Server Profiling In A Private Node \u2014 Solution"
     path: sections/section-020/module-01/labs/lab-01/solution.md
   - type: reading
     title: Summary
@@ -348,7 +362,7 @@ modules:
     title: Select Checks And Export Results
     path: sections/section-020/module-02/course-05-select-checks-and-export-results.md
   - type: reading
-    title: Save The Failing API Server Check Ids — Task
+    title: "Save The Failing API Server Check Ids \u2014 Task"
     path: sections/section-020/module-02/labs/lab-01/question.md
   - type: lab
     title: Save The Failing API Server Check Ids
@@ -364,7 +378,7 @@ modules:
     - cks
     - kube-bench
   - type: reading
-    title: Save The Failing API Server Check Ids — Solution
+    title: "Save The Failing API Server Check Ids \u2014 Solution"
     path: sections/section-020/module-02/labs/lab-01/solution.md
   - type: reading
     title: Manual Checks And False Findings
@@ -393,7 +407,7 @@ modules:
     title: Audit Logging
     path: sections/section-020/module-03/course-04-audit-logging.md
   - type: reading
-    title: Enable Audit Logging On The API Server — Task
+    title: "Enable Audit Logging On The API Server \u2014 Task"
     path: sections/section-020/module-03/labs/lab-01/question.md
   - type: lab
     title: Enable Audit Logging On The API Server
@@ -409,7 +423,7 @@ modules:
     - cks
     - audit-logging
   - type: reading
-    title: Enable Audit Logging On The API Server — Solution
+    title: "Enable Audit Logging On The API Server \u2014 Solution"
     path: sections/section-020/module-03/labs/lab-01/solution.md
   - type: reading
     title: Profiling, TLS And Service Account Flags
@@ -418,7 +432,7 @@ modules:
     title: Controller Manager, Scheduler And File Permissions
     path: sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
   - type: reading
-    title: Disable Profiling And Restrict The API Server Manifest — Task
+    title: "Disable Profiling And Restrict The API Server Manifest \u2014 Task"
     path: sections/section-020/module-03/labs/lab-02/question.md
   - type: lab
     title: Disable Profiling And Restrict The API Server Manifest
@@ -429,13 +443,12 @@ modules:
     topic: api-profiling-permissions
     task_kind: build
     learning_goals:
-    - Disable API server profiling and set the manifest permissions while the API
-      server stays ready.
+    - Disable API server profiling and set the manifest permissions while the API server stays ready.
     tags:
     - cks
     - api-hardening
   - type: reading
-    title: Disable Profiling And Restrict The API Server Manifest — Solution
+    title: "Disable Profiling And Restrict The API Server Manifest \u2014 Solution"
     path: sections/section-020/module-03/labs/lab-02/solution.md
   - type: reading
     title: Summary
@@ -464,7 +477,7 @@ modules:
     title: Encryption At Rest Check
     path: sections/section-020/module-04/course-05-encryption-at-rest-check.md
   - type: reading
-    title: Enable Encryption At Rest For Secrets — Task
+    title: "Enable Encryption At Rest For Secrets \u2014 Task"
     path: sections/section-020/module-04/labs/lab-01/question.md
   - type: lab
     title: Enable Encryption At Rest For Secrets
@@ -475,14 +488,14 @@ modules:
     topic: etcd-encryption
     task_kind: build
     learning_goals:
-    - Enable an EncryptionConfiguration on the API server and prove with etcd that
-      a Secret is stored encrypted.
+    - Enable an EncryptionConfiguration on the API server and prove with etcd that a Secret is stored
+      encrypted.
     tags:
     - cks
     - etcd
     - encryption-at-rest
   - type: reading
-    title: Enable Encryption At Rest For Secrets — Solution
+    title: "Enable Encryption At Rest For Secrets \u2014 Solution"
     path: sections/section-020/module-04/labs/lab-01/solution.md
   - type: reading
     title: Summary
@@ -505,7 +518,7 @@ modules:
     title: Read-Only Port, Ports And TLS Settings
     path: sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
   - type: reading
-    title: Close Anonymous And Open Access On The Kubelet — Task
+    title: "Close Anonymous And Open Access On The Kubelet \u2014 Task"
     path: sections/section-020/module-05/labs/lab-01/question.md
   - type: lab
     title: Close Anonymous And Open Access On The Kubelet
@@ -516,15 +529,14 @@ modules:
     topic: kubelet-authentication
     task_kind: build
     learning_goals:
-    - Disable anonymous requests, set Webhook authorization and close the read-only
-      port on the kubelet.
+    - Disable anonymous requests, set Webhook authorization and close the read-only port on the kubelet.
     tags:
     - cks
     - kubelet
     - authentication
     - authorization
   - type: reading
-    title: Close Anonymous And Open Access On The Kubelet — Solution
+    title: "Close Anonymous And Open Access On The Kubelet \u2014 Solution"
     path: sections/section-020/module-05/labs/lab-01/solution.md
   - type: reading
     title: Other Kubelet Checks
@@ -536,7 +548,7 @@ modules:
     title: Remediate Findings End To End
     path: sections/section-020/module-05/course-06-remediate-findings-end-to-end.md
   - type: reading
-    title: Remediate Five Kubelet Benchmark Findings — Task
+    title: "Remediate Five Kubelet Benchmark Findings \u2014 Task"
     path: sections/section-020/module-05/labs/lab-02/question.md
   - type: lab
     title: Remediate Five Kubelet Benchmark Findings
@@ -547,40 +559,36 @@ modules:
     topic: kubelet-hardening
     task_kind: build
     learning_goals:
-    - Fix file modes, certificate rotation, streaming timeout and minimum TLS version,
-      then verify the effective configuration.
+    - Fix file modes, certificate rotation, streaming timeout and minimum TLS version, then verify the
+      effective configuration.
     tags:
     - cks
     - kubelet
     - file-permissions
     - tls
   - type: reading
-    title: Remediate Five Kubelet Benchmark Findings — Solution
+    title: "Remediate Five Kubelet Benchmark Findings \u2014 Solution"
     path: sections/section-020/module-05/labs/lab-02/solution.md
   - type: reading
     title: Summary
     path: sections/section-020/module-05/course-07-summary.md
   - type: quiz
-    title: 'Knowledge Check: Harden The kubelet And CoreDNS, Then Remediate End To
-      End'
+    title: 'Knowledge Check: Harden The kubelet And CoreDNS, Then Remediate End To End'
     path: sections/section-020/module-05/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
-    title: Remediate A CIS Benchmark Review Across The Control Plane And The Kubelet
-      — Task
+    title: "Remediate A CIS Benchmark Review Across The Control Plane And The Kubelet \u2014 Task"
     path: sections/section-020/capstone/labs/lab-01/question.md
   - type: lab
-    title: Remediate A CIS Benchmark Review Across The Control Plane And The Kubelet
-      Capstone Lab
+    title: Remediate A CIS Benchmark Review Across The Control Plane And The Kubelet Capstone Lab
     path: sections/section-020/capstone/labs/lab-01
     difficulty: advanced
     estimated_duration: 45m
     topic: cis-remediation
     task_kind: build
     learning_goals:
-    - Fix findings on the API server, etcd and the kubelet in one cluster and record
-      evidence in a ConfigMap.
+    - Fix findings on the API server, etcd and the kubelet in one cluster and record evidence in a ConfigMap.
     tags:
     - cks
     - api-server
@@ -588,8 +596,7 @@ modules:
     - kubelet
     - capstone
   - type: reading
-    title: Remediate A CIS Benchmark Review Across The Control Plane And The Kubelet
-      — Solution
+    title: "Remediate A CIS Benchmark Review Across The Control Plane And The Kubelet \u2014 Solution"
     path: sections/section-020/capstone/labs/lab-01/solution.md
 - id: module-030
   title: Properly set up Ingress with TLS
@@ -612,7 +619,7 @@ modules:
     title: Configure An Ingress With TLS And Verify It
     path: sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
   - type: reading
-    title: Verify TLS Termination And Server Identity — Task
+    title: "Verify TLS Termination And Server Identity \u2014 Task"
     path: sections/section-030/module-01/labs/lab-01/question.md
   - type: lab
     title: Verify TLS Termination And Server Identity
@@ -622,13 +629,12 @@ modules:
     topic: ingress-tls
     task_kind: build
     learning_goals:
-    - Route HTTPS through the controller and verify both matching and mismatched certificate
-      identities.
+    - Route HTTPS through the controller and verify both matching and mismatched certificate identities.
     tags:
     - cks
     - ingress-tls
   - type: reading
-    title: Verify TLS Termination And Server Identity — Solution
+    title: "Verify TLS Termination And Server Identity \u2014 Solution"
     path: sections/section-030/module-01/labs/lab-01/solution.md
   - type: reading
     title: Several Hosts, Server Name Selection And Troubleshooting
@@ -660,7 +666,7 @@ modules:
     title: Several Services And A Default Backend
     path: sections/section-030/module-02/course-05-several-services-and-a-default-backend.md
   - type: reading
-    title: Route Two Services From One Host — Task
+    title: "Route Two Services From One Host \u2014 Task"
     path: sections/section-030/module-02/labs/lab-01/question.md
   - type: lab
     title: Route Two Services From One Host
@@ -670,14 +676,13 @@ modules:
     topic: ingress-routing
     task_kind: build
     learning_goals:
-    - Route two Services from one host with Prefix path rules and a 404 for other
-      paths.
+    - Route two Services from one host with Prefix path rules and a 404 for other paths.
     tags:
     - cks
     - ingress-tls
     - traefik
   - type: reading
-    title: Route Two Services From One Host — Solution
+    title: "Route Two Services From One Host \u2014 Solution"
     path: sections/section-030/module-02/labs/lab-01/solution.md
   - type: reading
     title: Inspect The Running Controller
@@ -709,7 +714,7 @@ modules:
     title: Configure spec.tls And Verify
     path: sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
   - type: reading
-    title: Publish Scout Over HTTPS With Your Own Certificate — Task
+    title: "Publish Scout Over HTTPS With Your Own Certificate \u2014 Task"
     path: sections/section-030/module-03/labs/lab-01/question.md
   - type: lab
     title: Publish Scout Over HTTPS With Your Own Certificate
@@ -725,13 +730,13 @@ modules:
     - ingress-tls
     - openssl
   - type: reading
-    title: Publish Scout Over HTTPS With Your Own Certificate — Solution
+    title: "Publish Scout Over HTTPS With Your Own Certificate \u2014 Solution"
     path: sections/section-030/module-03/labs/lab-01/solution.md
   - type: reading
     title: HTTPS Redirect, HSTS And The Default Certificate
     path: sections/section-030/module-03/course-06-https-redirect-hsts-and-the-default-certificate.md
   - type: reading
-    title: Repair A TLS Ingress With A Missing Secret — Task
+    title: "Repair A TLS Ingress With A Missing Secret \u2014 Task"
     path: sections/section-030/module-03/labs/lab-02/question.md
   - type: lab
     title: Repair A TLS Ingress With A Missing Secret
@@ -741,14 +746,13 @@ modules:
     topic: tls-troubleshooting
     task_kind: build
     learning_goals:
-    - Repair a TLS Ingress whose Secret is missing in its namespace and whose certificate
-      has no SAN.
+    - Repair a TLS Ingress whose Secret is missing in its namespace and whose certificate has no SAN.
     tags:
     - cks
     - ingress-tls
     - troubleshooting
   - type: reading
-    title: Repair A TLS Ingress With A Missing Secret — Solution
+    title: "Repair A TLS Ingress With A Missing Secret \u2014 Solution"
     path: sections/section-030/module-03/labs/lab-02/solution.md
   - type: reading
     title: Summary
@@ -765,7 +769,7 @@ modules:
     title: TLS Versions, Ciphers And Server Names
     path: sections/section-030/module-04/course-01-tls-versions-ciphers-and-server-names.md
   - type: reading
-    title: Require TLS 1.3 And Strict Server Names — Task
+    title: "Require TLS 1.3 And Strict Server Names \u2014 Task"
     path: sections/section-030/module-04/labs/lab-01/question.md
   - type: lab
     title: Require TLS 1.3 And Strict Server Names
@@ -781,7 +785,7 @@ modules:
     - ingress-tls
     - tls-options
   - type: reading
-    title: Require TLS 1.3 And Strict Server Names — Solution
+    title: "Require TLS 1.3 And Strict Server Names \u2014 Solution"
     path: sections/section-030/module-04/labs/lab-01/solution.md
   - type: reading
     title: Mutual TLS With Client Certificates
@@ -796,7 +800,7 @@ modules:
     title: Troubleshoot TLS Ingress Failures
     path: sections/section-030/module-04/course-05-troubleshoot-tls-ingress-failures.md
   - type: reading
-    title: Repair Four Broken TLS Ingresses — Task
+    title: "Repair Four Broken TLS Ingresses \u2014 Task"
     path: sections/section-030/module-04/labs/lab-02/question.md
   - type: lab
     title: Repair Four Broken TLS Ingresses
@@ -812,8 +816,26 @@ modules:
     - ingress-tls
     - troubleshooting
   - type: reading
-    title: Repair Four Broken TLS Ingresses — Solution
+    title: "Repair Four Broken TLS Ingresses \u2014 Solution"
     path: sections/section-030/module-04/labs/lab-02/solution.md
+  - type: reading
+    title: Verify A Live Certificate Rotation
+    path: sections/section-030/module-04/course-04a-verify-live-certificate-rotation.md
+  - type: reading
+    title: "Rotate The Certificate Served By An Ingress \u2014 Task"
+    path: sections/section-030/module-04/labs/lab-03/question.md
+  - type: lab
+    title: Rotate The Certificate Served By An Ingress
+    path: sections/section-030/module-04/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 15m
+    learning_goals:
+    - The active TLS Secret contains the supplied replacement certificate and matching key
+    - A fresh verified TLS connection receives the replacement certificate and the original application
+      response
+  - type: reading
+    title: "Rotate The Certificate Served By An Ingress \u2014 Solution"
+    path: sections/section-030/module-04/labs/lab-03/solution.md
   - type: reading
     title: Summary
     path: sections/section-030/module-04/course-06-summary.md
@@ -823,7 +845,7 @@ modules:
     question_count: 10
     pass_score: 70
   - type: reading
-    title: 'Capstone: Secure Two Hosts With Traefik TLS — Task'
+    title: "Capstone: Secure Two Hosts With Traefik TLS \u2014 Task"
     path: sections/section-030/capstone/labs/lab-01/question.md
   - type: lab
     title: 'Capstone: Secure Two Hosts With Traefik TLS'
@@ -833,14 +855,13 @@ modules:
     topic: ingress-tls-capstone
     task_kind: build
     learning_goals:
-    - Publish two hosts over HTTPS with their own certificates, a redirect, TLS 1.3
-      and a repaired Ingress.
+    - Publish two hosts over HTTPS with their own certificates, a redirect, TLS 1.3 and a repaired Ingress.
     tags:
     - cks
     - capstone
     - ingress-tls
   - type: reading
-    title: 'Capstone: Secure Two Hosts With Traefik TLS — Solution'
+    title: "Capstone: Secure Two Hosts With Traefik TLS \u2014 Solution"
     path: sections/section-030/capstone/labs/lab-01/solution.md
 - id: module-040
   title: Protect node metadata and endpoints
@@ -863,7 +884,7 @@ modules:
     title: Restrict The Pod And Verify The Boundary
     path: sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
   - type: reading
-    title: Block A Simulated Metadata Endpoint — Task
+    title: "Block A Simulated Metadata Endpoint \u2014 Task"
     path: sections/section-040/module-01/labs/lab-01/question.md
   - type: lab
     title: Block A Simulated Metadata Endpoint
@@ -873,13 +894,12 @@ modules:
     topic: metadata-isolation
     task_kind: build
     learning_goals:
-    - Separate permitted application dependencies from a metadata-style endpoint in
-      the private network.
+    - Separate permitted application dependencies from a metadata-style endpoint in the private network.
     tags:
     - cks
     - metadata-isolation
   - type: reading
-    title: Block A Simulated Metadata Endpoint — Solution
+    title: "Block A Simulated Metadata Endpoint \u2014 Solution"
     path: sections/section-040/module-01/labs/lab-01/solution.md
   - type: reading
     title: Summary
@@ -902,7 +922,7 @@ modules:
     title: Block With An ipBlock Except Rule
     path: sections/section-040/module-02/course-03-block-with-an-ipblock-except-rule.md
   - type: reading
-    title: Block The Metadata Address For A Namespace — Task
+    title: "Block The Metadata Address For A Namespace \u2014 Task"
     path: sections/section-040/module-02/labs/lab-01/question.md
   - type: lab
     title: Block The Metadata Address For A Namespace
@@ -918,13 +938,13 @@ modules:
     - metadata-isolation
     - networkpolicy
   - type: reading
-    title: Block The Metadata Address For A Namespace — Solution
+    title: "Block The Metadata Address For A Namespace \u2014 Solution"
     path: sections/section-040/module-02/labs/lab-01/solution.md
   - type: reading
     title: Default Deny Plus A Selective Allow
     path: sections/section-040/module-02/course-04-default-deny-plus-a-selective-allow.md
   - type: reading
-    title: Allow The Metadata Address For One Labelled Pod — Task
+    title: "Allow The Metadata Address For One Labelled Pod \u2014 Task"
     path: sections/section-040/module-02/labs/lab-02/question.md
   - type: lab
     title: Allow The Metadata Address For One Labelled Pod
@@ -934,14 +954,13 @@ modules:
     topic: metadata-isolation
     task_kind: build
     learning_goals:
-    - Allow the metadata address for one labelled pod while every other pod stays
-      blocked.
+    - Allow the metadata address for one labelled pod while every other pod stays blocked.
     tags:
     - cks
     - metadata-isolation
     - networkpolicy
   - type: reading
-    title: Allow The Metadata Address For One Labelled Pod — Solution
+    title: "Allow The Metadata Address For One Labelled Pod \u2014 Solution"
     path: sections/section-040/module-02/labs/lab-02/solution.md
   - type: reading
     title: Policy Pitfalls For The Metadata Address
@@ -967,7 +986,7 @@ modules:
     title: Restrict Reachability To Node Ports
     path: sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
   - type: reading
-    title: Block Pod Access To The Kubelet Ports — Task
+    title: "Block Pod Access To The Kubelet Ports \u2014 Task"
     path: sections/section-040/module-03/labs/lab-01/question.md
   - type: lab
     title: Block Pod Access To The Kubelet Ports
@@ -977,14 +996,13 @@ modules:
     topic: kubelet-ports
     task_kind: build
     learning_goals:
-    - Stop pods from reaching the kubelet ports on the nodes while DNS and Services
-      keep working.
+    - Stop pods from reaching the kubelet ports on the nodes while DNS and Services keep working.
     tags:
     - cks
     - kubelet
     - networkpolicy
   - type: reading
-    title: Block Pod Access To The Kubelet Ports — Solution
+    title: "Block Pod Access To The Kubelet Ports \u2014 Solution"
     path: sections/section-040/module-03/labs/lab-01/solution.md
   - type: reading
     title: Node Identity And NodeRestriction
@@ -996,7 +1014,7 @@ modules:
     title: hostNetwork And Privileged Pods Bypass Policy
     path: sections/section-040/module-03/course-05-hostnetwork-and-privileged-pods-bypass-policy.md
   - type: reading
-    title: Find Pods That Expose The Runtime Or The Host Network — Task
+    title: "Find Pods That Expose The Runtime Or The Host Network \u2014 Task"
     path: sections/section-040/module-03/labs/lab-02/question.md
   - type: lab
     title: Find Pods That Expose The Runtime Or The Host Network
@@ -1012,7 +1030,7 @@ modules:
     - runtime-socket
     - hostpath
   - type: reading
-    title: Find Pods That Expose The Runtime Or The Host Network — Solution
+    title: "Find Pods That Expose The Runtime Or The Host Network \u2014 Solution"
     path: sections/section-040/module-03/labs/lab-02/solution.md
   - type: reading
     title: Controls Outside The Cluster
@@ -1026,7 +1044,7 @@ modules:
     question_count: 10
     pass_score: 70
   - type: reading
-    title: Protect The Node — Task
+    title: "Protect The Node \u2014 Task"
     path: sections/section-040/capstone/labs/lab-01/question.md
   - type: lab
     title: Protect The Node
@@ -1036,20 +1054,19 @@ modules:
     topic: node-protection
     task_kind: build
     learning_goals:
-    - Protect the node by combining a metadata block with one exception, a kubelet
-      port block and removal of a runtime socket mount.
+    - Protect the node by combining a metadata block with one exception, a kubelet port block and removal
+      of a runtime socket mount.
     tags:
     - cks
     - capstone
     - metadata-isolation
     - kubelet
   - type: reading
-    title: Protect The Node — Solution
+    title: "Protect The Node \u2014 Solution"
     path: sections/section-040/capstone/labs/lab-01/solution.md
 - id: module-050
   title: Verify platform binaries before deploying
-  description: Developed reading and reasoning for Verify platform binaries before
-    deploying.
+  description: Developed reading and reasoning for Verify platform binaries before deploying.
   status: alpha
   content:
   - type: reading
@@ -1068,7 +1085,7 @@ modules:
     title: Verify A Signed Manifest And Record The Result
     path: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
   - type: reading
-    title: Verify Signed Artifact Checksums — Task
+    title: "Verify Signed Artifact Checksums \u2014 Task"
     path: sections/section-050/module-01/labs/lab-01/question.md
   - type: lab
     title: Verify Signed Artifact Checksums
@@ -1084,7 +1101,7 @@ modules:
     - cks
     - artifact-authenticity
   - type: reading
-    title: Verify Signed Artifact Checksums — Solution
+    title: "Verify Signed Artifact Checksums \u2014 Solution"
     path: sections/section-050/module-01/labs/lab-01/solution.md
   - type: reading
     title: Keep The Binding Through Delivery, And Identity-Based Signatures
@@ -1110,7 +1127,7 @@ modules:
     title: Detect A Tampered Or Wrong Binary
     path: sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
   - type: reading
-    title: Find The Binary That Fails Verification — Task
+    title: "Find The Binary That Fails Verification \u2014 Task"
     path: sections/section-050/module-02/labs/lab-01/question.md
   - type: lab
     title: Find The Binary That Fails Verification
@@ -1126,7 +1143,7 @@ modules:
     - cks
     - release-binary-verification
   - type: reading
-    title: Find The Binary That Fails Verification — Solution
+    title: "Find The Binary That Fails Verification \u2014 Solution"
     path: sections/section-050/module-02/labs/lab-01/solution.md
   - type: reading
     title: Read The Version Of A Binary
@@ -1135,7 +1152,7 @@ modules:
     title: Verify What Runs On A Node
     path: sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
   - type: reading
-    title: Verify The Running kubelet Against A Release Checksum — Task
+    title: "Verify The Running kubelet Against A Release Checksum \u2014 Task"
     path: sections/section-050/module-02/labs/lab-02/question.md
   - type: lab
     title: Verify The Running kubelet Against A Release Checksum
@@ -1151,7 +1168,7 @@ modules:
     - cks
     - release-binary-verification
   - type: reading
-    title: Verify The Running kubelet Against A Release Checksum — Solution
+    title: "Verify The Running kubelet Against A Release Checksum \u2014 Solution"
     path: sections/section-050/module-02/labs/lab-02/solution.md
   - type: reading
     title: Summary
@@ -1174,7 +1191,7 @@ modules:
     title: cosign With A Local Key Pair
     path: sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
   - type: reading
-    title: Identify The Forged Signature — Task
+    title: "Identify The Forged Signature \u2014 Task"
     path: sections/section-050/module-03/labs/lab-01/question.md
   - type: lab
     title: Identify The Forged Signature
@@ -1190,7 +1207,7 @@ modules:
     - cks
     - signature-verification
   - type: reading
-    title: Identify The Forged Signature — Solution
+    title: "Identify The Forged Signature \u2014 Solution"
     path: sections/section-050/module-03/labs/lab-01/solution.md
   - type: reading
     title: Keyless Verification And Release Signatures
@@ -1199,7 +1216,7 @@ modules:
     title: Image Digests And Pinning
     path: sections/section-050/module-03/course-05-image-digests-and-pinning.md
   - type: reading
-    title: Pin An Image By Digest And Prove It Runs — Task
+    title: "Pin An Image By Digest And Prove It Runs \u2014 Task"
     path: sections/section-050/module-03/labs/lab-02/question.md
   - type: lab
     title: Pin An Image By Digest And Prove It Runs
@@ -1215,7 +1232,7 @@ modules:
     - cks
     - image-digest-pinning
   - type: reading
-    title: Pin An Image By Digest And Prove It Runs — Solution
+    title: "Pin An Image By Digest And Prove It Runs \u2014 Solution"
     path: sections/section-050/module-03/labs/lab-02/solution.md
   - type: reading
     title: SBOMs And Admission-Time Verification
@@ -1229,7 +1246,7 @@ modules:
     question_count: 10
     pass_score: 70
   - type: reading
-    title: Verify Before You Deploy Capstone — Task
+    title: "Verify Before You Deploy Capstone \u2014 Task"
     path: sections/section-050/capstone/labs/lab-01/question.md
   - type: lab
     title: Verify Before You Deploy Capstone
@@ -1239,13 +1256,12 @@ modules:
     topic: release-verification
     task_kind: build
     learning_goals:
-    - Verify a signed bundle, check the running kubelet, pin an image and report the
-      result.
+    - Verify a signed bundle, check the running kubelet, pin an image and report the result.
     tags:
     - cks
     - release-verification
   - type: reading
-    title: Verify Before You Deploy Capstone — Solution
+    title: "Verify Before You Deploy Capstone \u2014 Solution"
     path: sections/section-050/capstone/labs/lab-01/solution.md
   - type: quiz
     title: Final Domain Quiz

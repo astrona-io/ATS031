@@ -252,6 +252,12 @@ labs:
     - sections/section-050/module-03/course-04-keyless-verification-and-release-signatures.md
     - sections/section-050/module-03/course-05-image-digests-and-pinning.md
     - sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
+  sections/section-010/module-03/labs/lab-03:
+    preparation:
+    - sections/section-010/module-03/course-06a-verify-cidr-and-port-boundaries.md
+  sections/section-030/module-04/labs/lab-03:
+    preparation:
+    - sections/section-030/module-04/course-04a-verify-live-certificate-rotation.md
 additional_readings:
 - sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
 - sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
