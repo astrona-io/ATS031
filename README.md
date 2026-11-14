@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://astrona.io/courses/certified-kubernetes-security-specialist">
+    <img src="https://astrona.io/courses/certified-kubernetes-security-specialist/domains/ATS031.svg" alt="ATS031: Cluster Setup, part of the Certified Kubernetes Security Specialist course on Astrona" width="100%">
+  </a>
+</p>
+
 # Cluster Setup (ATS031)
 
 Certified Kubernetes Security Specialist (CKS): Cluster Setup, worth 15% of the official curriculum. This course belongs to ATP007.
