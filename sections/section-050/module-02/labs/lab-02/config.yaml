@@ -2,17 +2,12 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-031-lab-050-02-02
   docs:
-    prerequisites: docs/prerequisites.md
     examQuestion: question.md
-    caseStudy: docs/case-study.md
     guide: solution.md
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    preloadImages:
-    - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     nodes:
       workers: 1
 bootstrap:
@@ -37,18 +32,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: kubelet-binary
-    description: The review records the version and binary path of the running kubelet
+  - name: check-file
+    description: SHA256SUMS lists every download with its published digest in the check format
     type: file
-    source: validation/validate-kubelet-binary.sh
-    points: 1
-  - name: kubelet-digest
-    description: The review records the digest of the running kubelet binary
+    source: validation/validate-check-file.sh
+    points: 2
+  - name: check-result
+    description: download-check records the exit status and the failing file of the strict check
     type: file
-    source: validation/validate-kubelet-digest.sh
-    points: 1
-  - name: checksum-result
-    description: The review states whether the digest matches the staged checksum for that version
-    type: file
-    source: validation/validate-checksum-result.sh
+    source: validation/validate-check-result.sh
     points: 1

@@ -2,60 +2,91 @@
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Pin An Image By Digest And Prove It Runs Solution
+# Verify A Signed apt Repository And An Installed Package: Solution
 
-This walkthrough solves the task step by step. Run the first block to select the environment:
+Connect to the lab first, so that `kubectl` talks to this lab's cluster and `$node_name` names its control plane node. All commands below run in a shell inside the node, in the repository directory:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-03-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-03-02" || exit 1
-CONTROL=astro-ats-031-lab-050-03-02-control-plane
-WORKER=astro-ats-031-lab-050-03-02-worker
+node_name="astro-ats-031-lab-050-03-02-control-plane"
+podman exec -it -w /var/lib/fleet-apt "$node_name" bash
 ```
 
-Read the `imageID` of the running pod. The text after `@sha256:` is the digest to use:
+The keys, digests and random choices are new on every start. The output below comes from one run.
+
+## Verify the signed Release file
+
+Only `Release` carries a signature. Everything else is trusted because `Release` lists its digest. So check the signature first:
 
 ```sh
-kubectl -n starfleet-031-050-03-02 get pods -l app=relay -o jsonpath='{.items[0].status.containerStatuses[0].imageID}{"\n"}'
+gpgv --keyring ./fleet-archive.gpg Release.gpg Release
 ```
 
-If the value has the form `docker.io/library/busybox@sha256:<digest>`, copy the digest. If it shows only `sha256:` followed by a value, the runtime does not report a registry digest for this image and a pin cannot be built from it; in that case read the digest column of `crictl images --digests` on the node that runs the pod.
+```text
+gpgv: Signature made Tue Nov 17 19:56:58 2026 UTC
+gpgv:                using RSA key ECDF86F9E5DF4DD8F3621180F1A50B45B8FCE45B
+gpgv:                issuer "archive@fleet.example"
+gpgv: Good signature from "Fleet Archive <archive@fleet.example>"
+```
 
-Pin the Deployment to the digest. Replace `<digest>` with the 64 characters:
+## Check Packages against Release
+
+The `SHA256:` list at the end of `Release` gives the digest and the size of `Packages`. Compare it with the digest of the file:
 
 ```sh
-kubectl -n starfleet-031-050-03-02 set image deployment/relay relay=docker.io/library/busybox:1.36.1@sha256:<digest>
-kubectl -n starfleet-031-050-03-02 rollout status deployment/relay
+cat Release
+sha256sum Packages
 ```
 
-Read the `imageID` of the new pod and compare its digest with the one you pinned:
+```text
+SHA256:
+ a116ba8799bd0fc1a7cf59ffff5c1820d9484d89b2666b7b3c5efbad9658a2a1 1254 Packages
+a116ba8799bd0fc1a7cf59ffff5c1820d9484d89b2666b7b3c5efbad9658a2a1  Packages
+```
+
+The first lines of `Release` are left out above. The two digests are equal, so `Packages` is the index the archive signed.
+
+## Check every package file against Packages
+
+Each stanza in `Packages` has a `Filename:` and a `SHA256:` field. `awk` turns them into lines in the check format, and `sha256sum --check` reads those lines from standard input:
 
 ```sh
-kubectl -n starfleet-031-050-03-02 get pods -l app=relay -o jsonpath='{.items[0].status.containerStatuses[0].imageID}{"\n"}'
+awk '/^Filename:/ {file=$2} /^SHA256:/ {print $2 "  " file}' Packages | sha256sum --check
 ```
 
-Record the review. Save this as `configmap-image-pin-review.yaml`, with your own values:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: image-pin-review
-  namespace: starfleet-031-050-03-02
-data:
-  digest: sha256:<digest>
-  imageID: <imageID>
+```text
+pool/fleet-agent_2.0.1_all.deb: OK
+pool/fleet-docs_1.0.0_all.deb: OK
+pool/fleet-probe_0.9.7_all.deb: OK
+pool/fleet-tools_1.4.2_all.deb: FAILED
+sha256sum: WARNING: 1 computed checksum did NOT match
 ```
 
-Apply it:
+In this run `fleet-tools_1.4.2_all.deb` changed after the archive published the index. `apt` would refuse to install it for the same reason. The copy of `fleet-tools` on the node was installed before the change, so its installed files need their own check.
+
+## Check the installed files of fleet-tools
+
+A good package file says nothing about the files on disk after the install. `dpkg --verify` (short form `dpkg -V`) compares each installed file with the MD5 digest that the package shipped in its `md5sums` list:
 
 ```sh
-kubectl apply -f configmap-image-pin-review.yaml
+dpkg --verify fleet-tools
+exit
 ```
 
-After recording your result, remove the independent lab with `astrona destroy ats-031-lab-050-03-02`.
+```text
+??5??????   /usr/lib/fleet-tools/check-node
+```
 
-## Common pitfalls
+The `5` in the third column means the digest of the file differs from the package. A `?` means `dpkg` did not check that property. No output at all would mean every file matches.
 
-> [!WARNING]
-> Wait for the old pod to finish terminating before you read the `imageID`; the grader expects exactly one `relay` pod. A tag that stays in the field does not pin anything without the digest. Copy the digest, not the image identifier, if the two differ.
+## Record the result
+
+Use your own names:
+
+```sh
+kubectl -n starfleet-031-050-03-02 create configmap repository-review \
+  --from-literal=bad-package=fleet-tools_1.4.2_all.deb \
+  --from-literal=changed-file=/usr/lib/fleet-tools/check-node
+```
+
+The grader verifies the chain again on the node, runs `dpkg --verify` itself and compares both findings with the ConfigMap.

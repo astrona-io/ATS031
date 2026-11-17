@@ -21,7 +21,25 @@ podman exec $NODE grep "$(podman exec $NODE sha256sum /tmp/kubectl-staged | cut 
 podman exec $NODE rm /tmp/kubectl-staged
 ```
 
-The digest of the copy appears in the authenticated manifest, so the bytes in the final location are the verified bytes. The same idea applies to container images. A tag such as `v1.35.0` can be moved to another image, while a digest reference such as `image@sha256:<digest>` names exact content, so deploy by digest when you have verified one.
+The digest of the copy appears in the authenticated manifest, so the bytes in the final location are the verified bytes.
+
+The directory around the file matters as much as the file. A user who can write to the directory can delete the verified file and put another one in its place, even when the file itself is read-only. The `install` command copies a file and sets its owner and mode in one step, and `install -d` creates a directory the same way. Put the binary into a new directory that only `root` can write, then read the owner and the mode back with `stat`:
+
+```sh
+podman exec $NODE install -d -o root -g root -m 0755 /opt/verified/bin
+podman exec $NODE install -o root -g root -m 0755 /var/lib/training-release/kubectl /opt/verified/bin/kubectl
+podman exec $NODE stat -c '%U:%G %a %n' /opt/verified /opt/verified/bin /opt/verified/bin/kubectl
+```
+
+```text
+root:root 755 /opt/verified
+root:root 755 /opt/verified/bin
+root:root 755 /opt/verified/bin/kubectl
+```
+
+Mode `755` means the owner may read, write and run, and everyone else may only read and run. The group and other users have no write permission on the file or on either directory, so only `root` can change what sits at `/opt/verified/bin/kubectl`. After the install, compute the digest of `/opt/verified/bin/kubectl` and compare it with the manifest, exactly as for the copy above. Remove the directory when you are done with `podman exec $NODE rm -r /opt/verified`.
+
+The same idea applies to container images. A tag such as `v1.35.0` can be moved to another image, while a digest reference such as `image@sha256:<digest>` names exact content, so deploy by digest when you have verified one.
 
 ## Signatures tied to an identity
 
@@ -58,6 +76,7 @@ The diagram gives the order to follow for every platform binary that you deploy.
 
 > [!WARNING]
 > - **Verifying once at download and never again.** Check the file that is installed.
+> - **Checking only the file mode.** A directory that other users can write lets them replace a read-only file.
 > - **Omitting the expected identity.** Without it any valid signer passes.
 > - **Using a mutable tag as a pin.** Pin by digest.
 > - **Copying the playground key into a real process.** It is a fixture and not a trust root.

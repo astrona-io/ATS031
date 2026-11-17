@@ -126,25 +126,43 @@ labs:
     preparation:
     - sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
     - sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
+  sections/section-050/module-01/labs/lab-02:
+    preparation:
     - sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+  sections/section-050/module-01/labs/lab-03:
+    preparation:
+    - sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
   sections/section-050/module-02/labs/lab-01:
     preparation:
     - sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
-    - sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
-    - sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
   sections/section-050/module-02/labs/lab-02:
     preparation:
+    - sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+  sections/section-050/module-02/labs/lab-03:
+    preparation:
+    - sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
+  sections/section-050/module-02/labs/lab-04:
+    preparation:
     - sections/section-050/module-02/course-04-read-the-version-of-a-binary.md
+  sections/section-050/module-02/labs/lab-05:
+    preparation:
     - sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
   sections/section-050/module-03/labs/lab-01:
     preparation:
     - sections/section-050/module-03/course-01-gpg-signed-repositories.md
-    - sections/section-050/module-03/course-02-package-verification-on-a-node.md
-    - sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
   sections/section-050/module-03/labs/lab-02:
+    preparation:
+    - sections/section-050/module-03/course-02-package-verification-on-a-node.md
+  sections/section-050/module-03/labs/lab-03:
+    preparation:
+    - sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
+  sections/section-050/module-03/labs/lab-04:
     preparation:
     - sections/section-050/module-03/course-04-keyless-verification-and-release-signatures.md
     - sections/section-050/module-03/course-05-image-digests-and-pinning.md
+  sections/section-050/module-03/labs/lab-05:
+    preparation:
+    - sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
 additional_readings:
 - sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
 - sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
@@ -157,5 +175,3 @@ additional_readings:
 - sections/section-040/module-02/course-05-policy-pitfalls-for-the-metadata-address.md
 - sections/section-040/module-02/course-06-verify-coverage-across-namespaces.md
 - sections/section-040/module-03/course-06-controls-outside-the-cluster.md
-- sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
-- sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md

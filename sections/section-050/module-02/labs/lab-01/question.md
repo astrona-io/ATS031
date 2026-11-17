@@ -2,29 +2,32 @@
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Find The Binary That Fails Verification
+# Pick The Release Files For A Node
 
 Allow about 6 minutes for the tasks.
 
-The release team staged the three binaries `kubectl`, `kubeadm` and `kubelet` for the Starfleet clusters. Each has a published checksum file. One of the three was changed after its checksum was published.
+The worker node of the `starfleet` cluster needs a new `kubeadm`. An offline copy of the Kubernetes release site sits on the control plane node. Pick the exact file for the worker and note its published digest.
 
-## Starting state
+## Connect to the lab
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-02-01" || exit 1
-CONTROL=astro-ats-031-lab-050-02-01-control-plane
-WORKER=astro-ats-031-lab-050-02-01-worker
+node_name="astro-ats-031-lab-050-02-01-control-plane"
 ```
 
-Keep this connection selected. Host-level commands name only the node containers of this environment.
+The node of a `kind` cluster is a container on your machine. Run a command inside it with `podman exec "$node_name" <command>`. If your machine uses Docker, write `docker exec` instead.
 
-## Required result
+## Tasks
 
-The control plane node holds the files in `/var/lib/training-release/k8s/lab`. Each binary has a checksum file named like the binary with the suffix `.sha256`, which holds only the digest. Find the one binary that fails verification and write its file name, and nothing else, into `/var/lib/training-release/k8s/lab/result.txt` on the control plane node. Do not change the staged binaries or their checksum files. Do not run the staged binaries.
+The mirror is in `/var/lib/k8s-mirror` on the control plane node. It uses the same layout as the release site: `release/<version>/bin/<os>/<architecture>/<name>`, with a `<name>.sha256` file next to each binary.
 
-## Verify The Result
+1. Find the current stable version that the mirror publishes.
+2. Find the CPU architecture of the worker node `astro-ats-031-lab-050-02-01-worker`, in the form that the release paths use (`amd64` or `arm64`).
+3. Create the ConfigMap `release-pick` in the namespace `starfleet-031-050-02-01` with two keys:
+   - `path`: the path of the Linux `kubeadm` file for that version and architecture, relative to the mirror, in the form `release/<version>/bin/linux/<architecture>/kubeadm`.
+   - `sha256`: the published digest of that file, from its `.sha256` file.
 
-The grader reads the node files and the objects described above and recomputes every digest itself. Do not change the staged files.
+The stable version is chosen at random each time the lab starts.

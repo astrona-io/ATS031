@@ -2,17 +2,12 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-031-lab-050-01-01
   docs:
-    prerequisites: docs/prerequisites.md
     examQuestion: question.md
-    caseStudy: docs/case-study.md
     guide: solution.md
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    preloadImages:
-    - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     nodes:
       workers: 1
 bootstrap:
@@ -37,13 +32,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: review-verdict
-    description: artifact-review records the release as verified and the tampered copy as rejected
+  - name: failed-files
+    description: manifest-check names every file that fails the SHA256SUMS manifest
     type: file
-    source: validation/validate-review-verdict.sh
-    points: 1
-  - name: review-digest
-    description: artifact-review records the sha256 from the authenticated manifest
+    source: validation/validate-failed-files.sh
+    points: 2
+  - name: agent-digest
+    description: manifest-check records the current SHA-256 digest of fleet-agent
     type: file
-    source: validation/validate-review-digest.sh
+    source: validation/validate-agent-digest.sh
     points: 1

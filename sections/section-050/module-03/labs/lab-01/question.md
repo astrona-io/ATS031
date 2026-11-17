@@ -2,29 +2,31 @@
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Identify The Forged Signature
+# Verify Detached GPG Signatures With gpgv
 
-Allow about 8 minutes for the tasks.
+Allow about 10 minutes for the tasks.
 
-Two release notes arrived with detached signatures, one made with GPG and one made with cosign. The Starfleet team suspects that one file was changed after signing.
+The fleet publisher sends six operations documents to the control plane node of the `starfleet` cluster, each with a detached GPG signature. Some documents did not arrive as the publisher signed them. Find them before anyone acts on them.
 
-## Starting state
+## Connect to the lab
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-03-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-03-01" || exit 1
-CONTROL=astro-ats-031-lab-050-03-01-control-plane
-WORKER=astro-ats-031-lab-050-03-01-worker
+node_name="astro-ats-031-lab-050-03-01-control-plane"
 ```
 
-Keep this connection selected. Host-level commands name only the node containers of this environment.
+The node of a `kind` cluster is a container on your machine. Run a command inside it with `podman exec "$node_name" <command>`. If your machine uses Docker, write `docker exec` instead.
 
-## Required result
+## Tasks
 
-The control plane node holds the files in `/var/lib/training-release/signed/lab`: `gpg-notes.txt` with `gpg-notes.txt.asc` and the keyring `publisher.gpg`, and `cosign-notes.txt` with `cosign-notes.txt.sig` and the key `cosign.pub`. Verify both signatures. Exactly one fails. Write the word `gpg` or `cosign`, naming the forged one, and nothing else, into `/var/lib/training-release/signed/lab/result.txt` on the control plane node. Do not change the staged files.
+The directory `/var/lib/doc-review` on the control plane node holds six `.txt` documents, a detached ASCII-armored signature `<document>.asc` for most of them, and `publisher.gpg`, a keyring file with only the publisher's public key. The node has `gpgv`, the GnuPG tool that only verifies signatures; it has no `gpg`.
 
-## Verify The Result
+1. Verify each document against its signature, trusting only the keys in `publisher.gpg`.
+2. Create the ConfigMap `signature-review` in the namespace `starfleet-031-050-03-01` with two keys:
+   - `rejected`: the names of every document that does not have a good signature from the publisher key, separated by spaces, for example `crew-roster.txt nav-update.txt`.
+   - `fingerprint`: the full 40-character fingerprint of the publisher key, as `gpgv` prints it.
 
-The grader reads the node files and the objects described above and recomputes every digest itself. Do not change the staged files.
+Do not change the documents, the signatures or the keyring. The rejected documents are chosen at random each time the lab starts.

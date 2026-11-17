@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
+# Creates the lab namespace and stages a new random starting state inside the
+# lab's control-plane node container. The staging script is bootstrap/stage-node.sh.
 set -euo pipefail
 context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-031-lab-050-02-01}"
 if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-050-02-01}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-kubectl apply -f "$lab_directory/bootstrap/manifests/start.yaml"
-kubectl -n starfleet-031-050-02-01 rollout status deployment/probe --timeout=180s
-kubectl -n starfleet-031-050-02-01 wait --for=condition=Ready pod/shuttle --timeout=120s
-kubectl -n outpost-031-050-02-01 wait --for=condition=Ready pod/drifter --timeout=120s
-
-python3 "$lab_directory/bootstrap/prepare-k8s-mirror.py" ats-031-lab-050-02-01 lab1
+kubectl apply -f "$lab_directory/bootstrap/manifests/namespace.yaml"
+"$engine" exec -i "$cluster-control-plane" bash -s < "$lab_directory/bootstrap/stage-node.sh"
