@@ -40,7 +40,7 @@ See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [questi
 
 ## Hands-On Coverage
 
-This course has 19 ungraded module playgrounds, 29 independent labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static checks only: YAML and JSON parse, shell syntax, Python compile, path and question-count checks. No playground, lab or grader has been booted or run, and runtime verification is pending.
+This course has 19 ungraded module playgrounds and 86 independent labs. Each lab's task and solution are registered immediately after the reading it practises. CI (`.github/workflows/labs.yml`) checks registration, lab layout, teaching coverage and question banks, and runs `astrona test` on changed labs. Every lab passed `astrona validate` and `astrona test` on kind (arm64 node image) on 2026-11-17; the playgrounds have not been booted in CI yet.
 
 | Module | Labs in teaching order |
 | --- | --- |
