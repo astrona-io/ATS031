@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dock-031-040-03-03
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scanner-settings
+  namespace: dock-031-040-03-03
+data:
+  targets: |
+    registry.dock.internal/cargo
+    registry.dock.internal/relay
+---
+# The finding: the container runs as root and mounts the containerd socket directory.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-scanner
+  namespace: dock-031-040-03-03
+  labels:
+    app: image-scanner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-scanner
+  template:
+    metadata:
+      labels:
+        app: image-scanner
+    spec:
+      securityContext:
+        runAsUser: 0
+      containers:
+      - name: scanner
+        image: docker.io/curlimages/curl:8.11.1
+        command:
+        - sleep
+        - '86400'
+        volumeMounts:
+        - name: runtime
+          mountPath: /host/run/containerd
+        - name: scratch
+          mountPath: /scratch
+        - name: settings
+          mountPath: /etc/scanner
+          readOnly: true
+      volumes:
+      - name: runtime
+        hostPath:
+          path: /run/containerd
+          type: Directory
+      - name: scratch
+        emptyDir: {}
+      - name: settings
+        configMap:
+          name: scanner-settings
+---
+# A reviewed node agent that reads the node logs. It stays as it is.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-shipper
+  namespace: dock-031-040-03-03
+  labels:
+    app: log-shipper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-shipper
+  template:
+    metadata:
+      labels:
+        app: log-shipper
+    spec:
+      containers:
+      - name: shipper
+        image: docker.io/curlimages/curl:8.11.1
+        command:
+        - sleep
+        - '86400'
+        volumeMounts:
+        - name: node-logs
+          mountPath: /host/var/log
+          readOnly: true
+      volumes:
+      - name: node-logs
+        hostPath:
+          path: /var/log
+          type: Directory

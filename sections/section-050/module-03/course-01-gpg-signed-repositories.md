@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---
@@ -61,7 +60,20 @@ flowchart TB
 
 The diagram shows one signature over the `Release` file reaching every package through the digests listed one level below.
 
-You can now verify a detached signature and a repository file, and you know that the key is the trust anchor. The next question is how to check packages that are already installed.
+## Verify with gpgv
+
+Many nodes have no `gpg` at all, but a node that uses apt also has `gpgv`, because apt depends on it to check repository signatures. `gpgv` only verifies signatures. It has no key management and no trust model: it accepts any key in the keyring file you name, so it prints no "not certified" warning. Write the keyring with a path that contains a slash, such as `./publisher.gpg`. A bare file name makes `gpgv` look for the keyring in its home directory instead of the current directory:
+
+```sh
+podman exec -w $SIGNED $NODE gpgv --keyring ./publisher.gpg Release.gpg Release
+echo "exit status: $?"
+podman exec -w $SIGNED $NODE gpgv --keyring ./publisher.gpg release-notes.txt.asc release-notes-forged.txt
+echo "exit status: $?"
+```
+
+The first command prints `Good signature from "Training Publisher <publisher@training.invalid>"` and exit status 0. The second prints `BAD signature` and exit status 1. `gpgv` has a third result that scripts must also treat as a failure. When a different key made the signature, or the signature file is missing, it prints `Can't check signature: No public key` or `can't open`, and the exit status is 2. Only exit status 0 means the file is good.
+
+You can now verify a detached signature and a repository file with `gpg` or `gpgv`, and you know that the key is the trust anchor. The next question is how to check packages that are already installed.
 
 ## Common pitfalls
 
@@ -70,3 +82,4 @@ You can now verify a detached signature and a repository file, and you know that
 > - **Importing the key into the default keyring.** Every repository then trusts that key. Name the key file for the one repository.
 > - **Taking the key from the same site as the packages without checking the fingerprint.** An attacker who controls the site controls both.
 > - **Verifying the package but not the Release file.** The digests in an unsigned index prove nothing.
+> - **Treating only `BAD signature` as a failure.** A missing signature or an unknown key also fails, with exit status 2.

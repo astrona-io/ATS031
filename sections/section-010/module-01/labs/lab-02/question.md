@@ -1,39 +1,45 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
 # Allow DNS And One Application Dependency
 
-Solve this question on: `terminal`
+Allow about 12 minutes for the tasks.
 
-The namespace `starfleet-031-010-01-02` runs the `probe` Deployment (two pods labelled `app: probe`, port 8080) behind the Service `probe`, and the client pod `shuttle` labelled `app: shuttle`. The namespace `outpost-031-010-01-02` runs the pod `drifter`, which no policy restricts. Calico, the network plugin of this cluster, enforces NetworkPolicy. No policy exists yet, so `shuttle` can send traffic anywhere. The team wants `shuttle` to reach only name resolution (DNS, the Domain Name System) and `probe`, and wants proof that it cannot reach a healthy server that it has no reason to call.
+The `scanner` pod should talk to the `archive` and to nothing else. It finds the archive by name, so it also needs DNS.
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+## Connect to the lab
+
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-01-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-01-02" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-Allow about 8 minutes for task work. Cluster startup adds time.
+## Starting state
+
+The namespace `starfleet-031-010-01-02` runs the Deployment `archive` with two replicas and the Service `archive`, plus the pods `scanner`, `decoy` and `idler`. The Service listens on port 80 and sends requests to the container port named `http`, which is TCP port 8080. The `decoy` pod is a healthy listener on TCP port 8080 with the label `app: decoy`; it is there to prove that unlisted egress is blocked. Each pod has the label `app: <name>` and contains a small test client, `/app/client.py`. No NetworkPolicy exists. CoreDNS, the cluster DNS server, runs in `kube-system` in pods with the label `k8s-app: kube-dns`.
 
 ## Tasks
 
-1. Create the NetworkPolicy `shuttle-egress` in `starfleet-031-010-01-02`. It selects the pods labelled `app: shuttle` and covers egress only. One rule allows DNS on UDP and TCP port 53, only to the pods labelled `k8s-app: kube-dns` in the namespace `kube-system` (selected by the label `kubernetes.io/metadata.name`, in the same peer entry). A second rule allows TCP port 8080, only to pods labelled `app: probe` in the same namespace.
-2. Create the pod `blocked-server` in `starfleet-031-010-01-02` with the label `app: blocked-server` and `restartPolicy: Never`. Its one container is named `web`, uses the image `docker.io/library/python:3.13-alpine` and runs the command `python -m http.server 8080`. Wait until it is ready.
-3. Prove the result. From `shuttle`, `nslookup probe.starfleet-031-010-01-02.svc.cluster.local` must return an address, and `http://probe/` must return a response with `version=v1`. A request from `shuttle` to the `blocked-server` pod address on port 8080 must time out.
+1. In `starfleet-031-010-01-02`, create a NetworkPolicy named `scanner-egress` that selects only the pod with the label `app: scanner` and covers egress.
+2. Allow DNS on UDP port 53 and TCP port 53 to the CoreDNS pods in `kube-system`. Select the namespace by its name label and the pods by `k8s-app: kube-dns` in one peer entry.
+3. Allow TCP port 8080 to the pods with the label `app: archive` in the same namespace.
+4. Allow nothing else. `scanner` must time out to `decoy`, and `decoy` must stay running and reachable for other pods.
 
-## Constraints
+## Check your work
 
-- Keep the `probe` Deployment and the `shuttle` and `drifter` pods running and unchanged.
-- Give `blocked-server` a label of its own, so no allow rule for `shuttle` matches it.
-- Do not open any other egress path for `shuttle`.
+The test client prints `open` with the reply, `blocked` when the connection times out, and `resolved` or `unresolved` for a DNS lookup:
 
-## How the answer is checked
+```sh
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py dns archive.starfleet-031-010-01-02.svc.cluster.local
+ARCHIVE_SERVICE_IP=$(kubectl -n starfleet-031-010-01-02 get service archive -o jsonpath='{.spec.clusterIP}')
+DECOY_IP=$(kubectl -n starfleet-031-010-01-02 get pod decoy -o jsonpath='{.status.podIP}')
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py tcp "$ARCHIVE_SERVICE_IP" 80
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py tcp "$DECOY_IP" 8080
+```
 
-The grader runs three checks. The first reads the NetworkPolicy `shuttle-egress` and needs the pod selector `app: shuttle`, the policy type `Egress` only, a DNS rule to `k8s-app: kube-dns` in `kube-system` on UDP and TCP port 53, and a rule to `app: probe` on TCP port 8080. The second reads the pod `blocked-server` and needs the label, container, image and command above, with the pod running and ready. The third runs `nslookup` from `shuttle` and needs an `Address` line, asks `http://probe/` from `shuttle` and needs `version=v1`, then proves that `blocked-server` answers `drifter` on port 8080 and that the same request from `shuttle` times out after 3 seconds. Every check also needs the `probe` Deployment fully rolled out.
-
-Hint: Calico updates its rules a few seconds after you apply a policy. Repeat your test requests before you submit.
+The lookup must print `resolved` and the Service address. The request to the archive must print `open` and the request to the decoy must print `blocked`.

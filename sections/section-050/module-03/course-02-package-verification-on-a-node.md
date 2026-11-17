@@ -1,11 +1,10 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---
 # Package Verification On A Node
 
-A signature check happens at install time. Later, a file that a package installed can be changed on disk. This part explains how the package manager can compare installed files with the package metadata. It is reading only, for a reason given below, and it has no commands to run.
+A signature check happens at install time. Later, a file that a package installed can be changed on disk. This part explains how the package manager compares installed files with the package metadata, runs that check on a playground node, and shows which files the check cannot see.
 
 ## What the package manager remembers
 
@@ -13,11 +12,51 @@ When dpkg installs a Debian package, it records the list of files and, for many 
 
 The tool `debsums` does a similar job with the digests stored in the package files. On RPM based systems the command `rpm -V` prints the same kind of nine character line, with `S` for size and `5` for content digest. All of them depend on the stored digests, and the digests are stored on the same machine. An attacker with root access can change both the file and the record, so these tools find accidents and unsophisticated changes, not a careful attacker. Packages also carry a signature, which `rpm -K` can check against an imported key and which apt checks through the repository, but that happens at install time.
 
-## Why this part has no commands
+## Run the check on a node
 
-The node containers of the playground are built from a minimal image, and they may not have `debsums` or the full package database tooling. More important, the Kubernetes binaries on a `kind` node are placed by the image build and were not installed by a package, so a package verification of the node would not cover them. A command that cannot cover the files you care about teaches the wrong lesson. On a node installed from the Kubernetes package repository the command applies, and you would run it against the `kubelet` package and look for lines that name `/usr/bin/kubelet`.
+The playground node is a Debian-based container with `dpkg`, so the check runs there. Start with the file that matters most on a Kubernetes node. `dpkg -S` names the package that installed a path:
 
-When a binary is not covered by any package record, the digest comparison of the file with a published digest is the only check, and you need an authenticated digest from the release.
+<!-- astrona:playground:renew -->
+
+```sh
+NODE=astro-ats-031-playground-050-03-control-plane
+podman exec $NODE dpkg -S /usr/bin/kubelet
+```
+
+```text
+dpkg-query: no path found matching pattern /usr/bin/kubelet
+```
+
+No package owns the `kubelet` here. The `kind` image build copied the Kubernetes binaries into place, so `dpkg` has no record of them, and a package check cannot cover them. On a node installed from the Kubernetes package repository, the `kubelet` package owns `/usr/bin/kubelet` and the check applies. For a binary without a package record, compare its digest with an authenticated digest from the release instead.
+
+Files that did come from a package can be checked. The `base-files` package installs `/etc/issue` and other small files. Verify it:
+
+```sh
+podman exec $NODE dpkg --verify base-files
+```
+
+```text
+missing     /usr/share/doc/base-files
+missing     /usr/share/doc/base-files/README
+missing     /usr/share/doc/base-files/README.FHS
+missing     /usr/share/doc/base-files/changelog.gz
+missing     /usr/share/doc/base-files/copyright
+missing     /usr/share/lintian/overrides/base-files
+missing     /usr/share/doc/base-files/FAQ
+```
+
+The `missing` lines are documentation files that the image build removed to save space. They are expected in a minimal image. Now change one installed file and verify again, this time without the `missing` lines:
+
+```sh
+podman exec $NODE sh -c 'echo changed >> /etc/issue'
+podman exec $NODE sh -c 'dpkg --verify base-files | grep -v "^missing"'
+```
+
+```text
+??5?????? c /etc/issue
+```
+
+The `5` in the third place says that the MD5 digest of `/etc/issue` no longer matches the package. The `c` marks a configuration file, which an administrator may edit on purpose. The same line without the `c` on a binary, such as `??5??????   /bin/mount`, needs an explanation, because binaries do not change after install. `dpkg --verify` in this version returns exit status 0 even when it prints a changed file, so a script must read the output, not the exit status.
 
 ## What to look for
 
@@ -32,3 +71,4 @@ You can now say what the package manager checks and what it cannot see. The next
 > - **Expecting package tools to cover manually placed binaries.** They only know files from packages.
 > - **Treating every difference as an attack.** Edited configuration files are expected to differ.
 > - **Running the check once.** Run it on a schedule, and keep the output as evidence.
+> - **Testing the exit status of `dpkg --verify`.** It can be 0 while the output lists a changed file. Read the lines.

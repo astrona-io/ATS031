@@ -1,40 +1,30 @@
 ---
-draft: true
 exam_objectives:
 - Protect node metadata and endpoints
 ---
-# Block A Simulated Metadata Endpoint
+# Bring A Host-Network Workload Back Under NetworkPolicy
 
-Solve this question on: `terminal`
+Allow about 7 minutes for the tasks.
 
-The namespace `starfleet-031-040-01-01` runs the `probe` Deployment (two pods labelled `app: probe`, port 8080) behind the Service `probe`, and the client pod `shuttle` labelled `app: shuttle`. The namespace `outpost-031-040-01-01` runs the client pod `drifter`. Calico, the network plugin of this cluster, enforces NetworkPolicy. No policy exists yet. You will add a pod that plays the part of a metadata endpoint, and keep `shuttle` away from it while it keeps its permitted dependencies. This models the network boundary only. It does not secure a real cloud provider metadata service, and it does not cover pods on the host network.
+Find out why an egress policy does not restrict one workload, and change the workload so that the policy applies to it.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+## Starting state
+
+The namespace `starfleet-031-040-01-01` has the `probe` Deployment and Service, the pod `metadata-simulator` (a web server on port 8080 that stands in for a metadata endpoint) and the Deployment `relay` with one client pod. The NetworkPolicy `starfleet-egress` selects every pod in the namespace and allows egress only to the cluster DNS pods and to the `probe` pods on port 8080. The namespace `outpost-031-040-01-01` has the client pod `drifter` and no NetworkPolicy.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-040-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-040-01-01" || exit 1
-node_name="astro-ats-031-lab-040-01-01-control-plane"
-worker_name="astro-ats-031-lab-040-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Keep this connection selected for the whole task.
 
-Allow about 8 minutes for task work. Cluster startup adds time.
+## Required result
 
-## Tasks
+An audit found that the `relay` pod can still reach `metadata-simulator`, although `starfleet-egress` should allow only DNS and the `probe` pods. The `relay` workload does not need any setting that gives it access to the network of the node.
 
-1. Create the pod `metadata-simulator` in `starfleet-031-040-01-01` with the label `app: metadata-simulator` and `restartPolicy: Never`. Its one container is named `web`, uses the image `docker.io/library/python:3.13-alpine` and runs the command `python -m http.server 8080`.
-2. Create the NetworkPolicy `shuttle-isolation` in `starfleet-031-040-01-01`. It selects the pods labelled `app: shuttle`, covers egress only, and allows two things: DNS to the CoreDNS pods (`k8s-app: kube-dns` in the namespace `kube-system`) on UDP and TCP port 53, and the pods labelled `app: probe` on TCP port 8080.
-3. Prove the result. `shuttle` must still get a response with `version=v1` from `http://probe/`, and its request to the `metadata-simulator` pod address on port 8080 must time out. A request from `drifter` to the same address must still get the directory listing.
+Change the `relay` Deployment so that its pod runs in the pod network, where `starfleet-egress` applies to it. Then `relay` must not reach `metadata-simulator`, and it must still reach the `probe` Service by the name `probe`. Keep the Deployment available with one replica. Do not change or delete the NetworkPolicy, `metadata-simulator` or `drifter`.
 
-## Constraints
+## Verify the result
 
-- Keep the `probe` Deployment, the `shuttle` pod and the `drifter` pod running and unchanged.
-- Do not add a policy that blocks `drifter`.
-
-## How the answer is checked
-
-The grader runs two checks. The first reads the pod `metadata-simulator` and needs the label, container, image and command from the first task, with the pod running and ready, and a request from `drifter` to the pod address on port 8080 must return a page that contains `Directory listing`. The second reads the NetworkPolicy `shuttle-isolation`, which must have exactly the selector, policy type and two egress rules from the second task, and a request from `shuttle` to the `metadata-simulator` pod address on port 8080 must time out. Both checks also need the `probe` Deployment fully rolled out and a response with `version=v1` from `shuttle` to `http://probe/`.
-
-Hint: Calico updates its rules a few seconds after you apply a policy. Repeat your test requests before you submit.
+The grader reads the `relay` Deployment and its running pod, and sends live requests from that pod to the pod IP address of `metadata-simulator` and to the `probe` Service. It also checks that `drifter` still reaches `metadata-simulator`, so a blocked request cannot come from a stopped server. Wait until the rollout of `relay` has finished before you submit.

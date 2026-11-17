@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Properly set up Ingress with TLS
 ---
@@ -21,7 +20,7 @@ After this module you can:
 
 ## Before you start
 
-You need Kubernetes basics: Deployments, Services, Secrets and `kubectl`. You also need `curl` and OpenSSL 1.1.1 or newer on your own machine. The `openssl` that comes with some macOS versions is LibreSSL and does not support every option used here, so check `openssl version` first. The module has six parts: certificate fundamentals, a self-signed certificate, a certificate signed by your own authority, the TLS Secret, the TLS Ingress and its verification, and the redirect with the default certificate. A graded lab follows the fifth and the sixth part.
+You need Kubernetes basics: Deployments, Services, Secrets and `kubectl`. You also need `curl` and OpenSSL 1.1.1 or newer on your own machine. The `openssl` that comes with some macOS versions is LibreSSL and does not support every option used here, so check `openssl version` first. The module has six parts: certificate fundamentals, a self-signed certificate, a certificate signed by your own authority, the TLS Secret, the TLS Ingress and its verification, and the redirect with the default certificate. A graded lab follows every part except the first, which explains the concepts.
 
 Your playground is a `kind` cluster running Kubernetes v1.35 with Traefik installed. It has these objects:
 

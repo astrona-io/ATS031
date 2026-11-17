@@ -1,30 +1,31 @@
 ---
-draft: true
 exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
 # Save The Failing API Server Check Ids Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-02-01" || exit 1
+node_name="astro-ats-031-lab-020-02-01-control-plane"
+worker_name="astro-ats-031-lab-020-02-01-worker"
 ```
 
-## Run the audit
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
-The Job must share the host process namespace, mount the host directories that the audits read, and run on the control plane node. That node carries a taint, so the Job needs a toleration.
+## Run the audit with JSON output
 
-Save this as `job-kube-bench-master.yaml`:
+The text report is made for people. The `--json` option prints the same result as one JSON document, so a script can read it. The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version. Save this as `job-api-server-audit.yaml`:
 
 ```yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: kube-bench-master
-  namespace: default
+  name: api-server-audit
+  namespace: starfleet-031-020-02-01
 spec:
   backoffLimit: 0
   template:
@@ -41,7 +42,7 @@ spec:
       - name: kube-bench
         image: docker.io/aquasec/kube-bench:v0.10.6
         imagePullPolicy: IfNotPresent
-        command: ["kube-bench", "run", "--targets", "master"]
+        command: ["kube-bench", "run", "--targets", "master", "--json"]
         volumeMounts:
         - {name: var-lib-etcd, mountPath: /var/lib/etcd, readOnly: true}
         - {name: var-lib-kubelet, mountPath: /var/lib/kubelet, readOnly: true}
@@ -56,48 +57,67 @@ spec:
       - {name: usr-bin, hostPath: {path: /usr/bin}}
 ```
 
-Apply it and wait for it to complete:
+Apply it, wait until it completes and save the log in a local file:
 
 ```sh
-kubectl apply -f job-kube-bench-master.yaml
-kubectl -n default wait --for=condition=complete job/kube-bench-master --timeout=180s
+kubectl apply -f job-api-server-audit.yaml
+kubectl -n starfleet-031-020-02-01 wait --for=condition=complete job/api-server-audit --timeout=180s
+kubectl -n starfleet-031-020-02-01 logs job/api-server-audit > api-server-audit.json
 ```
 
-## Build the list
+## Filter the failing API server checks
 
-Each failing line of the text report starts with `[FAIL]`, then the check number. Select the lines for section 1.2, keep the number, and save it:
+Each result in the JSON document is an object with a `test_number` and a `status`. The `jq` filter below walks the whole document, keeps the failing results and prints the numbers that start with `1.2.`:
 
 ```sh
-kubectl -n default logs job/kube-bench-master | grep -E '^\[FAIL\] 1\.2\.' | awk '{print $2}' | sort -V > failing-1-2.txt
+jq -r '[.. | objects | select(has("test_number")) | select(.status == "FAIL") | .test_number | select(startswith("1.2."))] | sort | .[]' api-server-audit.json > failing-1-2.txt
 cat failing-1-2.txt
 ```
 
-The file should show one check number on each line, all starting with `1.2.`. If the file is empty, read the first lines of the log to see which edition was loaded and whether the audit ran.
+If `jq` is not installed, save this short Python program as `failing_checks.py`. It does the same walk through the document:
 
-## Save the list in the cluster
+```python
+import json
+import sys
 
-Create the ConfigMap from the file. The key must be `ids`:
+text = open(sys.argv[1]).read()
+report, _ = json.JSONDecoder().raw_decode(text[text.index("{"):])
+failing = set()
+
+
+def collect(node):
+    if isinstance(node, dict):
+        if node.get("status") == "FAIL" and str(node.get("test_number", "")).startswith("1.2."):
+            failing.add(node["test_number"])
+        for value in node.values():
+            collect(value)
+    elif isinstance(node, list):
+        for value in node:
+            collect(value)
+
+
+collect(report)
+print("\n".join(sorted(failing)))
+```
+
+Run it on the saved log:
+
+```sh
+python3 failing_checks.py api-server-audit.json > failing-1-2.txt
+```
+
+## Record the list
+
+Create the ConfigMap from the file:
 
 ```sh
 kubectl -n starfleet-031-020-02-01 create configmap failing-checks --from-file=ids=failing-1-2.txt
+kubectl -n starfleet-031-020-02-01 get configmap failing-checks -o yaml
 ```
 
-## Verify The Result
-
-Read the ConfigMap back and compare it with the file:
-
-```sh
-kubectl -n starfleet-031-020-02-01 get configmap failing-checks -o jsonpath='{.data.ids}'
-```
-
-Do not change any cluster setting before you submit, because the grader compares your list with a new audit run. The JSON route with `jq` gives the same list.
-
-After recording your result, remove the independent lab with `astrona destroy ats-031-lab-020-02-01`.
+The key `ids` holds one check number on each line. Do not change any API server setting now, because the grader compares your list with a new run.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Listing `WARN` checks.** Only the state `FAIL` belongs in the list.
-> - **Including other sections.** Keep only numbers that start with `1.2.`.
-> - **Using another key.** The ConfigMap key must be `ids`.
-> - **Fixing a setting first.** A fix changes the failing list, and the grader compares with the current state.
+> A `grep` on the text report also matches the numbers in the remediation block and can miss checks that wrap. A partial list fails, and so does a list with `WARN` checks. A Job name can be used only once; delete the Job before you run it again with other options.

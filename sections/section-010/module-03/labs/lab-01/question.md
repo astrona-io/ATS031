@@ -1,40 +1,43 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
 # Allow One Pod From Another Namespace
 
-Solve this question on: `terminal`
+Allow about 10 minutes for the tasks.
 
-The `starfleet-031-010-03-01` and `outpost-031-010-03-01` namespaces each run the `probe` Deployment (two pods labelled `app: probe`, port 8080), the `probe` Service (port 80), a `shuttle` pod labelled `app: shuttle` and a `drifter` pod. The `dock-031-010-03-01` namespace has a `shuttle` pod and a `telemetry` pod. No NetworkPolicy exists. Calico, the network plugin of this cluster, enforces policy.
+Only the `courier` in `outpost-031-010-03-01` may deliver to the `registry`. The couriers in other namespaces carry the same label and must not get in.
 
-The `shuttle` pod in `outpost-031-010-03-01` must reach the `probe` pods in `starfleet-031-010-03-01`. No other pod may reach them.
+## Connect to the lab
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-03-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-Allow about 7 minutes for task work. Cluster startup adds time.
+## Starting state
+
+The namespace `starfleet-031-010-03-01` runs the pods `registry` and `courier`. The namespace `outpost-031-010-03-01` runs the pods `courier` and `idler`, and the namespace `dock-031-010-03-01` runs one more pod named `courier`. Each pod has the label `app: <pod name>`, so three pods carry `app: courier`. Each pod serves HTTP on TCP port 8080 and contains a small test client, `/app/client.py`. Each namespace has the automatic label `kubernetes.io/metadata.name: <namespace name>`. No NetworkPolicy exists.
 
 ## Tasks
 
-1. Look at the labels of the namespace `outpost-031-010-03-01` and of the pods in it, so you know which labels select the one allowed client.
-2. Create the NetworkPolicy `probe-from-outpost` in `starfleet-031-010-03-01`. It selects the pods labelled `app: probe`, covers ingress only, and has one rule with one `from` entry. That entry holds a `namespaceSelector` for the namespace named `outpost-031-010-03-01` (use the label `kubernetes.io/metadata.name`) and a `podSelector` for pods labelled `app: shuttle`, in the same entry. The rule allows TCP port 8080 only.
-3. Prove the result. The `shuttle` pod in `outpost-031-010-03-01` gets a response with `version=v1` from `http://probe.starfleet-031-010-03-01/`. The `drifter` pod in `outpost-031-010-03-01`, the `shuttle` pod in `dock-031-010-03-01` and the `shuttle` pod in `starfleet-031-010-03-01` all time out when they request the same Service.
+1. In `starfleet-031-010-03-01`, create a NetworkPolicy named `registry-from-outpost-courier` that selects the `registry` pod and covers ingress.
+2. Admit TCP port 8080 only from pods with the label `app: courier` in the namespace `outpost-031-010-03-01`. Use one peer entry that has both a `namespaceSelector` and a `podSelector`.
+3. Do not create policies in any other namespace, and do not add a second policy in `starfleet-031-010-03-01`.
 
-## Constraints
+## Check your work
 
-- Create the policy in `starfleet-031-010-03-01` only. Do not change any other namespace.
-- Keep every Deployment and pod running and unchanged.
+The test client prints `open` with the reply, or `blocked` when the connection times out:
 
-## How the answer is checked
+```sh
+REGISTRY_IP=$(kubectl -n starfleet-031-010-03-01 get pod registry -o jsonpath='{.status.podIP}')
+kubectl -n outpost-031-010-03-01 exec courier -- python /app/client.py tcp "$REGISTRY_IP" 8080
+kubectl -n dock-031-010-03-01 exec courier -- python /app/client.py tcp "$REGISTRY_IP" 8080
+kubectl -n starfleet-031-010-03-01 exec courier -- python /app/client.py tcp "$REGISTRY_IP" 8080
+```
 
-The grader runs two checks. The first reads the NetworkPolicy `probe-from-outpost` and needs the pod selector `app: probe`, the policy type `Ingress` only, and one rule with exactly one `from` entry that holds both the namespace name `outpost-031-010-03-01` and the pod label `app: shuttle`, on TCP port 8080. The second sends a request to the `probe` Service in `starfleet-031-010-03-01` from four pods: `shuttle` in `outpost-031-010-03-01` must get `version=v1`, and `drifter` in `outpost-031-010-03-01`, `shuttle` in `dock-031-010-03-01` and `shuttle` in `starfleet-031-010-03-01` must each time out after 3 seconds. Both checks also need both `probe` Deployments fully rolled out and every client pod running and ready.
-
-Hint: Calico updates its rules a few seconds after you apply a policy. Repeat your test requests before you submit.
+The first command must print `open`. The other two must print `blocked`.

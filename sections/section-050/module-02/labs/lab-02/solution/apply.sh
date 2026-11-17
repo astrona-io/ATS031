@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Reference result, applied only by astrona test. Kept in step with solution.md.
+# Reference solution: turn the digest-only .sha256 files into one SHA256SUMS
+# file in the check format, run the strict check and record the result.
 set -euo pipefail
 context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-031-lab-050-02-02}"
 if [[ "$(kubectl config current-context)" != "$context" ]]; then
@@ -8,13 +9,19 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-050-02-02}"
 engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
-CONTROL="$cluster-control-plane"
-WORKER="$cluster-worker"
-pid="$("$engine" exec "$WORKER" sh -c "grep -l '^kubelet\$' /proc/[0-9]*/comm | head -n 1 | cut -d/ -f3")"
-path="$("$engine" exec "$WORKER" readlink "/proc/$pid/exe")"
-version="$("$engine" exec "$WORKER" "$path" --version | awk '{print $NF}')"
-actual="$("$engine" exec "$WORKER" sha256sum "$path" | cut -d' ' -f1)"
-published="$("$engine" exec "$WORKER" sh -c "cat /var/lib/training-release/k8s/release/$version/bin/linux/*/kubelet.sha256")"
-result=mismatch
-if [[ "$published" == "$actual" ]]; then result=match; fi
-kubectl -n starfleet-031-050-02-02 create configmap kubelet-review --from-literal=version="$version" --from-literal=path="$path" --from-literal=sha256="$actual" --from-literal=result="$result" --dry-run=client -o yaml | kubectl apply -f -
+node_name="$cluster-control-plane"
+downloads=/var/lib/k8s-downloads
+checksum_lines=""
+for tool in kubectl kubeadm kubelet; do
+  published_digest=$("$engine" exec "$node_name" cat "$downloads/$tool.sha256")
+  checksum_lines+="$published_digest  $tool"$'\n'
+done
+printf '%s' "$checksum_lines" | "$engine" exec -i "$node_name" tee "$downloads/SHA256SUMS" >/dev/null
+set +e
+check_output=$("$engine" exec -w "$downloads" "$node_name" sha256sum --check --strict SHA256SUMS 2>/dev/null)
+exit_status=$?
+set -e
+failed_file=$(printf '%s\n' "$check_output" | grep ': FAILED$' | cut -d: -f1 || true)
+kubectl -n starfleet-031-050-02-02 create configmap download-check \
+  --from-literal=exit-status="$exit_status" --from-literal=failed="${failed_file:-none}" \
+  --dry-run=client -o yaml | kubectl apply -f -

@@ -1,95 +1,52 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Verify Signed Artifact Checksums Solution
+# Find The Files That Fail A Checksum Manifest: Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Connect to the lab first, so that `kubectl` talks to this lab's cluster and `$node_name` names its control plane node:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-01-01" || exit 1
 node_name="astro-ats-031-lab-050-01-01-control-plane"
-worker_name="astro-ats-031-lab-050-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+## Check the files against the manifest
 
-## Inspect And Explain
-
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
-
-Inspect the current objects before changing them:
+`sha256sum --check` reads each line of the manifest, computes the digest of the named file and prints `OK` or `FAILED`. The file names in the manifest have no directory, so run the check in the release directory. The option `-w` of `podman exec` sets the working directory inside the node container.
 
 ```sh
-kubectl -n starfleet-031-050-01-01 get pods -o wide
-kubectl get nodes -o wide
+podman exec -w /var/lib/fleet-release "$node_name" sha256sum --check SHA256SUMS
 ```
 
-Use the public key provisioned with the isolated fixture to verify checksums.sig over checksums.txt. Verify the staged kubectl digest matches the authenticated manifest and the tampered copy does not. Record the ConfigMap `artifact-review` in the namespace `starfleet-031-050-01-01` with `result: verified`, `tampered: rejected` and the exact `sha256`. The fixture key is a local exercise trust root, not proof of the upstream Kubernetes publisher identity.
+The output has one line per file. The files with `FAILED` are the answer, and the last line is a warning that counts them. The exit status is 1, because at least one file failed. The sizes and the dates of the files are all normal, so `ls -l` does not show which files changed; only the digest does.
 
-Save this as `configmap-artifact-review.yaml`:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: artifact-review
-  namespace: starfleet-031-050-01-01
-data:
-  result: verified
-  tampered: rejected
-```
-
-Save this as `verify-release.py`:
-
-```python
-import json,subprocess,tempfile
-from pathlib import Path
-CONTEXT="kind-astro-ats-031-lab-050-01-01"
-NODE="astro-ats-031-lab-050-01-01-control-plane"
-def run(*args):
-    result=subprocess.run(args,check=True,text=True,capture_output=True,timeout=30)
-    return result.stdout.strip()
-assert run('kubectl','config','current-context')==CONTEXT, 'Select the private environment'
-assert run('podman','inspect',NODE,'--format','{{index .Config.Labels "io.x-k8s.kind.cluster"}}')=='astro-ats-031-lab-050-01-01', 'Refusing an unrelated node container'
-def node(*args):return run('podman','exec',NODE,*args)
-
-node('openssl','dgst','-sha256','-verify','/var/lib/training-release/publisher.pub','-signature','/var/lib/training-release/checksums.sig','/var/lib/training-release/checksums.txt')
-trusted=node('cat','/var/lib/training-release/checksums.txt').split()[0]
-actual=node('sha256sum','/var/lib/training-release/kubectl').split()[0]
-changed=node('sha256sum','/var/lib/training-release/kubectl-tampered').split()[0]
-assert trusted==actual and trusted!=changed
-report_name='artifact-review';report={'result':'verified','tampered':'rejected','sha256':actual}
-
-with tempfile.TemporaryDirectory(prefix='training-report-') as temporary:
-    source=Path(temporary)/'configmap-report.json'
-    source.write_text(json.dumps({'apiVersion':'v1','kind':'ConfigMap','metadata':{'name':report_name,'namespace':'starfleet-031-050-01-01'},'data':report}))
-    run('kubectl','apply','-f',str(source))
-
-```
-
-Apply the scoped correction:
+The option `--quiet` prints only the failing lines, which is handy when the manifest is long:
 
 ```sh
-python3 verify-release.py
+podman exec -w /var/lib/fleet-release "$node_name" sha256sum --check --quiet SHA256SUMS
 ```
 
-## Verify The Result
+## Compute the digest of fleet-agent
 
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
+`sha256sum` without `--check` prints the digest of a file and its name. Keep only the digest:
 
 ```sh
-kubectl -n starfleet-031-050-01-01 get configmaps
-kubectl -n starfleet-031-050-01-01 get deployment probe -o yaml
+agent_digest=$(podman exec "$node_name" sha256sum /var/lib/fleet-release/fleet-agent | cut -d' ' -f1)
+echo "$agent_digest"
 ```
 
-Verify a signed checksum manifest and reject altered bytes before using a binary. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
+## Record the result
 
-After recording your result, remove the independent lab with `astrona destroy ats-031-lab-050-01-01`.
+Put the failing names, separated by commas, in the `failed` key. Replace the example names below with the ones that your check reported:
 
-## Common pitfalls
+```sh
+kubectl -n starfleet-031-050-01-01 create configmap manifest-check \
+  --from-literal=failed=fleet-cli,fleet-sync \
+  --from-literal=agent-sha256="$agent_digest"
+kubectl -n starfleet-031-050-01-01 get configmap manifest-check -o yaml
+```
 
-> [!WARNING]
-> A checksum from an unauthenticated location does not establish publisher identity. Trust the provisioned exercise public key independently and verify the signed manifest before the bytes. Do not run the altered binary.
+The grader computes the digests of the files again and compares them with the manifest, so the `failed` list must name exactly the files that fail now.
+
+A manifest check proves only that the files match the manifest. In this lab the manifest is correct by agreement. In a real release you first check the signature of the manifest, because an attacker who changes a file can also change its line in an unsigned manifest.

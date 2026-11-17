@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-02-02",
+  "cluster": "astro-ats-031-lab-010-02-02",
+  "namespace": "dock-031-010-02-02",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "vault",
+      "namespace": "dock-031-010-02-02",
+      "expected": {
+        "metadata": {
+          "name": "vault",
+          "namespace": "dock-031-010-02-02",
+          "labels": {
+            "app": "vault"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "crane",
+      "namespace": "dock-031-010-02-02",
+      "expected": {
+        "metadata": {
+          "name": "crane",
+          "namespace": "dock-031-010-02-02",
+          "labels": {
+            "app": "crane"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "visitor",
+      "namespace": "outpost-031-010-02-02",
+      "expected": {
+        "metadata": {
+          "name": "visitor",
+          "namespace": "outpost-031-010-02-02",
+          "labels": {
+            "app": "visitor"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

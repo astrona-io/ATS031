@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---
@@ -16,7 +15,7 @@ Start with the path. `command -v kubelet` prints the file that the shell would r
 ```sh
 NODE=astro-ats-031-playground-050-02-control-plane
 MIRROR=/var/lib/training-release/k8s
-podman exec $NODE command -v kubelet
+podman exec $NODE sh -c "command -v kubelet"
 podman exec $NODE sh -c "grep -l '^kubelet\$' /proc/[0-9]*/comm"
 ```
 

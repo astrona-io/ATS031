@@ -39,13 +39,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: runtime-socket-pods
-    description: exposed-pods lists the pods that mount the container runtime socket
+  - name: kubelet-https-port
+    description: drifter cannot reach port 10250 on either node
     type: file
-    source: validation/validate-runtime-socket-pods.sh
-    points: 2
-  - name: host-network-pods
-    description: exposed-pods lists the pods that use the host network
-    type: file
-    source: validation/validate-host-network-pods.sh
+    source: validation/validate-kubelet-https-port.sh
     points: 1
+  - name: kubelet-read-only-port
+    description: drifter cannot reach port 10255 on the worker
+    type: file
+    source: validation/validate-kubelet-read-only-port.sh
+    points: 1
+  - name: whole-namespace
+    description: A new pod that the grader starts in the namespace cannot reach either kubelet port and still reaches the Services
+    type: file
+    source: validation/validate-whole-namespace.sh
+    points: 2

@@ -1,3 +1,16 @@
+---
+exam_objectives:
+- Properly set up Ingress with TLS
+---
 # Prerequisites
 
-Use Astrona with kind and a working container engine. The task runs in an independent cluster; wait for bootstrap before starting.
+Use a host shell with astrona, kubectl, openssl and Python 3.
+
+Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+
+```sh
+export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-04-03)"
+test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-04-03" || exit 1
+```
+
+Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.

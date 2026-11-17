@@ -1,8 +1,7 @@
 ---
-draft: true
 exam_objectives:
 - Protect node metadata and endpoints
 ---
 # Starting Environment
 
-The cluster has one control plane node and one worker node. The kubelet on the worker serves its read-only port 10255 on purpose, and both kubelets serve HTTPS on port 10250. The namespaces `starfleet-031-040-03-01`, `outpost-031-040-03-01` and `dock-031-040-03-01` each have a `probe` Deployment and Service on port 80 and a client pod with the `curl` command. The namespace `metadata-stub-031-040-03-01` has a pod `control` that no policy selects. The pods `runtime-peek`, `cri-helper`, `log-reader` and `net-tool` expose host resources. No NetworkPolicy exists. No policy restricts the pods of `outpost-031-040-03-01`.
+The cluster has one control plane node and one worker node. The kubelet on the worker reads its settings from the file `/var/lib/kubelet/config.yaml`, and that file sets `readOnlyPort: 10255`. The read-only port answers HTTP requests without any credential. The namespace `dock-031-040-03-01` has a pod `inspector` with the `curl` command. No NetworkPolicy exists.

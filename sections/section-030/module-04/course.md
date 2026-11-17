@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Properly set up Ingress with TLS
 ---
@@ -21,7 +20,7 @@ After this module you can:
 
 ## Before you start
 
-You need the TLS basics from creating certificates and TLS Secrets, plus `openssl` and `curl` on your own machine. The module has five parts: TLS versions and server names, mutual TLS, the attack surface of the controller, certificate rotation, and troubleshooting. The first graded lab follows the first part, and the second follows the troubleshooting part.
+You need the TLS basics from creating certificates and TLS Secrets, plus `openssl` and `curl` on your own machine. The module has five parts: TLS versions and server names, mutual TLS, the attack surface of the controller, certificate rotation, and troubleshooting. A graded lab follows every part.
 
 Your playground is a `kind` cluster running Kubernetes v1.35 with Traefik installed and these objects:
 
@@ -35,7 +34,3 @@ Your playground is a `kind` cluster running Kubernetes v1.35 with Traefik instal
 `kubectl` already points at the playground cluster. Launch your playground now and keep it running while you read:
 
 <!-- astrona:playground -->
-
-## Independent live assessment
-
-Prepare with [Verify A Live Certificate Rotation](course-04a-verify-live-certificate-rotation.md). [Rotate The Certificate Served By An Ingress](labs/lab-03/question.md) uses its own kind environment. The active TLS Secret contains the supplied replacement certificate and matching key; A fresh verified TLS connection receives the replacement certificate and the original application response.

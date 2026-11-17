@@ -1,53 +1,80 @@
 ---
-draft: true
 exam_objectives:
 - Protect node metadata and endpoints
 ---
-# Find Pods That Expose The Runtime Or The Host Network Solution
+# Block Pod Access To The Kubelet Ports Solution
 
-## Find host path mounts
+## Inspect the starting state
 
-List the host paths of every pod in the three namespaces. The `grep` keeps lines that contain a host path:
-
-```sh
-for namespace in starfleet-031-040-03-02 outpost-031-040-03-02 dock-031-040-03-02; do
-  kubectl -n "$namespace" get pods -o jsonpath='{range .items[*]}{.metadata.namespace}{"/"}{.metadata.name}{" "}{range .spec.volumes[*]}{.hostPath.path}{" "}{end}{"\n"}{end}'
-done | grep -E ' /'
-```
-
-Three pods have host paths. `outpost-031-040-03-02/runtime-peek` mounts `/run/containerd/containerd.sock`, `starfleet-031-040-03-02/cri-helper` mounts the directory `/run/containerd`, which contains the socket, and `outpost-031-040-03-02/log-reader` mounts `/var/log`. Only the first two give access to the runtime.
-
-## Find host network pods
+Read the addresses of the nodes. They are the addresses you must exclude:
 
 ```sh
-for namespace in starfleet-031-040-03-02 outpost-031-040-03-02 dock-031-040-03-02; do
-  kubectl -n "$namespace" get pods -o custom-columns='NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork' --no-headers
-done | grep true
+kubectl get nodes -o wide
+WORKER_IP=$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+CONTROL_PLANE_IP=$(kubectl get nodes -l 'node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
+kubectl -n outpost-031-040-03-02 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
+kubectl -n outpost-031-040-03-02 exec drifter -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$WORKER_IP:10250/pods"
 ```
 
-One pod appears: `dock-031-040-03-02/net-tool`. The pod `fake-imds` also uses the host network, but it is in the namespace `metadata-stub-031-040-03-02`, which the task does not include.
+The first request prints `200` because the read-only port answers without a credential. The second prints `401`, because the secure port refuses an unauthenticated request. Both prove that the ports are reachable.
 
-## Record the result
+## Create the policy
 
-The list holds three pods. Save it as `exposed-pods.txt`:
+The policy selects all pods and allows `0.0.0.0/0` except the address of each node. Replace `<WORKER_IP>` and `<CONTROL_PLANE_IP>` with the two addresses you stored.
 
-```text
-dock-031-040-03-02/net-tool
-outpost-031-040-03-02/runtime-peek
-starfleet-031-040-03-02/cri-helper
+Save this as `networkpolicy-block-node-ports.yaml`:
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-node-ports
+  namespace: outpost-031-040-03-02
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - <WORKER_IP>/32
+        - <CONTROL_PLANE_IP>/32
 ```
 
-Create the ConfigMap from the file:
+Apply it:
 
 ```sh
-kubectl -n dock-031-040-03-02 create configmap exposed-pods --from-file=pods=exposed-pods.txt
+kubectl apply -f networkpolicy-block-node-ports.yaml
 ```
 
-Check what you stored:
+## Verify
+
+Wait a few seconds, then check the blocked ports, the Services and the controls:
 
 ```sh
-kubectl -n dock-031-040-03-02 get configmap exposed-pods -o jsonpath='{.data.pods}'
+kubectl -n outpost-031-040-03-02 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
+kubectl -n outpost-031-040-03-02 exec drifter -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$WORKER_IP:10250/pods"
+kubectl -n outpost-031-040-03-02 exec drifter -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$CONTROL_PLANE_IP:10250/pods"
+kubectl -n outpost-031-040-03-02 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe/
+kubectl -n outpost-031-040-03-02 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe.starfleet-031-040-03-02.svc.cluster.local/
+kubectl -n starfleet-031-040-03-02 exec shuttle -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
 ```
 
-The output is the three lines. The pod `outpost-031-040-03-02/log-reader` is not in the list, because a log directory is not the runtime socket. All four pods must still be running.
+The first three requests print `000` with exit code 28. The last three print `200`. An alternative that also passes the check is a policy that allows all addresses on the port ranges 1 to 10249, 10251 to 10254 and 10256 to 65535, with `endPort`.
+
+The policy must also cover pods that start later. Start a short-lived pod with no special labels in the namespace and send a request to the read-only port from it. The options `--rm` and `-i` attach to the pod and delete it when the command ends:
+
+```sh
+kubectl -n outpost-031-040-03-02 run port-check --rm -i --restart=Never --image=docker.io/curlimages/curl:8.11.1 --command -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
+```
+
+Next to a note about the command prompt and a line that says kubectl deleted the pod, the command prints `000`, because `podSelector: {}` selects the new pod as well. kubectl also reports that the pod `terminated (Error)`: `curl` exits with code 28 when its request times out. Then submit.
+
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-040-03-02`.
+
+## Common pitfalls
+
+> [!WARNING]
+> Excluding only the worker address leaves port 10250 on the control plane node open. A policy that selects only `app: drifter` leaves every new pod in the namespace open. Read the node addresses again if you recreate the lab, because they can change.

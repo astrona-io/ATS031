@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
@@ -19,11 +18,5 @@ Key facts to remember:
 - A timeout in a test shows a dropped packet; a refusal shows a closed port.
 - `endPort` needs a numeric `port` and a plugin that supports it.
 - Select by label and port name, not by pod address or Service address.
-
-
-
-## Independent live assessment
-
-Prepare with [Verify CIDR Exceptions And Port Ranges](course-06a-verify-cidr-and-port-boundaries.md). [Enforce An Address Exception And Port Range](labs/lab-03/question.md) uses its own kind environment. The permitted client connects and the excluded address cannot; Every port in the requested range works and adjacent ports remain denied.
 
 <!-- astrona:playground:destroy -->

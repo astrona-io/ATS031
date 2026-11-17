@@ -1,12 +1,11 @@
 ---
-draft: true
 exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Close Anonymous And Open Access On The Kubelet Solution
+# Secure Kubelet Authentication And Authorization Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-05-01)"
@@ -15,50 +14,47 @@ node_name="astro-ats-031-lab-020-05-01-control-plane"
 worker_name="astro-ats-031-lab-020-05-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
-## Inspect
+## See the open kubelet API
 
-Read the three effective settings through the API server:
+The kubelet API on port `10250` can list pods, read logs and run commands in containers. Send a request without credentials from the control plane node:
 
 ```sh
-kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -m json.tool | grep -e anonymous -e '"mode"' -e readOnlyPort
+worker_ip="$(kubectl get node "$worker_name" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')"
+podman exec "$node_name" curl -sk --max-time 5 -o /dev/null -w '%{http_code}\n' "https://$worker_ip:10250/pods"
 ```
 
-The output shows anonymous access enabled, the mode `AlwaysAllow` and the port `10255`.
+The answer is `200`: the kubelet accepts the anonymous request and allows it. Two settings work together here. Authentication decides who the caller is; with `anonymous.enabled: true`, a caller without credentials becomes the user `system:anonymous`. Authorization decides what the caller may do; `AlwaysAllow` allows everything.
 
-## Change the kubelet file
+## Change both settings
 
-Three commands change the file. The first two edit existing lines. The third removes the old `readOnlyPort` line and appends a new one, so the key appears once:
+Keep a copy of the file, then change the two values:
 
 ```sh
+podman exec "$worker_name" cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.before
 podman exec "$worker_name" sed -i '/^  anonymous:/{n;s/enabled: true/enabled: false/}' /var/lib/kubelet/config.yaml
 podman exec "$worker_name" sed -i 's/^  mode: AlwaysAllow$/  mode: Webhook/' /var/lib/kubelet/config.yaml
-podman exec "$worker_name" sed -i '/^readOnlyPort:/d' /var/lib/kubelet/config.yaml
-podman exec "$worker_name" sh -c "printf '\nreadOnlyPort: 0\n' >> /var/lib/kubelet/config.yaml"
-```
-
-## Restart and wait
-
-Restart the kubelet. Then ask the API server for the effective configuration until the anonymous setting shows `false`. The loop ignores errors while the kubelet restarts and stops after 60 tries:
-
-```sh
+podman exec "$worker_name" grep -A6 '^authentication:' /var/lib/kubelet/config.yaml
+podman exec "$worker_name" grep -A1 '^authorization:' /var/lib/kubelet/config.yaml
 podman exec "$worker_name" systemctl restart kubelet
-for attempt in $(seq 1 60); do
-  if kubectl --request-timeout=3s get --raw "/api/v1/nodes/$worker_name/proxy/configz" 2>/dev/null | grep -q '"anonymous":{"enabled":false}'; then echo "settled"; break; fi
-  sleep 3
-done
 ```
 
-If the loop never prints the message, read the kubelet log with `podman exec "$worker_name" journalctl -u kubelet --no-pager -n 30`. The usual cause is a duplicate or misindented key. Copy the backup from `/opt/training/backup` over the file and start again.
+The first `sed` command finds the line `anonymous:` and changes `enabled` on the next line. With `Webhook`, the kubelet sends each request to the API server as a `SubjectAccessReview` and follows its answer.
 
-## Verify
+## Check the result
 
-Read the settings again and check the node:
+The kubelet reads its configuration only when it starts. Restart it, then read the effective configuration through the API server. The `configz` endpoint returns the values that the running kubelet really uses, after all sources are merged:
 
 ```sh
-kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -m json.tool | grep -e anonymous -e '"mode"' -e readOnlyPort
+kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -m json.tool | grep -A2 -e '"anonymous"' -e '"authorization"'
+podman exec "$node_name" curl -sk --max-time 5 -o /dev/null -w '%{http_code}\n' "https://$worker_ip:10250/pods"
 kubectl get node "$worker_name"
 ```
 
-The mode is `Webhook`, anonymous access is disabled, `readOnlyPort` is absent because the kubelet omits a zero value, and the node is `Ready`. Run `astrona submit` when this is true.
+`anonymous` shows `enabled: false`, the mode is `Webhook`, and the request now returns `401` (Unauthorized), because the kubelet no longer accepts a caller without credentials. The API server still reaches the kubelet with its own client certificate, so `kubectl logs` and `kubectl exec` keep working.
+
+## Common pitfalls
+
+> [!WARNING]
+> With only `Webhook` and anonymous access still on, the request returns `403` instead of `401`; the caller is still accepted as `system:anonymous`. A changed file without a kubelet restart changes nothing. A typing mistake in `config.yaml` stops the kubelet; keep the copy so you can put it back.

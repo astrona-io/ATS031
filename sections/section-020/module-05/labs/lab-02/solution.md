@@ -1,12 +1,11 @@
 ---
-draft: true
 exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
 # Remediate Five Kubelet Benchmark Findings Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-05-02)"
@@ -15,61 +14,55 @@ node_name="astro-ats-031-lab-020-05-02-control-plane"
 worker_name="astro-ats-031-lab-020-05-02-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
-## Inspect
+## Record the starting state
 
-Read the file modes and the effective values:
+A remediation is easier to prove when you record the state before and after. This shell function prints the three fields from the effective configuration and the modes of the two files:
 
 ```sh
-podman exec "$worker_name" stat -c '%a %n' /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
-kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -m json.tool | grep -e rotateCertificates -e streamingConnectionIdleTimeout -e tlsMinVersion
+audit_kubelet() {
+  kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -c 'import json, sys; settings = json.load(sys.stdin)["kubeletconfig"]; [print(key, settings.get(key)) for key in ("rotateCertificates", "streamingConnectionIdleTimeout", "tlsMinVersion")]'
+  podman exec "$worker_name" stat -c '%a %U:%G %n' /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
+}
+audit_kubelet > kubelet-before.txt
+cat kubelet-before.txt
 ```
+
+`rotateCertificates` and `tlsMinVersion` print `None`, because the endpoint leaves out fields that are `false` or not set. The idle timeout prints `4h0m0s`: the kubelet treats `0s` as not set and uses its default. Both files have mode `644`.
 
 ## Fix the file modes
 
 ```sh
 podman exec "$worker_name" chmod 600 /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
-podman exec "$worker_name" stat -c '%a %n' /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
 ```
 
-Both files now show mode `600`.
+## Fix the three fields
 
-## Fix the three settings
-
-Define a helper that removes a key and appends it again, so the key appears once. Then set the three values:
+The kubelet stops at start when a key appears twice, so delete each key before you add it. Keep a copy first:
 
 ```sh
-set_kubelet_field() {
-  podman exec "$worker_name" sed -i "/^$1:/d" /var/lib/kubelet/config.yaml
-  podman exec "$worker_name" sh -c "printf '\n%s: %s\n' '$1' '$2' >> /var/lib/kubelet/config.yaml"
-}
-set_kubelet_field rotateCertificates true
-set_kubelet_field streamingConnectionIdleTimeout 5m
-set_kubelet_field tlsMinVersion VersionTLS12
-```
-
-## Restart and wait
-
-Restart the kubelet and wait until the effective configuration shows the new value. The loop ignores errors while the kubelet restarts and stops after 60 tries:
-
-```sh
+podman exec "$worker_name" cp -p /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.before
+podman exec "$worker_name" sed -i -e '/^rotateCertificates:/d' -e '/^streamingConnectionIdleTimeout:/d' -e '/^tlsMinVersion:/d' /var/lib/kubelet/config.yaml
+podman exec "$worker_name" sh -c "printf '\nrotateCertificates: true\nstreamingConnectionIdleTimeout: 5m\ntlsMinVersion: VersionTLS12\n' >> /var/lib/kubelet/config.yaml"
 podman exec "$worker_name" systemctl restart kubelet
-for attempt in $(seq 1 60); do
-  if kubectl --request-timeout=3s get --raw "/api/v1/nodes/$worker_name/proxy/configz" 2>/dev/null | grep -q '"tlsMinVersion":"VersionTLS12"'; then echo "settled"; break; fi
-  sleep 3
-done
 ```
 
-If the loop never prints the message, read the kubelet log with `podman exec "$worker_name" journalctl -u kubelet --no-pager -n 30` and look for a duplicate key.
+`rotateCertificates` renews the client certificate of the kubelet before it expires. `streamingConnectionIdleTimeout` closes `exec`, `attach` and `port-forward` connections that stay idle for five minutes. `tlsMinVersion` refuses TLS 1.0 and 1.1 on port `10250`.
 
-## Verify
+## Prove the result
 
-Read the values again and check the node:
+The kubelet reads its configuration only when it starts. Restart it, then read the effective configuration through the API server. The `configz` endpoint returns the values that the running kubelet really uses, after all sources are merged:
 
 ```sh
-kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -m json.tool | grep -e rotateCertificates -e streamingConnectionIdleTimeout -e tlsMinVersion
+audit_kubelet > kubelet-after.txt
+diff kubelet-before.txt kubelet-after.txt
 kubectl get node "$worker_name"
 ```
 
-The output shows `true`, `5m0s` and `VersionTLS12`, and the node is `Ready`. Run `astrona submit` when this is true.
+The `diff` output shows each changed value: `True`, `5m0s`, `VersionTLS12` and mode `600` for both files. The node is `Ready`. If the old values still show, wait a few seconds and run `audit_kubelet` again.
+
+## Common pitfalls
+
+> [!WARNING]
+> The idle timeout shows `5m0s` in `configz`, not `5m`. `chmod` on `config.yaml` with a restrictive mode does not stop the kubelet, because it runs as `root`. A duplicate key in `config.yaml` stops the kubelet; keep the copy so you can put it back.

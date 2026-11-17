@@ -1,26 +1,28 @@
-def worker_shell(script, success=True):
-    return node_exec(WORKER, 'sh', '-c', script, success=success)
+import re
 
+downloads = '/var/lib/k8s-downloads'
+tools = ('kubectl', 'kubeadm', 'kubelet')
+published = {tool: node_exec(NODE, 'cat', f'{downloads}/{tool}.sha256').stdout.strip() for tool in tools}
+actual = {tool: node_exec(NODE, 'sha256sum', f'{downloads}/{tool}').stdout.split()[0] for tool in tools}
+failing = [tool for tool in tools if published[tool] != actual[tool]]
+assert len(failing) <= 1, 'The downloads were changed; start the lab again'
 
-def review():
-    """The kubelet-review ConfigMap's data, or {} while it does not exist."""
-    result = command(['kubectl', '-n', NAMESPACE, 'get', 'configmap', 'kubelet-review', '-o', 'json'], success=False)
-    return json.loads(result.stdout).get('data', {}) if result.returncode == 0 else {}
-
-
-pid = worker_shell("grep -l '^kubelet$' /proc/[0-9]*/comm | head -n 1 | cut -d/ -f3").stdout.strip()
-assert pid, 'The kubelet process was not found on the worker'
-path = worker_shell('readlink /proc/%s/exe' % pid).stdout.strip()
-version = worker_shell('%s --version' % path).stdout.strip().split()[-1]
-actual = worker_shell("sha256sum '%s' | cut -d' ' -f1" % path).stdout.strip()
-data = review()
-if wants('kubelet-binary'):
-    assert data.get('version') == version, 'Record the version that the worker kubelet reports in kubelet-review'
-    assert data.get('path') == path, 'Record the path of the running kubelet binary in kubelet-review'
-if wants('kubelet-digest'):
-    assert data.get('sha256') == actual, 'Record the digest of the running kubelet binary in kubelet-review'
-if wants('checksum-result'):
-    published = worker_shell('cat /var/lib/training-release/k8s/release/%s/bin/linux/*/kubelet.sha256' % version, success=False)
-    assert published.returncode == 0, 'No staged checksum exists for this version'
-    expected = 'match' if published.stdout.strip() == actual else 'mismatch'
-    assert data.get('result') == expected, 'The result in kubelet-review does not follow from comparing the digest with the staged checksum for this version'
+if wants('check-file'):
+    found = node_exec(NODE, 'cat', downloads + '/SHA256SUMS', success=False)
+    assert found.returncode == 0, 'Create ' + downloads + '/SHA256SUMS'
+    listed = {}
+    for line in found.stdout.splitlines():
+        if not line.strip():
+            continue
+        match = re.fullmatch(r'([0-9a-f]{64})  (\S+)', line.rstrip('\r'))
+        assert match, 'Each line must be <64 hex digits><two spaces><file name>: ' + line
+        listed[match.group(2)] = match.group(1)
+    assert set(listed) == set(tools), 'SHA256SUMS must list exactly kubectl, kubeadm and kubelet by file name only'
+    for tool in tools:
+        assert listed[tool] == published[tool], f'The digest for {tool} must come from {tool}.sha256'
+if wants('check-result'):
+    found = command(['kubectl', '-n', NAMESPACE, 'get', 'configmap', 'download-check', '-o', 'json'], success=False)
+    assert found.returncode == 0, 'Create the ConfigMap download-check in ' + NAMESPACE
+    data = json.loads(found.stdout).get('data') or {}
+    assert data.get('exit-status', '').strip() == ('1' if failing else '0'), 'exit-status must be the exit status of the strict check'
+    assert data.get('failed', '').strip() == (failing[0] if failing else 'none'), 'failed must name the failing download, or be none'

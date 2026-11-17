@@ -4,18 +4,27 @@
   "namespace": "starfleet-031-020-02-01",
   "resources": [
     {
-      "kind": "configmap",
-      "name": "failing-checks",
+      "kind": "deployment",
+      "name": "probe",
       "namespace": "starfleet-031-020-02-01",
       "expected": {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
         "metadata": {
-          "name": "failing-checks",
+          "name": "probe",
           "namespace": "starfleet-031-020-02-01"
+        },
+        "spec": {
+          "replicas": 2,
+          "selector": {
+            "matchLabels": {
+              "app": "probe",
+              "release": "probe"
+            }
+          }
         }
       },
-      "outcome": "failing-checks-saved"
+      "state": "deployment"
     }
   ],
   "behavior": [
@@ -26,6 +35,25 @@
         "--raw=/readyz"
       ],
       "equals": "ok"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet-031-020-02-01",
+        "exec",
+        "shuttle",
+        "--",
+        "wget",
+        "-q",
+        "-T",
+        "3",
+        "-O-",
+        "http://probe/"
+      ],
+      "contains": [
+        "version=v1"
+      ]
     }
   ]
 }

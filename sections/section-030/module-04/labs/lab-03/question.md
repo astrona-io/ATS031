@@ -1,24 +1,30 @@
 ---
-draft: true
+exam_objectives:
+- Properly set up Ingress with TLS
 ---
-# Rotate The Certificate Served By An Ingress
+# Require Client Certificates On One Route
 
-Solve this question on: `terminal`
+Allow about 12 minutes for the tasks.
 
-Traefik serves `probe.example.test` using `probe-tls` in `rotation-training`. A replacement certificate and key are staged in `probe-next`, signed by the existing training CA. `probe-old` preserves the previous pair.
+The vault route must accept only crew members who present a client certificate from the crew certificate authority (CA). The beacon route stays public. Set up mutual TLS (mTLS) for the vault route only.
 
-Allow about 10 minutes for task work. Cluster startup adds time.
+## Starting state
 
-## Tasks
+The namespace `starfleet-031-030-04-03` holds the Services `vault` and `beacon`, their TLS Secrets and the Ingresses `vault` and `beacon` on the `websecure` entrypoint. The Secret `crew-client` holds a client certificate (`tls.crt`), its key (`tls.key`) and the crew CA certificate (`ca.crt`). Traefik reads `dynamic.yaml` from the ConfigMap `traefik-dynamic` in `ingress-system`. Its pod also mounts the ConfigMap `client-ca` at `/etc/traefik/client-ca`, but that ConfigMap does not exist yet.
 
-1. Replace the certificate and key in the existing `probe-tls` Secret with the pair from `probe-next`. Keep the Ingress, host, CA and backend unchanged.
-2. Establish a fresh TLS connection that verifies the CA and hostname.
-3. Confirm its leaf certificate matches `probe-next`, differs from `probe-old`, and the application still responds successfully.
+Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
-## Constraints
+```sh
+export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-04-03)"
+test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-04-03" || exit 1
+```
 
-Do not disable certificate or hostname verification. Keep both staged Secrets and `rotation-trust` unchanged. Let the ingress controller reload the Secret; do not replace its certificate with a default certificate or change the route.
+Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
 
-## How the answer is checked
+## Required result
 
-The grader checks the active pair, then makes a new TLS connection with the CA from `rotation-trust`. It compares the served leaf certificate to the replacement and checks the original HTTP response. Merely updating a Secret is insufficient.
+Create the ConfigMap `client-ca` in `ingress-system` with the crew CA certificate under the key `client-ca.crt`. Add a TLS option named `mtls` to `dynamic.yaml` that sets `clientAuthType: RequireAndVerifyClientCert` and reads the CA from `/etc/traefik/client-ca/client-ca.crt`; keep the option `default`. Attach the option only to the Ingress `vault` with the annotation `traefik.ingress.kubernetes.io/router.tls.options: mtls@file`. Restart Traefik so it mounts the new ConfigMap.
+
+## Verify the result
+
+The grader reads the annotations and both ConfigMaps. From a pod it then connects to `vault.example.test` without a client certificate, which must fail, and with the crew client certificate, which must return the `vault` response. A request to `beacon.example.test` without a client certificate must still succeed.

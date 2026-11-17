@@ -1,11 +1,10 @@
 ---
-draft: true
 exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Disable API Server Profiling In A Private Node
+# Correct The Scheduler Bind Address And Record It
 
-Review and correct one effective control-plane setting while keeping API access available.
+Correct the kube-scheduler `--bind-address` finding in its static pod manifest, check that the new process listens only on the loopback address, and record the change.
 
-The task and solution use a separate pinned kind cluster. Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass.
+The task and solution use a separate pinned kind cluster with one control plane node and one worker node. Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then `solution/apply.sh` applies the reference solution and every outcome must pass.

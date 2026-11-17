@@ -1,21 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 context="${ASTRONA_KUBE_CONTEXT:-kind-astro-ats-031-lab-030-04-03}"
-cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-030-04-03}"
-engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
-[[ "$(kubectl config current-context)" == "$context" ]] || { echo 'ERROR: wrong context'; exit 2; }
+if [[ "$(kubectl config current-context)" != "$context" ]]; then
+  printf 'Refusing to operate on another Kubernetes context\n' >&2
+  exit 1
+fi
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-kubectl apply -f "$lab_directory/bootstrap/start.yaml"
-kubectl -n rotation-training rollout status deployment/probe --timeout=180s
+kubectl apply -f "$lab_directory/bootstrap/manifests/start.yaml"
+kubectl -n starfleet-031-030-04-03 rollout status deployment/probe --timeout=180s
+kubectl -n starfleet-031-030-04-03 rollout status deployment/vault --timeout=180s
+kubectl -n starfleet-031-030-04-03 rollout status deployment/beacon --timeout=180s
 kubectl -n ingress-system rollout status deployment/traefik --timeout=180s
-certs=$(mktemp -d)
-trap 'rm -rf "$certs"' EXIT
-openssl req -x509 -newkey rsa:2048 -nodes -days 3 -keyout "$certs/ca.key" -out "$certs/ca.crt" -subj /CN=TrainingRoot -addext 'basicConstraints=critical,CA:TRUE' -addext 'keyUsage=critical,keyCertSign,cRLSign' -addext 'subjectKeyIdentifier=hash' >/dev/null 2>&1
-printf 'subjectAltName=DNS:probe.example.test\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\n' > "$certs/extensions"
-for version in old next; do
-  openssl req -new -newkey rsa:2048 -nodes -keyout "$certs/$version.key" -out "$certs/$version.csr" -subj /CN=probe.example.test >/dev/null 2>&1
-  openssl x509 -req -in "$certs/$version.csr" -CA "$certs/ca.crt" -CAkey "$certs/ca.key" -CAcreateserial -days 2 -extfile "$certs/extensions" -out "$certs/$version.crt" >/dev/null 2>&1
-  kubectl -n rotation-training create secret tls "probe-$version" --cert="$certs/$version.crt" --key="$certs/$version.key"
-done
-kubectl -n rotation-training create secret tls probe-tls --cert="$certs/old.crt" --key="$certs/old.key"
-kubectl -n rotation-training create configmap rotation-trust --from-file=ca.crt="$certs/ca.crt"
+certificate_directory="$(mktemp -d)"
+trap 'rm -rf "$certificate_directory"' EXIT
+make_certificate() {
+  # make_certificate <file name> <host name> <days>
+  openssl req -x509 -newkey rsa:2048 -nodes -days "$3" \
+    -keyout "$certificate_directory/$1.key" -out "$certificate_directory/$1.crt" \
+    -subj "/CN=$2" -addext "subjectAltName=DNS:$2" >/dev/null 2>&1
+}
+make_certificate vault vault.example.test 30
+make_certificate beacon beacon.example.test 30
+kubectl -n starfleet-031-030-04-03 create secret tls vault-tls --cert="$certificate_directory/vault.crt" --key="$certificate_directory/vault.key"
+kubectl -n starfleet-031-030-04-03 create secret tls beacon-tls --cert="$certificate_directory/beacon.crt" --key="$certificate_directory/beacon.key"
+openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
+  -keyout "$certificate_directory/crew-ca.key" -out "$certificate_directory/crew-ca.crt" -subj "/CN=crew-ca" >/dev/null 2>&1
+openssl req -newkey rsa:2048 -nodes -keyout "$certificate_directory/crew.key" -out "$certificate_directory/crew.csr" \
+  -subj "/CN=ensign-two" >/dev/null 2>&1
+openssl x509 -req -in "$certificate_directory/crew.csr" -CA "$certificate_directory/crew-ca.crt" -CAkey "$certificate_directory/crew-ca.key" \
+  -CAcreateserial -days 30 -out "$certificate_directory/crew.crt" >/dev/null 2>&1
+kubectl -n starfleet-031-030-04-03 create secret generic crew-client --type=kubernetes.io/tls \
+  --from-file=tls.crt="$certificate_directory/crew.crt" --from-file=tls.key="$certificate_directory/crew.key" \
+  --from-file=ca.crt="$certificate_directory/crew-ca.crt"

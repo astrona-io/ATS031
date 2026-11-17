@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-01-04",
+  "cluster": "astro-ats-031-lab-010-01-04",
+  "namespace": "outpost-031-010-01-04",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "lander",
+      "namespace": "outpost-031-010-01-04",
+      "expected": {
+        "metadata": {
+          "name": "lander",
+          "namespace": "outpost-031-010-01-04",
+          "labels": {
+            "app": "lander"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "depot",
+      "namespace": "outpost-031-010-01-04",
+      "expected": {
+        "metadata": {
+          "name": "depot",
+          "namespace": "outpost-031-010-01-04",
+          "labels": {
+            "app": "depot"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "stray",
+      "namespace": "outpost-031-010-01-04",
+      "expected": {
+        "metadata": {
+          "name": "stray",
+          "namespace": "outpost-031-010-01-04",
+          "labels": {
+            "app": "stray"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

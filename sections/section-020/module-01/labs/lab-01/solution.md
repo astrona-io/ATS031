@@ -1,12 +1,11 @@
 ---
-draft: true
 exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Disable API Server Profiling In A Private Node Solution
+# Correct The Scheduler Bind Address And Record It Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-01-01)"
@@ -15,20 +14,55 @@ node_name="astro-ats-031-lab-020-01-01-control-plane"
 worker_name="astro-ats-031-lab-020-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
-## Inspect And Explain
+## Confirm the finding
 
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
-
-Inspect the current objects before changing them:
+Check 1.4.2 of the benchmark asks that the scheduler binds only to the loopback address `127.0.0.1`. The scheduler serves health and metrics on its secure port `10259`, and nothing outside the node needs to reach it. First, read the flag of the running process:
 
 ```sh
-kubectl -n starfleet-031-020-01-01 get pods -o wide
-kubectl get nodes -o wide
+podman exec "$node_name" ps -eo args | grep '^kube-scheduler' | tr ' ' '\n' | grep -e '--bind-address'
 ```
 
-Set the isolated API server flag `--profiling=false`. Create ConfigMap `benchmark-review` recording `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`. Keep the API ready and both application replicas available. This is one scoped configuration review, not a claim of full Center for Internet Security (CIS) benchmark compliance.
+The flag is `--bind-address=0.0.0.0`. Now test the port from the node itself, once on the loopback address and once on the node's own address. The `/healthz` path of the scheduler answers without credentials:
+
+```sh
+node_address="$(kubectl get node "$node_name" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')"
+podman exec "$node_name" curl -sk -m 3 https://127.0.0.1:10259/healthz
+podman exec "$node_name" curl -sk -m 3 "https://$node_address:10259/healthz"
+```
+
+Both requests print `ok`. The second one shows the finding: any client that can reach the node address can reach the scheduler port.
+
+## Change the manifest safely
+
+The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. So keep the backup in another directory, edit a copy, and move the copy back in one step:
+
+```sh
+podman exec "$node_name" mkdir -p /root/backup /etc/kubernetes/edit
+podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /root/backup/kube-scheduler.yaml
+podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
+podman exec "$node_name" sed -i 's|--bind-address=0.0.0.0|--bind-address=127.0.0.1|' /etc/kubernetes/edit/kube-scheduler.yaml
+podman exec "$node_name" grep -e '--bind-address' /etc/kubernetes/edit/kube-scheduler.yaml
+podman exec "$node_name" mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+```
+
+The `grep` line shows the new value before the kubelet sees the file. The kubelet then stops the old scheduler and starts a new one. This takes up to a minute.
+
+## Verify the running process
+
+Run the checks from the start again until they show the new state:
+
+```sh
+podman exec "$node_name" ps -eo args | grep '^kube-scheduler' | tr ' ' '\n' | grep -e '--bind-address'
+podman exec "$node_name" curl -sk -m 3 https://127.0.0.1:10259/healthz
+podman exec "$node_name" curl -sk -m 3 "https://$node_address:10259/healthz"
+kubectl -n kube-system get pod "kube-scheduler-$node_name"
+```
+
+The flag is now `--bind-address=127.0.0.1`. The request to `127.0.0.1` still prints `ok`, and the request to the node address fails because nothing listens there. The pod is `Running` and ready.
+
+## Record the decision
 
 Save this as `configmap-benchmark-review.yaml`:
 
@@ -39,69 +73,25 @@ metadata:
   name: benchmark-review
   namespace: starfleet-031-020-01-01
 data:
-  component: kube-apiserver
-  control: disable-profiling
+  component: kube-scheduler
+  check: "1.4.2"
+  setting: bind-address
   result: corrected
 ```
 
-Save this as `configure-api.py`:
-
-```python
-import json,subprocess,tempfile
-from pathlib import Path
-CONTEXT="kind-astro-ats-031-lab-020-01-01"
-NODE="astro-ats-031-lab-020-01-01-control-plane"
-def run(*args):
-    result=subprocess.run(args,check=True,text=True,capture_output=True,timeout=30)
-    return result.stdout.strip()
-assert run('kubectl','config','current-context')==CONTEXT, 'Select the private environment'
-assert run('podman','inspect',NODE,'--format','{{index .Config.Labels "io.x-k8s.kind.cluster"}}')=='astro-ats-031-lab-020-01-01', 'Refusing an unrelated node container'
-def node(*args):return run('podman','exec',NODE,*args)
-def put(path,content):
-    with tempfile.TemporaryDirectory(prefix='training-node-') as temporary:
-        source=Path(temporary)/'content';source.write_text(content)
-        run('podman','cp',str(source),NODE+':'+path)
-def api_manifest():
-    with tempfile.TemporaryDirectory(prefix='training-api-') as temporary:
-        source=Path(temporary)/'pod.yaml';source.write_text(node('cat','/etc/kubernetes/manifests/kube-apiserver.yaml'))
-        return json.loads(run('kubectl','create','--dry-run=client','--validate=false','-f',str(source),'-o','json'))
-def set_api_flag(flag,value):
-    manifest=api_manifest(); container=manifest['spec']['containers'][0]
-    container['command']=[arg for arg in container['command'] if not arg.startswith('--'+flag+'=')]+['--'+flag+'='+value]
-    put('/etc/kubernetes/lab-api-pod.json',json.dumps(manifest))
-    node('mv','/etc/kubernetes/lab-api-pod.json','/etc/kubernetes/manifests/kube-apiserver.yaml')
-
-set_api_flag('profiling','false')
-```
-
-Apply the scoped correction:
+Apply it:
 
 ```sh
-python3 configure-api.py
-api_ready=0
-for attempt in $(seq 1 80); do
-  if kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then api_ready=1; break; fi
-  sleep 3
-done
-test "$api_ready" -eq 1
-
 kubectl apply -f configmap-benchmark-review.yaml
 ```
 
-## Verify The Result
-
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
+Then check the result:
 
 ```sh
-kubectl get --raw=/readyz
-kubectl -n starfleet-031-020-01-01 exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-031-020-01-01 get configmap benchmark-review -o yaml
 ```
-
-Review and correct one effective control-plane setting while keeping API access available. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
-
-After recording your result, remove the independent lab with `astrona destroy ats-031-lab-020-01-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Use the version-appropriate benchmark and record the selected control. One corrected flag does not establish overall compliance. Backups belong outside the kubelet static-manifest directory.
+> A backup inside `/etc/kubernetes/manifests` becomes a second static pod. A changed manifest is not a closed finding until the new process runs with the new flag, so read the process, not only the file. Quote the check number `"1.4.2"` in YAML.

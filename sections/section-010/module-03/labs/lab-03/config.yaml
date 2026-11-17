@@ -12,38 +12,37 @@ runtime:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
     - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
-    nodes:
-      workers: 1
     addons:
       cni: calico
 bootstrap:
   init:
-  - name: prepare-environment
+  - name: seed-lab
     type: file
     source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
 testing:
   init:
   - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
     type: file
     source: testing/verify-start.sh
-  - name: reference-solution
+  - name: reference-result
     type: file
     source: solution/apply.sh
-  - name: negative-cases
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: testing/regression.sh
+    source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: address-exception
-    description: The permitted client connects and the excluded address cannot
+  - name: division-labels
+    description: The survey and salvage namespaces carry division=science and the outpost namespace does not
     type: file
-    source: validation/validate-address-exception.sh
+    source: validation/validate-division-labels.sh
     points: 1
-  - name: port-range
-    description: Every port in the requested range works and adjacent ports remain denied
+  - name: archive-admits-division
+    description: The archive pod accepts TCP 8080 from namespaces labelled division=science and the outpost namespace times out
     type: file
-    source: validation/validate-port-range.sh
+    source: validation/validate-archive-admits-division.sh
     points: 1
-teardown:
-  keepCluster: false

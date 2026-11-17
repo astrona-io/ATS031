@@ -1,17 +1,20 @@
-R = '/var/lib/training-release/k8s/lab'
+mirror = '/var/lib/k8s-mirror'
+stable = node_exec(NODE, 'cat', mirror + '/release/stable.txt').stdout.strip()
+assert stable in ('v1.33.7', 'v1.34.3', 'v1.35.1'), 'stable.txt was changed; start the lab again'
+machine = node_exec(WORKER, 'uname', '-m').stdout.strip()
+architecture = {'x86_64': 'amd64', 'aarch64': 'arm64'}[machine]
+expected_path = f'release/{stable}/bin/linux/{architecture}/kubeadm'
+published = node_exec(NODE, 'cat', f'{mirror}/{expected_path}.sha256').stdout.strip()
 
 
-def node_sh(script, success=True):
-    return node_exec(NODE, 'sh', '-c', script, success=success)
+def pick():
+    found = command(['kubectl', '-n', NAMESPACE, 'get', 'configmap', 'release-pick', '-o', 'json'], success=False)
+    assert found.returncode == 0, 'Create the ConfigMap release-pick in ' + NAMESPACE
+    return json.loads(found.stdout).get('data') or {}
 
 
-failing = [
-    tool for tool in ('kubectl', 'kubeadm', 'kubelet')
-    if node_sh("cat %s/%s.sha256" % (R, tool)).stdout.strip()
-    != node_sh("sha256sum '%s/%s' | cut -d' ' -f1" % (R, tool)).stdout.strip()
-]
-assert len(failing) == 1, 'The staged files were changed: exactly one binary must fail verification'
-if wants('failing-binary'):
-    result = node_sh("cat %s/result.txt" % R, success=False)
-    assert result.returncode == 0, 'Write the result file %s/result.txt on the control plane node' % R
-    assert result.stdout.strip() == failing[0], 'The result file does not name the binary that fails verification'
+if wants('release-path'):
+    path = pick().get('path', '').strip().removeprefix(mirror + '/').lstrip('/')
+    assert path == expected_path, 'path must be release/<stable version>/bin/linux/<worker architecture>/kubeadm'
+if wants('release-digest'):
+    assert pick().get('sha256', '').strip() == published, 'sha256 must be the published digest of that kubeadm file'

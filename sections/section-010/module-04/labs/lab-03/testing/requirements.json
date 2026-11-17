@@ -1,0 +1,38 @@
+{
+  "context": "kind-astro-ats-031-lab-010-04-03",
+  "cluster": "astro-ats-031-lab-010-04-03",
+  "namespace": "starfleet-031-010-04-03",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "operator",
+      "namespace": "starfleet-031-010-04-03",
+      "expected": {
+        "metadata": {
+          "name": "operator",
+          "namespace": "starfleet-031-010-04-03",
+          "labels": {
+            "app": "operator"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "helper",
+      "namespace": "starfleet-031-010-04-03",
+      "expected": {
+        "metadata": {
+          "name": "helper",
+          "namespace": "starfleet-031-010-04-03",
+          "labels": {
+            "app": "helper"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

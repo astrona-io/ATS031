@@ -8,7 +8,7 @@
 
 Certified Kubernetes Security Specialist (CKS): Cluster Setup, worth 15% of the official curriculum. This course belongs to ATP007.
 
-Developed reading explains mechanisms, responsible components, examples and limits. Every section has an introduction and every module closes with a summary. Reusable YAML checks contain 5–15 questions per bank. Each module is a short landing page followed by deep-dive parts that carry the hands-on steps, a closing summary and a ten-question knowledge check. Technical content remains draft. Private playgrounds and draft graded labs are included.
+Developed reading explains mechanisms, responsible components, examples and limits. Every section has an introduction and every module closes with a summary. Reusable YAML checks contain 5–15 questions per bank. Each module is a short landing page followed by deep-dive parts that carry the hands-on steps, a closing summary and a ten-question knowledge check. Private playgrounds and graded labs are included.
 
 ## Course Outline
 
@@ -36,11 +36,11 @@ Developed reading explains mechanisms, responsible components, examples and limi
 
 ## Author Review
 
-See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [question-bank documentation](ASSESSMENTS.md) and [contribution instructions](CONTRIBUTING.md). Runtime results are recorded in the PR and GitHub Actions.
+See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [question-bank documentation](ASSESSMENTS.md) and [contribution instructions](CONTRIBUTING.md). No runtime execution is claimed.
 
 ## Hands-On Coverage
 
-This course has 19 ungraded module playgrounds, 29 draft independent labs and 5 section capstone labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static checks only: YAML and JSON parse, shell syntax, Python compile, path and question-count checks. No playground, lab or grader has been booted or run, and runtime verification is pending.
+This course has 19 ungraded module playgrounds and 86 independent labs. Each lab's task and solution are registered immediately after the reading it practises. CI (`.github/workflows/labs.yml`) checks registration, lab layout, teaching coverage and question banks, and runs `astrona test` on changed labs. Every lab passed `astrona validate` and `astrona test` on kind (arm64 node image) on 2026-11-17; the playgrounds have not been booted in CI yet.
 
 | Module | Labs in teaching order |
 | --- | --- |
@@ -73,10 +73,3 @@ This course has 19 ungraded module playgrounds, 29 draft independent labs and 5 
 | 050/02 | Verify The Running kubelet Against A Release Checksum |
 | 050/03 | Identify The Forged Signature |
 | 050/03 | Pin An Image By Digest And Prove It Runs |
-
-## Authoring and verification
-
-See [AUTHORING.md](AUTHORING.md) for the lab lifecycle and review workflow, and
-[LAB-COVERAGE.md](LAB-COVERAGE.md) for preparation lessons and graded outcomes.
-
-See [lesson and lab links](LAB-COVERAGE.md) and [remaining practical gaps](COVERAGE-REVIEW.md) for the current assessment scope.

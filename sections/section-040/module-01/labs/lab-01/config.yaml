@@ -12,7 +12,7 @@ runtime:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
     - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
+    - docker.io/curlimages/curl:8.11.1
     nodes:
       workers: 1
     addons:
@@ -39,13 +39,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: metadata-simulator
-    description: metadata-simulator serves HTTP on port 8080 to unrestricted clients
+  - name: pod-network
+    description: The relay Deployment is available and its pod has its own pod network instead of the network of the node
     type: file
-    source: validation/validate-metadata-simulator.sh
-    points: 1
-  - name: shuttle-isolation
-    description: shuttle reaches DNS and probe but times out on metadata-simulator
+    source: validation/validate-pod-network.sh
+    points: 2
+  - name: metadata-blocked
+    description: relay cannot reach metadata-simulator and still reaches the probe Service
     type: file
-    source: validation/validate-shuttle-isolation.sh
+    source: validation/validate-metadata-blocked.sh
     points: 2

@@ -1,133 +1,161 @@
 #!/usr/bin/env python3
-"""Check course registration, lab boundaries and local runtime references."""
-from collections import Counter
+"""Check registration, module order and the exam-ready lab layout."""
 from pathlib import Path
+import json
 import re
 import sys
-
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-errors = []
+SHARED = Path(__file__).resolve().parent / 'lab-files'
+# Files every lab carries unchanged; the key is the path inside the lab.
+SHARED_FILES = {
+    'testing/check.py': 'check.py',
+    'testing/verify-start.sh': 'verify-start.sh',
+    'testing/wait-solved.sh': 'wait-solved.sh',
+}
+LIFECYCLE = ['testing/verify-start.sh', 'solution/apply.sh', 'testing/wait-solved.sh']
+MAX_MINUTES = 20
+DESTROY = '<!-- astrona:playground:destroy -->'
 
 
-def require(condition, message):
-    if not condition:
-        errors.append(message)
+def lab_suffix(name):
+    match = re.fullmatch(r'ats-031-lab-(\d{3})-(\d{2})-(\d{2})', name)
+    if not match:
+        raise ValueError(f'{name}: lab name must be ats-031-lab-<section>-<module>-<lab>')
+    return '031-' + '-'.join(match.groups())
 
 
-def read_yaml(path):
+def check_sources(config, cfg):
+    for stage in ('bootstrap', 'testing', 'teardown', 'validation'):
+        block = cfg.get(stage) or {}
+        items = block.get('init', []) + block.get('scripts', [])
+        if block.get('script'):
+            items.append(block['script'])
+        for item in items:
+            if item.get('type') in ('file', 'folder') and not (config.parent / item['source']).exists():
+                raise ValueError(f'{config}: missing {stage} source {item["source"]}')
+
+
+def check_lab(root, lab, entry):
+    directory = root / lab
+    cfg = yaml.safe_load((directory / 'config.yaml').read_text())
+    name = cfg['metadata']['name']
+    suffix = lab_suffix(name)
+    runtime = cfg['runtime']['type']
+    init = [item.get('source') for item in cfg.get('testing', {}).get('init', [])]
+    if init != LIFECYCLE:
+        raise ValueError(f'{lab}: testing.init must be {LIFECYCLE}')
+    scripts = cfg.get('validation', {}).get('scripts', [])
+    if not scripts or cfg['validation'].get('script'):
+        raise ValueError(f'{lab}: validation needs one scripts entry per outcome')
+    wrapper = (SHARED / 'validate-outcome.sh').read_bytes()
+    for grader in scripts:
+        if not grader.get('description') or not isinstance(grader.get('points'), int):
+            raise ValueError(f'{lab}: grader {grader.get("name")} needs a description and points')
+        if grader['source'] != f'validation/validate-{grader["name"]}.sh':
+            raise ValueError(f'{lab}: grader {grader["name"]} must use validation/validate-{grader["name"]}.sh')
+        if (directory / grader['source']).read_bytes() != wrapper:
+            raise ValueError(f'{lab}: {grader["source"]} differs from scripts/ci/lab-files/validate-outcome.sh')
+    listed = {grader['source'] for grader in scripts}
+    present = {str(path.relative_to(directory)) for path in directory.glob('validation/*')}
+    if listed != present:
+        raise ValueError(f'{lab}: validation/ files and config.yaml differ: {sorted(listed ^ present)}')
+    for path, shared in SHARED_FILES.items():
+        if (directory / path).read_bytes() != (SHARED / shared).read_bytes():
+            raise ValueError(f'{lab}: {path} differs from scripts/ci/lab-files/{shared}')
+    requirements = json.loads((directory / 'testing/requirements.json').read_text())
+    outcomes = {grader['name'] for grader in scripts}
+    tagged = {item['outcome'] for key in ('resources', 'behavior') for item in requirements.get(key, []) if 'outcome' in item}
+    live = directory / 'testing/live.py'
+    computed = False
+    if live.exists():
+        text = live.read_text()
+        tagged |= set(re.findall(r"wants\('([\w-]+)'\)", text))
+        # wants(host + '-ingress') names outcomes at run time; only literal names can be compared.
+        computed = bool(re.search(r"wants\((?!')", text))
+    if not tagged <= outcomes or (not computed and tagged != outcomes):
+        raise ValueError(f'{lab}: graded outcomes and config.yaml differ: {sorted(tagged ^ outcomes)}')
+    if not requirements['namespace'].endswith('-' + suffix):
+        raise ValueError(f'{lab}: namespace must end with -{suffix}')
+    if runtime == 'kind' and (requirements['context'], requirements['cluster']) != (f'kind-astro-{name}', f'astro-{name}'):
+        raise ValueError(f'{lab}: requirements.json context and cluster must name astro-{name}')
+    for script in ['validate.sh', 'solution/apply.sh']:
+        if 'ASTRONA_KUBE_CONTEXT' not in (directory / script).read_text():
+            raise ValueError(f'{lab}: {script} needs the context guard')
+    question = (directory / 'question.md').read_text()
+    minutes = re.search(r'^Allow about (\d+) minutes for the tasks\.$', question, re.M)
+    if not minutes or int(minutes.group(1)) > MAX_MINUTES:
+        raise ValueError(f'{lab}: question.md needs "Allow about N minutes for the tasks." with N <= {MAX_MINUTES}')
+    if entry.get('examScope') and runtime != 'kind':
+        raise ValueError(f'{lab}: only kind labs fit the exam profile')
+    return name
+
+
+def module_of(path):
+    match = re.match(r'sections/section-\d+/module-\d+/', path)
+    return match.group(0) if match else None
+
+
+def validate(root):
+    course = yaml.safe_load((root / 'astrona.yaml').read_text())
+    entries = [entry for module in course['modules'] for entry in module.get('content', [])]
+    paths = [entry['path'] for entry in entries]
+    if len(paths) != len(set(paths)):
+        raise ValueError('course content paths must be unique')
+    for path in paths:
+        if not (root / path).exists():
+            raise ValueError(f'missing registered content: {path}')
+    labs = {entry['path']: entry for entry in entries if entry['type'] == 'lab'}
+    actual = {str(path.parent.relative_to(root)) for path in root.glob('sections/**/labs/lab-*/config.yaml')}
+    if set(labs) != actual:
+        raise ValueError(f'lab registration mismatch: {sorted(set(labs) ^ actual)}')
+    names = set()
+    for config in sorted(root.glob('sections/**/config.yaml')):
+        cfg = yaml.safe_load(config.read_text())
+        name = cfg['metadata']['name']
+        if name in names:
+            raise ValueError(f'duplicate environment name: {name}')
+        names.add(name)
+        if cfg['runtime']['type'] not in ('kind', 'qemu'):
+            raise ValueError(f'{config}: unsupported runtime')
+        check_sources(config, cfg)
+    # Report every broken lab at once, not only the first.
+    errors = []
+    for lab, entry in labs.items():
+        position = paths.index(lab)
+        try:
+            if paths[position - 1] != lab + '/question.md':
+                raise ValueError(f'{lab}: question.md must immediately precede its lab')
+            if position + 1 >= len(paths) or paths[position + 1] != lab + '/solution.md':
+                raise ValueError(f'{lab}: solution.md must immediately follow its lab')
+            check_lab(root, lab, entry)
+        except (ValueError, KeyError, OSError) as error:
+            errors.append(str(error))
+    if errors:
+        raise ValueError('\n  '.join([f'{len(errors)} labs fail:'] + errors))
+    # A module's entries are contiguous and its summary is its last reading.
+    seen, previous = set(), None
+    for entry in entries:
+        module = module_of(entry['path'])
+        if module and module != previous:
+            if module in seen:
+                raise ValueError(f'{module}: entries must be contiguous')
+            seen.add(module)
+        previous = module or previous
+    for module in seen:
+        own = [entry for entry in entries if module_of(entry['path']) == module and entry['type'] != 'quiz']
+        last = own[-1]['path']
+        if not re.fullmatch(re.escape(module) + r'course-\d+-summary\.md', last):
+            raise ValueError(f'{module}: the summary must be the last entry, found {last}')
+        if (root / last).read_text().rstrip().splitlines()[-1] != DESTROY:
+            raise ValueError(f'{last}: must end with {DESTROY}')
+    return len(labs), len(names) - len(labs)
+
+
+if __name__ == '__main__':
     try:
-        return yaml.safe_load(path.read_text())
-    except (OSError, yaml.YAMLError) as error:
-        errors.append(f"{path.relative_to(ROOT)}: {error}")
-        return {}
-
-
-outline = read_yaml(ROOT / "astrona.yaml")
-registered = []
-for section in outline.get("modules", []):
-    content = section.get("content", [])
-    for index, item in enumerate(content):
-        path = item.get("path", "")
-        require(bool(path) and (ROOT / path).exists(), f"Missing course path: {path}")
-        if item.get("type") != "lab":
-            continue
-        registered.append(path)
-        require(index > 0 and content[index - 1].get("path") == path + "/question.md",
-                f"{path}: lab must follow its question reading")
-        question = ROOT / path / "question.md"
-        if question.is_file():
-            text = question.read_text()
-            for heading in ("Solve this question on:", "## Tasks", "## Constraints", "## How the answer is checked"):
-                require(heading in text, f"{path}: question.md has no {heading!r}")
-            require(bool(re.search(r"^Allow (about )?\d+(–\d+)? minutes for task work\.", text, re.M)),
-                    f"{path}: question.md has no time line")
-            tasks = re.findall(r"^\d+\.\s+", text, re.M)
-            require(3 <= len(tasks) <= 5, f"{path}: expected 3–5 tasks, found {len(tasks)}")
-        if "/module-" not in path:
-            continue
-        # The lab practises the nearest lesson before it; earlier labs of the
-        # same lesson (their question, lab and solution entries) sit between.
-        lesson_index = index - 2
-        while lesson_index >= 0 and "/labs/" in content[lesson_index].get("path", ""):
-            lesson_index -= 1
-        lesson = content[lesson_index].get("path", "") if lesson_index >= 0 else ""
-        module = str(Path(path).parent.parent)
-        require(lesson_index >= 0 and content[lesson_index].get("type") == "reading"
-                and lesson.startswith(module + "/course-0") and not lesson.endswith("-summary.md"),
-                f"{path}: place the lab right after the module lesson it practises")
-
-counts = Counter(registered)
-for path, count in counts.items():
-    require(count == 1, f"Duplicate lab registration: {path}")
-
-runtime_names = {}
-module_labs = 0
-for config in sorted((ROOT / "sections").rglob("config.yaml")):
-    environment = config.parent
-    if environment.name != "playground" and environment.parent.name != "labs":
-        continue
-    relative = str(environment.relative_to(ROOT))
-    data = read_yaml(config)
-    name = data.get("metadata", {}).get("name")
-    require(bool(name), f"{relative}: missing runtime name")
-    require(name not in runtime_names,
-            f"{relative}: runtime name {name} also used by {runtime_names.get(name)}")
-    runtime_names[name] = relative
-    if environment.parent.name == "labs":
-        require(relative in counts, f"Unregistered lab: {relative}")
-        graders = data.get("validation", {}).get("scripts") or []
-        require(bool(graders), f"{relative}: no graders")
-        for grader in graders:
-            require(bool(grader.get("description")), f"{relative}: grader {grader.get('name')} has no description")
-        require(bool(data.get("testing", {}).get("init")), f"{relative}: no reference lifecycle")
-        if "/module-" in relative:
-            module_labs += 1
-            steps = data.get("testing", {}).get("init", [])
-            require(bool(steps) and steps[0].get("source") == "testing/verify-start.sh",
-                    f"{relative}: verify the starting state before the solution")
-            for grader in graders:
-                name = grader.get("name")
-                require(isinstance(grader.get("points"), int) and grader["points"] > 0,
-                        f"{relative}: grader {name} has no points")
-                require(grader.get("source") == f"validation/validate-{name}.sh",
-                        f"{relative}: grader {name} must be validation/validate-{name}.sh")
-    for value in data.get("metadata", {}).get("docs", {}).values():
-        require((environment / value).is_file(), f"{relative}: missing document {value}")
-
-    def check_sources(value):
-        if isinstance(value, dict):
-            if value.get("type") == "file" and "source" in value:
-                require((environment / value["source"]).is_file(),
-                        f"{relative}: missing source {value['source']}")
-            for child in value.values():
-                check_sources(child)
-        elif isinstance(value, list):
-            for child in value:
-                check_sources(child)
-
-    check_sources(data)
-
-for page in (ROOT / "sections").glob("section-*/module-*/course*.md"):
-    text = page.read_text()
-    relative = page.relative_to(ROOT)
-    if page.name == "course.md":
-        marker = "<!-- astrona:playground -->"
-    elif page.name.endswith("-summary.md"):
-        marker = "<!-- astrona:playground:destroy -->"
-    elif "```sh" in text or "```bash" in text:
-        marker = "<!-- astrona:playground:renew -->"
-    else:
-        continue
-    require(text.count(marker) == 1, f"{relative}: expected exactly one {marker}")
-
-for quiz in (ROOT / "sections").rglob("*quiz.yaml"):
-    for question in read_yaml(quiz).get("questions", []):
-        for reading in question.get("source_readings", []):
-            require((ROOT / reading).is_file(), f"{quiz.relative_to(ROOT)}: missing reading {reading}")
-
-if errors:
-    print("\n".join(f"FAIL: {error}" for error in errors))
-    sys.exit(1)
-print(f"PASS: {len(registered)} registered labs, {module_labs} module labs, {len(runtime_names)} unique environments")
+        labs, playgrounds = validate(ROOT)
+        print(f'PASS: {labs} labs and {playgrounds} playgrounds have valid registration and lifecycle files')
+    except (ValueError, KeyError, OSError) as error:
+        sys.exit(f'FAIL: {error}')

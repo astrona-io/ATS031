@@ -1,0 +1,122 @@
+{
+  "context": "kind-astro-ats-031-lab-030-01-04",
+  "cluster": "astro-ats-031-lab-030-01-04",
+  "namespace": "starfleet-031-030-01-04",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-01-04"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-01-04"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "bridge",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "bridge",
+          "namespace": "starfleet-031-030-01-04"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "bridge"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "bridge",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "bridge",
+          "namespace": "starfleet-031-030-01-04"
+        },
+        "spec": {
+          "selector": {
+            "app": "bridge"
+          }
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "dock",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "dock",
+          "namespace": "starfleet-031-030-01-04"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "dock"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "dock",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "dock",
+          "namespace": "starfleet-031-030-01-04"
+        },
+        "spec": {
+          "selector": {
+            "app": "dock"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

@@ -37,7 +37,7 @@ testing:
 validation:
   scripts:
   - name: scout-tls-secret
-    description: TLS Secret scout-tls exists
+    description: TLS Secret scout-tls holds a certificate for scout.example.test with its key
     type: file
     source: validation/validate-scout-tls-secret.sh
     points: 1

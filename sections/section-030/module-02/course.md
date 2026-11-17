@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Properly set up Ingress with TLS
 ---
@@ -21,7 +20,7 @@ After this module you can:
 
 ## Before you start
 
-You need Kubernetes basics: Deployments, Services and `kubectl`. You also need `curl` on your own machine. The module has six parts: controller architecture, the installation on `kind`, a first Ingress, path types and priority, several Services with a default backend, and inspection of the running controller. The graded lab follows the part on several Services.
+You need Kubernetes basics: Deployments, Services and `kubectl`. You also need `curl` on your own machine. The module has six parts: controller architecture, the installation on `kind`, a first Ingress, path types and priority, several Services with a default backend, and inspection of the running controller. A graded lab follows every part except the first, which explains the architecture.
 
 Your playground is a `kind` cluster running Kubernetes v1.35 with Traefik already installed. It has these objects:
 

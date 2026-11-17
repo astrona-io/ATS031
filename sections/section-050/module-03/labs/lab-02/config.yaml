@@ -2,17 +2,12 @@ apiVersion: astrona.io/v1
 metadata:
   name: ats-031-lab-050-03-02
   docs:
-    prerequisites: docs/prerequisites.md
     examQuestion: question.md
-    caseStudy: docs/case-study.md
     guide: solution.md
 runtime:
   type: kind
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    preloadImages:
-    - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     nodes:
       workers: 1
 bootstrap:
@@ -37,13 +32,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: deployment-pinned
-    description: relay runs busybox pinned by the digest of the image it ran
+  - name: bad-package
+    description: repository-review names the package file whose digest differs from the signed index
     type: file
-    source: validation/validate-deployment-pinned.sh
-    points: 2
-  - name: pin-review
-    description: image-pin-review records the digest and the imageID of the running pod
+    source: validation/validate-bad-package.sh
+    points: 1
+  - name: changed-file
+    description: repository-review names the installed file that dpkg reports as changed
     type: file
-    source: validation/validate-pin-review.sh
+    source: validation/validate-changed-file.sh
     points: 1

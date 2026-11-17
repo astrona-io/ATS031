@@ -1,7 +1,5 @@
 # Curriculum Coverage
 
-> Historical design record. Counts and execution claims below describe the original expansion. For current labs, preparation and practical limits, use [LAB-COVERAGE.md](LAB-COVERAGE.md) and [COVERAGE-REVIEW.md](COVERAGE-REVIEW.md).
-
 Exam: Certified Kubernetes Security Specialist (CKS). Domain: Cluster Setup (15%).
 
 The [official objectives](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/) were checked on 2026-10-11. Teaching structure is independently authored and does not add official requirements.
@@ -26,7 +24,7 @@ AUTHORING.yaml records measurable goals and adaptation sources. Every objective 
 
 ## Hands-On Coverage
 
-This course has 5 ungraded module playgrounds and 6 draft independent labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static configuration, shell/Python/YAML, parser, lifecycle and offline grader checks pass. Live execution remains pending because the session cannot access Podman; installed CLI configuration validation is separately blocked by its maintenance lock.
+This course has 19 ungraded module playgrounds and 86 independent labs. Each lab's task and solution are registered immediately after the reading it practises. Every lab passed `astrona validate` and `astrona test` on kind (arm64 node image) on 2026-11-17.
 
 | Module | Labs in teaching order |
 | --- | --- |

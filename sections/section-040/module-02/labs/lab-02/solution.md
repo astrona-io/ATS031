@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Protect node metadata and endpoints
 ---
@@ -85,4 +84,19 @@ check_metadata outpost-031-040-02-02 drifter
 ```
 
 The request from `agent` prints `200`. The request from `shuttle` prints `000` with exit code 28. The two Service requests and the request from `drifter` print `200`. A common mistake is a second policy that selects `agent` but is the only one that selects it: then `agent` can reach the metadata address and nothing else, and the Service request fails.
+
+The label decides, not the pod name. Start one short-lived pod without labels and one with `role=cloud-agent`, and send the metadata request from each. The options `--rm` and `-i` attach to the pod and delete it when the command ends:
+
+```sh
+kubectl -n starfleet-031-040-02-02 run plain-check --rm -i --restart=Never --image=docker.io/curlimages/curl:8.11.1 --command -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://169.254.169.254/latest/meta-data/
+kubectl -n starfleet-031-040-02-02 run agent-check --rm -i --restart=Never --labels=role=cloud-agent --image=docker.io/curlimages/curl:8.11.1 --command -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://169.254.169.254/latest/meta-data/
+```
+
+Each command also prints a note about the command prompt and a line that says kubectl deleted the pod. The status code of the first command is `000`, and kubectl reports that the pod `terminated (Error)`, because `curl` exits with code 28 when its request times out. The second prints `200`. This also shows the risk of the design: anyone who can create a pod with that label in the namespace gets the address. Then submit.
+
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-040-02-02`.
+
+## Common pitfalls
+
+> [!WARNING]
+> A policy that selects `agent` by its name label, or any policy that names one pod, gives the address to that pod only, and a new pod with `role=cloud-agent` stays blocked. A block policy that selects only `shuttle` leaves every new pod open. Select by `role: cloud-agent` for the exception and by `{}` for the block.

@@ -1,78 +1,70 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
 # Allow One Peer And Deny Another Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-01-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-## Inspect And Explain
+A NetworkPolicy is a Kubernetes object that limits which network traffic may reach or leave the pods it selects. The network plugin (here Calico) reads the policy and enforces it. In this lab one ingress policy on the `hub` pods admits the `tender` pod, and every other sender loses access because the `hub` pods become isolated for ingress.
 
-The application and client fixtures are healthy. Complete the required change without replacing unrelated resources.
+The policy selects the `hub` pods with `podSelector`, lists only `Ingress` in `policyTypes`, and names the allowed sender with a second `podSelector` inside `from`. A `from` entry with only a `podSelector` means "pods with this label in the same namespace as the policy".
 
-Inspect the relevant evidence:
-
-```sh
-kubectl -n starfleet-031-010-01-01 get pods --show-labels
-kubectl -n outpost-031-010-01-01 get pods --show-labels
-kubectl -n starfleet-031-010-01-01 get networkpolicy -o yaml
-```
-
-A NetworkPolicy selects destination Pods and describes allowed ingress. A Pod selector in a peer rule without a namespace selector matches only that policy namespace. The policy-capable network plugin enforces the rule. A negative request must fail with a network timeout, not because the client Pod is absent.
-
-
-Save this as `networkpolicy-probe-shuttle.yaml`:
+Save this as `networkpolicy-hub-from-tender.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: probe-shuttle
+  name: hub-from-tender
   namespace: starfleet-031-010-01-01
 spec:
   podSelector:
     matchLabels:
-      app: probe
+      app: hub
   policyTypes:
   - Ingress
   ingress:
   - from:
     - podSelector:
         matchLabels:
-          app: shuttle
+          app: tender
     ports:
     - protocol: TCP
       port: 8080
 ```
 
-Apply the required change:
+Apply it:
 
 ```sh
-kubectl apply -f networkpolicy-probe-shuttle.yaml
+kubectl apply -f networkpolicy-hub-from-tender.yaml
 ```
 
-## Verify The Result
-
-Observe the actual result. A denied-request command returns a nonzero status when the denial works. Run denial checks separately from a shell sequence that stops on the first nonzero status.
+Then check the result. The test client prints `open` with the reply, or `blocked` when the connection times out:
 
 ```sh
-kubectl -n starfleet-031-010-01-01 exec shuttle -- wget -q -T 3 -O- http://probe/
-kubectl -n outpost-031-010-01-01 exec drifter -- wget -q -T 3 -O- http://probe.starfleet-031-010-01-01/
+HUB_SERVICE_IP=$(kubectl -n starfleet-031-010-01-01 get service hub -o jsonpath='{.spec.clusterIP}')
+kubectl -n starfleet-031-010-01-01 exec tender -- python /app/client.py tcp "$HUB_SERVICE_IP" 80
+kubectl -n starfleet-031-010-01-01 exec idler -- python /app/client.py tcp "$HUB_SERVICE_IP" 80
+kubectl -n outpost-031-010-01-01 exec stranger -- python /app/client.py tcp "$HUB_SERVICE_IP" 80
 ```
 
-Create NetworkPolicy `probe-shuttle` selecting `app: probe` for ingress. Allow only same-namespace Pods labelled `app: shuttle` on TCP port 8080. Keep the original workload and clients healthy. Shuttle must receive version one through the Service; drifter in `outpost-031-010-01-01` must time out. Do not create any policy that also allows drifter.
+The first command must print `open`. The other two must print `blocked`.
 
-After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-01-01`.
+The `tender` pod gets a reply because its label matches the `from` rule. The `idler` pod in the same namespace and the `stranger` pod in `outpost-031-010-01-01` time out, because no rule admits them. Both pods still reach the `mirror` pod: the policy only isolates the `hub` pods, so the block comes from the hub policy and not from a broken client.
+
+When you are done, remove the lab with `astrona destroy ats-031-lab-010-01-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Policies combine their allowed traffic. Check a denied peer as well as an allowed peer. A missing client or refused listener is not evidence that the network policy enforced a timeout.
+> A policy changes nothing for pods it does not select. Test a denied sender and also prove that the same sender still reaches another pod, so you know the policy causes the block.
+>
+> Do not add a policy in the other namespace to block the `stranger` pod. The task asks for one policy on the `hub` pods; extra egress policies hide whether the ingress rule works.

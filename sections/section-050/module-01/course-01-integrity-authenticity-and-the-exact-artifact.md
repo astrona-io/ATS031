@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---
@@ -35,8 +34,6 @@ Suppose the release page lists `kubectl` and its digest. If the page and the fil
 A release is identified by the component, the version, the operating system and the CPU architecture. `kubectl` for `linux/amd64` and for `linux/arm64` are different files with different digests. The version label such as `v1.35.0` is useful to a human, and the digest binds your decision to exact bytes. Record all of these before the file enters your automation: component, version, platform, source and digest.
 
 As reference, the Kubernetes project publishes a digest file next to each binary on its download host. The documented pattern fetches the binary and its `.sha256` file for the same version and platform, then checks them together. These commands need network access to the real release host, so treat them as a pattern and do not expect to run them in the playground:
-
-<!-- astrona:playground:renew -->
 
 ```sh
 VERSION=v1.35.0

@@ -1,40 +1,33 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Verify The Running kubelet Against A Release Checksum
+# Verify Downloads With sha256sum --check
 
-Solve this question on: `terminal`
+Allow about 8 minutes for the tasks.
 
-The Starfleet worker node must run the released `kubelet`. The release checksums for two versions were staged on the worker node in `/var/lib/training-release/k8s/release`. Nobody has compared the running binary with them yet.
+An operator of the `starfleet` cluster downloaded `kubectl`, `kubeadm` and `kubelet` to the control plane node, each with the `.sha256` file that the release site publishes next to it. Check all three downloads in one run of `sha256sum --check`.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+## Connect to the lab
+
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-02-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-02-02" || exit 1
-CONTROL=astro-ats-031-lab-050-02-02-control-plane
-WORKER=astro-ats-031-lab-050-02-02-worker
+node_name="astro-ats-031-lab-050-02-02-control-plane"
 ```
 
-Keep this connection selected. Host-level commands name only the node containers of this environment.
-
-Allow about 10 minutes for task work. Cluster startup adds time.
+The node of a `kind` cluster is a container on your machine. Run a command inside it with `podman exec "$node_name" <command>`. If your machine uses Docker, write `docker exec` instead.
 
 ## Tasks
 
-1. On the worker node, find the running `kubelet` process, resolve the binary it runs through `/proc/<pid>/exe`, and read its version.
-2. Compute the SHA-256 digest of that binary.
-3. Compare the digest with the staged release checksum for that version.
-4. Record the result in a ConfigMap named `kubelet-review` in the `starfleet-031-050-02-02` namespace with these keys: `version` (the version the kubelet reports, for example `v1.35.0`), `path` (the path that `/proc/<pid>/exe` points to), `sha256` (the digest of the running binary) and `result` (`match` if the digest equals the staged checksum for that version, otherwise `mismatch`).
+The downloads are in `/var/lib/k8s-downloads` on the control plane node. Each `.sha256` file holds only a 64-character digest, with no file name.
 
-## Constraints
+1. Create `/var/lib/k8s-downloads/SHA256SUMS` in the format that `sha256sum --check` reads: one line per download, with the published digest, two spaces and the file name without a directory.
+2. Run `sha256sum --check --strict SHA256SUMS` in that directory and note its exit status.
+3. Create the ConfigMap `download-check` in the namespace `starfleet-031-050-02-02` with two keys:
+   - `exit-status`: the exit status of the check, as a number.
+   - `failed`: the name of the download that failed the check, or `none` if every download passed.
 
-- Do not change the staged files.
-
-## How the answer is checked
-
-The grader runs three checks. Each one first finds the running `kubelet` on the worker node, its binary path, version and digest. The first check needs `version` and `path` in `kubelet-review` to match the running kubelet. The second needs `sha256` to equal the digest of the running binary. The third reads the staged checksum for that version under `/var/lib/training-release/k8s/release` and needs `result` to be `match` when the two digests are equal and `mismatch` when they differ.
-
-Hint: `readlink /proc/<pid>/exe` prints the path of the binary a process runs.
+Take each digest from its `.sha256` file, never from the downloaded file itself. Do not change the downloads. Each start of the lab decides at random whether one download is damaged.

@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---

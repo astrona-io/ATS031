@@ -1,0 +1,83 @@
+{
+  "context": "kind-astro-ats-031-lab-010-04-04",
+  "cluster": "astro-ats-031-lab-010-04-04",
+  "namespace": "starfleet-031-010-04-04",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "rover",
+      "namespace": "starfleet-031-010-04-04",
+      "expected": {
+        "metadata": {
+          "name": "rover",
+          "namespace": "starfleet-031-010-04-04",
+          "labels": {
+            "app": "rover"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "tanker",
+      "namespace": "starfleet-031-010-04-04",
+      "expected": {
+        "metadata": {
+          "name": "tanker",
+          "namespace": "starfleet-031-010-04-04",
+          "labels": {
+            "app": "tanker"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "hangar",
+      "namespace": "starfleet-031-010-04-04",
+      "expected": {
+        "metadata": {
+          "name": "hangar",
+          "namespace": "starfleet-031-010-04-04",
+          "labels": {
+            "app": "hangar"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "vault",
+      "namespace": "starfleet-031-010-04-04",
+      "expected": {
+        "metadata": {
+          "name": "vault",
+          "namespace": "starfleet-031-010-04-04",
+          "labels": {
+            "app": "vault"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "drone",
+      "namespace": "outpost-031-010-04-04",
+      "expected": {
+        "metadata": {
+          "name": "drone",
+          "namespace": "outpost-031-010-04-04",
+          "labels": {
+            "app": "drone"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

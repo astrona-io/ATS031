@@ -1,37 +1,37 @@
 ---
-draft: true
 exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
 # Save The Failing API Server Check Ids
 
-Solve this question on: `terminal`
+Allow about 12 minutes for the tasks.
 
-The security team needs the list of failing API server checks before it plans fixes. The kind cluster has two healthy `probe` replicas in the namespace `starfleet-031-020-02-01`, a `shuttle` client pod, and one control plane node that runs with the kubeadm defaults. kube-bench is a tool that runs the Center for Internet Security (CIS) Kubernetes benchmark checks on a node. Its image `docker.io/aquasec/kube-bench:v0.10.6` is already loaded on both nodes. No kube-bench result has been collected.
+The security team of the `starfleet` cluster needs the list of failing API server checks in a form that a script can read, before it plans fixes.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+## Starting state
+
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-02-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The `kube-bench` image `docker.io/aquasec/kube-bench:v0.10.6` is already loaded on both nodes. The control plane node runs with the kubeadm defaults. No kube-bench result has been collected.
+
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-02-01" || exit 1
+node_name="astro-ats-031-lab-020-02-01-control-plane"
+worker_name="astro-ats-031-lab-020-02-01-worker"
 ```
 
-Allow about 10 minutes for task work. Cluster startup adds time.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
-## Tasks
+## Required result
 
-1. Run `kube-bench` with the `master` target on the control plane node, as a Job in the `default` namespace. Wait until the Job has completed, so that its log is complete.
-2. From the log, find every check with the state `FAIL` whose number starts with `1.2.`. Save the numbers in a file named `failing-1-2.txt`, one number on each line.
-3. Create the ConfigMap `failing-checks` in the namespace `starfleet-031-020-02-01` with the content of that file under the key `ids`.
+- Create the Job `api-server-audit` in the `starfleet-031-020-02-01` namespace. It runs `kube-bench run --targets master --json` on the control plane node and completes.
+- From its JSON output, find every check with the status `FAIL` whose number starts with `1.2.`.
+- Create the ConfigMap `failing-checks` in the same namespace with the numbers under the key `ids`, one number on each line.
 
-## Constraints
+Do not change any setting of the cluster. The grader runs kube-bench again and compares its failing `1.2.` checks with your list.
 
-- Do not change any setting of the cluster. The grader runs `kube-bench` again and compares its failing `1.2.` checks with your list. If you fix a setting, your list no longer matches.
-- Put only `1.2.` check numbers in the list.
+## Verify The Result
 
-## How the answer is checked
-
-The grader runs two checks. The first reads the ConfigMap `failing-checks` in `starfleet-031-020-02-01` and needs a key `ids` that is not empty and that holds only numbers of the form `1.2.<n>`, one on each line. The second starts its own `kube-bench` Job in the `default` namespace, waits for it to complete, and needs your list to be exactly the set of `1.2.` checks that fail in that run. A list that is too short or too long fails. Both checks also need `/readyz` of the API server to return `ok`.
-
-Hint: the `--json` option of `kube-bench` makes the failing checks easy to filter.
+The grader reads your Job, then runs its own JSON audit in the same namespace and compares the result with your ConfigMap. A list that is too short, too long, or that holds a number outside `1.2.` fails.

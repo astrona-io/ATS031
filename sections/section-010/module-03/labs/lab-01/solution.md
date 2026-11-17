@@ -1,42 +1,32 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
 # Allow One Pod From Another Namespace Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-03-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-## Inspect and explain
+A peer entry in `from` can hold a `namespaceSelector` and a `podSelector` together. In one entry they are joined with AND: the sender must be in a selected namespace and carry the selected pod label. This is the way to admit one pod from one other namespace.
 
-Check the labels the policy relies on. The namespace carries only the automatic name label, and the pods carry `app` labels.
-
-```sh
-kubectl get namespace outpost-031-010-03-01 --show-labels
-kubectl -n outpost-031-010-03-01 get pods --show-labels
-```
-
-The policy selects the `probe` pods in `starfleet-031-010-03-01`. Its single `from` entry combines the namespace and the pod selector, so a peer must match both. The port is the pod port 8080, because the plugin applies policy to the pod after the Service address has been translated.
-
-Save this as `networkpolicy-probe-from-outpost.yaml`:
+Save this as `networkpolicy-registry-from-outpost-courier.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: probe-from-outpost
+  name: registry-from-outpost-courier
   namespace: starfleet-031-010-03-01
 spec:
   podSelector:
     matchLabels:
-      app: probe
+      app: registry
   policyTypes:
   - Ingress
   ingress:
@@ -46,7 +36,7 @@ spec:
           kubernetes.io/metadata.name: outpost-031-010-03-01
       podSelector:
         matchLabels:
-          app: shuttle
+          app: courier
     ports:
     - protocol: TCP
       port: 8080
@@ -55,26 +45,27 @@ spec:
 Apply it:
 
 ```sh
-kubectl apply -f networkpolicy-probe-from-outpost.yaml
+kubectl apply -f networkpolicy-registry-from-outpost-courier.yaml
 ```
 
-## Verify the result
-
-The first request must return the `probe` response. The other three must time out. A denied request returns a nonzero status, so run the checks one by one.
+Then check the result. The test client prints `open` with the reply, or `blocked` when the connection times out:
 
 ```sh
-kubectl -n outpost-031-010-03-01 exec shuttle -- wget -q -T 3 -O- http://probe.starfleet-031-010-03-01/
-kubectl -n outpost-031-010-03-01 exec drifter -- wget -q -T 3 -O- http://probe.starfleet-031-010-03-01/
-kubectl -n dock-031-010-03-01 exec shuttle -- wget -q -T 3 -O- http://probe.starfleet-031-010-03-01/
-kubectl -n starfleet-031-010-03-01 exec shuttle -- wget -q -T 3 -O- http://probe/
+REGISTRY_IP=$(kubectl -n starfleet-031-010-03-01 get pod registry -o jsonpath='{.status.podIP}')
+kubectl -n outpost-031-010-03-01 exec courier -- python /app/client.py tcp "$REGISTRY_IP" 8080
+kubectl -n dock-031-010-03-01 exec courier -- python /app/client.py tcp "$REGISTRY_IP" 8080
+kubectl -n starfleet-031-010-03-01 exec courier -- python /app/client.py tcp "$REGISTRY_IP" 8080
 ```
 
-After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-03-01`.
+The first command must print `open`. The other two must print `blocked`.
+
+Only the `courier` pod in `outpost-031-010-03-01` gets a reply. The `courier` pods in `dock-031-010-03-01` and `starfleet-031-010-03-01` carry the same label, but their namespaces do not match the `namespaceSelector`. A `podSelector` alone would have admitted only the `courier` in the policy's own namespace.
+
+When you are done, remove the lab with `astrona destroy ats-031-lab-010-03-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Writing two list entries.** A dash before `podSelector` makes it a second entry that allows every `shuttle` pod in `starfleet-031-010-03-01`.
-> - **Selecting the namespace by a made-up label.** Use `kubernetes.io/metadata.name`.
-> - **Allowing the Service port.** The policy sees the pod port 8080, not port 80.
-> - **Testing only the allowed request.** Run the denied requests too.
+> Indentation decides the meaning. A `- ` in front of `podSelector` starts a second peer entry, and the two entries are joined with OR.
+>
+> Select the namespace by `kubernetes.io/metadata.name`. The API server sets this label on every namespace, so it always exists.

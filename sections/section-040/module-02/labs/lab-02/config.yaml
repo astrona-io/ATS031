@@ -44,3 +44,8 @@ validation:
     type: file
     source: validation/validate-shuttle-blocked.sh
     points: 2
+  - name: label-decides
+    description: A new pod without the label is blocked from 169.254.169.254 and a new pod with role=cloud-agent reaches it
+    type: file
+    source: validation/validate-label-decides.sh
+    points: 2

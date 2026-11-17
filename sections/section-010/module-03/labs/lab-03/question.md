@@ -1,24 +1,44 @@
 ---
-draft: true
+exam_objectives:
+- Use Network security policies to restrict cluster level access
 ---
-# Enforce An Address Exception And Port Range
+# Admit A Group Of Namespaces By Label
 
-Solve this question on: `terminal`
+Allow about 10 minutes for the tasks.
 
-Three independent Pods in `ranges-training` provide a server and two clients. The server listens on TCP 8079 through 8083. No ingress policy restricts it yet.
+Only the science division may read the `archive`. The survey and salvage teams belong to it, and new science namespaces will join later, so the rule must not list namespace names.
 
-Allow about 10 minutes for task work. Cluster startup adds time.
+## Connect to the lab
+
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
+
+```sh
+export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-03-03)"
+test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-03" || exit 1
+```
+
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
+
+## Starting state
+
+The namespace `starfleet-031-010-03-03` runs the pod `archive`. The namespaces `survey-031-010-03-03`, `salvage-031-010-03-03` and `outpost-031-010-03-03` each run a pod named `mapper`. Each pod has the label `app: <pod name>`, serves HTTP on TCP port 8080 and contains a small test client, `/app/client.py`. No NetworkPolicy exists.
 
 ## Tasks
 
-1. Create `bounded-range`, selecting only `app=range-server`, with ingress from `ipBlock.cidr: 0.0.0.0/0` except the current `excluded` Pod's single IPv4 address. Use `/32` for the exception.
-2. Allow TCP 8080 through 8082 using `port` and `endPort`.
-3. Verify the allowed client reaches all three ports, the excluded client cannot reach them, and neither adjacent port is reachable remotely.
+1. Add the label `division=science` to the namespaces `survey-031-010-03-03` and `salvage-031-010-03-03`. Do not label `outpost-031-010-03-03`.
+2. In `starfleet-031-010-03-03`, create a NetworkPolicy named `archive-from-science` that selects the pod with the label `app: archive`.
+3. Allow ingress to `archive` on TCP port 8080 from every pod in a namespace with the label `division=science`. Select the namespaces by that label, not by their names.
+4. The `mapper` pod in `outpost-031-010-03-03` must time out.
 
-## Constraints
+## Check your work
 
-Preserve Pods, their labels and every listener. Do not add another policy that broadens ingress. Pod addresses are used here only to demonstrate CIDR matching in a disposable Calico cluster; use selectors for production Pod identities.
+The test client prints `open` with the reply, or `blocked` when the connection times out:
 
-## How the answer is checked
+```sh
+ARCHIVE_IP=$(kubectl -n starfleet-031-010-03-03 get pod archive -o jsonpath='{.status.podIP}')
+kubectl get namespaces -l division=science
+kubectl -n survey-031-010-03-03 exec mapper -- python /app/client.py tcp "$ARCHIVE_IP" 8080
+kubectl -n outpost-031-010-03-03 exec mapper -- python /app/client.py tcp "$ARCHIVE_IP" 8080
+```
 
-The grader checks the requested policy fields, confirms all local listeners are healthy, and opens fresh TCP connections from both clients. It tests both endpoints of the range, its middle, and adjacent ports.
+The request from `survey-031-010-03-03` must print `open` and the request from `outpost-031-010-03-03` must print `blocked`.

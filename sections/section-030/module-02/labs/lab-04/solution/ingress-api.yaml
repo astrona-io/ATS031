@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api
+  namespace: starfleet-031-030-02-04
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: api.local
+    http:
+      paths:
+      - path: /healthz
+        pathType: Exact
+        backend:
+          service:
+            name: beacon
+            port:
+              number: 80
+      - path: /v1
+        pathType: Prefix
+        backend:
+          service:
+            name: scout
+            port:
+              number: 80

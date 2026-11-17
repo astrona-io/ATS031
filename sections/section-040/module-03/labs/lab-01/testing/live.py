@@ -1,39 +1,86 @@
-def http_status(namespace, pod, url):
-    """HTTP status from a client pod, or denied when the request cannot connect."""
+import time
+import uuid
+
+CLIENT_IMAGE = 'docker.io/curlimages/curl:8.11.1'
+TEST_PODS = []
+
+
+def run(args, timeout=30, stdin=None):
+    """Run a command and return the result, or None when it does not finish in time."""
     try:
-        result = subprocess.run(['kubectl', '-n', namespace, 'exec', pod, '--', 'curl', '-sk', '-m', '3', '-o', '/dev/null', '-w', '%{http_code}', url], capture_output=True, text=True, timeout=25)
+        return subprocess.run(args, capture_output=True, text=True, timeout=timeout, input=stdin)
     except subprocess.TimeoutExpired:
-        return 'denied'
-    if result.returncode != 0 and result.stdout.strip() in ('', '000'):
-        return 'denied'
-    return result.stdout.strip()
+        return None
 
 
-def expect_http(namespace, pod, url, expected, label):
-    actual = http_status(namespace, pod, url)
-    assert actual == expected, '%s: request from %s/%s to %s gave %s, expected %s' % (label, namespace, pod, url, actual, expected)
+def http_status(namespace, pod, url):
+    """HTTP status code of a request from a pod, or 'denied' when no HTTP answer arrives."""
+    result = run(['kubectl', '-n', namespace, 'exec', pod, '--', 'curl', '-sk', '-m', '3', '-o', '/dev/null', '-w', '%{http_code}', url], 25)
+    if result is None:
+        return 'denied'
+    output = result.stdout.strip()
+    if result.returncode != 0 and output in ('', '000'):
+        return 'denied'
+    return output
+
+
+def expect_http(namespace, pod, url, expected, label, attempts=3):
+    """Retry a few times: the network plugin needs a moment for a new pod or policy."""
+    actual = None
+    for attempt in range(attempts):
+        actual = http_status(namespace, pod, url)
+        if actual == expected:
+            return
+        time.sleep(2)
+    raise AssertionError('%s: request from %s/%s to %s gave %s, expected %s' % (label, namespace, pod, url, actual, expected))
+
+
+def test_pod(namespace, labels=None):
+    """Start a new client pod in a namespace, as a new workload would start, and wait until it is ready."""
+    name = 'grader-' + uuid.uuid4().hex[:6]
+    args = ['kubectl', '-n', namespace, 'run', name, '--image=' + CLIENT_IMAGE, '--restart=Never']
+    if labels:
+        args.append('--labels=' + labels)
+    result = run(args + ['--command', '--', 'sleep', '600'])
+    assert result is not None and result.returncode == 0, 'Could not start a test pod in namespace %s' % namespace
+    TEST_PODS.append((namespace, name))
+    ready = run(['kubectl', '-n', namespace, 'wait', '--for=condition=Ready', 'pod/' + name, '--timeout=90s'], 100)
+    assert ready is not None and ready.returncode == 0, 'The test pod %s/%s did not become ready' % (namespace, name)
+    return name
+
+
+def remove_test_pods():
+    for namespace, name in TEST_PODS:
+        run(['kubectl', '-n', namespace, 'delete', 'pod', name, '--grace-period=0', '--force', '--wait=false'], 30)
+    del TEST_PODS[:]
 
 
 def node_ip(node):
-    return next(a['address'] for a in get('node', node, namespace=None)['status']['addresses'] if a['type'] == 'InternalIP')
+    return next(address['address'] for address in get('node', node, namespace=None)['status']['addresses'] if address['type'] == 'InternalIP')
 
 
-def selects_all_egress(namespace):
-    policies = json.loads(kubectl('-n', namespace, 'get', 'networkpolicy', '-o', 'json'))['items']
-    return any(not p['spec'].get('podSelector') and 'Egress' in p['spec'].get('policyTypes', []) for p in policies)
+def node_ready(node):
+    conditions = get('node', node, namespace=None)['status'].get('conditions', [])
+    return any(condition['type'] == 'Ready' and condition['status'] == 'True' for condition in conditions)
 
 
-OUTPOST = 'outpost-031-040-03-01'
+def running_read_only_port():
+    """The value the running kubelet uses, from its configz endpoint through the API server."""
+    result = run(['kubectl', 'get', '--raw', '/api/v1/nodes/%s/proxy/configz' % WORKER], 20)
+    assert result is not None and result.returncode == 0, 'Could not read the running configuration of the worker kubelet'
+    return json.loads(result.stdout)['kubeletconfig'].get('readOnlyPort', 0)
+
+
 worker_ip = node_ip(WORKER)
-control_plane_ip = node_ip(NODE)
-expect_http(OUTPOST, 'drifter', 'http://probe/', '200', 'drifter must reach the probe Service')
-expect_http(OUTPOST, 'drifter', 'http://probe.' + NAMESPACE + '.svc.cluster.local/', '200', 'DNS and cross-namespace Services must work')
-expect_http(NAMESPACE, 'shuttle', 'http://%s:10255/pods' % worker_ip, '200', NAMESPACE + ' must stay unchanged')
-expect_http('metadata-stub-031-040-03-01', 'control', 'http://%s:10255/pods' % worker_ip, '200', 'control pod must still reach the read-only port')
-if wants('kubelet-https-port'):
-    expect_http(OUTPOST, 'drifter', 'https://%s:10250/pods' % worker_ip, 'denied', 'drifter must not reach the worker kubelet port')
-    expect_http(OUTPOST, 'drifter', 'https://%s:10250/pods' % control_plane_ip, 'denied', 'drifter must not reach the control plane kubelet port')
-if wants('kubelet-read-only-port'):
-    expect_http(OUTPOST, 'drifter', 'http://%s:10255/pods' % worker_ip, 'denied', 'drifter must not reach the worker read-only port')
-if wants('whole-namespace'):
-    assert selects_all_egress(OUTPOST), 'Namespace %s needs an egress policy that selects all pods' % OUTPOST
+try:
+    assert node_ready(WORKER), 'The worker node must be Ready'
+    expect_http(NAMESPACE, 'inspector', 'https://%s:10250/pods' % worker_ip, '401', 'The kubelet must still serve its HTTPS port 10250 and refuse anonymous requests', attempts=5)
+    if wants('config-closed'):
+        result = node_exec(WORKER, 'cat', '/var/lib/kubelet/config.yaml')
+        values = [line.split(':', 1)[1].strip() for line in result.stdout.splitlines() if line.startswith('readOnlyPort:')]
+        assert all(value == '0' for value in values), 'readOnlyPort in /var/lib/kubelet/config.yaml on the worker must be 0 or absent, found %s' % values
+    if wants('port-closed'):
+        assert running_read_only_port() == 0, 'The running kubelet on the worker still uses a read-only port; restart it after changing the file'
+        expect_http(NAMESPACE, 'inspector', 'http://%s:10255/pods' % worker_ip, 'denied', 'Port 10255 on the worker must not answer')
+finally:
+    remove_test_pods()

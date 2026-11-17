@@ -1,16 +1,19 @@
 ---
-draft: true
 exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Disable API Server Profiling In A Private Node
+# Correct The Scheduler Bind Address And Record It
 
-Solve this question on: `terminal`
+Allow about 10 minutes for the tasks.
 
-The namespace `starfleet-031-020-01-01` runs the `probe` Deployment (two healthy replicas) behind an internal Service `probe`, and two client pods. The API server of this cluster runs as a static pod on the control plane node. A static pod is a pod that the kubelet starts from a manifest file in `/etc/kubernetes/manifests` on the node. The API server still runs with profiling at its default value, and no review record exists yet.
+A benchmark run on the `starfleet` control plane reports that the scheduler accepts connections on every address of the node. Correct the finding and record it for the review.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+## Starting state
+
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-01-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The kube-scheduler static pod runs with `--bind-address=0.0.0.0`, so its secure port `10259` listens on every address of the control plane node.
+
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-01-01)"
@@ -19,24 +22,15 @@ node_name="astro-ats-031-lab-020-01-01-control-plane"
 worker_name="astro-ats-031-lab-020-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
-Allow about 8 minutes for task work. Cluster startup adds time.
+## Required result
 
-## Tasks
+- The kube-scheduler on the control plane node runs with `--bind-address=127.0.0.1`, so its port `10259` answers only on `127.0.0.1`.
+- Keep any backup of the manifest outside `/etc/kubernetes/manifests`.
+- Create the ConfigMap `benchmark-review` in the `starfleet-031-020-01-01` namespace with `component: kube-scheduler`, `check: 1.4.2`, `setting: bind-address` and `result: corrected`.
+- The kube-scheduler pod is running again, the API server stays ready and both `probe` replicas stay available.
 
-1. Read the flags of the running API server pod in `kube-system` and find the profiling setting.
-2. Set the flag `--profiling=false` on the API server. Edit its static pod manifest on the control plane node and wait until the API server answers `ok` on `/readyz` again.
-3. Create the ConfigMap `benchmark-review` in the namespace `starfleet-031-020-01-01` with the keys `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`.
+## Verify The Result
 
-## Constraints
-
-- Keep the API server ready and both `probe` replicas available.
-- Keep the namespace, the workload names and unrelated components as they are.
-- This is one scoped configuration review, not a claim of full Center for Internet Security (CIS) benchmark compliance.
-
-## How the answer is checked
-
-The grader runs two checks. The first reads the command of the running API server pod in `kube-system` and needs `--profiling=false` in it. The second reads the ConfigMap `benchmark-review` in `starfleet-031-020-01-01` and needs the keys `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`. Both checks also need the API server pod running and ready, `/readyz` returning `ok`, the `probe` Deployment fully rolled out, and a response with `version=v1` when `shuttle` requests `http://probe/`.
-
-Hint: keep a copy of the manifest outside `/etc/kubernetes/manifests` before you edit it. The kubelet restarts the API server when the file changes, so wait a minute before you check.
+The grader reads the command line of the running `kube-scheduler` process, not only the manifest, and connects to port `10259` on the loopback address and on the node address. It also reads the ConfigMap.

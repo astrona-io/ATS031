@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Protect node metadata and endpoints
 ---

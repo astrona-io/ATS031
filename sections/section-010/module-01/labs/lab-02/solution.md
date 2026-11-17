@@ -1,63 +1,34 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
 # Allow DNS And One Application Dependency Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-01-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-01-02" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-## Inspect And Explain
+An egress policy controls the traffic that leaves a pod. Once a policy selects the `scanner` pod for `Egress`, the pod may only open connections that some egress rule allows. A pod that uses names also needs DNS, so the policy needs two rules: one to CoreDNS, the cluster DNS server, and one to the `archive` pods.
 
-The application and client fixtures are healthy. Complete the required change without replacing unrelated resources.
+The DNS rule uses one peer entry with both a `namespaceSelector` and a `podSelector`. Together they mean "pods with the label `k8s-app: kube-dns` in the namespace `kube-system`". DNS uses UDP port 53 for most queries and TCP port 53 for large answers, so the rule allows both. The archive rule uses TCP port 8080, the container port: the network plugin checks the pod address and pod port after the Service has translated the request, not the Service port 80.
 
-Inspect the relevant evidence:
-
-```sh
-kubectl -n starfleet-031-010-01-02 get pods
-kubectl -n starfleet-031-010-01-02 get deployment probe -o yaml
-```
-
-DNS lookup and application traffic are separate dependencies. Both need an allowance when the client is isolated for egress. Namespace and Pod selectors in the same peer item combine their requirements. Test a healthy denied listener as well as the intended Service so an overly broad policy cannot pass.
-
-
-Save this as `pod-blocked-server.yaml`:
+Save this as `networkpolicy-scanner-egress.yaml`:
 
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: blocked-server
-  namespace: starfleet-031-010-01-02
-  labels:
-    app: blocked-server
-spec:
-  restartPolicy: Never
-  containers:
-  - name: web
-    image: docker.io/library/python:3.13-alpine
-    command:
-    - python
-    - -m
-    - http.server
-    - '8080'
----
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: shuttle-egress
+  name: scanner-egress
   namespace: starfleet-031-010-01-02
 spec:
   podSelector:
     matchLabels:
-      app: shuttle
+      app: scanner
   policyTypes:
   - Egress
   egress:
@@ -76,33 +47,37 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app: probe
+          app: archive
     ports:
     - protocol: TCP
       port: 8080
 ```
 
-Apply the required change:
+Apply it:
 
 ```sh
-kubectl apply -f pod-blocked-server.yaml
+kubectl apply -f networkpolicy-scanner-egress.yaml
 ```
 
-## Verify The Result
-
-Observe the actual result. A denied-request command returns a nonzero status when the denial works. Run denial checks separately from a shell sequence that stops on the first nonzero status.
+Then check the result. The test client prints `open` with the reply, `blocked` when the connection times out, and `resolved` or `unresolved` for a DNS lookup:
 
 ```sh
-kubectl -n starfleet-031-010-01-02 wait --for=condition=Ready pod/blocked-server --timeout=180s
-kubectl -n starfleet-031-010-01-02 exec shuttle -- nslookup probe.starfleet-031-010-01-02.svc.cluster.local
-kubectl -n starfleet-031-010-01-02 exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py dns archive.starfleet-031-010-01-02.svc.cluster.local
+ARCHIVE_SERVICE_IP=$(kubectl -n starfleet-031-010-01-02 get service archive -o jsonpath='{.spec.clusterIP}')
+DECOY_IP=$(kubectl -n starfleet-031-010-01-02 get pod decoy -o jsonpath='{.status.podIP}')
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py tcp "$ARCHIVE_SERVICE_IP" 80
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py tcp "$DECOY_IP" 8080
 ```
 
-Create `shuttle-egress` selecting `app: shuttle`. Allow DNS on TCP and UDP port 53 only to kube-system Pods labelled `k8s-app: kube-dns`, and allow TCP 8080 only to same-namespace Pods labelled `app: probe`. Create a healthy `blocked-server` Pod with a different label. Shuttle must resolve and reach probe, while a direct request to the running blocked server must time out.
+The lookup must print `resolved` and the Service address. The request to the archive must print `open` and the request to the decoy must print `blocked`.
 
-After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-01-02`.
+The lookup succeeds because the DNS rule matches the CoreDNS pods. The request to the Service on port 80 succeeds because kube-proxy translates it to an `archive` pod on port 8080, which the second rule allows. The request to the `decoy` pod times out, because no rule allows it, while the `idler` pod can still reach the `decoy`.
+
+When you are done, remove the lab with `astrona destroy ats-031-lab-010-01-02`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> DNS and application connections require separate rules. Combine the DNS namespace and Pod selectors within one peer item. Verify that the unrelated listener is healthy before testing its denial.
+> If you write port 80 in the archive rule, the Service request fails: policies see the pod port after the Service translation, not the Service port.
+>
+> Two separate peer entries, one with the `namespaceSelector` and one with the `podSelector`, are joined with OR. That allows every pod in `kube-system`, not only CoreDNS.

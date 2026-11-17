@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Properly set up Ingress with TLS
 ---

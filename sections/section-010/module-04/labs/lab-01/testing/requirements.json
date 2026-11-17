@@ -4,40 +4,15 @@
   "namespace": "starfleet-031-010-04-01",
   "resources": [
     {
-      "kind": "deployment",
-      "name": "probe",
-      "namespace": "starfleet-031-010-04-01",
-      "expected": {
-        "apiVersion": "apps/v1",
-        "kind": "Deployment",
-        "metadata": {
-          "name": "probe",
-          "namespace": "starfleet-031-010-04-01"
-        },
-        "spec": {
-          "replicas": 2,
-          "selector": {
-            "matchLabels": {
-              "app": "probe",
-              "release": "probe"
-            }
-          }
-        }
-      },
-      "state": "deployment"
-    },
-    {
       "kind": "pod",
-      "name": "scout",
+      "name": "pathfinder",
       "namespace": "starfleet-031-010-04-01",
       "expected": {
-        "apiVersion": "v1",
-        "kind": "Pod",
         "metadata": {
-          "name": "scout",
+          "name": "pathfinder",
           "namespace": "starfleet-031-010-04-01",
           "labels": {
-            "app": "scout"
+            "app": "pathfinder"
           }
         }
       },
@@ -45,16 +20,14 @@
     },
     {
       "kind": "pod",
-      "name": "beacon",
+      "name": "datastore",
       "namespace": "starfleet-031-010-04-01",
       "expected": {
-        "apiVersion": "v1",
-        "kind": "Pod",
         "metadata": {
-          "name": "beacon",
+          "name": "datastore",
           "namespace": "starfleet-031-010-04-01",
           "labels": {
-            "app": "beacon"
+            "app": "datastore"
           }
         }
       },
@@ -62,58 +35,19 @@
     },
     {
       "kind": "pod",
-      "name": "drifter",
-      "namespace": "outpost-031-010-04-01",
+      "name": "stranger",
+      "namespace": "starfleet-031-010-04-01",
       "expected": {
-        "apiVersion": "v1",
-        "kind": "Pod",
         "metadata": {
-          "name": "drifter",
-          "namespace": "outpost-031-010-04-01",
+          "name": "stranger",
+          "namespace": "starfleet-031-010-04-01",
           "labels": {
-            "app": "drifter"
+            "app": "stranger"
           }
         }
       },
       "state": "pod"
-    },
-    {
-      "kind": "networkpolicy",
-      "name": "default-deny-all",
-      "namespace": "starfleet-031-010-04-01",
-      "expected": {
-        "apiVersion": "networking.k8s.io/v1",
-        "kind": "NetworkPolicy",
-        "metadata": {
-          "name": "default-deny-all",
-          "namespace": "starfleet-031-010-04-01"
-        },
-        "spec": {
-          "podSelector": {},
-          "policyTypes": [
-            "Ingress",
-            "Egress"
-          ]
-        }
-      }
     }
   ],
-  "behavior": [
-    {
-      "args": [
-        "kubectl",
-        "-n",
-        "starfleet-031-010-04-01",
-        "exec",
-        "scout",
-        "--",
-        "python",
-        "/app/check.py"
-      ],
-      "contains": [
-        "dns=ok probe=ok api=ok"
-      ],
-      "outcome": "scout-dependencies"
-    }
-  ]
+  "behavior": []
 }

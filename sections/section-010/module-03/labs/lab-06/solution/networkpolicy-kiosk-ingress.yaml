@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kiosk-ingress
+  namespace: starfleet-031-010-03-06
+spec:
+  podSelector:
+    matchLabels:
+      app: kiosk
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: visitor
+    ports:
+    - protocol: TCP
+      port: 8080
+  - from:
+    - podSelector:
+        matchLabels:
+          app: collector
+    ports:
+    - protocol: TCP
+      port: 9100
+      endPort: 9102

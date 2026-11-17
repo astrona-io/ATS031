@@ -1,43 +1,40 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
 # Repair A Two-Entry Peer Rule Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-03-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-02" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-## Inspect and explain
+The policy lists the `namespaceSelector` and the `podSelector` as two peer entries, so they are joined with OR. It admits every pod in `starfleet-031-010-03-02` and every pod with `app: sampler` in `dock-031-010-03-02`, the policy's own namespace. That is why the `idler` pod and the local `sampler` get in.
 
-Read the existing policy and test the paths. The request tests show which pods get through.
+Look at the current rule:
 
 ```sh
-kubectl -n outpost-031-010-03-02 get networkpolicy probe-from-starfleet -o yaml
-kubectl -n starfleet-031-010-03-02 exec drifter -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
-kubectl -n outpost-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
+kubectl -n dock-031-010-03-02 get networkpolicy assay-from-starfleet -o yaml
 ```
 
-The `from` list has two entries: one `namespaceSelector` and one `podSelector`, each started by its own dash. The first entry allows every pod in `starfleet-031-010-03-02`. The second allows every `shuttle` pod in `outpost-031-010-03-02`. Both requests above are therefore allowed, and the task wants neither. The repair puts both selectors into one entry. Applying the corrected file with the same name replaces the rule list.
+The `from` list has two items, each starting with `- `. Merge them into one item.
 
-Save this as `networkpolicy-probe-from-starfleet.yaml`:
+Save this as `networkpolicy-assay-from-starfleet.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: probe-from-starfleet
-  namespace: outpost-031-010-03-02
+  name: assay-from-starfleet
+  namespace: dock-031-010-03-02
 spec:
   podSelector:
     matchLabels:
-      app: probe
+      app: assay
   policyTypes:
   - Ingress
   ingress:
@@ -47,7 +44,7 @@ spec:
           kubernetes.io/metadata.name: starfleet-031-010-03-02
       podSelector:
         matchLabels:
-          app: shuttle
+          app: sampler
     ports:
     - protocol: TCP
       port: 8080
@@ -56,26 +53,27 @@ spec:
 Apply it:
 
 ```sh
-kubectl apply -f networkpolicy-probe-from-starfleet.yaml
+kubectl apply -f networkpolicy-assay-from-starfleet.yaml
 ```
 
-## Verify the result
-
-The first request must return the `probe` response. The other three must time out. Run the checks one by one.
+Then check the result. The test client prints `open` with the reply, or `blocked` when the connection times out:
 
 ```sh
-kubectl -n starfleet-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
-kubectl -n starfleet-031-010-03-02 exec drifter -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
-kubectl -n outpost-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
-kubectl -n dock-031-010-03-02 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-03-02/
+ASSAY_IP=$(kubectl -n dock-031-010-03-02 get pod assay -o jsonpath='{.status.podIP}')
+kubectl -n starfleet-031-010-03-02 exec sampler -- python /app/client.py tcp "$ASSAY_IP" 8080
+kubectl -n starfleet-031-010-03-02 exec idler -- python /app/client.py tcp "$ASSAY_IP" 8080
+kubectl -n dock-031-010-03-02 exec sampler -- python /app/client.py tcp "$ASSAY_IP" 8080
 ```
 
-After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-03-02`.
+The first command must print `open`. The other two must print `blocked`.
+
+Only the `sampler` pod in `starfleet-031-010-03-02` gets a reply now, because one peer entry requires both the namespace and the pod label. The `idler` pod fails the pod label, and the other `sampler` pods fail the namespace.
+
+When you are done, remove the lab with `astrona destroy ats-031-lab-010-03-02`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Adding a deny policy.** Policies only add; nothing can subtract a path that another policy allows.
-> - **Leaving the extra dash.** One dash too many keeps two entries.
-> - **Fixing the selector but not testing the denied pods.** Test `drifter` and the same-namespace `shuttle`.
-> - **Creating a second policy.** The old policy would keep allowing the wide paths.
+> `kubectl apply` replaces the `from` list with the one in your file. Check the result with `-o yaml` and count the peer entries.
+>
+> A two-entry rule is a common review finding: it looks narrow but admits every pod of the selected namespace.

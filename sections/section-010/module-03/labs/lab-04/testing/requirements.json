@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-03-04",
+  "cluster": "astro-ats-031-lab-010-03-04",
+  "namespace": "starfleet-031-010-03-04",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "ledger",
+      "namespace": "starfleet-031-010-03-04",
+      "expected": {
+        "metadata": {
+          "name": "ledger",
+          "namespace": "starfleet-031-010-03-04",
+          "labels": {
+            "app": "ledger"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "courier",
+      "namespace": "outpost-031-010-03-04",
+      "expected": {
+        "metadata": {
+          "name": "courier",
+          "namespace": "outpost-031-010-03-04",
+          "labels": {
+            "app": "courier"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "rogue",
+      "namespace": "outpost-031-010-03-04",
+      "expected": {
+        "metadata": {
+          "name": "rogue",
+          "namespace": "outpost-031-010-03-04",
+          "labels": {
+            "app": "rogue"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

@@ -1,31 +1,88 @@
+# Checks that read the running processes and files of this lab's node
+# containers. check.py runs this file with NODE, WORKER, node_exec(),
+# kubectl(), get() and wants() already defined.
+import re
 import time
-# Guard: the API server static pod of this cluster is running and ready.
-resource_check({'kind': 'pod', 'name': 'kube-apiserver-' + NODE, 'namespace': 'kube-system', 'expected': {}, 'state': 'pod'})
-_node = NODE
-_label = subprocess.run([ENGINE, 'inspect', _node, '--format', '{{index .Config.Labels "io.x-k8s.kind.cluster"}}'], capture_output=True, text=True, timeout=20).stdout.strip()
-assert _label == CLUSTER, 'Refusing an unrelated node container'
-_pod = get('pod', 'kube-apiserver-' + _node, namespace='kube-system')
-_args = _pod['spec']['containers'][0]['command']
-def _flag(name):
-    return [item.split('=', 1)[1] for item in _args if item.startswith('--' + name + '=')]
+
+
+def process_arguments(container, program):
+    """Return the command line of the newest running process with this name."""
+    found = node_exec(container, 'pgrep', '-n', '-f', '^(/[^ ]*/)?' + program + '( |$)', success=False).stdout.strip()
+    assert found, program + ' is not running on ' + container
+    raw = node_exec(container, 'cat', '/proc/' + found + '/cmdline', success=False).stdout
+    arguments = [item for item in raw.split('\0') if item]
+    assert arguments, program + ' stopped while it was read; try again'
+    return arguments
+
+
+def flag_value(arguments, name):
+    """The value a single-value flag takes: the last occurrence wins."""
+    value = None
+    for item in arguments:
+        if item.startswith('--' + name + '='):
+            value = item.split('=', 1)[1]
+        elif item == '--' + name:
+            value = 'true'
+    return value
+
+
+def flag_list(arguments, name):
+    """The items of a list flag: every occurrence adds its items."""
+    items = []
+    for item in arguments:
+        if item.startswith('--' + name + '='):
+            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+    return items
+
+
+def file_mode(container, path):
+    result = node_exec(container, 'stat', '-c', '%a %U:%G', path, success=False)
+    assert result.returncode == 0, path + ' is missing on ' + container
+    mode, owner = result.stdout.split()
+    return int(mode, 8), owner
+
+
+def assert_mode_at_most(container, path, limit, owner='root:root'):
+    mode, actual_owner = file_mode(container, path)
+    assert mode & ~limit == 0, '%s has mode %o; it must be %o or stricter' % (path, mode, limit)
+    if owner:
+        assert actual_owner == owner, path + ' must be owned by ' + owner
+
+
+def configz(node):
+    return json.loads(kubectl('get', '--raw', '/api/v1/nodes/' + node + '/proxy/configz'))['kubeletconfig']
+
+
+def assert_api_ready():
+    assert kubectl('--request-timeout=5s', 'get', '--raw=/readyz') == 'ok', 'The API server must stay ready'
+
+
+def assert_node_ready(node):
+    status = get('node', node, namespace=None)['status']
+    assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
+
+
+arguments = process_arguments(NODE, 'kube-apiserver')
 if wants('audit-policy'):
-    assert _flag('audit-policy-file'), 'API server flag is missing: --audit-policy-file'
+    policy = flag_value(arguments, 'audit-policy-file')
+    assert policy == '/etc/kubernetes/policy/audit-policy.yaml', 'Set --audit-policy-file=/etc/kubernetes/policy/audit-policy.yaml'
+    staged = node_exec(NODE, 'cat', '/opt/training/audit-policy.yaml').stdout
+    used = node_exec(NODE, 'cat', policy, success=False).stdout
+    assert used.strip() == staged.strip(), 'The policy file differs from the staged policy'
 if wants('audit-log-retention'):
-    for _name in ('audit-log-maxage', 'audit-log-maxbackup', 'audit-log-maxsize'):
-        assert _flag(_name), 'API server flag is missing: --' + _name
+    for name in ('audit-log-maxage', 'audit-log-maxbackup', 'audit-log-maxsize'):
+        value = flag_value(arguments, name)
+        assert value and value.isdigit() and int(value) > 0, 'Set --' + name + ' to a number above zero'
 if wants('audit-events-written'):
-    for _name in ('audit-policy-file', 'audit-log-path'):
-        assert _flag(_name), 'API server flag is missing: --' + _name
-    _log_path = _flag('audit-log-path')[0]
-    _marker = 'audit-check-' + str(int(time.time()))
-    command(['kubectl', '-n', 'starfleet-031-020-03-01', 'create', 'configmap', _marker])
-    command(['kubectl', '-n', 'starfleet-031-020-03-01', 'get', 'configmap', _marker])
-    command(['kubectl', '-n', 'starfleet-031-020-03-01', 'delete', 'configmap', _marker])
-    _seen = False
-    for _attempt in range(10):
-        _found = subprocess.run([ENGINE, 'exec', _node, 'grep', '-c', _marker, _log_path], capture_output=True, text=True, timeout=20)
-        if _found.returncode == 0:
-            _seen = True
+    path = flag_value(arguments, 'audit-log-path')
+    assert path == '/var/log/kubernetes/audit/audit.log', 'Set --audit-log-path=/var/log/kubernetes/audit/audit.log'
+    marker = 'audit-check-' + str(int(time.time()))
+    kubectl('-n', NAMESPACE, 'create', 'configmap', marker)
+    kubectl('-n', NAMESPACE, 'delete', 'configmap', marker)
+    seen = False
+    for attempt in range(10):
+        if node_exec(NODE, 'grep', '-c', marker, path, success=False).returncode == 0:
+            seen = True
             break
         time.sleep(2)
-    assert _seen, 'No audit event for the test request was found in the audit log'
+    assert seen, 'No audit event for the test request was found in ' + path

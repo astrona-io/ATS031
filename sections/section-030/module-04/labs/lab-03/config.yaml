@@ -14,36 +14,35 @@ runtime:
     - docker.io/library/python:3.13-alpine
     - docker.io/library/busybox:1.37.0
     - docker.io/library/traefik:v3.6.1
-    nodes:
-      workers: 1
 bootstrap:
   init:
-  - name: prepare-environment
+  - name: seed-lab
     type: file
     source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
 testing:
   init:
   - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
     type: file
     source: testing/verify-start.sh
-  - name: reference-solution
+  - name: reference-result
     type: file
     source: solution/apply.sh
-  - name: negative-cases
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: testing/regression.sh
+    source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: replacement-secret
-    description: The active TLS Secret contains the supplied replacement certificate and matching key
+  - name: mtls-option
+    description: Ingress vault uses the TLS option mtls@file, which requires a client certificate from the crew CA
     type: file
-    source: validation/validate-replacement-secret.sh
+    source: validation/validate-mtls-option.sh
     points: 1
-  - name: served-certificate
-    description: A fresh verified TLS connection receives the replacement certificate and the original
-      application response
+  - name: mtls-enforced
+    description: vault.example.test accepts only clients with a crew certificate, and beacon.example.test stays open
     type: file
-    source: validation/validate-served-certificate.sh
+    source: validation/validate-mtls-enforced.sh
     points: 1
-teardown:
-  keepCluster: false

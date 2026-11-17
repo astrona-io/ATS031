@@ -27,20 +27,28 @@ def validate(course, coverage):
         prep = mapping.get('preparation', [])
         if not prep or len(prep) != len(set(prep)):
             raise ValueError(f'{path}: preparation must contain unique reading paths')
-        scope = path.split('/labs/')[0] if '/module-' in path else path.split('/capstone/')[0]
+        scope = path.split('/labs/')[0]
         for reading in prep:
             if reading not in readings or not technical(reading):
                 raise ValueError(f'{path}: unknown technical reading {reading}')
             if positions[reading] >= positions[path]:
                 raise ValueError(f'{path}: preparation must precede the lab: {reading}')
             if not reading.startswith(scope + '/'):
-                raise ValueError(f'{path}: preparation must belong to the same module or capstone section')
-        if '/module-' in path:
-            used.update(prep)
+                raise ValueError(f'{path}: preparation must belong to the same module')
+        used.update(prep)
+    previous_lab = -1
+    for entry in entries:
+        if entry.get('type') != 'lab':
+            continue
+        path = entry['path']
+        prep = coverage['labs'][path]['preparation']
+        if not any(previous_lab < positions[p] < positions[path] for p in prep):
+            raise ValueError(f'{path}: each lab needs its own preparation reading after the previous lab')
+        previous_lab = positions[path]
     additional = coverage.get('additional_readings', [])
     expected = {path for path in readings if technical(path)} - used
     if len(additional) != len(set(additional)) or set(additional) != expected:
-        raise ValueError('additional_readings must list exactly the technical readings without a module-lab link')
+        raise ValueError('additional_readings must list exactly the technical readings without a practice link')
     return readings, labs
 
 
@@ -52,8 +60,7 @@ def render(root=ROOT):
              'Generated from `TEACHING-COVERAGE.yaml`, course registration and grader descriptions. '
              'Run `python3 scripts/ci/lab-coverage.py --write` after changing them.', '',
              'Preparation links identify teaching needed for the task. They do not claim that '
-             'every skill in a linked lesson is graded. See [coverage review](COVERAGE-REVIEW.md) '
-             'for practical gaps and fixture limits. A map is not a runtime test result.', '',
+             'every skill in a linked lesson is graded. A map is not a runtime test result.', '',
              '## Labs and their preparation', '',
              '| Preparation | Independent task and starting state | Graded result | Runtime and lifecycle |',
              '| --- | --- | --- | --- |']
@@ -61,7 +68,7 @@ def render(root=ROOT):
     for path, entry in labs.items():
         config = yaml.safe_load((root / path / 'config.yaml').read_text())
         validation = config.get('validation', {})
-        graders = validation.get('scripts') or [validation['script']]
+        graders = ([validation['script']] if validation.get('script') else []) + validation.get('scripts', [])
         descriptions = '; '.join(link(g.get('description') or g['name'], path + '/' + g['source']) for g in graders)
         preparation = coverage['labs'][path]['preparation']
         prep = '<br>'.join(link(readings[p]['title'], p) for p in preparation)
@@ -69,15 +76,14 @@ def render(root=ROOT):
         runtime = config['runtime']['type']
         lifecycle = link(runtime + ' reference lifecycle', path + '/config.yaml')
         lines.append(f'| {prep} | {task} | {descriptions} | {lifecycle} |')
-        if '/module-' in path:
-            for reading in preparation:
-                reverse[reading].append(task)
-    lines += ['', '## Readings and their module labs', '',
-              'Section capstones integrate several modules and are listed above. '
-              'They do not make every preceding reading a separately graded skill.', '',
-              '| Technical reading | Related module task |', '| --- | --- |']
+        for reading in preparation:
+            reverse[reading].append(task)
+    lines += ['', '## Readings and their practice', '',
+              'Each reading links to the module labs that use it. '
+              'A link does not make every skill in the reading a separately graded skill.', '',
+              '| Technical reading | Related task |', '| --- | --- |']
     for path, tasks in reverse.items():
-        result = '<br>'.join(tasks) if tasks else 'Supporting concepts or ungraded practice; no module-lab link'
+        result = '<br>'.join(tasks) if tasks else 'Supporting concepts or ungraded practice; no practice link'
         lines.append(f"| {link(readings[path]['title'], path)} | {result} |")
     lines += ['', 'Module labs check the unfinished state, apply the reference solution and '
               'run live graders. Each configuration records its waits and any deliberate '

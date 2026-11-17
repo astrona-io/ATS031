@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Properly set up Ingress with TLS
 ---
@@ -23,7 +22,7 @@ After this module you can:
 
 ## Before you start
 
-You need Kubernetes basics: Deployments, Services, Secrets and `kubectl`. You also need `curl` and `openssl` on your own machine. The module has four parts. The first covers routing. The second covers certificates and the TLS Secret. The third configures the TLS Ingress. The fourth covers several hosts, the certificate choice by server name, and troubleshooting.
+You need Kubernetes basics: Deployments, Services, Secrets and `kubectl`. You also need `curl` and `openssl` on your own machine. The module has four parts. The first covers routing. The second covers certificates and the TLS Secret. The third configures the TLS Ingress. The fourth covers several hosts, the certificate choice by server name, and troubleshooting. A graded lab follows every part.
 
 Your playground is a `kind` cluster running Kubernetes v1.35. It has these objects:
 

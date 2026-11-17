@@ -1,29 +1,21 @@
 ---
-draft: true
 exam_objectives:
 - Use Network security policies to restrict cluster level access
 ---
 # Apply A Default-Deny Baseline And Allow One Path Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-02-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-## Inspect and explain
+A default-deny baseline is a policy that selects every pod in a namespace (`podSelector: {}`) and isolates both directions with no rules. After it, nothing is allowed, and every path you need must be added on purpose. For one path between two pods in the same namespace you need two rules: an ingress rule on the server and an egress rule on the client.
 
-Read the starting state. The pods have the labels the policies select on, and no policy exists yet.
-
-```sh
-kubectl -n outpost-031-010-02-01 get pods --show-labels
-kubectl get networkpolicy --all-namespaces
-```
-
-The baseline comes first. It selects all pods in `outpost-031-010-02-01` and isolates them for both directions. The allow rules then open exactly one path. A connection between two isolated pods needs an egress rule at the source and an ingress rule at the destination, and the `shuttle` pod also needs DNS to resolve the name `probe`.
+Start with the baseline. It has no rules, so it allows nothing.
 
 Save this as `networkpolicy-default-deny-all.yaml`:
 
@@ -46,25 +38,27 @@ Apply it:
 kubectl apply -f networkpolicy-default-deny-all.yaml
 ```
 
-Save this as `networkpolicy-probe-ingress-from-shuttle.yaml`:
+Now let the `forge` pod accept requests from the `smith` pod.
+
+Save this as `networkpolicy-forge-from-smith.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: probe-ingress-from-shuttle
+  name: forge-from-smith
   namespace: outpost-031-010-02-01
 spec:
   podSelector:
     matchLabels:
-      app: probe
+      app: forge
   policyTypes:
   - Ingress
   ingress:
   - from:
     - podSelector:
         matchLabels:
-          app: shuttle
+          app: smith
     ports:
     - protocol: TCP
       port: 8080
@@ -73,68 +67,59 @@ spec:
 Apply it:
 
 ```sh
-kubectl apply -f networkpolicy-probe-ingress-from-shuttle.yaml
+kubectl apply -f networkpolicy-forge-from-smith.yaml
 ```
 
-Save this as `networkpolicy-shuttle-egress-to-probe.yaml`:
+The `smith` pod is isolated for egress too, so it also needs a rule that lets it send to `forge`.
+
+Save this as `networkpolicy-smith-to-forge.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: shuttle-egress-to-probe
+  name: smith-to-forge
   namespace: outpost-031-010-02-01
 spec:
   podSelector:
     matchLabels:
-      app: shuttle
+      app: smith
   policyTypes:
   - Egress
   egress:
   - to:
     - podSelector:
         matchLabels:
-          app: probe
+          app: forge
     ports:
     - protocol: TCP
       port: 8080
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: kube-system
-      podSelector:
-        matchLabels:
-          k8s-app: kube-dns
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
 ```
 
 Apply it:
 
 ```sh
-kubectl apply -f networkpolicy-shuttle-egress-to-probe.yaml
+kubectl apply -f networkpolicy-smith-to-forge.yaml
 ```
 
-## Verify the result
-
-The first request must return the `probe` response. The next three must time out or, for the last one, return the response because `starfleet-031-010-02-01` has no policy. A denied request returns a nonzero status, so run the checks one by one.
+Then check the result. The test client prints `open` with the reply, `blocked` when the connection times out, and `resolved` or `unresolved` for a DNS lookup:
 
 ```sh
-kubectl -n outpost-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe/
-kubectl -n starfleet-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe.outpost-031-010-02-01/
-kubectl -n outpost-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe.starfleet-031-010-02-01/
-kubectl -n starfleet-031-010-02-01 exec shuttle -- wget -q -T 3 -O- http://probe/
+FORGE_IP=$(kubectl -n outpost-031-010-02-01 get pod forge -o jsonpath='{.status.podIP}')
+kubectl -n outpost-031-010-02-01 exec smith -- python /app/client.py tcp "$FORGE_IP" 8080
+kubectl -n dock-031-010-02-01 exec visitor -- python /app/client.py tcp "$FORGE_IP" 8080
+kubectl -n outpost-031-010-02-01 exec idler -- python /app/client.py dns kubernetes.default.svc.cluster.local
 ```
 
-After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-02-01`.
+The first command must print `open`, the second `blocked` and the third `unresolved`.
+
+The `smith` pod reaches `forge`, because both the egress rule on `smith` and the ingress rule on `forge` match. The `visitor` pod in `dock-031-010-02-01` times out, because the ingress rule names only `smith`. The `idler` pod cannot resolve names, because the baseline also blocks its DNS traffic and no policy gives it egress.
+
+When you are done, remove the lab with `astrona destroy ats-031-lab-010-02-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Writing only one half of the path.** The connection needs egress at `shuttle` and ingress at `probe`.
-> - **Forgetting TCP port 53.** DNS needs both UDP and TCP.
-> - **Testing only the allowed path.** Run the denied requests too.
-> - **Applying the files to the wrong namespace.** The namespace is set inside each file.
+> With only the ingress rule on `forge`, the request still times out: the `smith` pod is isolated for egress by the baseline.
+>
+> A baseline in one namespace does not protect any other namespace. Each namespace needs its own copy.

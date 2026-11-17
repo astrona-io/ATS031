@@ -1,108 +1,58 @@
 ---
-draft: true
 exam_objectives:
 - Protect node metadata and endpoints
 ---
-# Block A Simulated Metadata Endpoint Solution
+# Bring A Host-Network Workload Back Under NetworkPolicy Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+## Confirm the gap
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-040-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-040-01-01" || exit 1
-node_name="astro-ats-031-lab-040-01-01-control-plane"
-worker_name="astro-ats-031-lab-040-01-01-worker"
-```
-
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
-
-## Inspect And Explain
-
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
-
-Inspect the current objects before changing them:
+Store the pod IP address of `metadata-simulator` and send a request to it from the `relay` pod. The function `check` prints the HTTP status code of a request from a pod:
 
 ```sh
-kubectl -n starfleet-031-040-01-01 get pods -o wide
-kubectl get nodes -o wide
+SIM_IP=$(kubectl -n starfleet-031-040-01-01 get pod metadata-simulator -o jsonpath='{.status.podIP}')
+check() { kubectl -n "$1" exec "$2" -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "$3"; }
+check starfleet-031-040-01-01 deploy/relay "http://$SIM_IP:8080/"
 ```
 
-Create metadata-simulator as a healthy Python HTTP server with label app metadata-simulator on port 8080. Configure shuttle-isolation to allow only DNS and probe application traffic. A direct metadata-simulator request from shuttle must time out while an unrestricted drifter request proves that listener works. This models the network boundary; it does not claim to secure a cloud provider metadata service or host-network bypass.
+The request prints `200`, although `starfleet-egress` selects every pod with `podSelector: {}` and does not allow port 8080 of `metadata-simulator`. `kubectl exec` accepts `deploy/relay` and picks one pod of the Deployment.
 
-Save this as `pod-metadata-simulator.yaml`:
+## Find the cause
 
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: metadata-simulator
-  namespace: starfleet-031-040-01-01
-  labels:
-    app: metadata-simulator
-spec:
-  restartPolicy: Never
-  containers:
-  - name: web
-    image: docker.io/library/python:3.13-alpine
-    command:
-    - python
-    - -m
-    - http.server
-    - '8080'
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: shuttle-isolation
-  namespace: starfleet-031-040-01-01
-spec:
-  podSelector:
-    matchLabels:
-      app: shuttle
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: kube-system
-      podSelector:
-        matchLabels:
-          k8s-app: kube-dns
-    ports:
-    - port: 53
-      protocol: UDP
-    - port: 53
-      protocol: TCP
-  - to:
-    - podSelector:
-        matchLabels:
-          app: probe
-    ports:
-    - port: 8080
-      protocol: TCP
-```
-
-Apply the scoped correction:
+Compare the IP address of the `relay` pod with the IP address of its node:
 
 ```sh
-kubectl apply -f pod-metadata-simulator.yaml
+kubectl -n starfleet-031-040-01-01 get pods -l app=relay -o custom-columns=NAME:.metadata.name,POD_IP:.status.podIP,HOST_IP:.status.hostIP,HOST_NETWORK:.spec.hostNetwork
 ```
 
-## Verify The Result
+The two addresses are the same and `HOST_NETWORK` is `true`. The pod shares the network namespace of the node, so it has no pod interface. Calico, the network plugin, enforces NetworkPolicy on the pod interface, so the policy has nothing to filter and the traffic leaves as node traffic.
 
-Observe the actual result. A denied request returns a nonzero status when the denial works, so run it separately from a shell sequence that stops on error. Status convergence and a successful request establish different parts of the result.
+## Move the workload to the pod network
+
+Remove the field from the pod template. A JSON patch with the `remove` operation deletes exactly that field:
 
 ```sh
-kubectl -n starfleet-031-040-01-01 wait --for=condition=Ready pod/metadata-simulator --timeout=180s
-kubectl -n starfleet-031-040-01-01 exec shuttle -- wget -q -T 3 -O- http://probe/
+kubectl -n starfleet-031-040-01-01 patch deployment relay --type json -p '[{"op": "remove", "path": "/spec/template/spec/hostNetwork"}]'
+kubectl -n starfleet-031-040-01-01 rollout status deployment/relay --timeout=180s
 ```
 
-Separate permitted application dependencies from a metadata-style endpoint in the private network. The commands above deliberately target one environment. Keep its remaining components available so an unrelated failure cannot stand in for the required denial or correction. No example command output is presented as evidence of a completed run. A matching field alone does not establish that a process used it or that a controller reconciled it.
+The Deployment controller replaces the pod. The template keeps `dnsPolicy: ClusterFirstWithHostNet`, which works like the default `ClusterFirst` for a pod on the pod network, so the pod still uses the cluster DNS. You can also run `kubectl edit deployment relay` and delete the line `hostNetwork: true`.
+
+## Verify
+
+Repeat the column view and the requests:
+
+```sh
+kubectl -n starfleet-031-040-01-01 get pods -l app=relay -o custom-columns=NAME:.metadata.name,POD_IP:.status.podIP,HOST_IP:.status.hostIP,HOST_NETWORK:.spec.hostNetwork
+check starfleet-031-040-01-01 deploy/relay "http://$SIM_IP:8080/"
+check starfleet-031-040-01-01 deploy/relay http://probe/
+check outpost-031-040-01-01 drifter "http://$SIM_IP:8080/"
+```
+
+The new pod has its own pod IP address and `HOST_NETWORK` shows `<none>`. The request to `metadata-simulator` prints `000`, and `kubectl` reports exit code 28, the `curl` time-out. The request to `probe` prints `200`. The request from `drifter` prints `200`, which shows that the server still answers and that the `000` comes from the policy. Then submit.
 
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-040-01-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Confirm the private context and exact node names before a change. Check the stated scope and live result. Do not change unrelated components to hide the original fault.
+> Setting `hostNetwork: false` on the running pod is not possible, because most pod fields cannot change. Change the Deployment template and let the controller replace the pod. Adding a second NetworkPolicy does not help either: no pod policy selects a host-network pod.
