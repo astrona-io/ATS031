@@ -12,7 +12,6 @@ runtime:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
     - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     addons:
       cni: calico
 bootstrap:
@@ -37,13 +36,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: scout-dependencies
-    description: scout reaches DNS, probe and the API server through explicit rules
+  - name: pathfinder-dependencies
+    description: The pathfinder pod resolves names, reaches the datastore on TCP 6379 and the API server, and still times out to the stranger pod
     type: file
-    source: validation/validate-scout-dependencies.sh
-    points: 2
-  - name: probe-ingress
-    description: probe admits TCP 8080 from scout only
+    source: validation/validate-pathfinder-dependencies.sh
+    points: 1
+  - name: datastore-ingress
+    description: The datastore-ingress policy isolates the datastore for ingress and admits only the pathfinder pod on TCP 6379; the stranger pod times out
     type: file
-    source: validation/validate-probe-ingress.sh
+    source: validation/validate-datastore-ingress.sh
     points: 1

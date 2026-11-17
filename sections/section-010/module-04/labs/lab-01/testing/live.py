@@ -1,56 +1,141 @@
+# Shared helpers for this lab's live checks. check.py runs this file in its own
+# globals, so wants(), kubectl(), get() and command() are available here.
+import ipaddress
 import json
+
 
 def policies(namespace):
     return json.loads(kubectl('-n', namespace, 'get', 'networkpolicy', '-o', 'json'))['items']
 
-def selects(policy, labels):
-    wanted = policy['spec'].get('podSelector', {}).get('matchLabels', {})
-    return all(labels.get(key) == value for key, value in wanted.items())
+
+def selector_matches(selector, labels):
+    """Apply a Kubernetes label selector (matchLabels and matchExpressions)."""
+    selector = selector or {}
+    for key, value in (selector.get('matchLabels') or {}).items():
+        if labels.get(key) != value:
+            return False
+    for expression in selector.get('matchExpressions') or []:
+        key, operator, values = expression['key'], expression['operator'], expression.get('values') or []
+        if operator == 'In' and labels.get(key) not in values:
+            return False
+        if operator == 'NotIn' and key in labels and labels[key] in values:
+            return False
+        if operator == 'Exists' and key not in labels:
+            return False
+        if operator == 'DoesNotExist' and key in labels:
+            return False
+    return True
+
+
+def pod_labels(namespace, name):
+    return get('pod', name, namespace)['metadata'].get('labels', {})
+
+
+def selecting(namespace, labels, direction):
+    """The policies in a namespace that select these pod labels for one direction."""
+    return [policy for policy in policies(namespace)
+            if selector_matches(policy['spec'].get('podSelector'), labels) and direction in policy['spec'].get('policyTypes', [])]
+
 
 def rules_for(namespace, labels, direction):
     found = []
-    for policy in policies(namespace):
-        if selects(policy, labels) and direction in policy['spec'].get('policyTypes', []):
-            found += policy['spec'].get(direction.lower(), []) or []
+    for policy in selecting(namespace, labels, direction):
+        found += policy['spec'].get(direction.lower()) or []
     return found
 
+
 def port_set(rule):
-    return {(item.get('protocol', 'TCP'), str(item.get('port')), item.get('endPort')) for item in rule.get('ports', [])}
+    """The ports of a rule as an order-independent set of (protocol, port, endPort)."""
+    return {(item.get('protocol', 'TCP'), str(item.get('port')), item.get('endPort')) for item in rule.get('ports') or []}
 
-def peers_of(rule, field):
-    return rule.get(field, []) or []
 
-def has_dns_rule(rules):
-    wanted = {('UDP', '53', None), ('TCP', '53', None)}
+def peers_of(rule):
+    return (rule.get('to') or []) + (rule.get('from') or [])
+
+
+def no_open_rules(rules, need_ports=True):
+    """Reject rules that reach every pod, every namespace or a wide address range."""
     for rule in rules:
-        for peer in peers_of(rule, 'to'):
-            if peer.get('podSelector') == {'matchLabels': {'k8s-app': 'kube-dns'}} and peer.get('namespaceSelector') == {'matchLabels': {'kubernetes.io/metadata.name': 'kube-system'}} and wanted <= port_set(rule):
-                return True
-    return False
+        assert peers_of(rule), 'A rule without peers allows every address'
+        for peer in peers_of(rule):
+            assert peer, 'An empty peer matches every address'
+            if 'namespaceSelector' in peer:
+                assert peer['namespaceSelector'], 'namespaceSelector: {} matches every namespace'
+            if 'ipBlock' in peer:
+                network = ipaddress.ip_network(peer['ipBlock']['cidr'], strict=False)
+                assert network.prefixlen >= 16, 'An ipBlock wider than /16 opens too many addresses: ' + peer['ipBlock']['cidr']
+        if need_ports:
+            assert rule.get('ports'), 'A rule without ports allows every port'
 
-def no_open_rules(rules):
+
+def pod_ip(namespace, name):
+    address = get('pod', name, namespace)['status'].get('podIP')
+    assert address, f'Pod {name} in {namespace} has no IP address'
+    return address
+
+
+def service_ip(namespace, name):
+    return get('service', name, namespace)['spec']['clusterIP']
+
+
+def client(namespace, pod, *args):
+    """Run the lab's test client in a pod: prints open, blocked, refused, resolved or unresolved."""
+    result = command(['kubectl', '-n', namespace, 'exec', pod, '--', 'python', '/app/client.py', *[str(item) for item in args]], success=False)
+    assert result.returncode == 0, f'The test client could not run in {namespace}/{pod}: ' + (result.stderr.strip().splitlines() or ['no output'])[-1]
+    return result.stdout.strip()
+
+
+def expect_open(namespace, pod, target, port, protocol='tcp', note=''):
+    output = client(namespace, pod, protocol, target, port)
+    assert output.startswith('open'), f'{namespace}/{pod} must reach {target}:{port}/{protocol.upper()} {note}but got: {output}'
+    return output
+
+
+def expect_blocked(namespace, pod, target, port, protocol='tcp', note=''):
+    output = client(namespace, pod, protocol, target, port)
+    assert output == 'blocked', f'{namespace}/{pod} must time out to {target}:{port}/{protocol.upper()} {note}but got: {output}'
+
+
+def expect_dns(namespace, pod, works=True):
+    output = client(namespace, pod, 'dns', 'kubernetes.default.svc.cluster.local')
+    if works:
+        assert output.startswith('resolved'), f'{namespace}/{pod} must resolve names through CoreDNS but got: {output}'
+    else:
+        assert output == 'unresolved', f'{namespace}/{pod} must not resolve names but got: {output}'
+
+NS = 'starfleet-031-010-04-01'
+
+def guard():
+    names = sorted(item['metadata']['name'] for item in policies(NS))
+    assert 'default-deny-all' in names, 'Keep the default-deny-all policy'
+    baseline = get('networkpolicy', 'default-deny-all', NS)['spec']
+    assert baseline.get('podSelector') in ({}, None) and sorted(baseline.get('policyTypes') or []) == ['Egress', 'Ingress'] and not baseline.get('ingress') and not baseline.get('egress'), 'Do not change the default-deny-all policy'
+    for item in policies(NS):
+        no_open_rules(item['spec'].get('ingress') or [])
+        no_open_rules(item['spec'].get('egress') or [])
+
+if wants('pathfinder-dependencies'):
+    guard()
+    get('networkpolicy', 'pathfinder-egress', NS)
+    expect_dns(NS, 'pathfinder')
+    expect_open(NS, 'pathfinder', pod_ip(NS, 'datastore'), 6379)
+    expect_open(NS, 'pathfinder', service_ip('default', 'kubernetes'), 443, note='through the kubernetes Service ')
+    expect_blocked(NS, 'pathfinder', pod_ip(NS, 'stranger'), 8080)
+    for rule in rules_for(NS, pod_labels(NS, 'pathfinder'), 'Egress'):
+        for peer in peers_of(rule):
+            if 'ipBlock' in peer:
+                assert peer['ipBlock']['cidr'].endswith('/32'), 'Keep the API server rule at one /32 address'
+if wants('datastore-ingress'):
+    guard()
+    spec = get('networkpolicy', 'datastore-ingress', NS)['spec']
+    assert 'Ingress' in (spec.get('policyTypes') or []), 'datastore-ingress must cover Ingress'
+    rules = rules_for(NS, pod_labels(NS, 'datastore'), 'Ingress')
+    assert rules, 'The datastore pod needs an ingress rule'
     for rule in rules:
-        assert rule.get('to') or rule.get('from'), 'A rule without peers allows every address'
-        for peer in peers_of(rule, 'to') + peers_of(rule, 'from'):
-            assert peer != {} and peer.get('ipBlock', {}).get('cidr') != '0.0.0.0/0', 'A peer matches every address'
-        assert rule.get('ports'), 'A rule without ports allows every port'
-
-scout_labels = {'app': 'scout'}
-probe_labels = {'app': 'probe'}
-if wants('scout-dependencies'):
-    egress = rules_for('starfleet-031-010-04-01', scout_labels, 'Egress')
-    no_open_rules(egress)
-    assert has_dns_rule(egress), 'DNS to CoreDNS on UDP and TCP port 53 is missing'
-    want_peer = {'namespaceSelector': {'matchLabels': {'kubernetes.io/metadata.name': 'starfleet-031-010-04-01'}}, 'podSelector': {'matchLabels': {'app': 'probe'}}}
-    assert any(peer == want_peer and ('TCP', '8080', None) in port_set(rule) for rule in egress for peer in peers_of(rule, 'to')), 'The scout pod needs an egress rule to the probe pods on TCP 8080'
-if wants('probe-ingress'):
-    ingress = rules_for('starfleet-031-010-04-01', probe_labels, 'Ingress')
-    no_open_rules(ingress)
-    assert any(peer.get('podSelector') == {'matchLabels': {'app': 'scout'}} and ('TCP', '8080', None) in port_set(rule) for rule in ingress for peer in peers_of(rule, 'from')), 'The probe pods need an ingress rule from the scout pod on TCP 8080'
-    for rule in ingress:
-        for peer in peers_of(rule, 'from'):
-            assert peer.get('podSelector') == {'matchLabels': {'app': 'scout'}}, 'The probe pods may receive traffic from the scout pod only'
-    probe_ip = kubectl('-n', 'starfleet-031-010-04-01', 'get', 'pod', '-l', 'app=probe', '-o', 'jsonpath={.items[0].status.podIP}')
-    scout_ip = kubectl('-n', 'starfleet-031-010-04-01', 'get', 'pod', 'scout', '-o', 'jsonpath={.status.podIP}')
-    for address in (probe_ip, scout_ip):
-        behavior_check({'args': ['kubectl', '-n', 'outpost-031-010-04-01', 'exec', 'drifter', '--', 'wget', '-q', '-T', '3', '-O-', 'http://' + address + ':8080/'], 'denied': True, 'failure_markers': ['timed out']})
+        assert port_set(rule) == {('TCP', '6379', None)}, 'Admit only TCP 6379 to the datastore'
+        for peer in peers_of(rule):
+            assert 'ipBlock' not in peer, 'Admit the pathfinder pod by its label, not by its address'
+            assert selector_matches(peer.get('podSelector'), pod_labels(NS, 'pathfinder')), 'The ingress peer must select the pathfinder pod'
+            assert not selector_matches(peer.get('podSelector'), pod_labels(NS, 'stranger')), 'The ingress peer must not select the stranger pod'
+    expect_blocked(NS, 'stranger', pod_ip(NS, 'datastore'), 6379)
+    expect_open(NS, 'pathfinder', pod_ip(NS, 'datastore'), 6379)

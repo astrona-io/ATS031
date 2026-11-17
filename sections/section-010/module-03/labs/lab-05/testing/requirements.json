@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-03-05",
+  "cluster": "astro-ats-031-lab-010-03-05",
+  "namespace": "starfleet-031-010-03-05",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "meter",
+      "namespace": "starfleet-031-010-03-05",
+      "expected": {
+        "metadata": {
+          "name": "meter",
+          "namespace": "starfleet-031-010-03-05",
+          "labels": {
+            "app": "meter"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "surveyor",
+      "namespace": "outpost-031-010-03-05",
+      "expected": {
+        "metadata": {
+          "name": "surveyor",
+          "namespace": "outpost-031-010-03-05",
+          "labels": {
+            "app": "surveyor"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "loiterer",
+      "namespace": "outpost-031-010-03-05",
+      "expected": {
+        "metadata": {
+          "name": "loiterer",
+          "namespace": "outpost-031-010-03-05",
+          "labels": {
+            "app": "loiterer"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

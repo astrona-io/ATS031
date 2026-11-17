@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-01-03",
+  "cluster": "astro-ats-031-lab-010-01-03",
+  "namespace": "starfleet-031-010-01-03",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "relay",
+      "namespace": "starfleet-031-010-01-03",
+      "expected": {
+        "metadata": {
+          "name": "relay",
+          "namespace": "starfleet-031-010-01-03",
+          "labels": {
+            "app": "relay"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "lander",
+      "namespace": "starfleet-031-010-01-03",
+      "expected": {
+        "metadata": {
+          "name": "lander",
+          "namespace": "starfleet-031-010-01-03",
+          "labels": {
+            "app": "lander"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "courier",
+      "namespace": "starfleet-031-010-01-03",
+      "expected": {
+        "metadata": {
+          "name": "courier",
+          "namespace": "starfleet-031-010-01-03",
+          "labels": {
+            "app": "courier"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

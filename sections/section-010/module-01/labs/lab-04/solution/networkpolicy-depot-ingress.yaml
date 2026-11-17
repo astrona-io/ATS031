@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: depot-ingress
+  namespace: outpost-031-010-01-04
+spec:
+  podSelector:
+    matchLabels:
+      app: depot
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: lander
+    ports:
+    - protocol: TCP
+      port: 8080

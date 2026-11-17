@@ -1,0 +1,60 @@
+{
+  "context": "kind-astro-ats-031-lab-010-03-06",
+  "cluster": "astro-ats-031-lab-010-03-06",
+  "namespace": "starfleet-031-010-03-06",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "kiosk",
+      "namespace": "starfleet-031-010-03-06",
+      "expected": {
+        "metadata": {
+          "name": "kiosk",
+          "namespace": "starfleet-031-010-03-06"
+        },
+        "spec": {
+          "replicas": 2,
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "kiosk"
+              }
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "pod",
+      "name": "visitor",
+      "namespace": "starfleet-031-010-03-06",
+      "expected": {
+        "metadata": {
+          "name": "visitor",
+          "namespace": "starfleet-031-010-03-06",
+          "labels": {
+            "app": "visitor"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "collector",
+      "namespace": "starfleet-031-010-03-06",
+      "expected": {
+        "metadata": {
+          "name": "collector",
+          "namespace": "starfleet-031-010-03-06",
+          "labels": {
+            "app": "collector"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

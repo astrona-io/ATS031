@@ -4,40 +4,46 @@ exam_objectives:
 ---
 # Repair A Broken Policy Set Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-04-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-04-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-## Inspect and explain
+Repair a broken policy set one dependency at a time: test it, read the rule that should allow it, fix that rule, and test again. The `pathfinder` pod needs DNS, the `datastore` and the API server. Two faults block it.
 
-Run the script and read the policies. The script shows which of the three needs fails.
+First test DNS and the `datastore`:
 
 ```sh
-kubectl -n starfleet-031-010-04-01 exec scout -- python /app/check.py
-kubectl -n starfleet-031-010-04-01 get networkpolicy
-kubectl -n starfleet-031-010-04-01 describe networkpolicy scout-egress scout-to-probe probe-ingress
-kubectl get namespace starfleet-031-010-04-01 --show-labels
+kubectl -n starfleet-031-010-04-01 exec pathfinder -- python /app/client.py dns kubernetes.default.svc.cluster.local
+kubectl -n starfleet-031-010-04-01 get networkpolicy pathfinder-egress datastore-ingress -o yaml
 ```
 
-Three kinds of fault explain the result. DNS fails because no policy lets `scout` reach CoreDNS, and the existing `scout-egress` policy holds only the API server rule. The `probe` step fails because `scout-to-probe` selects the namespace by a label named `name`, which the namespace does not have, and because `probe-ingress` has the type `Egress` with a peer that selects a mistyped pod label, so nothing opens ingress to the `probe` pods. The `api` step already works through the existing rule.
+The DNS rule selects a namespace with the label `name: kube-system`, but namespaces carry `kubernetes.io/metadata.name: kube-system`, so the rule matches no namespace. It also allows only UDP port 53. The `datastore-ingress` policy lists `Egress` instead of `Ingress`, and its peer label `app: pathfindr` is misspelled, so the `datastore` pod stays closed under `default-deny-all`.
 
-Save this as `networkpolicy-scout-dns.yaml`:
+Find the API server address and port, because the repaired egress file keeps the API server rule:
+
+```sh
+kubectl get endpointslice -n default -l kubernetes.io/service-name=kubernetes -o jsonpath='{.items[0].endpoints[0].addresses[0]} {.items[0].ports[0].port}'
+```
+
+Use the address in place of `<API_SERVER_IP>` and the port in place of `<API_SERVER_PORT>` in the first file.
+
+Save this as `networkpolicy-pathfinder-egress.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: scout-dns
+  name: pathfinder-egress
   namespace: starfleet-031-010-04-01
 spec:
   podSelector:
     matchLabels:
-      app: scout
+      app: pathfinder
   policyTypes:
   - Egress
   egress:
@@ -53,95 +59,77 @@ spec:
       port: 53
     - protocol: TCP
       port: 53
-```
-
-Apply it:
-
-```sh
-kubectl apply -f networkpolicy-scout-dns.yaml
-```
-
-Save this as `networkpolicy-scout-to-probe.yaml`:
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: scout-to-probe
-  namespace: starfleet-031-010-04-01
-spec:
-  podSelector:
-    matchLabels:
-      app: scout
-  policyTypes:
-  - Egress
-  egress:
   - to:
-    - namespaceSelector:
+    - podSelector:
         matchLabels:
-          kubernetes.io/metadata.name: starfleet-031-010-04-01
-      podSelector:
-        matchLabels:
-          app: probe
+          app: datastore
     ports:
     - protocol: TCP
-      port: 8080
+      port: 6379
+  - to:
+    - ipBlock:
+        cidr: <API_SERVER_IP>/32
+    ports:
+    - protocol: TCP
+      port: <API_SERVER_PORT>
 ```
 
 Apply it:
 
 ```sh
-kubectl apply -f networkpolicy-scout-to-probe.yaml
+kubectl apply -f networkpolicy-pathfinder-egress.yaml
 ```
 
-Save this as `networkpolicy-probe-ingress.yaml`:
+Save this as `networkpolicy-datastore-ingress.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: probe-ingress
+  name: datastore-ingress
   namespace: starfleet-031-010-04-01
 spec:
   podSelector:
     matchLabels:
-      app: probe
+      app: datastore
   policyTypes:
   - Ingress
   ingress:
   - from:
     - podSelector:
         matchLabels:
-          app: scout
+          app: pathfinder
     ports:
     - protocol: TCP
-      port: 8080
+      port: 6379
 ```
 
 Apply it:
 
 ```sh
-kubectl apply -f networkpolicy-probe-ingress.yaml
+kubectl apply -f networkpolicy-datastore-ingress.yaml
 ```
 
-## Verify the result
-
-The script must print `dns=ok probe=ok api=ok`. The two requests from `drifter` must time out. Run the checks one by one.
+Then check the result. The test client prints `open` with the reply, `blocked` when the connection times out, and `resolved` or `unresolved` for a DNS lookup:
 
 ```sh
-kubectl -n starfleet-031-010-04-01 exec scout -- python /app/check.py
-PROBE_IP=$(kubectl -n starfleet-031-010-04-01 get pod -l app=probe -o jsonpath='{.items[0].status.podIP}')
-SCOUT_IP=$(kubectl -n starfleet-031-010-04-01 get pod scout -o jsonpath='{.status.podIP}')
-kubectl -n outpost-031-010-04-01 exec drifter -- wget -q -T 3 -O- "http://$PROBE_IP:8080/"
-kubectl -n outpost-031-010-04-01 exec drifter -- wget -q -T 3 -O- "http://$SCOUT_IP:8080/"
+DATASTORE_IP=$(kubectl -n starfleet-031-010-04-01 get pod datastore -o jsonpath='{.status.podIP}')
+API_SERVICE_IP=$(kubectl -n default get service kubernetes -o jsonpath='{.spec.clusterIP}')
+kubectl -n starfleet-031-010-04-01 exec pathfinder -- python /app/client.py dns kubernetes.default.svc.cluster.local
+kubectl -n starfleet-031-010-04-01 exec pathfinder -- python /app/client.py tcp "$DATASTORE_IP" 6379
+kubectl -n starfleet-031-010-04-01 exec pathfinder -- python /app/client.py tcp "$API_SERVICE_IP" 443
+kubectl -n starfleet-031-010-04-01 exec stranger -- python /app/client.py tcp "$DATASTORE_IP" 6379
 ```
 
-After recording the result, remove this independent lab with `astrona destroy ats-031-lab-010-04-01`.
+The lookup must print `resolved`. The next two commands must print `open`, and the last one `blocked`.
+
+The lookup now succeeds, because the DNS rule matches CoreDNS on both protocols. The `pathfinder` pod reaches the `datastore`, because its egress rule and the repaired ingress rule both match. The `stranger` pod times out to the `datastore`, because the ingress rule names only `pathfinder`.
+
+When you are done, remove the lab with `astrona destroy ats-031-lab-010-04-01`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Fixing one fault and stopping.** Faults hide each other. Run the script after each change.
-> - **Deleting `default-deny-all`.** That opens every pod and breaks the limits of the task.
-> - **Opening everything to pass the script.** A rule without peers or ports fails the grader.
-> - **Skipping the denied requests.** A repair that also lets `drifter` in is a leak.
+> A wrong label in a selector does not cause an error. The policy simply matches nothing; compare every selector with real labels.
+>
+> An ingress rule written under `egress` with `policyTypes: [Egress]` changes the wrong direction and can block the pod from sending.

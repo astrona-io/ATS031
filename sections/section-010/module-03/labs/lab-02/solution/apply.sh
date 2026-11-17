@@ -5,6 +5,5 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-solution_directory="$lab_directory/solution"
-kubectl apply -f "$solution_directory/networkpolicy-probe-from-starfleet.yaml"
+solution_directory="$(cd "$(dirname "$0")" && pwd)"
+kubectl apply -f "$solution_directory/networkpolicy-assay-from-starfleet.yaml"

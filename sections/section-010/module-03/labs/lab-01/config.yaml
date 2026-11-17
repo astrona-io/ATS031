@@ -12,7 +12,6 @@ runtime:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
     - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     addons:
       cni: calico
 bootstrap:
@@ -37,13 +36,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: probe-from-outpost-policy
-    description: NetworkPolicy probe-from-outpost selects outpost shuttle in one entry
+  - name: registry-policy
+    description: The registry-from-outpost-courier policy selects the registry pod and uses one peer entry with both a namespaceSelector for outpost and a podSelector for app=courier, on TCP 8080
     type: file
-    source: validation/validate-probe-from-outpost-policy.sh
+    source: validation/validate-registry-policy.sh
     points: 1
-  - name: only-outpost-shuttle
-    description: Only shuttle in outpost reaches probe in starfleet
+  - name: only-outpost-courier
+    description: Only the courier pod in outpost reaches the registry; the courier pods in starfleet and dock and the idler pod in outpost time out, and no other namespace has a policy
     type: file
-    source: validation/validate-only-outpost-shuttle.sh
-    points: 2
+    source: validation/validate-only-outpost-courier.sh
+    points: 1

@@ -5,8 +5,7 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-solution_directory="$lab_directory/solution"
+solution_directory="$(cd "$(dirname "$0")" && pwd)"
 kubectl apply -f "$solution_directory/networkpolicy-default-deny-all.yaml"
-kubectl apply -f "$solution_directory/networkpolicy-probe-ingress-from-shuttle.yaml"
-kubectl apply -f "$solution_directory/networkpolicy-shuttle-egress-to-probe.yaml"
+kubectl apply -f "$solution_directory/networkpolicy-forge-from-smith.yaml"
+kubectl apply -f "$solution_directory/networkpolicy-smith-to-forge.yaml"

@@ -49,6 +49,24 @@ modules:
     title: How NetworkPolicy Isolation Works
     path: sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
   - type: reading
+    title: Isolate One Pod For Egress Only — Task
+    path: sections/section-010/module-01/labs/lab-03/question.md
+  - type: lab
+    title: Isolate One Pod For Egress Only
+    path: sections/section-010/module-01/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: networkpolicy-egress
+    task_kind: build
+    learning_goals:
+    - Isolate one pod for egress only and prove that its ingress and its neighbours stay open.
+    tags:
+    - cks
+    - networkpolicy-egress
+  - type: reading
+    title: Isolate One Pod For Egress Only — Solution
+    path: sections/section-010/module-01/labs/lab-03/solution.md
+  - type: reading
     title: Allow One Peer With An Ingress Policy
     path: sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
   - type: reading
@@ -58,11 +76,11 @@ modules:
     title: Allow One Peer And Deny Another
     path: sections/section-010/module-01/labs/lab-01
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: networkpolicy-ingress
     task_kind: build
     learning_goals:
-    - Enforce both an allowed same-namespace peer and a denied peer in another namespace.
+    - Admit one pod by label to a Deployment and prove that the policy itself blocks two other pods.
     tags:
     - cks
     - networkpolicy-ingress
@@ -79,12 +97,11 @@ modules:
     title: Allow DNS And One Application Dependency
     path: sections/section-010/module-01/labs/lab-02
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 12m
     topic: networkpolicy-egress
     task_kind: build
     learning_goals:
-    - Allow name resolution and application access while denying a healthy unrelated
-      listener.
+    - Allow DNS and one application dependency for one pod while a healthy listener stays blocked.
     tags:
     - cks
     - networkpolicy-egress
@@ -94,6 +111,24 @@ modules:
   - type: reading
     title: Default Deny And Troubleshooting Policies
     path: sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
+  - type: reading
+    title: Find The Policy That Blocks A Request — Task
+    path: sections/section-010/module-01/labs/lab-04/question.md
+  - type: lab
+    title: Find The Policy That Blocks A Request
+    path: sections/section-010/module-01/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: networkpolicy-troubleshooting
+    task_kind: troubleshooting
+    learning_goals:
+    - Find and repair the policy that blocks one request under a default-deny baseline without opening other paths.
+    tags:
+    - cks
+    - networkpolicy-troubleshooting
+  - type: reading
+    title: Find The Policy That Blocks A Request — Solution
+    path: sections/section-010/module-01/labs/lab-04/solution.md
   - type: reading
     title: Summary
     path: sections/section-010/module-01/course-05-summary.md
@@ -112,8 +147,44 @@ modules:
     title: Deny All Ingress
     path: sections/section-010/module-02/course-02-deny-all-ingress.md
   - type: reading
+    title: Deny All Ingress In One Namespace — Task
+    path: sections/section-010/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Deny All Ingress In One Namespace
+    path: sections/section-010/module-02/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: networkpolicy-default-deny
+    task_kind: build
+    learning_goals:
+    - Isolate every pod in one namespace for ingress while egress stays open.
+    tags:
+    - cks
+    - networkpolicy-default-deny
+  - type: reading
+    title: Deny All Ingress In One Namespace — Solution
+    path: sections/section-010/module-02/labs/lab-02/solution.md
+  - type: reading
     title: Deny All Egress And Its Side Effects
     path: sections/section-010/module-02/course-03-deny-all-egress-and-its-side-effects.md
+  - type: reading
+    title: Deny All Egress And Observe DNS Fail — Task
+    path: sections/section-010/module-02/labs/lab-03/question.md
+  - type: lab
+    title: Deny All Egress And Observe DNS Fail
+    path: sections/section-010/module-02/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: networkpolicy-default-deny
+    task_kind: build
+    learning_goals:
+    - Isolate every pod in one namespace for egress and observe that DNS stops while ingress stays open.
+    tags:
+    - cks
+    - networkpolicy-default-deny
+  - type: reading
+    title: Deny All Egress And Observe DNS Fail — Solution
+    path: sections/section-010/module-02/labs/lab-03/solution.md
   - type: reading
     title: Combine Baselines With Allow Rules
     path: sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
@@ -124,11 +195,11 @@ modules:
     title: Apply A Default-Deny Baseline And Allow One Path
     path: sections/section-010/module-02/labs/lab-01
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 12m
     topic: networkpolicy-default-deny
     task_kind: build
     learning_goals:
-    - Apply a combined baseline and open one path while two other paths stay denied.
+    - Apply a default-deny baseline for both directions and open one path with an egress and an ingress rule.
     tags:
     - cks
     - networkpolicy-default-deny
@@ -138,6 +209,24 @@ modules:
   - type: reading
     title: Baselines Across Many Namespaces
     path: sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
+  - type: reading
+    title: Apply One Baseline To Labelled Namespaces — Task
+    path: sections/section-010/module-02/labs/lab-05/question.md
+  - type: lab
+    title: Apply One Baseline To Labelled Namespaces
+    path: sections/section-010/module-02/labs/lab-05
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: networkpolicy-default-deny
+    task_kind: build
+    learning_goals:
+    - Apply one default-deny manifest to every namespace selected by a label.
+    tags:
+    - cks
+    - networkpolicy-default-deny
+  - type: reading
+    title: Apply One Baseline To Labelled Namespaces — Solution
+    path: sections/section-010/module-02/labs/lab-05/solution.md
   - type: reading
     title: Summary
     path: sections/section-010/module-02/course-06-summary.md
@@ -153,6 +242,24 @@ modules:
     title: Selectors Recap And The Namespace Name Label
     path: sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
   - type: reading
+    title: Admit A Group Of Namespaces By Label — Task
+    path: sections/section-010/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Admit A Group Of Namespaces By Label
+    path: sections/section-010/module-03/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: networkpolicy-peers
+    task_kind: build
+    learning_goals:
+    - Label a group of namespaces and admit them with one namespaceSelector.
+    tags:
+    - cks
+    - networkpolicy-peers
+  - type: reading
+    title: Admit A Group Of Namespaces By Label — Solution
+    path: sections/section-010/module-03/labs/lab-03/solution.md
+  - type: reading
     title: Cross-Namespace Ingress
     path: sections/section-010/module-03/course-02-cross-namespace-ingress.md
   - type: reading
@@ -162,11 +269,11 @@ modules:
     title: Allow One Pod From Another Namespace
     path: sections/section-010/module-03/labs/lab-01
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: networkpolicy-peers
     task_kind: build
     learning_goals:
-    - Write one combined peer entry that admits one pod from another namespace.
+    - Admit one pod from one other namespace with a combined peer entry while same-label pods elsewhere stay blocked.
     tags:
     - cks
     - networkpolicy-peers
@@ -183,11 +290,11 @@ modules:
     title: Repair A Two-Entry Peer Rule
     path: sections/section-010/module-03/labs/lab-02
     difficulty: intermediate
-    estimated_duration: 20m
+    estimated_duration: 10m
     topic: networkpolicy-peers
     task_kind: troubleshooting
     learning_goals:
-    - Find and repair a rule whose two list entries admit too many peers.
+    - Repair a rule whose two peer entries admit too many pods.
     tags:
     - cks
     - networkpolicy-peers
@@ -198,11 +305,65 @@ modules:
     title: ipBlock And Except
     path: sections/section-010/module-03/course-04-ipblock-and-except.md
   - type: reading
+    title: Allow A Pod Range With ipBlock And except — Task
+    path: sections/section-010/module-03/labs/lab-04/question.md
+  - type: lab
+    title: Allow A Pod Range With ipBlock And except
+    path: sections/section-010/module-03/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: networkpolicy-peers
+    task_kind: build
+    learning_goals:
+    - Admit an address range with ipBlock and remove one address with except.
+    tags:
+    - cks
+    - networkpolicy-peers
+  - type: reading
+    title: Allow A Pod Range With ipBlock And except — Solution
+    path: sections/section-010/module-03/labs/lab-04/solution.md
+  - type: reading
     title: Ports, Protocols And endPort
     path: sections/section-010/module-03/course-05-ports-protocols-and-endport.md
   - type: reading
+    title: Allow A TCP Port Range And A Named UDP Port — Task
+    path: sections/section-010/module-03/labs/lab-05/question.md
+  - type: lab
+    title: Allow A TCP Port Range And A Named UDP Port
+    path: sections/section-010/module-03/labs/lab-05
+    difficulty: intermediate
+    estimated_duration: 12m
+    topic: networkpolicy-peers
+    task_kind: build
+    learning_goals:
+    - Allow a TCP port range with endPort and a UDP port by its name, and nothing more.
+    tags:
+    - cks
+    - networkpolicy-peers
+  - type: reading
+    title: Allow A TCP Port Range And A Named UDP Port — Solution
+    path: sections/section-010/module-03/labs/lab-05/solution.md
+  - type: reading
     title: Policies On Services And Replicas
     path: sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
+  - type: reading
+    title: Repair A Policy That Names The Service Port And Add A Port Range — Task
+    path: sections/section-010/module-03/labs/lab-06/question.md
+  - type: lab
+    title: Repair A Policy That Names The Service Port And Add A Port Range
+    path: sections/section-010/module-03/labs/lab-06
+    difficulty: intermediate
+    estimated_duration: 12m
+    topic: networkpolicy-troubleshooting
+    task_kind: troubleshooting
+    learning_goals:
+    - Replace a Service port with the container port in a policy and add a metrics port range for one client.
+    tags:
+    - cks
+    - networkpolicy-troubleshooting
+  - type: reading
+    title: Repair A Policy That Names The Service Port And Add A Port Range — Solution
+    path: sections/section-010/module-03/labs/lab-06/solution.md
   - type: reading
     title: Summary
     path: sections/section-010/module-03/course-07-summary.md
@@ -218,14 +379,68 @@ modules:
     title: DNS And CoreDNS Egress
     path: sections/section-010/module-04/course-01-dns-and-coredns-egress.md
   - type: reading
+    title: Allow Only DNS Egress Under A Baseline — Task
+    path: sections/section-010/module-04/labs/lab-02/question.md
+  - type: lab
+    title: Allow Only DNS Egress Under A Baseline
+    path: sections/section-010/module-04/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: networkpolicy-egress
+    task_kind: build
+    learning_goals:
+    - Allow DNS on UDP and TCP port 53 to CoreDNS for one pod under a default-deny baseline.
+    tags:
+    - cks
+    - networkpolicy-egress
+  - type: reading
+    title: Allow Only DNS Egress Under A Baseline — Solution
+    path: sections/section-010/module-04/labs/lab-02/solution.md
+  - type: reading
     title: Egress To The API Server And Other Dependencies
     path: sections/section-010/module-04/course-02-egress-to-the-api-server-and-other-dependencies.md
+  - type: reading
+    title: Allow API Server Egress For One Pod — Task
+    path: sections/section-010/module-04/labs/lab-03/question.md
+  - type: lab
+    title: Allow API Server Egress For One Pod
+    path: sections/section-010/module-04/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: networkpolicy-egress
+    task_kind: build
+    learning_goals:
+    - Allow one pod to reach the API server endpoint with a /32 ipBlock and the endpoint port.
+    tags:
+    - cks
+    - networkpolicy-egress
+  - type: reading
+    title: Allow API Server Egress For One Pod — Solution
+    path: sections/section-010/module-04/labs/lab-03/solution.md
   - type: reading
     title: Probes, hostNetwork And Node Traffic
     path: sections/section-010/module-04/course-03-probes-hostnetwork-and-node-traffic.md
   - type: reading
     title: Test Matrix For A Policy Set
     path: sections/section-010/module-04/course-04-test-matrix-for-a-policy-set.md
+  - type: reading
+    title: Record A Test Matrix For A Policy Set — Task
+    path: sections/section-010/module-04/labs/lab-04/question.md
+  - type: lab
+    title: Record A Test Matrix For A Policy Set
+    path: sections/section-010/module-04/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 12m
+    topic: networkpolicy-troubleshooting
+    task_kind: troubleshooting
+    learning_goals:
+    - Predict, measure and record the result of each path in a policy set.
+    tags:
+    - cks
+    - networkpolicy-troubleshooting
+  - type: reading
+    title: Record A Test Matrix For A Policy Set — Solution
+    path: sections/section-010/module-04/labs/lab-04/solution.md
   - type: reading
     title: Audit And Troubleshoot Policies
     path: sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
@@ -236,12 +451,11 @@ modules:
     title: Repair A Broken Policy Set
     path: sections/section-010/module-04/labs/lab-01
     difficulty: advanced
-    estimated_duration: 35m
+    estimated_duration: 15m
     topic: networkpolicy-troubleshooting
     task_kind: troubleshooting
     learning_goals:
-    - Repair DNS, peer and direction faults in a policy set without opening more than
-      needed.
+    - Repair DNS, peer and direction faults in a policy set without opening more than needed.
     tags:
     - cks
     - networkpolicy-troubleshooting

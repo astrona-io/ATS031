@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: smith-to-forge
+  namespace: outpost-031-010-02-01
+spec:
+  podSelector:
+    matchLabels:
+      app: smith
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: forge
+    ports:
+    - protocol: TCP
+      port: 8080
