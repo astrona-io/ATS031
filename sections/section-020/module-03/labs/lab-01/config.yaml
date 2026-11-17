@@ -38,17 +38,17 @@ testing:
 validation:
   scripts:
   - name: audit-policy
-    description: The API server uses the staged audit policy
+    description: kube-apiserver uses an audit policy file with the same content as the staged policy
     type: file
     source: validation/validate-audit-policy.sh
     points: 1
   - name: audit-log-retention
-    description: The audit log max age, backup count and size are set
+    description: kube-apiserver sets --audit-log-maxage, --audit-log-maxbackup and --audit-log-maxsize to values above zero
     type: file
     source: validation/validate-audit-log-retention.sh
     points: 1
   - name: audit-events-written
-    description: A test request shows up in the audit log on the node
+    description: A test request appears in the audit log file on the control plane node
     type: file
     source: validation/validate-audit-events-written.sh
     points: 2

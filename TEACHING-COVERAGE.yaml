@@ -31,44 +31,82 @@ labs:
     - sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
   sections/section-020/module-01/labs/lab-01:
     preparation:
-    - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
-    - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
-    - sections/section-020/module-01/course-03-reviewing-the-kubelet.md
     - sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
+  sections/section-020/module-01/labs/lab-02:
+    preparation:
+    - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  sections/section-020/module-01/labs/lab-03:
+    preparation:
+    - sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+  sections/section-020/module-01/labs/lab-04:
+    preparation:
+    - sections/section-020/module-01/course-03-reviewing-the-kubelet.md
   sections/section-020/module-02/labs/lab-01:
     preparation:
-    - sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
-    - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
-    - sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
-    - sections/section-020/module-02/course-04-read-a-result.md
     - sections/section-020/module-02/course-05-select-checks-and-export-results.md
+  sections/section-020/module-02/labs/lab-02:
+    preparation:
+    - sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
+  sections/section-020/module-02/labs/lab-03:
+    preparation:
+    - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+  sections/section-020/module-02/labs/lab-04:
+    preparation:
+    - sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
+  sections/section-020/module-02/labs/lab-05:
+    preparation:
+    - sections/section-020/module-02/course-04-read-a-result.md
   sections/section-020/module-03/labs/lab-01:
     preparation:
-    - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
-    - sections/section-020/module-03/course-02-authentication-and-authorization-flags.md
-    - sections/section-020/module-03/course-03-admission-plugins.md
     - sections/section-020/module-03/course-04-audit-logging.md
   sections/section-020/module-03/labs/lab-02:
     preparation:
     - sections/section-020/module-03/course-05-profiling-tls-and-service-account-flags.md
+  sections/section-020/module-03/labs/lab-03:
+    preparation:
+    - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+  sections/section-020/module-03/labs/lab-04:
+    preparation:
+    - sections/section-020/module-03/course-02-authentication-and-authorization-flags.md
+  sections/section-020/module-03/labs/lab-05:
+    preparation:
+    - sections/section-020/module-03/course-03-admission-plugins.md
+  sections/section-020/module-03/labs/lab-06:
+    preparation:
     - sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
   sections/section-020/module-04/labs/lab-01:
     preparation:
-    - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
-    - sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
-    - sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
-    - sections/section-020/module-04/course-04-query-etcd-with-etcdctl.md
     - sections/section-020/module-04/course-05-encryption-at-rest-check.md
+  sections/section-020/module-04/labs/lab-02:
+    preparation:
+    - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+  sections/section-020/module-04/labs/lab-03:
+    preparation:
+    - sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+  sections/section-020/module-04/labs/lab-04:
+    preparation:
+    - sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
+  sections/section-020/module-04/labs/lab-05:
+    preparation:
+    - sections/section-020/module-04/course-04-query-etcd-with-etcdctl.md
   sections/section-020/module-05/labs/lab-01:
     preparation:
-    - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
     - sections/section-020/module-05/course-02-kubelet-authentication-and-authorization.md
-    - sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
   sections/section-020/module-05/labs/lab-02:
     preparation:
-    - sections/section-020/module-05/course-04-other-kubelet-checks.md
-    - sections/section-020/module-05/course-05-review-coredns-kube-dns.md
     - sections/section-020/module-05/course-06-remediate-findings-end-to-end.md
+  sections/section-020/module-05/labs/lab-03:
+    preparation:
+    - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+  sections/section-020/module-05/labs/lab-04:
+    preparation:
+    - sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
+  sections/section-020/module-05/labs/lab-05:
+    preparation:
+    - sections/section-020/module-05/course-04-other-kubelet-checks.md
+  sections/section-020/module-05/labs/lab-06:
+    preparation:
+    - sections/section-020/module-05/course-05-review-coredns-kube-dns.md
   sections/section-030/module-01/labs/lab-01:
     preparation:
     - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md

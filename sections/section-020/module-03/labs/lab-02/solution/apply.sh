@@ -6,13 +6,17 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   exit 1
 fi
 cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-020-03-02}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-solution_directory="$lab_directory/solution"
 node_name="$cluster-control-plane"
-python3 "$solution_directory/configure-api.py"
-api_ready=0
-for attempt in $(seq 1 80); do
-  if kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then api_ready=1; break; fi
-  sleep 3
-done
-test "$api_ready" -eq 1
+worker_name="$cluster-worker"
+namespace="starfleet-031-020-03-02"
+source "$lab_directory/bootstrap/helpers.sh"
+if [[ "$("$engine" inspect "$node_name" --format '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')" != "$cluster" ]]; then
+  printf 'Refusing to operate on an unrelated node container\n' >&2
+  exit 1
+fi
+solution_directory="$lab_directory/solution"
+edit_manifest kube-apiserver 's|--tls-min-version=VersionTLS10|--tls-min-version=VersionTLS12|; s|^\( *\)- kube-apiserver$|&\n\1- --profiling=false|'
+wait_for_argument "$node_name" kube-apiserver --profiling=false present
+wait_for_api

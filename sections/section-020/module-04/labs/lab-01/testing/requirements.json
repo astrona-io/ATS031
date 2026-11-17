@@ -21,87 +21,10 @@
               "app": "probe",
               "release": "probe"
             }
-          },
-          "template": {
-            "metadata": {
-              "labels": {
-                "app": "probe",
-                "release": "probe"
-              }
-            },
-            "spec": {
-              "containers": [
-                {
-                  "name": "probe",
-                  "image": "docker.io/library/python:3.13-alpine",
-                  "command": [
-                    "python",
-                    "/app/server.py"
-                  ],
-                  "env": [
-                    {
-                      "name": "VERSION",
-                      "value": "v1"
-                    }
-                  ],
-                  "ports": [
-                    {
-                      "name": "http",
-                      "containerPort": 8080
-                    }
-                  ],
-                  "readinessProbe": {
-                    "httpGet": {
-                      "path": "/ready",
-                      "port": "http"
-                    },
-                    "periodSeconds": 2
-                  },
-                  "resources": {
-                    "requests": {
-                      "cpu": "10m",
-                      "memory": "32Mi"
-                    },
-                    "limits": {
-                      "memory": "128Mi"
-                    }
-                  },
-                  "volumeMounts": [
-                    {
-                      "name": "app",
-                      "mountPath": "/app",
-                      "readOnly": true
-                    }
-                  ]
-                }
-              ],
-              "volumes": [
-                {
-                  "name": "app",
-                  "configMap": {
-                    "name": "probe-code"
-                  }
-                }
-              ]
-            }
           }
         }
       },
       "state": "deployment"
-    },
-    {
-      "kind": "pod",
-      "name": "shuttle",
-      "namespace": "starfleet-031-020-04-01",
-      "expected": {
-        "apiVersion": "v1",
-        "kind": "Pod",
-        "metadata": {
-          "name": "shuttle",
-          "namespace": "starfleet-031-020-04-01"
-        }
-      },
-      "state": "pod"
     }
   ],
   "behavior": [

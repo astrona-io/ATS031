@@ -12,9 +12,4 @@ rules:
   resources:
   - group: ""
     resources: ["secrets"]
-- level: Request
-  namespaces: ["starfleet-031-020-03-01"]
-  resources:
-  - group: ""
-    resources: ["pods"]
 - level: Metadata

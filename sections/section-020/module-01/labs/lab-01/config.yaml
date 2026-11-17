@@ -37,13 +37,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: api-profiling-disabled
-    description: The API server runs with --profiling=false
+  - name: scheduler-bind-address
+    description: kube-scheduler runs with --bind-address=127.0.0.1 and port 10259 answers only on the loopback address
     type: file
-    source: validation/validate-api-profiling-disabled.sh
+    source: validation/validate-scheduler-bind-address.sh
     points: 2
   - name: benchmark-review-record
-    description: ConfigMap benchmark-review records the corrected control
+    description: ConfigMap benchmark-review records the corrected scheduler control
     type: file
     source: validation/validate-benchmark-review-record.sh
     points: 1

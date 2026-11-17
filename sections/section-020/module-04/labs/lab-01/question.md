@@ -5,15 +5,15 @@ exam_objectives:
 ---
 # Enable Encryption At Rest For Secrets
 
-Allow about 12 minutes for the tasks.
+Allow about 15 minutes for the tasks.
 
-The security team found that the Secret `launch-code` in `starfleet-031-020-04-01` is stored in clear text in etcd. Enable encryption at rest for Secrets without stopping the cluster.
+The `starfleet` cluster stores the Secret `launch-code`. A reader of an etcd backup could read the code. Make etcd store Secrets encrypted.
 
 ## Starting state
 
-The isolated environment has two healthy probe replicas, an internal Service, two client Pods and the Secret `launch-code` in `starfleet-031-020-04-01`. The API server has no encryption configuration. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-04-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. etcd runs as a static pod on the control plane node. The Secret `launch-code` in the `starfleet-031-020-04-01` namespace holds the key `code` with the value `warp-nine-launch`. The API server has no encryption configuration, so etcd stores the value as plain text. A copy of the API server manifest is in `/opt/training/backup/kube-apiserver.yaml` on the control plane node.
 
-Use a host shell with the private kubeconfig for this independent kind environment.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-04-01)"
@@ -22,15 +22,17 @@ node_name="astro-ats-031-lab-020-04-01-control-plane"
 worker_name="astro-ats-031-lab-020-04-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
 ## Required result
 
-1. A file `/etc/kubernetes/enc/encryption-config.yaml` on the control plane node holds an `EncryptionConfiguration` for `secrets` with the `aescbc` provider first and the `identity` provider last. The file has mode `600`.
-2. The `kube-apiserver` static pod runs with `--encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml`, and the file is mounted into the pod.
-3. The Secret `launch-code` is stored encrypted in etcd: the stored value starts with the `aescbc` prefix and no longer holds the plain text code. The Secret still returns its original value through the API.
-4. The API stays ready and both application replicas stay available.
+- Create an `EncryptionConfiguration` at `/etc/kubernetes/enc/encryption-config.yaml` on the control plane node. For `secrets`, the first provider is `aescbc` with a random 32 byte key, followed by `identity`. The file has mode `600` or stricter.
+- The API server runs with `--encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml` and mounts the directory.
+- etcd stores the Secret `launch-code` with the prefix `k8s:enc:aescbc:v1:`, and the plain text `warp-nine-launch` no longer appears in etcd.
+- The API still returns the value `warp-nine-launch` for the key `code`.
+
+Keep every backup outside `/etc/kubernetes/manifests`.
 
 ## Verify The Result
 
-The grader reads the API server pod, reads the stored value from etcd through the etcd pod, and reads the Secret through the API. Wait for the API server to restart before you submit. Keep a backup of the API server manifest outside `/etc/kubernetes/manifests`.
+The grader reads the command line of the running `kube-apiserver` process and the configuration file, reads the stored value of `launch-code` with `etcdctl` in the etcd pod, and reads the Secret through the API.

@@ -1,27 +1,149 @@
-# Run kube-bench again for the master target and compare its failing 1.2.x checks
-# with the list that the learner saved. The Job is removed afterwards.
+# Checks that read the running processes and files of this lab's node
+# containers. check.py runs this file with NODE, WORKER, node_exec(),
+# kubectl(), get() and wants() already defined.
 import re
+import time
 
-def _kubectl_raw(args, timeout):
-    return subprocess.run(['kubectl', *args], capture_output=True, text=True, timeout=timeout)
 
-def _failing_ids_now():
-    _kubectl_raw(['-n', 'default', 'delete', 'job', 'kube-bench-verify', '--ignore-not-found', '--wait=true'], 60)
-    applied = _kubectl_raw(['apply', '-f', str(DIRECTORY / 'verify-job.yaml')], 30)
-    assert applied.returncode == 0, 'Could not start the verification Job'
+def process_arguments(container, program):
+    """Return the command line of the newest running process with this name."""
+    found = node_exec(container, 'pgrep', '-n', '-f', '^(/[^ ]*/)?' + program + '( |$)', success=False).stdout.strip()
+    assert found, program + ' is not running on ' + container
+    raw = node_exec(container, 'cat', '/proc/' + found + '/cmdline', success=False).stdout
+    arguments = [item for item in raw.split('\0') if item]
+    assert arguments, program + ' stopped while it was read; try again'
+    return arguments
+
+
+def flag_value(arguments, name):
+    """The value a single-value flag takes: the last occurrence wins."""
+    value = None
+    for item in arguments:
+        if item.startswith('--' + name + '='):
+            value = item.split('=', 1)[1]
+        elif item == '--' + name:
+            value = 'true'
+    return value
+
+
+def flag_list(arguments, name):
+    """The items of a list flag: every occurrence adds its items."""
+    items = []
+    for item in arguments:
+        if item.startswith('--' + name + '='):
+            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+    return items
+
+
+def file_mode(container, path):
+    result = node_exec(container, 'stat', '-c', '%a %U:%G', path, success=False)
+    assert result.returncode == 0, path + ' is missing on ' + container
+    mode, owner = result.stdout.split()
+    return int(mode, 8), owner
+
+
+def assert_mode_at_most(container, path, limit, owner='root:root'):
+    mode, actual_owner = file_mode(container, path)
+    assert mode & ~limit == 0, '%s has mode %o; it must be %o or stricter' % (path, mode, limit)
+    if owner:
+        assert actual_owner == owner, path + ' must be owned by ' + owner
+
+
+def configz(node):
+    return json.loads(kubectl('get', '--raw', '/api/v1/nodes/' + node + '/proxy/configz'))['kubeletconfig']
+
+
+def assert_api_ready():
+    assert kubectl('--request-timeout=5s', 'get', '--raw=/readyz') == 'ok', 'The API server must stay ready'
+
+
+def assert_node_ready(node):
+    status = get('node', node, namespace=None)['status']
+    assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
+
+
+KUBE_BENCH_IMAGE = 'docker.io/aquasec/kube-bench:v0.10.6'
+HOST_PATHS = [('var-lib-etcd', '/var/lib/etcd', '/var/lib/etcd'), ('var-lib-kubelet', '/var/lib/kubelet', '/var/lib/kubelet'),
+              ('etc-systemd', '/etc/systemd', '/etc/systemd'), ('etc-kubernetes', '/etc/kubernetes', '/etc/kubernetes'),
+              ('usr-bin', '/usr/bin', '/usr/local/mount-from-host/bin')]
+
+
+def run_with_limit(arguments, limit, text_input=None):
+    return subprocess.run(arguments, capture_output=True, text=True, timeout=limit, input=text_input)
+
+
+def finished_log(kind, name, condition):
+    waited = run_with_limit(['kubectl', '-n', NAMESPACE, 'wait', condition, kind + '/' + name, '--timeout=150s'], 170)
+    assert waited.returncode == 0, 'The grader ' + kind + ' ' + name + ' did not finish'
+    return run_with_limit(['kubectl', '-n', NAMESPACE, 'logs', kind + '/' + name], 30).stdout
+
+
+def image_output(name, script):
+    """Run a shell script in a short pod with the kube-bench image."""
+    run_with_limit(['kubectl', '-n', NAMESPACE, 'delete', 'pod', name, '--ignore-not-found', '--wait=true'], 60)
+    started = run_with_limit(['kubectl', '-n', NAMESPACE, 'run', name, '--restart=Never', '--image-pull-policy=IfNotPresent',
+                              '--image=' + KUBE_BENCH_IMAGE, '--command', '--', 'sh', '-c', script], 30)
+    assert started.returncode == 0, 'Could not start the grader pod'
     try:
-        waited = _kubectl_raw(['-n', 'default', 'wait', '--for=condition=complete', 'job/kube-bench-verify', '--timeout=150s'], 170)
-        assert waited.returncode == 0, 'The verification Job did not complete'
-        logs = _kubectl_raw(['-n', 'default', 'logs', 'job/kube-bench-verify'], 30).stdout
+        return finished_log('pod', name, "--for=jsonpath={.status.phase}=Succeeded")
     finally:
-        _kubectl_raw(['-n', 'default', 'delete', 'job', 'kube-bench-verify', '--ignore-not-found', '--wait=false'], 30)
-    start = logs.find('{"')
-    assert start >= 0, 'The verification Job printed no JSON'
-    report, _ = json.JSONDecoder().raw_decode(logs[start:])
+        run_with_limit(['kubectl', '-n', NAMESPACE, 'delete', 'pod', name, '--ignore-not-found', '--wait=false'], 30)
+
+
+def bench_job(name, arguments):
+    """Run kube-bench as a Job on the control plane node and return its log."""
+    container = {'name': 'kube-bench', 'image': KUBE_BENCH_IMAGE, 'imagePullPolicy': 'IfNotPresent',
+                 'command': ['kube-bench', 'run'] + arguments,
+                 'volumeMounts': [{'name': item[0], 'mountPath': item[2], 'readOnly': True} for item in HOST_PATHS]}
+    spec = {'hostPID': True, 'restartPolicy': 'Never', 'containers': [container],
+            'nodeSelector': {'node-role.kubernetes.io/control-plane': ''},
+            'tolerations': [{'key': 'node-role.kubernetes.io/control-plane', 'operator': 'Exists', 'effect': 'NoSchedule'}],
+            'volumes': [{'name': item[0], 'hostPath': {'path': item[1]}} for item in HOST_PATHS]}
+    job = {'apiVersion': 'batch/v1', 'kind': 'Job', 'metadata': {'name': name, 'namespace': NAMESPACE},
+           'spec': {'backoffLimit': 0, 'template': {'spec': spec}}}
+    run_with_limit(['kubectl', '-n', NAMESPACE, 'delete', 'job', name, '--ignore-not-found', '--wait=true'], 60)
+    applied = run_with_limit(['kubectl', 'apply', '-f', '-'], 30, json.dumps(job))
+    assert applied.returncode == 0, 'Could not start the grader Job'
+    try:
+        return finished_log('job', name, '--for=condition=complete')
+    finally:
+        run_with_limit(['kubectl', '-n', NAMESPACE, 'delete', 'job', name, '--ignore-not-found', '--wait=false'], 30)
+
+
+def learner_job(name):
+    """Return the Job, its pod and its log after checking that it completed."""
+    job = get('job', name)
+    assert job.get('status', {}).get('succeeded', 0) >= 1, 'The Job ' + name + ' has not completed'
+    pods = json.loads(kubectl('-n', NAMESPACE, 'get', 'pods', '-l', 'job-name=' + name, '-o', 'json'))['items']
+    finished = [pod for pod in pods if pod['status'].get('phase') == 'Succeeded']
+    assert finished, 'The Job ' + name + ' has no finished pod'
+    log = run_with_limit(['kubectl', '-n', NAMESPACE, 'logs', 'pod/' + finished[0]['metadata']['name']], 30).stdout
+    return job, finished[0], log
+
+
+def command_line(pod_spec):
+    container = pod_spec['containers'][0]
+    return container.get('command', []) + container.get('args', [])
+
+
+def option(arguments, name):
+    """The value of an option given as --name value or --name=value."""
+    value = None
+    for index, item in enumerate(arguments):
+        if item == '--' + name and index + 1 < len(arguments):
+            value = arguments[index + 1]
+        elif item.startswith('--' + name + '='):
+            value = item.split('=', 1)[1]
+    return value
+
+def failing_api_server_checks(log):
+    start = log.find('{"')
+    assert start >= 0, 'The kube-bench log holds no JSON'
+    report, _ = json.JSONDecoder().raw_decode(log[start:])
     found = set()
     def walk(node):
         if isinstance(node, dict):
-            if 'test_number' in node and node.get('status') == 'FAIL':
+            if node.get('status') == 'FAIL' and re.fullmatch(r'1\.2\.\d+', str(node.get('test_number', ''))):
                 found.add(str(node['test_number']))
             for value in node.values():
                 walk(value)
@@ -29,16 +151,19 @@ def _failing_ids_now():
             for value in node:
                 walk(value)
     walk(report)
-    return {item for item in found if re.fullmatch(r'1\.2\.\d+', item)}
+    return found
 
-def _learner_ids():
-    _saved = get('configmap', 'failing-checks')
-    _learner = {line.strip() for line in _saved.get('data', {}).get('ids', '').splitlines() if line.strip()}
-    assert _learner, 'The ConfigMap key ids is empty'
-    assert all(re.fullmatch(r'1\.2\.\d+', item) for item in _learner), 'The list may hold only 1.2.x check ids'
-    return _learner
 
-if wants('failing-checks-saved'):
-    _learner_ids()
+if wants('json-job-completed'):
+    job, pod, log = learner_job('api-server-audit')
+    arguments = command_line(pod['spec'])
+    assert option(arguments, 'targets') == 'master', 'Run kube-bench with --targets master'
+    assert '--json' in arguments, 'Run kube-bench with --json'
+    failing_api_server_checks(log)
 if wants('failing-checks-match'):
-    assert _learner_ids() == _failing_ids_now(), 'The saved list differs from the failing 1.2.x checks of the control plane'
+    saved = get('configmap', 'failing-checks').get('data', {}).get('ids', '')
+    recorded = {line.strip() for line in saved.splitlines() if line.strip()}
+    assert recorded, 'The ConfigMap key ids is empty'
+    assert all(re.fullmatch(r'1\.2\.\d+', item) for item in recorded), 'The list may hold only 1.2.x check numbers'
+    expected = failing_api_server_checks(bench_job('grader-audit', ['--targets', 'master', '--json']))
+    assert recorded == expected, 'The saved list differs from the failing 1.2.x checks of the control plane'

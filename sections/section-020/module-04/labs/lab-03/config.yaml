@@ -1,0 +1,49 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-031-lab-020-04-03
+  docs:
+    prerequisites: docs/prerequisites.md
+    examQuestion: question.md
+    caseStudy: docs/case-study.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+    - docker.io/library/python:3.13-alpine
+    - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-private-environment
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: client-cert-auth
+    description: etcd runs with --client-cert-auth=true and refuses a request without a client certificate
+    type: file
+    source: validation/validate-client-cert-auth.sh
+    points: 2
+  - name: peer-client-cert-auth
+    description: etcd runs with --peer-client-cert-auth=true
+    type: file
+    source: validation/validate-peer-client-cert-auth.sh
+    points: 1

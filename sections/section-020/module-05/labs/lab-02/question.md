@@ -7,13 +7,19 @@ exam_objectives:
 
 Allow about 12 minutes for the tasks.
 
-A benchmark review of the worker node lists five findings for the kubelet. Remediate all of them and keep the node in service.
+A benchmark review of the `starfleet` worker node lists five findings for the kubelet. Remediate all of them and keep the node in service.
 
 ## Starting state
 
-The isolated environment has one control plane node, one worker node, two healthy probe replicas and two client Pods. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. The environment also has the weak authentication settings from the review, but only the five findings below are graded in this task.
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-05-02` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. A copy of the original kubelet configuration is in `/opt/training/backup/kubelet-config.yaml` on the worker node. The review lists these findings for the worker node `astro-ats-031-lab-020-05-02-worker`:
 
-Use a host shell with the private kubeconfig for this independent kind environment.
+1. `/var/lib/kubelet/config.yaml` has mode `644`.
+2. `/etc/kubernetes/kubelet.conf` has mode `644`.
+3. `rotateCertificates` is `false`.
+4. `streamingConnectionIdleTimeout` has no useful value.
+5. `tlsMinVersion` is not set.
+
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-05-02)"
@@ -22,20 +28,16 @@ node_name="astro-ats-031-lab-020-05-02-control-plane"
 worker_name="astro-ats-031-lab-020-05-02-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
-
-## Findings
-
-1. `/var/lib/kubelet/config.yaml` on the worker node has mode `644`. The benchmark requires `600` or stricter.
-2. `/etc/kubernetes/kubelet.conf` on the worker node has mode `644`. The benchmark requires `600` or stricter.
-3. `rotateCertificates` is `false`. It must be `true`.
-4. `streamingConnectionIdleTimeout` is not set to a useful value. It must be `5m0s` in the effective configuration.
-5. `tlsMinVersion` is not set. It must be `VersionTLS12`.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
 ## Required result
 
-All five findings are fixed in the effective state. The worker node is `Ready` and both application replicas stay available. Do not set `protectKernelDefaults`, because a kind node shares the kernel of the host.
+- `/var/lib/kubelet/config.yaml` and `/etc/kubernetes/kubelet.conf` on the worker node have mode `600` or stricter and the owner `root:root`.
+- The effective kubelet configuration has `rotateCertificates` set to `true`.
+- The effective `streamingConnectionIdleTimeout` is `5m0s`.
+- The effective `tlsMinVersion` is `VersionTLS12` or `VersionTLS13`.
+- The worker node is `Ready`, and both `probe` replicas stay available. Do not set `protectKernelDefaults`, because a kind node shares the kernel of the host.
 
 ## Verify The Result
 
-The grader reads the file modes with `stat` on the worker node and the effective kubelet configuration through the API server. Restart the kubelet and wait until the effective configuration shows your change. A duplicate key in the kubelet file stops the kubelet, so remove a key before you append it again. A copy of the original file is in `/opt/training/backup` on the worker node.
+The grader reads the file modes with `stat` on the worker node and the effective kubelet configuration through the `configz` endpoint of the API server.

@@ -5,6 +5,6 @@ exam_objectives:
 ---
 # Starting Environment
 
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-01-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The kube-scheduler static pod runs with `--bind-address=0.0.0.0`, so its secure port `10259` listens on every address of the control plane node.
 
-Review and correct one effective control-plane setting while keeping API access available.
+Correct the kube-scheduler `--bind-address` finding in its static pod manifest, check that the new process listens only on the loopback address, and record the change.

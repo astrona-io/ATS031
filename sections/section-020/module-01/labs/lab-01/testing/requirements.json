@@ -7,20 +7,15 @@
       "kind": "configmap",
       "name": "benchmark-review",
       "namespace": "starfleet-031-020-01-01",
+      "outcome": "benchmark-review-record",
       "expected": {
-        "apiVersion": "v1",
-        "kind": "ConfigMap",
-        "metadata": {
-          "name": "benchmark-review",
-          "namespace": "starfleet-031-020-01-01"
-        },
         "data": {
-          "component": "kube-apiserver",
-          "control": "disable-profiling",
+          "component": "kube-scheduler",
+          "check": "1.4.2",
+          "setting": "bind-address",
           "result": "corrected"
         }
-      },
-      "outcome": "benchmark-review-record"
+      }
     },
     {
       "kind": "deployment",
@@ -39,69 +34,6 @@
             "matchLabels": {
               "app": "probe",
               "release": "probe"
-            }
-          },
-          "template": {
-            "metadata": {
-              "labels": {
-                "app": "probe",
-                "release": "probe"
-              }
-            },
-            "spec": {
-              "containers": [
-                {
-                  "name": "probe",
-                  "image": "docker.io/library/python:3.13-alpine",
-                  "command": [
-                    "python",
-                    "/app/server.py"
-                  ],
-                  "env": [
-                    {
-                      "name": "VERSION",
-                      "value": "v1"
-                    }
-                  ],
-                  "ports": [
-                    {
-                      "name": "http",
-                      "containerPort": 8080
-                    }
-                  ],
-                  "readinessProbe": {
-                    "httpGet": {
-                      "path": "/ready",
-                      "port": "http"
-                    },
-                    "periodSeconds": 2
-                  },
-                  "resources": {
-                    "requests": {
-                      "cpu": "10m",
-                      "memory": "32Mi"
-                    },
-                    "limits": {
-                      "memory": "128Mi"
-                    }
-                  },
-                  "volumeMounts": [
-                    {
-                      "name": "app",
-                      "mountPath": "/app",
-                      "readOnly": true
-                    }
-                  ]
-                }
-              ],
-              "volumes": [
-                {
-                  "name": "app",
-                  "configMap": {
-                    "name": "probe-code"
-                  }
-                }
-              ]
             }
           }
         }
