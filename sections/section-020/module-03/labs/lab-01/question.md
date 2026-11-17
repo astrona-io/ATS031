@@ -7,29 +7,32 @@ exam_objectives:
 
 Allow about 15 minutes for the tasks.
 
-The API server of this cluster keeps no record of requests. Turn on audit logging with the staged policy and prove that an event is written.
+After an incident on the `starfleet` cluster nobody could tell who deleted a ConfigMap. The security team has written an audit policy. Turn it on.
 
 ## Starting state
 
-The kind cluster has two healthy `probe` replicas and a `shuttle` client pod in the `starfleet-031-020-03-01` namespace, and a control plane node. The API server runs without an audit policy and without an audit log. A policy file is staged on the control plane node at `/opt/training/audit-policy.yaml`, and no component uses it. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-03-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. An audit policy is staged in `/opt/training/audit-policy.yaml` on the control plane node. No component uses it yet, and the API server writes no audit log.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-03-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-03-01" || exit 1
-NODE=astro-ats-031-lab-020-03-01-control-plane
+node_name="astro-ats-031-lab-020-03-01-control-plane"
+worker_name="astro-ats-031-lab-020-03-01-worker"
 ```
+
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
 ## Required result
 
-- The API server static pod uses the staged policy through the flag `--audit-policy-file`.
-- The API server writes the log to a file set with `--audit-log-path` on a host path of the control plane node.
-- The flags `--audit-log-maxage`, `--audit-log-maxbackup` and `--audit-log-maxsize` are set.
-- The API server is ready and both `probe` replicas stay available.
+- Copy the staged policy to `/etc/kubernetes/policy/audit-policy.yaml` on the control plane node, without changes.
+- The API server runs with `--audit-policy-file=/etc/kubernetes/policy/audit-policy.yaml` and `--audit-log-path=/var/log/kubernetes/audit/audit.log`. Mount both host directories into the API server pod at the same paths.
+- The API server runs with `--audit-log-maxage`, `--audit-log-maxbackup` and `--audit-log-maxsize`, each set to a number above zero.
+- The API server is ready, writes audit events to the log file, and both `probe` replicas stay available.
 
 Keep every backup outside `/etc/kubernetes/manifests`.
 
 ## Verify The Result
 
-The grader reads the flags of the running API server pod, sends a test request, and looks for that request in the audit log on the node. Wait until the API server answers `ok` on `/readyz` before you submit.
+The grader reads the command line of the running `kube-apiserver` process, compares the policy file on the node with the staged policy, creates a test ConfigMap and looks for it in the audit log.

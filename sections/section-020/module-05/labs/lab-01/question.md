@@ -3,17 +3,17 @@ exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Close Anonymous And Open Access On The Kubelet
+# Secure Kubelet Authentication And Authorization
 
-Allow about 8 minutes for the tasks.
+Allow about 12 minutes for the tasks.
 
-An audit found that the kubelet on the worker node accepts anonymous requests, authorizes every authenticated request and listens on the unauthenticated read-only port. Fix these three findings without taking the node out of service.
+A scan of the `starfleet` worker node shows that anyone who reaches port `10250` can list the pods on the node. Close the kubelet API.
 
 ## Starting state
 
-The isolated environment has one control plane node, one worker node, two healthy probe replicas and two client Pods. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-05-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The kubelet on the worker node accepts anonymous requests and allows every request (`AlwaysAllow`). A copy of the original kubelet configuration is in `/opt/training/backup/kubelet-config.yaml` on the worker node.
 
-Use a host shell with the private kubeconfig for this independent kind environment.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-05-01)"
@@ -22,15 +22,14 @@ node_name="astro-ats-031-lab-020-05-01-control-plane"
 worker_name="astro-ats-031-lab-020-05-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
 ## Required result
 
-1. The kubelet on the worker node rejects anonymous requests: `authentication.anonymous.enabled` is `false`.
-2. The kubelet authorization mode is `Webhook`.
-3. The read-only port is closed: `readOnlyPort` is `0` or absent in the effective configuration.
-4. The worker node is `Ready` and both application replicas stay available.
+- The kubelet on the worker node `astro-ats-031-lab-020-05-01-worker` runs with `authentication.anonymous.enabled: false` and `authorization.mode: Webhook` in its effective configuration.
+- A request without credentials from the control plane node to `https://<worker-ip>:10250/pods` returns HTTP `401`.
+- The worker node is `Ready`, and both `probe` replicas stay available.
 
 ## Verify The Result
 
-The grader reads the effective kubelet configuration through the API server. The kubelet reads its file only at start, so restart the kubelet and wait until the effective configuration shows the change. A duplicate key in the kubelet file stops the kubelet. A copy of the original file is in `/opt/training/backup` on the worker node.
+The grader reads the effective kubelet configuration through the `configz` endpoint and sends an anonymous request to the kubelet API from the control plane node.

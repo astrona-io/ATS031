@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: starfleet-031-020-03-02
   labels:
-    project: cks
+    project: ckad
 ---
 apiVersion: v1
 kind: Namespace

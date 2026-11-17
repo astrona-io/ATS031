@@ -488,33 +488,96 @@ modules:
     title: The Benchmark And Where The Settings Live
     path: sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
   - type: reading
+    title: Restrict Control Plane Kubeconfig And Key Files — Task
+    path: sections/section-020/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Restrict Control Plane Kubeconfig And Key Files
+    path: sections/section-020/module-01/labs/lab-02
+    examScope: cluster
+    difficulty: beginner
+    estimated_duration: 8m
+    topic: control-plane-file-permissions
+    task_kind: build
+    learning_goals:
+    - Find control plane kubeconfig and private key files with a wide mode and restrict
+      them to 600.
+    tags:
+    - cks
+    - cis-benchmark
+    - file-permissions
+  - type: reading
+    title: Restrict Control Plane Kubeconfig And Key Files — Solution
+    path: sections/section-020/module-01/labs/lab-02/solution.md
+  - type: reading
     title: 'Read A Check: kube-bench And The Manual Audit'
     path: sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+  - type: reading
+    title: Record A Manual Audit Of The API Server And etcd — Task
+    path: sections/section-020/module-01/labs/lab-03/question.md
+  - type: lab
+    title: Record A Manual Audit Of The API Server And etcd
+    path: sections/section-020/module-01/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: manual-control-plane-audit
+    task_kind: build
+    learning_goals:
+    - Read the effective API server and etcd settings on the node and record them
+      for a benchmark review.
+    tags:
+    - cks
+    - cis-benchmark
+    - manual-audit
+  - type: reading
+    title: Record A Manual Audit Of The API Server And etcd — Solution
+    path: sections/section-020/module-01/labs/lab-03/solution.md
   - type: reading
     title: 'Review The Kubelet: Effective Configuration And File Permissions'
     path: sections/section-020/module-01/course-03-reviewing-the-kubelet.md
   - type: reading
+    title: Report The Effective Kubelet Settings — Task
+    path: sections/section-020/module-01/labs/lab-04/question.md
+  - type: lab
+    title: Report The Effective Kubelet Settings
+    path: sections/section-020/module-01/labs/lab-04
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: kubelet-effective-configuration
+    task_kind: build
+    learning_goals:
+    - Read the effective kubelet configuration through configz, record it, and restrict
+      the kubelet configuration file.
+    tags:
+    - cks
+    - cis-benchmark
+    - kubelet
+  - type: reading
+    title: Report The Effective Kubelet Settings — Solution
+    path: sections/section-020/module-01/labs/lab-04/solution.md
+  - type: reading
     title: Correct A Finding Safely And Record It
     path: sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
   - type: reading
-    title: Disable API Server Profiling In A Private Node — Task
+    title: Correct The Scheduler Bind Address And Record It — Task
     path: sections/section-020/module-01/labs/lab-01/question.md
   - type: lab
-    title: Disable API Server Profiling In A Private Node
+    title: Correct The Scheduler Bind Address And Record It
     path: sections/section-020/module-01/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: api-profiling
     task_kind: build
     learning_goals:
-    - Review and correct one effective control-plane setting while keeping API access
-      available.
+    - Correct one control plane benchmark finding in a static pod manifest, verify
+      the running process and record the decision.
     tags:
     - cks
     - api-profiling
   - type: reading
-    title: Disable API Server Profiling In A Private Node — Solution
+    title: Correct The Scheduler Bind Address And Record It — Solution
     path: sections/section-020/module-01/labs/lab-01/solution.md
   - type: reading
     title: Summary
@@ -531,14 +594,97 @@ modules:
     title: What kube-bench Does Under The Hood
     path: sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
   - type: reading
+    title: Read A kube-bench Check Definition — Task
+    path: sections/section-020/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Read A kube-bench Check Definition
+    path: sections/section-020/module-02/labs/lab-02
+    examScope: cluster
+    difficulty: beginner
+    estimated_duration: 8m
+    topic: kube-bench-definitions
+    task_kind: build
+    learning_goals:
+    - Find the definition files of one benchmark edition in the kube-bench image and
+      read the identifier of a check.
+    tags:
+    - cks
+    - kube-bench
+    - cis-benchmark
+  - type: reading
+    title: Read A kube-bench Check Definition — Solution
+    path: sections/section-020/module-02/labs/lab-02/solution.md
+  - type: reading
     title: Run kube-bench On A kind Node
     path: sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+  - type: reading
+    title: Audit The Worker Node With A kube-bench Job — Task
+    path: sections/section-020/module-02/labs/lab-03/question.md
+  - type: lab
+    title: Audit The Worker Node With A kube-bench Job
+    path: sections/section-020/module-02/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: kube-bench-worker-job
+    task_kind: build
+    learning_goals:
+    - Run kube-bench as a Job on the worker node with access to the node processes
+      and files.
+    tags:
+    - cks
+    - kube-bench
+    - cis-benchmark
+  - type: reading
+    title: Audit The Worker Node With A kube-bench Job — Solution
+    path: sections/section-020/module-02/labs/lab-03/solution.md
   - type: reading
     title: Targets, Benchmarks And Versions
     path: sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
   - type: reading
+    title: Run The etcd Checks With A Pinned Benchmark Edition — Task
+    path: sections/section-020/module-02/labs/lab-04/question.md
+  - type: lab
+    title: Run The etcd Checks With A Pinned Benchmark Edition
+    path: sections/section-020/module-02/labs/lab-04
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: kube-bench-targets
+    task_kind: build
+    learning_goals:
+    - Run only the etcd target of kube-bench with a benchmark edition chosen by name.
+    tags:
+    - cks
+    - kube-bench
+    - etcd
+  - type: reading
+    title: Run The etcd Checks With A Pinned Benchmark Edition — Solution
+    path: sections/section-020/module-02/labs/lab-04/solution.md
+  - type: reading
     title: Read A Result
     path: sections/section-020/module-02/course-04-read-a-result.md
+  - type: reading
+    title: Record The Totals Of A kube-bench Report — Task
+    path: sections/section-020/module-02/labs/lab-05/question.md
+  - type: lab
+    title: Record The Totals Of A kube-bench Report
+    path: sections/section-020/module-02/labs/lab-05
+    examScope: cluster
+    difficulty: beginner
+    estimated_duration: 10m
+    topic: kube-bench-results
+    task_kind: build
+    learning_goals:
+    - Read the summary and the failures of a kube-bench text report and count them
+      by section.
+    tags:
+    - cks
+    - kube-bench
+    - cis-benchmark
+  - type: reading
+    title: Record The Totals Of A kube-bench Report — Solution
+    path: sections/section-020/module-02/labs/lab-05/solution.md
   - type: reading
     title: Select Checks And Export Results
     path: sections/section-020/module-02/course-05-select-checks-and-export-results.md
@@ -550,11 +696,12 @@ modules:
     path: sections/section-020/module-02/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 12m
     topic: kube-bench-master
     task_kind: build
     learning_goals:
-    - Run kube-bench for the master target and save the failing 1.2.x check ids.
+    - Export a kube-bench control plane result as JSON and record exactly the failing
+      API server checks.
     tags:
     - cks
     - kube-bench
@@ -579,11 +726,75 @@ modules:
     title: Static Pods And Safe Editing
     path: sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
   - type: reading
+    title: Recover A Broken Controller Manager Static Pod — Task
+    path: sections/section-020/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Recover A Broken Controller Manager Static Pod
+    path: sections/section-020/module-03/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: static-pod-recovery
+    task_kind: build
+    learning_goals:
+    - Find why a static pod does not start, repair its manifest and keep the manifest
+      file mode.
+    tags:
+    - cks
+    - static-pods
+    - kube-controller-manager
+  - type: reading
+    title: Recover A Broken Controller Manager Static Pod — Solution
+    path: sections/section-020/module-03/labs/lab-03/solution.md
+  - type: reading
     title: Authentication And Authorization Flags
     path: sections/section-020/module-03/course-02-authentication-and-authorization-flags.md
   - type: reading
+    title: Restore API Server Authorization And Remove Anonymous Access — Task
+    path: sections/section-020/module-03/labs/lab-04/question.md
+  - type: lab
+    title: Restore API Server Authorization And Remove Anonymous Access
+    path: sections/section-020/module-03/labs/lab-04
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 12m
+    topic: api-authorization
+    task_kind: build
+    learning_goals:
+    - Restore Node and RBAC authorization on the API server and remove a binding that
+      gives anonymous requests read access.
+    tags:
+    - cks
+    - api-server
+    - authorization
+    - rbac
+  - type: reading
+    title: Restore API Server Authorization And Remove Anonymous Access — Solution
+    path: sections/section-020/module-03/labs/lab-04/solution.md
+  - type: reading
     title: Admission Plugins
     path: sections/section-020/module-03/course-03-admission-plugins.md
+  - type: reading
+    title: Enable NodeRestriction — Task
+    path: sections/section-020/module-03/labs/lab-05/question.md
+  - type: lab
+    title: Enable NodeRestriction
+    path: sections/section-020/module-03/labs/lab-05
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: node-restriction
+    task_kind: build
+    learning_goals:
+    - Enable the NodeRestriction admission plugin and prove that a kubelet can no
+      longer change another node.
+    tags:
+    - cks
+    - api-server
+    - admission-control
+  - type: reading
+    title: Enable NodeRestriction — Solution
+    path: sections/section-020/module-03/labs/lab-05/solution.md
   - type: reading
     title: Audit Logging
     path: sections/section-020/module-03/course-04-audit-logging.md
@@ -595,7 +806,7 @@ modules:
     path: sections/section-020/module-03/labs/lab-01
     examScope: cluster
     difficulty: advanced
-    estimated_duration: 30m
+    estimated_duration: 15m
     topic: api-audit-logging
     task_kind: build
     learning_goals:
@@ -610,28 +821,50 @@ modules:
     title: Profiling, TLS And Service Account Flags
     path: sections/section-020/module-03/course-05-profiling-tls-and-service-account-flags.md
   - type: reading
-    title: Controller Manager, Scheduler And File Permissions
-    path: sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
-  - type: reading
-    title: Disable Profiling And Restrict The API Server Manifest — Task
+    title: Disable Profiling And Raise The API Server TLS Minimum — Task
     path: sections/section-020/module-03/labs/lab-02/question.md
   - type: lab
-    title: Disable Profiling And Restrict The API Server Manifest
+    title: Disable Profiling And Raise The API Server TLS Minimum
     path: sections/section-020/module-03/labs/lab-02
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: api-profiling-permissions
     task_kind: build
     learning_goals:
-    - Disable API server profiling and set the manifest permissions while the API
-      server stays ready.
+    - Disable API server profiling and raise its minimum TLS version, then prove both
+      on the running API server.
     tags:
     - cks
     - api-hardening
   - type: reading
-    title: Disable Profiling And Restrict The API Server Manifest — Solution
+    title: Disable Profiling And Raise The API Server TLS Minimum — Solution
     path: sections/section-020/module-03/labs/lab-02/solution.md
+  - type: reading
+    title: Controller Manager, Scheduler And File Permissions
+    path: sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
+  - type: reading
+    title: Harden The Controller Manager And Scheduler — Task
+    path: sections/section-020/module-03/labs/lab-06/question.md
+  - type: lab
+    title: Harden The Controller Manager And Scheduler
+    path: sections/section-020/module-03/labs/lab-06
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 12m
+    topic: controller-manager-scheduler-hardening
+    task_kind: build
+    learning_goals:
+    - Disable profiling on the controller manager and the scheduler and restrict the
+      control plane manifest files.
+    tags:
+    - cks
+    - kube-controller-manager
+    - kube-scheduler
+    - file-permissions
+  - type: reading
+    title: Harden The Controller Manager And Scheduler — Solution
+    path: sections/section-020/module-03/labs/lab-06/solution.md
   - type: reading
     title: Summary
     path: sections/section-020/module-03/course-07-summary.md
@@ -647,14 +880,99 @@ modules:
     title: What Lives In etcd And Who Talks To It
     path: sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
   - type: reading
+    title: Record How The API Server Connects To etcd — Task
+    path: sections/section-020/module-04/labs/lab-02/question.md
+  - type: lab
+    title: Record How The API Server Connects To etcd
+    path: sections/section-020/module-04/labs/lab-02
+    examScope: cluster
+    difficulty: beginner
+    estimated_duration: 8m
+    topic: etcd-clients
+    task_kind: build
+    learning_goals:
+    - Read from the running API server which etcd address and which client certificate
+      it uses.
+    tags:
+    - cks
+    - etcd
+    - api-server
+  - type: reading
+    title: Record How The API Server Connects To etcd — Solution
+    path: sections/section-020/module-04/labs/lab-02/solution.md
+  - type: reading
     title: Client And Peer TLS Flags
     path: sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+  - type: reading
+    title: Require Client Certificates On etcd — Task
+    path: sections/section-020/module-04/labs/lab-03/question.md
+  - type: lab
+    title: Require Client Certificates On etcd
+    path: sections/section-020/module-04/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 12m
+    topic: etcd-client-auth
+    task_kind: build
+    learning_goals:
+    - Make etcd require a valid client certificate on its client and peer ports again
+      and prove it.
+    tags:
+    - cks
+    - etcd
+    - tls
+  - type: reading
+    title: Require Client Certificates On etcd — Solution
+    path: sections/section-020/module-04/labs/lab-03/solution.md
   - type: reading
     title: Data Directory Ownership And Permissions
     path: sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
   - type: reading
+    title: Restrict The etcd Data Directory — Task
+    path: sections/section-020/module-04/labs/lab-04/question.md
+  - type: lab
+    title: Restrict The etcd Data Directory
+    path: sections/section-020/module-04/labs/lab-04
+    examScope: cluster
+    difficulty: beginner
+    estimated_duration: 8m
+    topic: etcd-data-directory
+    task_kind: build
+    learning_goals:
+    - Find the etcd data directory from the running process, restrict its mode and
+      record the user that runs etcd.
+    tags:
+    - cks
+    - etcd
+    - file-permissions
+  - type: reading
+    title: Restrict The etcd Data Directory — Solution
+    path: sections/section-020/module-04/labs/lab-04/solution.md
+  - type: reading
     title: Query etcd With etcdctl
     path: sections/section-020/module-04/course-04-query-etcd-with-etcdctl.md
+  - type: reading
+    title: Find A Secret Directly In etcd — Task
+    path: sections/section-020/module-04/labs/lab-05/question.md
+  - type: lab
+    title: Find A Secret Directly In etcd
+    path: sections/section-020/module-04/labs/lab-05
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: etcdctl-queries
+    task_kind: build
+    learning_goals:
+    - Use etcdctl with the right certificates to list members and find where a Secret
+      is stored.
+    tags:
+    - cks
+    - etcd
+    - etcdctl
+    - secrets
+  - type: reading
+    title: Find A Secret Directly In etcd — Solution
+    path: sections/section-020/module-04/labs/lab-05/solution.md
   - type: reading
     title: Encryption At Rest Check
     path: sections/section-020/module-04/course-05-encryption-at-rest-check.md
@@ -665,13 +983,13 @@ modules:
     title: Enable Encryption At Rest For Secrets
     path: sections/section-020/module-04/labs/lab-01
     examScope: cluster
-    difficulty: intermediate
-    estimated_duration: 30m
+    difficulty: advanced
+    estimated_duration: 15m
     topic: etcd-encryption
     task_kind: build
     learning_goals:
-    - Enable an EncryptionConfiguration on the API server and prove with etcd that
-      a Secret is stored encrypted.
+    - Enable aescbc encryption at rest for Secrets and prove that etcd stores an encrypted
+      value.
     tags:
     - cks
     - etcd
@@ -694,39 +1012,122 @@ modules:
     title: Kubelet Configuration Sources
     path: sections/section-020/module-05/course-01-kubelet-configuration-sources.md
   - type: reading
+    title: Remove A Kubelet Flag That Overrides The Configuration File — Task
+    path: sections/section-020/module-05/labs/lab-03/question.md
+  - type: lab
+    title: Remove A Kubelet Flag That Overrides The Configuration File
+    path: sections/section-020/module-05/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: kubelet-configuration-sources
+    task_kind: build
+    learning_goals:
+    - Find a kubelet setting that comes from a command-line flag instead of the configuration
+      file and remove it.
+    tags:
+    - cks
+    - kubelet
+  - type: reading
+    title: Remove A Kubelet Flag That Overrides The Configuration File — Solution
+    path: sections/section-020/module-05/labs/lab-03/solution.md
+  - type: reading
     title: Kubelet Authentication And Authorization
     path: sections/section-020/module-05/course-02-kubelet-authentication-and-authorization.md
   - type: reading
-    title: Read-Only Port, Ports And TLS Settings
-    path: sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
-  - type: reading
-    title: Close Anonymous And Open Access On The Kubelet — Task
+    title: Secure Kubelet Authentication And Authorization — Task
     path: sections/section-020/module-05/labs/lab-01/question.md
   - type: lab
-    title: Close Anonymous And Open Access On The Kubelet
+    title: Secure Kubelet Authentication And Authorization
     path: sections/section-020/module-05/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 12m
     topic: kubelet-authentication
     task_kind: build
     learning_goals:
-    - Disable anonymous requests, set Webhook authorization and close the read-only
-      port on the kubelet.
+    - Turn off anonymous access to the kubelet API and switch its authorization to
+      Webhook, then prove both.
     tags:
     - cks
     - kubelet
     - authentication
     - authorization
   - type: reading
-    title: Close Anonymous And Open Access On The Kubelet — Solution
+    title: Secure Kubelet Authentication And Authorization — Solution
     path: sections/section-020/module-05/labs/lab-01/solution.md
+  - type: reading
+    title: Read-Only Port, Ports And TLS Settings
+    path: sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
+  - type: reading
+    title: Close The Kubelet Read-Only Port And Raise Its TLS Minimum — Task
+    path: sections/section-020/module-05/labs/lab-04/question.md
+  - type: lab
+    title: Close The Kubelet Read-Only Port And Raise Its TLS Minimum
+    path: sections/section-020/module-05/labs/lab-04
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: kubelet-read-only-port
+    task_kind: build
+    learning_goals:
+    - Close the kubelet read-only port and raise the minimum TLS version of the kubelet,
+      then prove both.
+    tags:
+    - cks
+    - kubelet
+    - tls
+  - type: reading
+    title: Close The Kubelet Read-Only Port And Raise Its TLS Minimum — Solution
+    path: sections/section-020/module-05/labs/lab-04/solution.md
   - type: reading
     title: Other Kubelet Checks
     path: sections/section-020/module-05/course-04-other-kubelet-checks.md
   - type: reading
+    title: Restrict The Kubelet Service Files And Turn On Certificate Rotation — Task
+    path: sections/section-020/module-05/labs/lab-05/question.md
+  - type: lab
+    title: Restrict The Kubelet Service Files And Turn On Certificate Rotation
+    path: sections/section-020/module-05/labs/lab-05
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: kubelet-service-files
+    task_kind: build
+    learning_goals:
+    - Restrict the systemd unit files of the kubelet and turn certificate rotation
+      back on.
+    tags:
+    - cks
+    - kubelet
+    - file-permissions
+  - type: reading
+    title: Restrict The Kubelet Service Files And Turn On Certificate Rotation — Solution
+    path: sections/section-020/module-05/labs/lab-05/solution.md
+  - type: reading
     title: Review CoreDNS (kube-dns)
     path: sections/section-020/module-05/course-05-review-coredns-kube-dns.md
+  - type: reading
+    title: Remove Write Access To The CoreDNS Configuration — Task
+    path: sections/section-020/module-05/labs/lab-06/question.md
+  - type: lab
+    title: Remove Write Access To The CoreDNS Configuration
+    path: sections/section-020/module-05/labs/lab-06
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: coredns-review
+    task_kind: build
+    learning_goals:
+    - Find and remove an RBAC grant that lets a workload change the CoreDNS configuration,
+      and verify pod records in the Corefile.
+    tags:
+    - cks
+    - coredns
+    - rbac
+  - type: reading
+    title: Remove Write Access To The CoreDNS Configuration — Solution
+    path: sections/section-020/module-05/labs/lab-06/solution.md
   - type: reading
     title: Remediate Findings End To End
     path: sections/section-020/module-05/course-06-remediate-findings-end-to-end.md
@@ -737,13 +1138,13 @@ modules:
     title: Remediate Five Kubelet Benchmark Findings
     path: sections/section-020/module-05/labs/lab-02
     examScope: cluster
-    difficulty: advanced
-    estimated_duration: 30m
+    difficulty: intermediate
+    estimated_duration: 12m
     topic: kubelet-hardening
     task_kind: build
     learning_goals:
-    - Fix file modes, certificate rotation, streaming timeout and minimum TLS version,
-      then verify the effective configuration.
+    - Remediate five kubelet benchmark findings in one change and prove each one in
+      the effective state.
     tags:
     - cks
     - kubelet

@@ -38,22 +38,22 @@ testing:
 validation:
   scripts:
   - name: kubelet-file-modes
-    description: kubelet config.yaml and kubelet.conf have mode 600
+    description: The kubelet configuration file and kubeconfig on the worker node have mode 600 or stricter
     type: file
     source: validation/validate-kubelet-file-modes.sh
-    points: 2
+    points: 1
   - name: certificate-rotation
-    description: The kubelet rotates its certificates
+    description: The effective kubelet configuration has rotateCertificates set to true
     type: file
     source: validation/validate-certificate-rotation.sh
     points: 1
   - name: streaming-idle-timeout
-    description: streamingConnectionIdleTimeout is 5m0s
+    description: The effective kubelet streamingConnectionIdleTimeout is 5m0s
     type: file
     source: validation/validate-streaming-idle-timeout.sh
     points: 1
   - name: tls-min-version
-    description: The kubelet accepts TLS 1.2 or later only
+    description: The effective kubelet tlsMinVersion is VersionTLS12 or VersionTLS13
     type: file
     source: validation/validate-tls-min-version.sh
     points: 1

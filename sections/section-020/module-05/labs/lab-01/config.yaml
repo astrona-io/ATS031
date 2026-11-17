@@ -38,17 +38,12 @@ testing:
 validation:
   scripts:
   - name: anonymous-auth
-    description: The kubelet rejects anonymous requests
+    description: The kubelet has anonymous authentication off and answers an anonymous request with HTTP 401
     type: file
     source: validation/validate-anonymous-auth.sh
-    points: 1
+    points: 2
   - name: webhook-authorization
-    description: The kubelet authorizes requests through the API server (Webhook)
+    description: The effective kubelet configuration uses the Webhook authorization mode
     type: file
     source: validation/validate-webhook-authorization.sh
-    points: 1
-  - name: read-only-port
-    description: The kubelet read-only port is closed
-    type: file
-    source: validation/validate-read-only-port.sh
     points: 1

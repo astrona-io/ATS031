@@ -38,12 +38,12 @@ testing:
 validation:
   scripts:
   - name: api-profiling-disabled
-    description: The API server runs with --profiling=false
+    description: kube-apiserver runs with --profiling=false and /debug/pprof/ returns 404
     type: file
     source: validation/validate-api-profiling-disabled.sh
-    points: 1
-  - name: api-manifest-permissions
-    description: kube-apiserver.yaml has mode 600 and owner root:root
+    points: 2
+  - name: tls-min-version
+    description: kube-apiserver runs with --tls-min-version VersionTLS12 or VersionTLS13
     type: file
-    source: validation/validate-api-manifest-permissions.sh
+    source: validation/validate-tls-min-version.sh
     points: 1

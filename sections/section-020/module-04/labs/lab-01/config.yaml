@@ -38,12 +38,12 @@ testing:
 validation:
   scripts:
   - name: encryption-provider
-    description: The API server loads an encryption configuration for Secrets
+    description: kube-apiserver uses an encryption configuration with aescbc before identity, stored with mode 600 or stricter
     type: file
     source: validation/validate-encryption-provider.sh
     points: 1
   - name: secret-encrypted
-    description: launch-code is stored in etcd with the aescbc provider
+    description: The Secret launch-code is stored in etcd with the aescbc prefix and the API still returns its value
     type: file
     source: validation/validate-secret-encrypted.sh
     points: 2

@@ -3,30 +3,33 @@ exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Disable Profiling And Restrict The API Server Manifest
+# Disable Profiling And Raise The API Server TLS Minimum
 
-Allow about 8 minutes for the tasks.
+Allow about 10 minutes for the tasks.
 
-A benchmark run on this cluster reports two failing checks for the API server: profiling and the permissions of its manifest.
+A penetration test of the `starfleet` API server reports two findings: the profiling endpoint answers, and the server accepts TLS 1.0. Close both.
 
 ## Starting state
 
-The kind cluster has two healthy `probe` replicas and a `shuttle` client pod in the `starfleet-031-020-03-02` namespace. The API server runs with profiling at its default value, and its static pod manifest has mode `644`. A copy of every original manifest is in `/opt/training/backup` on the control plane node.
+The kind cluster has one control plane node and one worker node. The `starfleet-031-020-03-02` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The API server runs with the profiling endpoint on (the default) and with `--tls-min-version=VersionTLS10`.
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-03-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-03-02" || exit 1
-NODE=astro-ats-031-lab-020-03-02-control-plane
+node_name="astro-ats-031-lab-020-03-02-control-plane"
+worker_name="astro-ats-031-lab-020-03-02-worker"
 ```
+
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
 ## Required result
 
-- The API server runs with `--profiling=false`.
-- The file `/etc/kubernetes/manifests/kube-apiserver.yaml` has mode `600` and owner `root:root`.
-- The API server is ready and both `probe` replicas stay available.
+- The API server runs with `--profiling=false`, and a request to `/debug/pprof/` returns HTTP `404`.
+- The API server runs with `--tls-min-version=VersionTLS12` or `--tls-min-version=VersionTLS13`.
+- The API server stays ready and both `probe` replicas stay available.
 
 ## Verify The Result
 
-The grader reads the arguments of the running API server pod and the mode and owner of the manifest on the node. Wait until the API server answers `ok` on `/readyz` before you submit.
+The grader reads the command line of the running `kube-apiserver` process and requests `/debug/pprof/` with administrator credentials.

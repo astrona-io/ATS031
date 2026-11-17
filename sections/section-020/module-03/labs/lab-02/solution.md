@@ -3,49 +3,55 @@ exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Disable Profiling And Restrict The API Server Manifest Solution
+# Disable Profiling And Raise The API Server TLS Minimum Solution
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-03-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-03-02" || exit 1
-NODE=astro-ats-031-lab-020-03-02-control-plane
+node_name="astro-ats-031-lab-020-03-02-control-plane"
+worker_name="astro-ats-031-lab-020-03-02-worker"
 ```
 
-## Add the flag through a copy
+Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
 
-Copy the manifest with its mode, insert the flag after the line `- kube-apiserver`, and move the copy into place:
+## Confirm both findings
+
+The profiling endpoint `/debug/pprof/` returns data about the memory and CPU use of the API server. Any user who is allowed to read it can learn about the inside of the server, and heavy profiling requests use resources. Request it with your administrator credentials, then read the two flags of the running process:
 
 ```sh
-podman exec $NODE mkdir -p /etc/kubernetes/edit
-podman exec $NODE cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec $NODE sed -i 's|^\( *\)- kube-apiserver$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec $NODE mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
+kubectl get --raw /debug/pprof/ | head -n 5
+podman exec "$node_name" ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' -e '--tls-min-version'
 ```
 
-## Fix the owner and the mode
+The first command prints the start of an HTML page, so the endpoint answers. The second shows `--tls-min-version=VersionTLS10` and no `--profiling` flag, so profiling has its default value `true`.
+
+## Change both flags
+
+TLS 1.0 and 1.1 have known weaknesses. The benchmark asks for TLS 1.2 or newer. Change the TLS line and add `--profiling=false` in the same edit, so the API server restarts only once. The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. Edit a copy in a work directory outside that folder, check the copy, and move it back in one step, so that the kubelet never reads a half-written file:
 
 ```sh
-podman exec $NODE chown root:root /etc/kubernetes/manifests/kube-apiserver.yaml
-podman exec $NODE chmod 600 /etc/kubernetes/manifests/kube-apiserver.yaml
-until kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; do sleep 3; done
+podman exec "$node_name" mkdir -p /etc/kubernetes/edit
+podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
+podman exec "$node_name" sed -i -e 's|--tls-min-version=VersionTLS10|--tls-min-version=VersionTLS12|' -e 's|^\( *\)- kube-apiserver$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-apiserver.yaml
+podman exec "$node_name" grep -e '--profiling' -e '--tls-min-version' /etc/kubernetes/edit/kube-apiserver.yaml
+podman exec "$node_name" mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-## Verify The Result
+## Verify the running API server
+
+Wait until the API server answers, then repeat the checks:
 
 ```sh
-kubectl -n kube-system get pod kube-apiserver-$NODE -o jsonpath='{.spec.containers[0].command}' | tr ',' '\n' | grep profiling
-podman exec $NODE stat -c '%a %U:%G' /etc/kubernetes/manifests/kube-apiserver.yaml
+kubectl get --raw=/readyz
+podman exec "$node_name" ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' -e '--tls-min-version'
+kubectl get --raw /debug/pprof/
 ```
 
-The first command prints `--profiling=false`, and the second prints `600 root:root`. If the pod still shows the old arguments, wait for the kubelet to restart the component and run the command again.
-
-After recording your result, remove the independent lab with `astrona destroy ats-031-lab-020-03-02`.
+The process now has `--profiling=false` and `--tls-min-version=VersionTLS12`, and the last command fails with `the server could not find the requested resource`, which is HTTP `404`.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Losing the mode in the copy.** Use `cp -p` and set the mode again at the end.
-> - **Checking only the file.** The grader reads the running pod, so wait for the restart.
-> - **Leaving a backup in the manifests directory.** Keep it outside.
+> A `--profiling=false` line in the manifest does nothing until the new process runs; check the process. A second `--tls-min-version` flag overrides the first, so remove the old line instead of adding one. Valid values are `VersionTLS12` and `VersionTLS13`, not `1.2`.
