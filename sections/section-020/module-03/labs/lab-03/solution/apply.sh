@@ -19,5 +19,5 @@ fi
 solution_directory="$lab_directory/solution"
 edit_manifest kube-controller-manager '/--profilling=false/d'
 run_on_node chmod 600 /etc/kubernetes/manifests/kube-controller-manager.yaml
-wait_for_argument "$node_name" kube-controller-manager --bind-address=127.0.0.1 present
-kubectl -n kube-system wait --for=condition=Ready "pod/kube-controller-manager-$node_name" --timeout=180s
+wait_for_argument "$node_name" kube-controller-manager --profilling=false absent
+wait_for_pod_ready "kube-controller-manager-$node_name" True

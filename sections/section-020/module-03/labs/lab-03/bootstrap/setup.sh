@@ -32,3 +32,6 @@ for attempt in $(seq 1 60); do
   fi
   sleep 3
 done
+# The broken process exits at once; wait until the pod status shows it, so a
+# stale Ready status cannot hide the fault from the reference solution.
+wait_for_pod_ready "kube-controller-manager-$node_name" False
