@@ -25,4 +25,4 @@ The `drifter` pod in `outpost-031-040-02-01` runs a third-party image, and the s
 
 ## Verify the result
 
-The grader sends live requests from the client pods and reads the objects. Wait a few seconds after you apply a policy, because the network plugin needs a moment to program it. Do not delete or recreate the existing pods unless the task says so.
+The grader sends live requests from the existing client pods. It also starts a new pod with no special labels in `outpost-031-040-02-01`, sends the same requests from it and removes it again, so a policy that selects only `drifter` does not pass. Wait a few seconds after you apply a policy, because the network plugin needs a moment to program it. Do not delete or recreate the existing pods.

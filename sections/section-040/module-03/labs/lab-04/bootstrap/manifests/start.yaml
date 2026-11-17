@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dock-031-040-03-04
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost-031-040-03-04
+---
+# Uses the network namespace of the node.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: net-tool
+  namespace: dock-031-040-03-04
+  labels:
+    app: net-tool
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  containers:
+  - name: client
+    image: docker.io/curlimages/curl:8.11.1
+    command:
+    - sleep
+    - '86400'
+---
+# Uses the network namespace of the node.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: port-watch
+  namespace: dock-031-040-03-04
+  labels:
+    app: port-watch
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  containers:
+  - name: client
+    image: docker.io/curlimages/curl:8.11.1
+    command:
+    - sleep
+    - '86400'
+---
+# An ordinary pod on the pod network.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tender
+  namespace: dock-031-040-03-04
+  labels:
+    app: tender
+spec:
+  containers:
+  - name: client
+    image: docker.io/curlimages/curl:8.11.1
+    command:
+    - sleep
+    - '86400'
+---
+# Uses the network namespace of the node.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sniffer
+  namespace: outpost-031-040-03-04
+  labels:
+    app: sniffer
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  containers:
+  - name: client
+    image: docker.io/curlimages/curl:8.11.1
+    command:
+    - sleep
+    - '86400'
+---
+# Privileged, but on the pod network.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-shell
+  namespace: outpost-031-040-03-04
+  labels:
+    app: debug-shell
+spec:
+  containers:
+  - name: client
+    image: docker.io/curlimages/curl:8.11.1
+    command:
+    - sleep
+    - '86400'
+    securityContext:
+      privileged: true
+---
+# An ordinary pod on the pod network.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drifter
+  namespace: outpost-031-040-03-04
+  labels:
+    app: drifter
+spec:
+  containers:
+  - name: client
+    image: docker.io/curlimages/curl:8.11.1
+    command:
+    - sleep
+    - '86400'

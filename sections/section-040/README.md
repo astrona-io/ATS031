@@ -8,9 +8,9 @@ A workload with no Kubernetes permissions can still reach a node metadata servic
 
 ## Learning Path
 
-1. Protect Node Metadata And Management Endpoints: the first module, with the landing page, three parts, one lab and the knowledge check.
-2. Block The Cloud Metadata Endpoint: the metadata service, an `ipBlock` with `except`, a selective allow for one labelled pod, policy pitfalls and a coverage check. Two labs and a knowledge check.
-3. Protect Node Endpoints And The Runtime: the kubelet ports, node identity and `NodeRestriction`, runtime socket and `hostPath` exposure, host network pods, and controls outside the cluster. Two labs and a knowledge check.
+1. Protect Node Metadata And Management Endpoints: the first module, with the landing page, three parts, two labs and the knowledge check.
+2. Block The Cloud Metadata Endpoint: the metadata service, an `ipBlock` with `except`, a selective allow for one labelled pod, policy pitfalls and a coverage check. Four labs and a knowledge check.
+3. Protect Node Endpoints And The Runtime: the kubelet ports, node identity and `NodeRestriction`, runtime socket and `hostPath` exposure, host network pods, and controls outside the cluster. Four labs and a knowledge check.
 
 Each module has a summary and a ten-question knowledge check. Each lab follows the part that practises its skill. Every module playground is a private `kind` cluster with Kubernetes v1.35 and Calico; launch it from the landing page and keep it running while you read.
 
@@ -23,6 +23,6 @@ Each module has a summary and a ten-question knowledge check. Each lab follows t
 - Explain what a NetworkPolicy does not cover, and name provider-specific protections that complement it.
 - Block the metadata address for a namespace with an `ipBlock` and an `except` entry, and open it for one labelled pod with a second policy.
 - Explain why two separate deny-list policies on the same pods cancel each other, and put every exception in one list.
-- Restrict pod access to the kubelet ports and read the node authorization settings.
-- Find pods that mount the container runtime socket or use the host network, and explain why a pod policy does not cover host network pods.
+- Turn off the kubelet read-only port, restrict pod access to the kubelet ports and read the node authorization settings.
+- Find pods that mount the container runtime socket or use the host network, remove a socket mount from a workload, and make Pod Security admission reject new host network pods.
 - Name the controls that live outside the cluster, such as metadata service settings and node identity configuration at a cloud provider.

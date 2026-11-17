@@ -796,16 +796,35 @@ modules:
     title: Network Paths To A Metadata-Style Endpoint
     path: sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
   - type: reading
+    title: Bring A Host-Network Workload Back Under NetworkPolicy — Task
+    path: sections/section-040/module-01/labs/lab-01/question.md
+  - type: lab
+    title: Bring A Host-Network Workload Back Under NetworkPolicy
+    path: sections/section-040/module-01/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 7m
+    topic: metadata-isolation
+    task_kind: build
+    learning_goals:
+    - Move a host-network workload back onto the pod network so that an egress NetworkPolicy applies to it.
+    tags:
+    - cks
+    - metadata-isolation
+    - networkpolicy
+  - type: reading
+    title: Bring A Host-Network Workload Back Under NetworkPolicy — Solution
+    path: sections/section-040/module-01/labs/lab-01/solution.md
+  - type: reading
     title: Restrict The Pod And Verify The Boundary
     path: sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
   - type: reading
-    title: Block A Simulated Metadata Endpoint — Task
-    path: sections/section-040/module-01/labs/lab-01/question.md
+    title: Restrict A Pod To An Egress Allow-List — Task
+    path: sections/section-040/module-01/labs/lab-02/question.md
   - type: lab
-    title: Block A Simulated Metadata Endpoint
-    path: sections/section-040/module-01/labs/lab-01
+    title: Restrict A Pod To An Egress Allow-List
+    path: sections/section-040/module-01/labs/lab-02
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 8m
     topic: metadata-isolation
     task_kind: build
     learning_goals:
@@ -815,8 +834,8 @@ modules:
     - cks
     - metadata-isolation
   - type: reading
-    title: Block A Simulated Metadata Endpoint — Solution
-    path: sections/section-040/module-01/labs/lab-01/solution.md
+    title: Restrict A Pod To An Egress Allow-List — Solution
+    path: sections/section-040/module-01/labs/lab-02/solution.md
   - type: reading
     title: Summary
     path: sections/section-040/module-01/course-04-summary.md
@@ -844,7 +863,7 @@ modules:
     title: Block The Metadata Address For A Namespace
     path: sections/section-040/module-02/labs/lab-01
     difficulty: intermediate
-    estimated_duration: 20m
+    estimated_duration: 6m
     topic: metadata-isolation
     task_kind: build
     learning_goals:
@@ -866,7 +885,7 @@ modules:
     title: Allow The Metadata Address For One Labelled Pod
     path: sections/section-040/module-02/labs/lab-02
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 8m
     topic: metadata-isolation
     task_kind: build
     learning_goals:
@@ -883,8 +902,47 @@ modules:
     title: Policy Pitfalls For The Metadata Address
     path: sections/section-040/module-02/course-05-policy-pitfalls-for-the-metadata-address.md
   - type: reading
+    title: Repair Metadata Policies That Do Not Block — Task
+    path: sections/section-040/module-02/labs/lab-03/question.md
+  - type: lab
+    title: Repair Metadata Policies That Do Not Block
+    path: sections/section-040/module-02/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: metadata-isolation
+    task_kind: troubleshooting
+    learning_goals:
+    - Find and repair metadata NetworkPolicies that select the pods but do not block
+      the address.
+    tags:
+    - cks
+    - metadata-isolation
+    - networkpolicy
+  - type: reading
+    title: Repair Metadata Policies That Do Not Block — Solution
+    path: sections/section-040/module-02/labs/lab-03/solution.md
+  - type: reading
     title: Verify Coverage Across Namespaces
     path: sections/section-040/module-02/course-06-verify-coverage-across-namespaces.md
+  - type: reading
+    title: Close Metadata Gaps Across Namespaces — Task
+    path: sections/section-040/module-02/labs/lab-04/question.md
+  - type: lab
+    title: Close Metadata Gaps Across Namespaces
+    path: sections/section-040/module-02/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 12m
+    topic: metadata-isolation
+    task_kind: troubleshooting
+    learning_goals:
+    - Find namespaces and pods that a metadata block does not cover and close the gaps.
+    tags:
+    - cks
+    - metadata-isolation
+    - networkpolicy
+  - type: reading
+    title: Close Metadata Gaps Across Namespaces — Solution
+    path: sections/section-040/module-02/labs/lab-04/solution.md
   - type: reading
     title: Summary
     path: sections/section-040/module-02/course-07-summary.md
@@ -900,16 +958,34 @@ modules:
     title: The Kubelet API From A Pod
     path: sections/section-040/module-03/course-01-the-kubelet-api-from-a-pod.md
   - type: reading
+    title: Close The Kubelet Read-Only Port — Task
+    path: sections/section-040/module-03/labs/lab-01/question.md
+  - type: lab
+    title: Close The Kubelet Read-Only Port
+    path: sections/section-040/module-03/labs/lab-01
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: kubelet-ports
+    task_kind: build
+    learning_goals:
+    - Turn off the kubelet read-only port on a node and keep the secure port working.
+    tags:
+    - cks
+    - kubelet
+  - type: reading
+    title: Close The Kubelet Read-Only Port — Solution
+    path: sections/section-040/module-03/labs/lab-01/solution.md
+  - type: reading
     title: Restrict Reachability To Node Ports
     path: sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
   - type: reading
     title: Block Pod Access To The Kubelet Ports — Task
-    path: sections/section-040/module-03/labs/lab-01/question.md
+    path: sections/section-040/module-03/labs/lab-02/question.md
   - type: lab
     title: Block Pod Access To The Kubelet Ports
-    path: sections/section-040/module-03/labs/lab-01
+    path: sections/section-040/module-03/labs/lab-02
     difficulty: intermediate
-    estimated_duration: 20m
+    estimated_duration: 8m
     topic: kubelet-ports
     task_kind: build
     learning_goals:
@@ -921,7 +997,7 @@ modules:
     - networkpolicy
   - type: reading
     title: Block Pod Access To The Kubelet Ports — Solution
-    path: sections/section-040/module-03/labs/lab-01/solution.md
+    path: sections/section-040/module-03/labs/lab-02/solution.md
   - type: reading
     title: Node Identity And NodeRestriction
     path: sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
@@ -929,27 +1005,48 @@ modules:
     title: Runtime Socket And hostPath Exposure
     path: sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
   - type: reading
-    title: hostNetwork And Privileged Pods Bypass Policy
-    path: sections/section-040/module-03/course-05-hostnetwork-and-privileged-pods-bypass-policy.md
-  - type: reading
-    title: Find Pods That Expose The Runtime Or The Host Network — Task
-    path: sections/section-040/module-03/labs/lab-02/question.md
+    title: Remove A Runtime Socket Mount — Task
+    path: sections/section-040/module-03/labs/lab-03/question.md
   - type: lab
-    title: Find Pods That Expose The Runtime Or The Host Network
-    path: sections/section-040/module-03/labs/lab-02
+    title: Remove A Runtime Socket Mount
+    path: sections/section-040/module-03/labs/lab-03
     difficulty: intermediate
-    estimated_duration: 20m
+    estimated_duration: 8m
     topic: host-exposure
-    task_kind: troubleshooting
+    task_kind: build
     learning_goals:
-    - Find pods that mount the runtime socket or use the host network and record them.
+    - Remove a container runtime socket mount from a workload and run it as a user
+      other than root.
     tags:
     - cks
     - runtime-socket
     - hostpath
   - type: reading
-    title: Find Pods That Expose The Runtime Or The Host Network — Solution
-    path: sections/section-040/module-03/labs/lab-02/solution.md
+    title: Remove A Runtime Socket Mount — Solution
+    path: sections/section-040/module-03/labs/lab-03/solution.md
+  - type: reading
+    title: hostNetwork And Privileged Pods Bypass Policy
+    path: sections/section-040/module-03/course-05-hostnetwork-and-privileged-pods-bypass-policy.md
+  - type: reading
+    title: Find Host-Network Pods And Block New Ones — Task
+    path: sections/section-040/module-03/labs/lab-04/question.md
+  - type: lab
+    title: Find Host-Network Pods And Block New Ones
+    path: sections/section-040/module-03/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: host-exposure
+    task_kind: troubleshooting
+    learning_goals:
+    - Find pods that use the host network and make Pod Security admission reject new
+      ones.
+    tags:
+    - cks
+    - runtime-socket
+    - hostpath
+  - type: reading
+    title: Find Host-Network Pods And Block New Ones — Solution
+    path: sections/section-040/module-03/labs/lab-04/solution.md
   - type: reading
     title: Controls Outside The Cluster
     path: sections/section-040/module-03/course-06-controls-outside-the-cluster.md

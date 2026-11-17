@@ -5,5 +5,23 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-printf 'dock-031-040-03-02/net-tool\noutpost-031-040-03-02/runtime-peek\nstarfleet-031-040-03-02/cri-helper\n' > /tmp/exposed-pods.txt
-kubectl -n dock-031-040-03-02 create configmap exposed-pods --from-file=pods=/tmp/exposed-pods.txt --dry-run=client -o yaml | kubectl apply -f -
+worker_ip="$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')"
+control_plane_ip="$(kubectl get nodes -l 'node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')"
+cat <<EOF | kubectl apply -f -
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-node-ports
+  namespace: outpost-031-040-03-02
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - $worker_ip/32
+        - $control_plane_ip/32
+EOF

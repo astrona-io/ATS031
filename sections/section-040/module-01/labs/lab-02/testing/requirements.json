@@ -1,0 +1,18 @@
+{
+  "context": "kind-astro-ats-031-lab-040-01-02",
+  "cluster": "astro-ats-031-lab-040-01-02",
+  "namespace": "starfleet-031-040-01-02",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet-031-040-01-02",
+      "expected": {
+        "metadata": {
+          "name": "probe"
+        }
+      },
+      "state": "deployment"
+    }
+  ]
+}
