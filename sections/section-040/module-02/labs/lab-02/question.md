@@ -21,8 +21,8 @@ Keep this connection selected for the whole task.
 
 ## Required result
 
-The pod `agent` in `starfleet-031-040-02-02` carries the label `role=cloud-agent` and needs the metadata address to do its work. The pod `shuttle` in the same namespace does not. Configure NetworkPolicy in `starfleet-031-040-02-02` so that `agent` can reach `169.254.169.254` on port 80, `shuttle` cannot, and both pods can still reach the `probe` Service by its name. Use the existing label. Do not add or remove labels, do not delete pods, and do not change other namespaces: `drifter` in `outpost-031-040-02-02` must still reach the metadata address.
+The pod `agent` in `starfleet-031-040-02-02` carries the label `role=cloud-agent` and needs the metadata address to do its work. The pod `shuttle` in the same namespace does not. Configure NetworkPolicy in `starfleet-031-040-02-02` so that `agent` can reach `169.254.169.254` on port 80, `shuttle` cannot, and both pods can still reach the `probe` Service by its name. The rule must follow the label, not the pod names: any pod in the namespace with `role=cloud-agent` gets the address, and any other pod, including pods that start later, does not. Use the existing label. Do not add or remove labels, do not delete pods, and do not change other namespaces: `drifter` in `outpost-031-040-02-02` must still reach the metadata address.
 
 ## Verify the result
 
-The grader sends live requests from the client pods and reads the objects. Wait a few seconds after you apply a policy, because the network plugin needs a moment to program it. Do not delete or recreate the existing pods unless the task says so.
+The grader sends live requests from the existing client pods. It also starts two new pods in `starfleet-031-040-02-02`, one without labels and one with `role=cloud-agent`, sends the same requests from them and removes them again. Wait a few seconds after you apply a policy, because the network plugin needs a moment to program it. Do not delete or recreate the existing pods.

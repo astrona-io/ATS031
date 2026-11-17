@@ -2,15 +2,15 @@
 exam_objectives:
 - Protect node metadata and endpoints
 ---
-# Find Pods That Expose The Runtime Or The Host Network
+# Block Pod Access To The Kubelet Ports
 
 Allow about 8 minutes for the tasks.
 
-List every pod in the application namespaces that mounts the container runtime socket or uses the host network.
+Stop the pods of one namespace from reaching the kubelet ports on the nodes while DNS and Services keep working.
 
 ## Starting state
 
-The cluster has one control plane node and one worker node. The kubelet on the worker serves its read-only port 10255 on purpose, and both kubelets serve HTTPS on port 10250. The namespaces `starfleet-031-040-03-02`, `outpost-031-040-03-02` and `dock-031-040-03-02` each have a `probe` Deployment and Service on port 80 and a client pod with the `curl` command. The namespace `metadata-stub-031-040-03-02` has a pod `control` that no policy selects. The pods `runtime-peek`, `cri-helper`, `log-reader` and `net-tool` expose host resources. No NetworkPolicy exists.
+The cluster has one control plane node and one worker node. The kubelet on the worker serves its read-only port 10255 on purpose, and both kubelets serve HTTPS on port 10250. The namespaces `starfleet-031-040-03-02`, `outpost-031-040-03-02` and `dock-031-040-03-02` each have a `probe` Deployment and Service on port 80 and a client pod with the `curl` command. The namespace `metadata-stub-031-040-03-02` has a pod `control` that no policy selects. No NetworkPolicy exists.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-040-03-02)"
@@ -21,8 +21,8 @@ Keep this connection selected for the whole task.
 
 ## Required result
 
-A review needs a list of the pods in `starfleet-031-040-03-02`, `outpost-031-040-03-02` and `dock-031-040-03-02` that either mount the container runtime socket, or a host directory that contains it, or use the host network. Create the ConfigMap `exposed-pods` in the namespace `dock-031-040-03-02` with one key, `pods`. The value holds one line for each such pod in the form `namespace/name` and nothing else. Include only pods that match. A pod that mounts a different host path does not match. Do not change, delete or recreate any pod.
+The pods in `outpost-031-040-03-02` do not need the kubelet. Create a NetworkPolicy in `outpost-031-040-03-02` that applies to every pod in the namespace and prevents them from reaching port 10250 on both nodes and port 10255 on the worker node. DNS and Services must keep working: `drifter` must still reach the `probe` Service in `outpost-031-040-03-02` and the `probe` Service in `starfleet-031-040-03-02` by its full DNS name. Do not change other namespaces: `shuttle` in `starfleet-031-040-03-02` must still reach the read-only port.
 
 ## Verify the result
 
-The grader sends live requests from the client pods and reads the objects. Wait a few seconds after you apply a policy, because the network plugin needs a moment to program it. Do not delete or recreate the existing pods unless the task says so.
+The grader sends live requests from the existing client pods. It also starts a new pod with no special labels in `outpost-031-040-03-02`, sends the same requests from it and removes it again, so a policy that selects only `drifter` does not pass. Wait a few seconds after you apply a policy, because the network plugin needs a moment to program it. Do not delete or recreate the existing pods.

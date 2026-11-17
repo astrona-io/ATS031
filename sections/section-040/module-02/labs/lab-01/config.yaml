@@ -40,12 +40,12 @@ testing:
 validation:
   scripts:
   - name: metadata-blocked
-    description: drifter cannot reach 169.254.169.254 while other egress still works
+    description: drifter cannot reach 169.254.169.254 and still reaches both probe Services
     type: file
     source: validation/validate-metadata-blocked.sh
     points: 1
   - name: whole-namespace
-    description: An egress policy selects every pod in drifter's namespace
+    description: A new pod that the grader starts in the namespace is blocked from 169.254.169.254 and still reaches the Services
     type: file
     source: validation/validate-whole-namespace.sh
     points: 1

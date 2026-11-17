@@ -1,9 +1,5 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
-# Block A Simulated Metadata Endpoint
+# Bring A Host-Network Workload Back Under NetworkPolicy
 
-Separate permitted application dependencies from a metadata-style endpoint in the private network.
+The namespace has an egress allow-list for every pod, but the `relay` Deployment runs with `hostNetwork: true`, so the policy does not select it and it still reaches a metadata-style endpoint. The learner moves the workload back to the pod network, so the existing policy applies to it.
 
-The task and solution use a separate pinned kind cluster. Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass.
+Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass.

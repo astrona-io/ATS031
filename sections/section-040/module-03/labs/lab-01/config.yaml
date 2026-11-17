@@ -11,7 +11,6 @@ runtime:
   kind:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
-    - docker.io/library/python:3.13-alpine
     - docker.io/curlimages/curl:8.11.1
     nodes:
       workers: 1
@@ -39,18 +38,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: kubelet-https-port
-    description: drifter cannot reach port 10250 on either node
+  - name: config-closed
+    description: The kubelet configuration file on the worker sets readOnlyPort to 0 or leaves it out
     type: file
-    source: validation/validate-kubelet-https-port.sh
+    source: validation/validate-config-closed.sh
     points: 1
-  - name: kubelet-read-only-port
-    description: drifter cannot reach port 10255 on the worker
+  - name: port-closed
+    description: The running worker kubelet uses no read-only port and port 10255 does not answer, while port 10250 still serves
     type: file
-    source: validation/validate-kubelet-read-only-port.sh
-    points: 1
-  - name: whole-namespace
-    description: An egress policy selects every pod in drifter's namespace
-    type: file
-    source: validation/validate-whole-namespace.sh
-    points: 1
+    source: validation/validate-port-closed.sh
+    points: 2

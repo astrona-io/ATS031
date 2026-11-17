@@ -2,65 +2,49 @@
 exam_objectives:
 - Protect node metadata and endpoints
 ---
-# Block Pod Access To The Kubelet Ports Solution
+# Close The Kubelet Read-Only Port Solution
 
 ## Inspect the starting state
 
-Read the addresses of the nodes. They are the addresses you must exclude:
+Store the name and address of the worker node, then confirm that the read-only port answers. The request goes from the `inspector` pod to the worker's address:
 
 ```sh
-kubectl get nodes -o wide
+WORKER=$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].metadata.name}')
 WORKER_IP=$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-CONTROL_PLANE_IP=$(kubectl get nodes -l 'node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')
-kubectl -n outpost-031-040-03-01 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
-kubectl -n outpost-031-040-03-01 exec drifter -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$WORKER_IP:10250/pods"
+kubectl -n dock-031-040-03-01 exec inspector -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
+kubectl get --raw "/api/v1/nodes/$WORKER/proxy/configz" | grep -o '"readOnlyPort":[0-9]*'
 ```
 
-The first request prints `200` because the read-only port answers without a credential. The second prints `401`, because the secure port refuses an unauthenticated request. Both prove that the ports are reachable.
+The request prints `200`: the kubelet sends the pod list to a caller with no credential. The second command asks the API server for the configuration that the running kubelet uses, and it prints `"readOnlyPort":10255`.
 
-## Create the policy
+## Change the kubelet configuration
 
-The policy selects all pods and allows `0.0.0.0/0` except the address of each node. Replace `<WORKER_IP>` and `<CONTROL_PLANE_IP>` with the two addresses you stored.
-
-Save this as `networkpolicy-block-node-ports.yaml`:
-
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: block-node-ports
-  namespace: outpost-031-040-03-01
-spec:
-  podSelector: {}
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - ipBlock:
-        cidr: 0.0.0.0/0
-        except:
-        - <WORKER_IP>/32
-        - <CONTROL_PLANE_IP>/32
-```
-
-Apply it:
+The kubelet reads `/var/lib/kubelet/config.yaml` only when it starts. Set the port to `0` in the file on the worker, then restart the kubelet with `systemctl`. Use `docker` instead of `podman` if your machine uses Docker:
 
 ```sh
-kubectl apply -f networkpolicy-block-node-ports.yaml
+podman exec astro-ats-031-lab-040-03-01-worker sed -i 's/^readOnlyPort:.*/readOnlyPort: 0/' /var/lib/kubelet/config.yaml
+podman exec astro-ats-031-lab-040-03-01-worker grep readOnlyPort /var/lib/kubelet/config.yaml
+podman exec astro-ats-031-lab-040-03-01-worker systemctl restart kubelet
 ```
+
+The `grep` command prints `readOnlyPort: 0`. Deleting the whole line also works, because the kubelet turns the port off when the field is missing from a configuration file.
 
 ## Verify
 
-Wait a few seconds, then check the blocked ports, the Services and the controls:
+Wait until the node is `Ready` again, then check the running configuration and both ports:
 
 ```sh
-kubectl -n outpost-031-040-03-01 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
-kubectl -n outpost-031-040-03-01 exec drifter -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$WORKER_IP:10250/pods"
-kubectl -n outpost-031-040-03-01 exec drifter -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$CONTROL_PLANE_IP:10250/pods"
-kubectl -n outpost-031-040-03-01 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe/
-kubectl -n outpost-031-040-03-01 exec drifter -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' http://probe.starfleet-031-040-03-01.svc.cluster.local/
-kubectl -n starfleet-031-040-03-01 exec shuttle -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
+kubectl wait --for=condition=Ready "node/$WORKER" --timeout=120s
+kubectl get --raw "/api/v1/nodes/$WORKER/proxy/configz" | grep -o '"readOnlyPort":[0-9]*'
+kubectl -n dock-031-040-03-01 exec inspector -- curl -s -m 3 -o /dev/null -w '%{http_code}\n' "http://$WORKER_IP:10255/pods"
+kubectl -n dock-031-040-03-01 exec inspector -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$WORKER_IP:10250/pods"
 ```
 
-The first three requests print `000` with exit code 28. The last three print `200`. An alternative that also passes the check is a policy that allows all addresses on the port ranges 1 to 10249, 10251 to 10254 and 10256 to 65535, with `endPort`.
+The `grep` on the running configuration finds no match, because the kubelet leaves out a port of `0`. The request to port 10255 prints `000`, because nothing listens on the port any more. The request to port 10250 prints `401`: the secure port still runs and still refuses a caller without a credential.
+
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-040-03-01`.
+
+## Common pitfalls
+
+> [!WARNING]
+> Editing the file without restarting the kubelet changes nothing on the running node: the read-only port keeps answering until the kubelet restarts. A typing mistake in `/var/lib/kubelet/config.yaml` stops the kubelet from starting, and the node turns `NotReady`; read `journalctl -u kubelet` on the worker to find the line. A NetworkPolicy that blocks port 10255 hides the port from some pods, but the kubelet still serves it to every other caller.

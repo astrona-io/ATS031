@@ -5,23 +5,12 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-worker_ip="$(kubectl get nodes -l '!node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')"
-control_plane_ip="$(kubectl get nodes -l 'node-role.kubernetes.io/control-plane' -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')"
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: block-node-ports
-  namespace: outpost-031-040-03-01
-spec:
-  podSelector: {}
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - ipBlock:
-        cidr: 0.0.0.0/0
-        except:
-        - $worker_ip/32
-        - $control_plane_ip/32
-EOF
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-040-03-01}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
+worker_name="$cluster-worker"
+
+# Close the read-only port in the kubelet configuration file, then restart the kubelet.
+"$engine" exec "$worker_name" sed -i 's/^readOnlyPort:.*/readOnlyPort: 0/' /var/lib/kubelet/config.yaml
+"$engine" exec "$worker_name" systemctl restart kubelet
+sleep 10
+kubectl wait --for=condition=Ready "node/$worker_name" --timeout=180s

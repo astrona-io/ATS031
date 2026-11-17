@@ -4,15 +4,11 @@ exam_objectives:
 ---
 # Prerequisites
 
-Use astrona, kubectl, Python 3, Podman and a shell. Node inspection exercises use the containers in this environment, not the physical host.
-
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use `astrona`, `kubectl` and a shell. Select the private kubeconfig of this independent `kind` environment. A kubeconfig identifies the cluster and credentials that `kubectl`, the Kubernetes command-line tool, uses.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-040-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-040-01-01" || exit 1
-node_name="astro-ats-031-lab-040-01-01-control-plane"
-worker_name="astro-ats-031-lab-040-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Keep this connection selected. The cluster has one control plane node and one worker node, and Calico enforces NetworkPolicy.

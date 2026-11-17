@@ -2,31 +2,29 @@
 exam_objectives:
 - Protect node metadata and endpoints
 ---
-# Block A Simulated Metadata Endpoint
+# Bring A Host-Network Workload Back Under NetworkPolicy
 
-Allow about 8 minutes for the tasks.
+Allow about 7 minutes for the tasks.
 
-Separate permitted application dependencies from a metadata-style endpoint in the private network.
+Find out why an egress policy does not restrict one workload, and change the workload so that the policy applies to it.
 
 ## Starting state
 
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
-
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+The namespace `starfleet-031-040-01-01` has the `probe` Deployment and Service, the pod `metadata-simulator` (a web server on port 8080 that stands in for a metadata endpoint) and the Deployment `relay` with one client pod. The NetworkPolicy `starfleet-egress` selects every pod in the namespace and allows egress only to the cluster DNS pods and to the `probe` pods on port 8080. The namespace `outpost-031-040-01-01` has the client pod `drifter` and no NetworkPolicy.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-040-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-040-01-01" || exit 1
-node_name="astro-ats-031-lab-040-01-01-control-plane"
-worker_name="astro-ats-031-lab-040-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+Keep this connection selected for the whole task.
 
 ## Required result
 
-Create metadata-simulator as a healthy Python HTTP server with label app metadata-simulator on port 8080. Configure shuttle-isolation to allow only DNS and probe application traffic. A direct metadata-simulator request from shuttle must time out while an unrestricted drifter request proves that listener works. This models the network boundary; it does not claim to secure a cloud provider metadata service or host-network bypass.
+An audit found that the `relay` pod can still reach `metadata-simulator`, although `starfleet-egress` should allow only DNS and the `probe` pods. The `relay` workload does not need any setting that gives it access to the network of the node.
 
-## Verify The Result
+Change the `relay` Deployment so that its pod runs in the pod network, where `starfleet-egress` applies to it. Then `relay` must not reach `metadata-simulator`, and it must still reach the `probe` Service by the name `probe`. Keep the Deployment available with one replica. Do not change or delete the NetworkPolicy, `metadata-simulator` or `drifter`.
 
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+## Verify the result
+
+The grader reads the `relay` Deployment and its running pod, and sends live requests from that pod to the pod IP address of `metadata-simulator` and to the `probe` Service. It also checks that `drifter` still reaches `metadata-simulator`, so a blocked request cannot come from a stopped server. Wait until the rollout of `relay` has finished before you submit.
