@@ -1,0 +1,9 @@
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+http:
+  middlewares:
+    hsts:
+      headers:
+        stsSeconds: 300

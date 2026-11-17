@@ -74,21 +74,52 @@ labs:
     - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
     - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
     - sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
+  sections/section-030/module-01/labs/lab-02:
+    preparation:
+    - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+  sections/section-030/module-01/labs/lab-03:
+    preparation:
+    - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+  sections/section-030/module-01/labs/lab-04:
+    preparation:
+    - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+    - sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
   sections/section-030/module-02/labs/lab-01:
     preparation:
-    - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
-    - sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
     - sections/section-030/module-02/course-03-first-ingress-and-host-header-testing.md
     - sections/section-030/module-02/course-04-path-types-and-priority.md
     - sections/section-030/module-02/course-05-several-services-and-a-default-backend.md
+  sections/section-030/module-02/labs/lab-02:
+    preparation:
+    - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+    - sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
+  sections/section-030/module-02/labs/lab-03:
+    preparation:
+    - sections/section-030/module-02/course-03-first-ingress-and-host-header-testing.md
+  sections/section-030/module-02/labs/lab-04:
+    preparation:
+    - sections/section-030/module-02/course-04-path-types-and-priority.md
+  sections/section-030/module-02/labs/lab-05:
+    preparation:
+    - sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
+    - sections/section-030/module-02/course-06-inspect-the-running-controller.md
   sections/section-030/module-03/labs/lab-01:
     preparation:
-    - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
-    - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
-    - sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
     - sections/section-030/module-03/course-04-create-the-tls-secret.md
     - sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
   sections/section-030/module-03/labs/lab-02:
+    preparation:
+    - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+    - sections/section-030/module-03/course-04-create-the-tls-secret.md
+  sections/section-030/module-03/labs/lab-03:
+    preparation:
+    - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+    - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+  sections/section-030/module-03/labs/lab-04:
+    preparation:
+    - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+    - sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
+  sections/section-030/module-03/labs/lab-05:
     preparation:
     - sections/section-030/module-03/course-06-https-redirect-hsts-and-the-default-certificate.md
   sections/section-030/module-04/labs/lab-01:
@@ -96,10 +127,17 @@ labs:
     - sections/section-030/module-04/course-01-tls-versions-ciphers-and-server-names.md
   sections/section-030/module-04/labs/lab-02:
     preparation:
-    - sections/section-030/module-04/course-02-mutual-tls-with-client-certificates.md
-    - sections/section-030/module-04/course-03-shrink-the-controller-attack-surface.md
-    - sections/section-030/module-04/course-04-rotate-and-replace-certificates.md
+    - sections/section-030/module-04/course-01-tls-versions-ciphers-and-server-names.md
     - sections/section-030/module-04/course-05-troubleshoot-tls-ingress-failures.md
+  sections/section-030/module-04/labs/lab-03:
+    preparation:
+    - sections/section-030/module-04/course-02-mutual-tls-with-client-certificates.md
+  sections/section-030/module-04/labs/lab-04:
+    preparation:
+    - sections/section-030/module-04/course-03-shrink-the-controller-attack-surface.md
+  sections/section-030/module-04/labs/lab-05:
+    preparation:
+    - sections/section-030/module-04/course-04-rotate-and-replace-certificates.md
   sections/section-040/module-01/labs/lab-01:
     preparation:
     - sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
@@ -152,8 +190,6 @@ additional_readings:
 - sections/section-010/module-03/course-05-ports-protocols-and-endport.md
 - sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
 - sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
-- sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
-- sections/section-030/module-02/course-06-inspect-the-running-controller.md
 - sections/section-040/module-02/course-05-policy-pitfalls-for-the-metadata-address.md
 - sections/section-040/module-02/course-06-verify-coverage-across-namespaces.md
 - sections/section-040/module-03/course-06-controls-outside-the-cluster.md

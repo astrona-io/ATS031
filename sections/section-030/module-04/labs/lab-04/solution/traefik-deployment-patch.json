@@ -1,0 +1,6 @@
+[
+  {"op": "test", "path": "/spec/template/spec/containers/0/args/6", "value": "--api.insecure=true"},
+  {"op": "replace", "path": "/spec/template/spec/containers/0/args/6", "value": "--providers.kubernetesingress.namespaces=starfleet-031-030-04-04"},
+  {"op": "test", "path": "/spec/template/spec/containers/0/ports/2/containerPort", "value": 8080},
+  {"op": "remove", "path": "/spec/template/spec/containers/0/ports/2"}
+]

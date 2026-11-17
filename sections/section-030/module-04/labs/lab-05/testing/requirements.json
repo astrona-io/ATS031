@@ -1,0 +1,84 @@
+{
+  "context": "kind-astro-ats-031-lab-030-04-05",
+  "cluster": "astro-ats-031-lab-030-04-05",
+  "namespace": "starfleet-031-030-04-05",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-04-05"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-04-05"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "orbit",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "orbit",
+          "namespace": "starfleet-031-030-04-05"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "orbit"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "orbit",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "orbit",
+          "namespace": "starfleet-031-030-04-05"
+        },
+        "spec": {
+          "selector": {
+            "app": "orbit"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

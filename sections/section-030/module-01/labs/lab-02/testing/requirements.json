@@ -1,0 +1,100 @@
+{
+  "context": "kind-astro-ats-031-lab-030-01-02",
+  "cluster": "astro-ats-031-lab-030-01-02",
+  "namespace": "starfleet-031-030-01-02",
+  "resources": [
+    {
+      "kind": "ingress",
+      "name": "relay",
+      "outcome": "relay-class",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "relay",
+          "namespace": "starfleet-031-030-01-02"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-01-02"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-01-02"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "relay",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "relay",
+          "namespace": "starfleet-031-030-01-02"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "relay"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "relay",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "relay",
+          "namespace": "starfleet-031-030-01-02"
+        },
+        "spec": {
+          "selector": {
+            "app": "relay"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

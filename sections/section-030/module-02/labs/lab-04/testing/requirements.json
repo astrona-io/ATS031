@@ -1,0 +1,122 @@
+{
+  "context": "kind-astro-ats-031-lab-030-02-04",
+  "cluster": "astro-ats-031-lab-030-02-04",
+  "namespace": "starfleet-031-030-02-04",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-02-04"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-02-04"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "beacon",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "beacon",
+          "namespace": "starfleet-031-030-02-04"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "beacon"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "beacon",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "beacon",
+          "namespace": "starfleet-031-030-02-04"
+        },
+        "spec": {
+          "selector": {
+            "app": "beacon"
+          }
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "scout",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "scout",
+          "namespace": "starfleet-031-030-02-04"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "scout"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "scout",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "scout",
+          "namespace": "starfleet-031-030-02-04"
+        },
+        "spec": {
+          "selector": {
+            "app": "scout"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

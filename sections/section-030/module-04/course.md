@@ -20,7 +20,7 @@ After this module you can:
 
 ## Before you start
 
-You need the TLS basics from creating certificates and TLS Secrets, plus `openssl` and `curl` on your own machine. The module has five parts: TLS versions and server names, mutual TLS, the attack surface of the controller, certificate rotation, and troubleshooting. The first graded lab follows the first part, and the second follows the troubleshooting part.
+You need the TLS basics from creating certificates and TLS Secrets, plus `openssl` and `curl` on your own machine. The module has five parts: TLS versions and server names, mutual TLS, the attack surface of the controller, certificate rotation, and troubleshooting. A graded lab follows every part.
 
 Your playground is a `kind` cluster running Kubernetes v1.35 with Traefik installed and these objects:
 

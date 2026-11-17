@@ -4,7 +4,7 @@ exam_objectives:
 ---
 # HTTPS Redirect, HSTS And The Default Certificate
 
-A route with a good certificate is only part of a safe HTTPS setup. Clients that ask for an unknown host still get a certificate, clients that use plain HTTP are not sent to HTTPS by themselves, and browsers do not know that they should always use HTTPS. This part shows what Traefik serves for an unknown name, redirects HTTP to HTTPS on the entrypoint, and explains HSTS.
+A route with a good certificate is only part of a safe HTTPS setup. Clients that ask for an unknown host still get a certificate, clients that use plain HTTP are not sent to HTTPS by themselves, and browsers do not know that they should always use HTTPS. This part shows what Traefik serves for an unknown name, redirects HTTP to HTTPS on the entrypoint, and adds an HSTS header to one route.
 
 ## What Traefik serves for an unknown name
 
@@ -66,12 +66,54 @@ The diagram shows that the redirect sends the client back with an HTTPS address,
 
 HTTP Strict Transport Security (HSTS) is a response header, `Strict-Transport-Security: max-age=...`. A browser that receives it over HTTPS remembers for `max-age` seconds that this host must only be reached over HTTPS. The browser then upgrades plain HTTP requests itself, which closes the gap before the first redirect. The header is useless over plain HTTP, and a long `max-age` is hard to undo, so start with a short value.
 
-In Traefik the header comes from a headers middleware with `stsSeconds`. With the file provider, a middleware named `hsts` in the dynamic configuration is attached to an Ingress with the annotation `traefik.ingress.kubernetes.io/router.middlewares: hsts@file`. Other controllers use an annotation that sets the same header. The module that follows uses the dynamic configuration file for TLS options, and this part does not change it.
+In Traefik the header comes from a headers middleware with `stsSeconds`. A middleware is a step that Traefik runs on a request or a response between the router and the Service. With the file provider, a middleware named `hsts` in the dynamic configuration is attached to an Ingress with the annotation `traefik.ingress.kubernetes.io/router.middlewares: hsts@file`. The suffix `@file` tells Traefik that the middleware comes from the file provider and not from Kubernetes objects. Other controllers use an annotation that sets the same header.
+
+In the playground, Traefik reads the file `dynamic.yaml` from the ConfigMap `traefik-dynamic` in `ingress-system`. The file already holds the TLS option `default`. The ConfigMap holds the whole file, so the new version must keep that option and add the middleware. Save this as `configmap-traefik-dynamic.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-dynamic
+  namespace: ingress-system
+data:
+  dynamic.yaml: |
+    tls:
+      options:
+        default:
+          minVersion: VersionTLS12
+    http:
+      middlewares:
+        hsts:
+          headers:
+            stsSeconds: 300
+```
+
+Apply it:
+
+```sh
+kubectl apply -f configmap-traefik-dynamic.yaml
+```
+
+The kubelet updates the mounted file in the Traefik pod after a short delay, often up to a minute, and Traefik reloads it because the file provider watches the folder. The middleware does nothing until a route uses it. Attach it to the Ingress `probe` with the annotation:
+
+```sh
+kubectl -n starfleet annotate ingress probe traefik.ingress.kubernetes.io/router.middlewares=hsts@file
+```
+
+Then check the result. Keep the port forward running and read the response headers of an HTTPS request. Use the same certificate file for `--cacert` as before:
+
+```sh
+curl -si --cacert ca.crt --resolve probe.example.test:8443:127.0.0.1 https://probe.example.test:8443/ | grep -i strict-transport
+```
+
+The output is the header `Strict-Transport-Security: max-age=300`. If the command prints nothing, Traefik has not yet read the new file, so wait a little and run it again. The same request over plain HTTP gets the redirect and no HSTS header, because the header is only valid over HTTPS.
 
 ## Common pitfalls
 
 > [!WARNING]
 > - **Replacing the whole `args` list with a merge patch.** Use a JSON patch that appends items.
 > - **Forgetting that the pod restarts.** The port forward ends and must be started again.
+> - **Dropping the TLS option `default` when you add the middleware.** The ConfigMap holds the whole file, so write the existing option again.
 > - **Setting HSTS with a long `max-age` while testing.** Browsers keep the rule and you cannot undo it from the server.
 > - **Treating the default certificate as a working certificate.** No client trusts it.

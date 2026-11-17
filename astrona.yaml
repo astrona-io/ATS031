@@ -562,8 +562,47 @@ modules:
     title: 'Ingress Routing: Controller, Class, Host And Path'
     path: sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
   - type: reading
+    title: Fix An Ingress That Traefik Ignores — Task
+    path: sections/section-030/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Fix An Ingress That Traefik Ignores
+    path: sections/section-030/module-01/labs/lab-02
+    difficulty: beginner
+    estimated_duration: 6m
+    topic: ingress-routing
+    task_kind: build
+    learning_goals:
+    - Repair the class and the backend port of an Ingress so Traefik routes it by
+      host name.
+    tags:
+    - cks
+    - ingress-tls
+    - traefik
+  - type: reading
+    title: Fix An Ingress That Traefik Ignores — Solution
+    path: sections/section-030/module-01/labs/lab-02/solution.md
+  - type: reading
     title: Certificates And The TLS Secret
     path: sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+  - type: reading
+    title: Create A TLS Secret From A Certificate And Key — Task
+    path: sections/section-030/module-01/labs/lab-03/question.md
+  - type: lab
+    title: Create A TLS Secret From A Certificate And Key
+    path: sections/section-030/module-01/labs/lab-03
+    difficulty: beginner
+    estimated_duration: 8m
+    topic: ingress-tls
+    task_kind: build
+    learning_goals:
+    - Create a certificate with a SAN and a long enough validity, check that the key
+      matches, and store both in a TLS Secret.
+    tags:
+    - cks
+    - ingress-tls
+  - type: reading
+    title: Create A TLS Secret From A Certificate And Key — Solution
+    path: sections/section-030/module-01/labs/lab-03/solution.md
   - type: reading
     title: Configure An Ingress With TLS And Verify It
     path: sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
@@ -574,7 +613,7 @@ modules:
     title: Verify TLS Termination And Server Identity
     path: sections/section-030/module-01/labs/lab-01
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 6m
     topic: ingress-tls
     task_kind: build
     learning_goals:
@@ -589,6 +628,25 @@ modules:
   - type: reading
     title: Several Hosts, Server Name Selection And Troubleshooting
     path: sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
+  - type: reading
+    title: Serve Two Hosts With Their Own Certificates — Task
+    path: sections/section-030/module-01/labs/lab-04/question.md
+  - type: lab
+    title: Serve Two Hosts With Their Own Certificates
+    path: sections/section-030/module-01/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: ingress-tls
+    task_kind: build
+    learning_goals:
+    - Give each host of one Ingress its own TLS Secret and prove with the server name
+      that each host gets its own certificate.
+    tags:
+    - cks
+    - ingress-tls
+  - type: reading
+    title: Serve Two Hosts With Their Own Certificates — Solution
+    path: sections/section-030/module-01/labs/lab-04/solution.md
   - type: reading
     title: Summary
     path: sections/section-030/module-01/course-05-summary.md
@@ -607,11 +665,70 @@ modules:
     title: Read The Traefik Installation On kind
     path: sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
   - type: reading
+    title: Repair The Traefik Installation — Task
+    path: sections/section-030/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Repair The Traefik Installation
+    path: sections/section-030/module-02/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: ingress-routing
+    task_kind: build
+    learning_goals:
+    - Read the Traefik installation, then fix the IngressClass argument and the read-only
+      ClusterRole so the controller routes again.
+    tags:
+    - cks
+    - ingress-tls
+    - traefik
+  - type: reading
+    title: Repair The Traefik Installation — Solution
+    path: sections/section-030/module-02/labs/lab-02/solution.md
+  - type: reading
     title: First Ingress And Host Header Testing
     path: sections/section-030/module-02/course-03-first-ingress-and-host-header-testing.md
   - type: reading
+    title: Publish A Service By Host Name — Task
+    path: sections/section-030/module-02/labs/lab-03/question.md
+  - type: lab
+    title: Publish A Service By Host Name
+    path: sections/section-030/module-02/labs/lab-03
+    difficulty: beginner
+    estimated_duration: 6m
+    topic: ingress-routing
+    task_kind: build
+    learning_goals:
+    - Write a host-based Ingress on the web entrypoint and test it with the Host header.
+    tags:
+    - cks
+    - ingress-tls
+    - traefik
+  - type: reading
+    title: Publish A Service By Host Name — Solution
+    path: sections/section-030/module-02/labs/lab-03/solution.md
+  - type: reading
     title: Path Types And Priority
     path: sections/section-030/module-02/course-04-path-types-and-priority.md
+  - type: reading
+    title: Match Exact And Prefix Paths — Task
+    path: sections/section-030/module-02/labs/lab-04/question.md
+  - type: lab
+    title: Match Exact And Prefix Paths
+    path: sections/section-030/module-02/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: ingress-routing
+    task_kind: build
+    learning_goals:
+    - Combine an Exact path and a Prefix path on one host and predict which requests
+      each one matches.
+    tags:
+    - cks
+    - ingress-tls
+    - traefik
+  - type: reading
+    title: Match Exact And Prefix Paths — Solution
+    path: sections/section-030/module-02/labs/lab-04/solution.md
   - type: reading
     title: Several Services And A Default Backend
     path: sections/section-030/module-02/course-05-several-services-and-a-default-backend.md
@@ -622,7 +739,7 @@ modules:
     title: Route Two Services From One Host
     path: sections/section-030/module-02/labs/lab-01
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 5m
     topic: ingress-routing
     task_kind: build
     learning_goals:
@@ -638,6 +755,26 @@ modules:
   - type: reading
     title: Inspect The Running Controller
     path: sections/section-030/module-02/course-06-inspect-the-running-controller.md
+  - type: reading
+    title: Find A Broken Route With The Traefik API — Task
+    path: sections/section-030/module-02/labs/lab-05/question.md
+  - type: lab
+    title: Find A Broken Route With The Traefik API
+    path: sections/section-030/module-02/labs/lab-05
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: ingress-routing
+    task_kind: build
+    learning_goals:
+    - Use the Traefik log and API to find why a route is missing, fix it, and record
+      the router name the API reports.
+    tags:
+    - cks
+    - ingress-tls
+    - traefik
+  - type: reading
+    title: Find A Broken Route With The Traefik API — Solution
+    path: sections/section-030/module-02/labs/lab-05/solution.md
   - type: reading
     title: Summary
     path: sections/section-030/module-02/course-07-summary.md
@@ -656,11 +793,72 @@ modules:
     title: Self-Signed Certificate With openssl
     path: sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
   - type: reading
+    title: Create A Self-Signed Certificate For Two Names — Task
+    path: sections/section-030/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Create A Self-Signed Certificate For Two Names
+    path: sections/section-030/module-03/labs/lab-03
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: ingress-tls
+    task_kind: build
+    learning_goals:
+    - Create one self-signed certificate whose SAN covers two host names, with a fixed
+      validity, and serve it for both names.
+    tags:
+    - cks
+    - ingress-tls
+    - openssl
+  - type: reading
+    title: Create A Self-Signed Certificate For Two Names — Solution
+    path: sections/section-030/module-03/labs/lab-03/solution.md
+  - type: reading
     title: Sign A Server Certificate With Your Own CA
     path: sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
   - type: reading
+    title: Sign A Server Certificate With A Lab CA — Task
+    path: sections/section-030/module-03/labs/lab-04/question.md
+  - type: lab
+    title: Sign A Server Certificate With A Lab CA
+    path: sections/section-030/module-03/labs/lab-04
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: ingress-tls
+    task_kind: build
+    learning_goals:
+    - Sign a server certificate with a given certificate authority, keep the SAN in
+      the signed certificate, and serve it so clients that trust only the CA accept
+      it.
+    tags:
+    - cks
+    - ingress-tls
+    - openssl
+  - type: reading
+    title: Sign A Server Certificate With A Lab CA — Solution
+    path: sections/section-030/module-03/labs/lab-04/solution.md
+  - type: reading
     title: Create The TLS Secret
     path: sections/section-030/module-03/course-04-create-the-tls-secret.md
+  - type: reading
+    title: Repair A TLS Ingress With A Missing Secret — Task
+    path: sections/section-030/module-03/labs/lab-02/question.md
+  - type: lab
+    title: Repair A TLS Ingress With A Missing Secret
+    path: sections/section-030/module-03/labs/lab-02
+    difficulty: intermediate
+    estimated_duration: 6m
+    topic: tls-troubleshooting
+    task_kind: build
+    learning_goals:
+    - Repair a TLS Ingress whose Secret is missing in its namespace and whose certificate
+      has no SAN.
+    tags:
+    - cks
+    - ingress-tls
+    - troubleshooting
+  - type: reading
+    title: Repair A TLS Ingress With A Missing Secret — Solution
+    path: sections/section-030/module-03/labs/lab-02/solution.md
   - type: reading
     title: Configure spec.tls And Verify
     path: sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
@@ -671,7 +869,7 @@ modules:
     title: Publish Scout Over HTTPS With Your Own Certificate
     path: sections/section-030/module-03/labs/lab-01
     difficulty: intermediate
-    estimated_duration: 30m
+    estimated_duration: 8m
     topic: tls-certificates
     task_kind: build
     learning_goals:
@@ -687,25 +885,25 @@ modules:
     title: HTTPS Redirect, HSTS And The Default Certificate
     path: sections/section-030/module-03/course-06-https-redirect-hsts-and-the-default-certificate.md
   - type: reading
-    title: Repair A TLS Ingress With A Missing Secret — Task
-    path: sections/section-030/module-03/labs/lab-02/question.md
+    title: Redirect HTTP To HTTPS And Add HSTS — Task
+    path: sections/section-030/module-03/labs/lab-05/question.md
   - type: lab
-    title: Repair A TLS Ingress With A Missing Secret
-    path: sections/section-030/module-03/labs/lab-02
+    title: Redirect HTTP To HTTPS And Add HSTS
+    path: sections/section-030/module-03/labs/lab-05
     difficulty: intermediate
-    estimated_duration: 25m
-    topic: tls-troubleshooting
+    estimated_duration: 10m
+    topic: ingress-tls
     task_kind: build
     learning_goals:
-    - Repair a TLS Ingress whose Secret is missing in its namespace and whose certificate
-      has no SAN.
+    - Redirect every plain HTTP request to HTTPS on the entrypoint and add an HSTS
+      header with a middleware.
     tags:
     - cks
     - ingress-tls
-    - troubleshooting
+    - traefik
   - type: reading
-    title: Repair A TLS Ingress With A Missing Secret — Solution
-    path: sections/section-030/module-03/labs/lab-02/solution.md
+    title: Redirect HTTP To HTTPS And Add HSTS — Solution
+    path: sections/section-030/module-03/labs/lab-05/solution.md
   - type: reading
     title: Summary
     path: sections/section-030/module-03/course-07-summary.md
@@ -727,7 +925,7 @@ modules:
     title: Require TLS 1.3 And Strict Server Names
     path: sections/section-030/module-04/labs/lab-01
     difficulty: advanced
-    estimated_duration: 30m
+    estimated_duration: 8m
     topic: tls-policy
     task_kind: build
     learning_goals:
@@ -743,11 +941,72 @@ modules:
     title: Mutual TLS With Client Certificates
     path: sections/section-030/module-04/course-02-mutual-tls-with-client-certificates.md
   - type: reading
+    title: Require Client Certificates On One Route — Task
+    path: sections/section-030/module-04/labs/lab-03/question.md
+  - type: lab
+    title: Require Client Certificates On One Route
+    path: sections/section-030/module-04/labs/lab-03
+    difficulty: advanced
+    estimated_duration: 12m
+    topic: ingress-tls
+    task_kind: build
+    learning_goals:
+    - Require a client certificate signed by a given CA on one route with a TLS option,
+      and keep a second route open.
+    tags:
+    - cks
+    - ingress-tls
+    - mtls
+  - type: reading
+    title: Require Client Certificates On One Route — Solution
+    path: sections/section-030/module-04/labs/lab-03/solution.md
+  - type: reading
     title: Shrink The Controller Attack Surface
     path: sections/section-030/module-04/course-03-shrink-the-controller-attack-surface.md
   - type: reading
+    title: Close The Traefik API And Restrict Secret Reads — Task
+    path: sections/section-030/module-04/labs/lab-04/question.md
+  - type: lab
+    title: Close The Traefik API And Restrict Secret Reads
+    path: sections/section-030/module-04/labs/lab-04
+    difficulty: advanced
+    estimated_duration: 12m
+    topic: ingress-tls
+    task_kind: build
+    learning_goals:
+    - Remove the unauthenticated Traefik API and limit the Secret access of the controller
+      to one namespace without breaking HTTPS.
+    tags:
+    - cks
+    - ingress-tls
+    - traefik
+    - rbac
+  - type: reading
+    title: Close The Traefik API And Restrict Secret Reads — Solution
+    path: sections/section-030/module-04/labs/lab-04/solution.md
+  - type: reading
     title: Rotate And Replace Certificates
     path: sections/section-030/module-04/course-04-rotate-and-replace-certificates.md
+  - type: reading
+    title: Rotate An Expiring Certificate — Task
+    path: sections/section-030/module-04/labs/lab-05/question.md
+  - type: lab
+    title: Rotate An Expiring Certificate
+    path: sections/section-030/module-04/labs/lab-05
+    difficulty: intermediate
+    estimated_duration: 8m
+    topic: ingress-tls
+    task_kind: build
+    learning_goals:
+    - Find a certificate that is about to expire and replace it in place with a new
+      key and certificate that Traefik serves.
+    tags:
+    - cks
+    - ingress-tls
+    - openssl
+  - type: reading
+    title: Rotate An Expiring Certificate — Solution
+    path: sections/section-030/module-04/labs/lab-05/solution.md
   - type: reading
     title: Troubleshoot TLS Ingress Failures
     path: sections/section-030/module-04/course-05-troubleshoot-tls-ingress-failures.md
@@ -758,7 +1017,7 @@ modules:
     title: Repair Four Broken TLS Ingresses
     path: sections/section-030/module-04/labs/lab-02
     difficulty: advanced
-    estimated_duration: 35m
+    estimated_duration: 12m
     topic: tls-troubleshooting
     task_kind: build
     learning_goals:

@@ -39,6 +39,7 @@ curl -s --cacert beacon.crt --resolve beacon.example.test:8443:127.0.0.1 https:/
 ```
 
 The command prints the `beacon` response. The Ingress itself needs no change, because it already names `beacon-tls` in its own namespace.
+
 ## Common pitfalls
 
 > [!WARNING]
