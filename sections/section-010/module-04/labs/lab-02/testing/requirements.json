@@ -1,0 +1,38 @@
+{
+  "context": "kind-astro-ats-031-lab-010-04-02",
+  "cluster": "astro-ats-031-lab-010-04-02",
+  "namespace": "starfleet-031-010-04-02",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "navigator",
+      "namespace": "starfleet-031-010-04-02",
+      "expected": {
+        "metadata": {
+          "name": "navigator",
+          "namespace": "starfleet-031-010-04-02",
+          "labels": {
+            "app": "navigator"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "cargo",
+      "namespace": "starfleet-031-010-04-02",
+      "expected": {
+        "metadata": {
+          "name": "cargo",
+          "namespace": "starfleet-031-010-04-02",
+          "labels": {
+            "app": "cargo"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

@@ -4,32 +4,42 @@ exam_objectives:
 ---
 # Allow DNS And One Application Dependency
 
-Allow about 8 minutes for the tasks.
+Allow about 12 minutes for the tasks.
 
-Allow name resolution and application access while denying a healthy unrelated listener. Use the isolated `starfleet-031-010-01-02` environment to verify the result.
+The `scanner` pod should talk to the `archive` and to nothing else. It finds the archive by name, so it also needs DNS.
 
-## Objective
+## Connect to the lab
 
-Allow name resolution and application access while denying a healthy unrelated listener.
-
-## Starting state
-
-The application and client fixtures are healthy. Complete the required change without replacing unrelated resources.
-
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-01-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-01-02" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
+## Starting state
 
-## Required result
+The namespace `starfleet-031-010-01-02` runs the Deployment `archive` with two replicas and the Service `archive`, plus the pods `scanner`, `decoy` and `idler`. The Service listens on port 80 and sends requests to the container port named `http`, which is TCP port 8080. The `decoy` pod is a healthy listener on TCP port 8080 with the label `app: decoy`; it is there to prove that unlisted egress is blocked. Each pod has the label `app: <name>` and contains a small test client, `/app/client.py`. No NetworkPolicy exists. CoreDNS, the cluster DNS server, runs in `kube-system` in pods with the label `k8s-app: kube-dns`.
 
-Create `shuttle-egress` selecting `app: shuttle`. Allow DNS on TCP and UDP port 53 only to kube-system Pods labelled `k8s-app: kube-dns`, and allow TCP 8080 only to same-namespace Pods labelled `app: probe`. Keep a healthy `blocked-server` Pod with a different label. Shuttle must resolve and reach probe, while a direct request to the running blocked server must time out.
+## Tasks
 
-## Verify The Result
+1. In `starfleet-031-010-01-02`, create a NetworkPolicy named `scanner-egress` that selects only the pod with the label `app: scanner` and covers egress.
+2. Allow DNS on UDP port 53 and TCP port 53 to the CoreDNS pods in `kube-system`. Select the namespace by its name label and the pods by `k8s-app: kube-dns` in one peer entry.
+3. Allow TCP port 8080 to the pods with the label `app: archive` in the same namespace.
+4. Allow nothing else. `scanner` must time out to `decoy`, and `decoy` must stay running and reachable for other pods.
 
-The grader checks the stated resource fields and live evidence. Wait for controller convergence before submitting. Inspect actual results rather than relying on a sample transcript.
+## Check your work
+
+The test client prints `open` with the reply, `blocked` when the connection times out, and `resolved` or `unresolved` for a DNS lookup:
+
+```sh
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py dns archive.starfleet-031-010-01-02.svc.cluster.local
+ARCHIVE_SERVICE_IP=$(kubectl -n starfleet-031-010-01-02 get service archive -o jsonpath='{.spec.clusterIP}')
+DECOY_IP=$(kubectl -n starfleet-031-010-01-02 get pod decoy -o jsonpath='{.status.podIP}')
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py tcp "$ARCHIVE_SERVICE_IP" 80
+kubectl -n starfleet-031-010-01-02 exec scanner -- python /app/client.py tcp "$DECOY_IP" 8080
+```
+
+The lookup must print `resolved` and the Service address. The request to the archive must print `open` and the request to the decoy must print `blocked`.

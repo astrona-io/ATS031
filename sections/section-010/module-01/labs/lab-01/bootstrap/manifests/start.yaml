@@ -2,91 +2,172 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: starfleet-031-010-01-01
-  labels:
-    project: ckad
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: outpost-031-010-01-01
-  labels:
-    project: outpost-031-010-01-01
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: probe-code
+  name: server-code
   namespace: starfleet-031-010-01-01
 data:
-  server.py: "from http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib\
-    \ import Path\nimport os\nimport socket\n\nclass Handler(BaseHTTPRequestHandler):\n\
-    \    def do_GET(self):\n        marker = {\"/ready\": \"/tmp/not-ready\", \"/health\"\
-    : \"/tmp/unhealthy\"}.get(self.path)\n        status = 503 if marker and Path(marker).exists()\
-    \ else 200\n        settings = Path(\"/settings/greeting\")\n        greeting\
-    \ = settings.read_text().strip() if settings.exists() else os.getenv(\"GREETING\"\
-    , \"hello\")\n        body = f\"version={os.getenv('VERSION', 'v1')} host={socket.gethostname()}\
-    \ greeting={greeting}\\n\"\n        self.send_response(status)\n        self.send_header(\"\
-    Content-Type\", \"text/plain\")\n        self.end_headers()\n        self.wfile.write(body.encode())\n\
-    \nHTTPServer((\"0.0.0.0\", 8080), Handler).serve_forever()\n"
+  server.py: |
+    import os
+    import socket
+    import threading
+
+    NAME = os.environ.get("SERVER_NAME", socket.gethostname())
+
+
+    def answer(connection, port):
+        try:
+            connection.settimeout(1)
+            try:
+                connection.recv(4096)
+            except OSError:
+                pass
+            body = ("%s port=%d\n" % (NAME, port)).encode()
+            head = "HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n" % len(body)
+            connection.sendall(head.encode() + body)
+        except OSError:
+            pass
+        finally:
+            connection.close()
+
+
+    def serve_tcp(port):
+        listener = socket.socket()
+        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        listener.bind(("0.0.0.0", port))
+        listener.listen(16)
+        while True:
+            connection, _ = listener.accept()
+            threading.Thread(target=answer, args=(connection, port), daemon=True).start()
+
+
+    def serve_udp(port):
+        listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        listener.bind(("0.0.0.0", port))
+        while True:
+            _, sender = listener.recvfrom(512)
+            listener.sendto(("%s udp port=%d\n" % (NAME, port)).encode(), sender)
+
+
+    threads = []
+    for value in os.environ.get("TCP_PORTS", "").split(","):
+        if value:
+            threads.append(threading.Thread(target=serve_tcp, args=(int(value),), daemon=True))
+    for value in os.environ.get("UDP_PORTS", "").split(","):
+        if value:
+            threads.append(threading.Thread(target=serve_udp, args=(int(value),), daemon=True))
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+  client.py: |
+    import socket
+    import sys
+    import threading
+
+    mode, target = sys.argv[1], sys.argv[2]
+    port = int(sys.argv[3]) if len(sys.argv) > 3 else 0
+    try:
+        if mode == "tcp":
+            connection = socket.create_connection((target, port), timeout=3)
+            connection.sendall(b"GET / HTTP/1.0\r\n\r\n")
+            reply = connection.recv(4096).decode(errors="replace").strip().splitlines()
+            print("open " + (reply[-1] if reply else ""))
+        elif mode == "udp":
+            connection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            connection.settimeout(3)
+            connection.sendto(b"ping", (target, port))
+            reply, _ = connection.recvfrom(512)
+            print("open " + reply.decode(errors="replace").strip())
+        elif mode == "dns":
+            answer = {}
+
+            def look_up():
+                try:
+                    answer["address"] = socket.gethostbyname(target)
+                except OSError:
+                    pass
+
+            lookup = threading.Thread(target=look_up, daemon=True)
+            lookup.start()
+            lookup.join(6)
+            print("resolved " + answer["address"] if "address" in answer else "unresolved")
+        else:
+            sys.exit("usage: client.py tcp|udp <address> <port> | client.py dns <name>")
+    except socket.timeout:
+        print("blocked")
+    except ConnectionRefusedError:
+        print("refused")
+    except OSError as error:
+        print("error " + str(error))
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: probe
+  name: hub
   namespace: starfleet-031-010-01-01
+  labels: &id001
+    app: hub
 spec:
   replicas: 2
   selector:
-    matchLabels:
-      app: probe
-      release: probe
+    matchLabels: *id001
   template:
     metadata:
-      labels:
-        app: probe
-        release: probe
+      labels: *id001
     spec:
       containers:
-      - name: probe
+      - name: app
         image: docker.io/library/python:3.13-alpine
         command:
         - python
         - /app/server.py
         env:
-        - name: VERSION
-          value: v1
+        - name: SERVER_NAME
+          value: hub
+        - name: TCP_PORTS
+          value: '8080'
+        - name: UDP_PORTS
+          value: ''
         ports:
         - name: http
           containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          periodSeconds: 2
+          protocol: TCP
         resources:
           requests:
-            cpu: 10m
-            memory: 32Mi
+            cpu: 5m
+            memory: 16Mi
           limits:
-            memory: 128Mi
+            memory: 64Mi
         volumeMounts:
-        - name: app
+        - name: code
           mountPath: /app
           readOnly: true
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          periodSeconds: 2
       volumes:
-      - name: app
+      - name: code
         configMap:
-          name: probe-code
+          name: server-code
+      terminationGracePeriodSeconds: 1
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: probe
+  name: hub
   namespace: starfleet-031-010-01-01
 spec:
   selector:
-    app: probe
-    release: probe
+    app: hub
   ports:
   - name: http
     port: 80
@@ -95,33 +176,275 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: shuttle
+  name: tender
   namespace: starfleet-031-010-01-01
   labels:
-    app: shuttle
+    app: tender
 spec:
   containers:
-  - name: client
-    image: docker.io/library/busybox:1.37.0
+  - name: app
+    image: docker.io/library/python:3.13-alpine
     command:
-    - sh
-    - -c
-    - sleep 3600
-  restartPolicy: Never
+    - python
+    - /app/server.py
+    env:
+    - name: SERVER_NAME
+      value: tender
+    - name: TCP_PORTS
+      value: '8080'
+    - name: UDP_PORTS
+      value: ''
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        memory: 64Mi
+    volumeMounts:
+    - name: code
+      mountPath: /app
+      readOnly: true
+    readinessProbe:
+      tcpSocket:
+        port: 8080
+      periodSeconds: 2
+  volumes:
+  - name: code
+    configMap:
+      name: server-code
+  terminationGracePeriodSeconds: 1
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: drifter
-  namespace: outpost-031-010-01-01
+  name: idler
+  namespace: starfleet-031-010-01-01
   labels:
-    app: drifter
+    app: idler
 spec:
   containers:
-  - name: client
-    image: docker.io/library/busybox:1.37.0
+  - name: app
+    image: docker.io/library/python:3.13-alpine
     command:
-    - sh
-    - -c
-    - sleep 3600
-  restartPolicy: Never
+    - python
+    - /app/server.py
+    env:
+    - name: SERVER_NAME
+      value: idler
+    - name: TCP_PORTS
+      value: '8080'
+    - name: UDP_PORTS
+      value: ''
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        memory: 64Mi
+    volumeMounts:
+    - name: code
+      mountPath: /app
+      readOnly: true
+    readinessProbe:
+      tcpSocket:
+        port: 8080
+      periodSeconds: 2
+  volumes:
+  - name: code
+    configMap:
+      name: server-code
+  terminationGracePeriodSeconds: 1
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mirror
+  namespace: starfleet-031-010-01-01
+  labels:
+    app: mirror
+spec:
+  containers:
+  - name: app
+    image: docker.io/library/python:3.13-alpine
+    command:
+    - python
+    - /app/server.py
+    env:
+    - name: SERVER_NAME
+      value: mirror
+    - name: TCP_PORTS
+      value: '8080'
+    - name: UDP_PORTS
+      value: ''
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        memory: 64Mi
+    volumeMounts:
+    - name: code
+      mountPath: /app
+      readOnly: true
+    readinessProbe:
+      tcpSocket:
+        port: 8080
+      periodSeconds: 2
+  volumes:
+  - name: code
+    configMap:
+      name: server-code
+  terminationGracePeriodSeconds: 1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-code
+  namespace: outpost-031-010-01-01
+data:
+  server.py: |
+    import os
+    import socket
+    import threading
+
+    NAME = os.environ.get("SERVER_NAME", socket.gethostname())
+
+
+    def answer(connection, port):
+        try:
+            connection.settimeout(1)
+            try:
+                connection.recv(4096)
+            except OSError:
+                pass
+            body = ("%s port=%d\n" % (NAME, port)).encode()
+            head = "HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n" % len(body)
+            connection.sendall(head.encode() + body)
+        except OSError:
+            pass
+        finally:
+            connection.close()
+
+
+    def serve_tcp(port):
+        listener = socket.socket()
+        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        listener.bind(("0.0.0.0", port))
+        listener.listen(16)
+        while True:
+            connection, _ = listener.accept()
+            threading.Thread(target=answer, args=(connection, port), daemon=True).start()
+
+
+    def serve_udp(port):
+        listener = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        listener.bind(("0.0.0.0", port))
+        while True:
+            _, sender = listener.recvfrom(512)
+            listener.sendto(("%s udp port=%d\n" % (NAME, port)).encode(), sender)
+
+
+    threads = []
+    for value in os.environ.get("TCP_PORTS", "").split(","):
+        if value:
+            threads.append(threading.Thread(target=serve_tcp, args=(int(value),), daemon=True))
+    for value in os.environ.get("UDP_PORTS", "").split(","):
+        if value:
+            threads.append(threading.Thread(target=serve_udp, args=(int(value),), daemon=True))
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+  client.py: |
+    import socket
+    import sys
+    import threading
+
+    mode, target = sys.argv[1], sys.argv[2]
+    port = int(sys.argv[3]) if len(sys.argv) > 3 else 0
+    try:
+        if mode == "tcp":
+            connection = socket.create_connection((target, port), timeout=3)
+            connection.sendall(b"GET / HTTP/1.0\r\n\r\n")
+            reply = connection.recv(4096).decode(errors="replace").strip().splitlines()
+            print("open " + (reply[-1] if reply else ""))
+        elif mode == "udp":
+            connection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            connection.settimeout(3)
+            connection.sendto(b"ping", (target, port))
+            reply, _ = connection.recvfrom(512)
+            print("open " + reply.decode(errors="replace").strip())
+        elif mode == "dns":
+            answer = {}
+
+            def look_up():
+                try:
+                    answer["address"] = socket.gethostbyname(target)
+                except OSError:
+                    pass
+
+            lookup = threading.Thread(target=look_up, daemon=True)
+            lookup.start()
+            lookup.join(6)
+            print("resolved " + answer["address"] if "address" in answer else "unresolved")
+        else:
+            sys.exit("usage: client.py tcp|udp <address> <port> | client.py dns <name>")
+    except socket.timeout:
+        print("blocked")
+    except ConnectionRefusedError:
+        print("refused")
+    except OSError as error:
+        print("error " + str(error))
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: stranger
+  namespace: outpost-031-010-01-01
+  labels:
+    app: stranger
+spec:
+  containers:
+  - name: app
+    image: docker.io/library/python:3.13-alpine
+    command:
+    - python
+    - /app/server.py
+    env:
+    - name: SERVER_NAME
+      value: stranger
+    - name: TCP_PORTS
+      value: '8080'
+    - name: UDP_PORTS
+      value: ''
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    resources:
+      requests:
+        cpu: 5m
+        memory: 16Mi
+      limits:
+        memory: 64Mi
+    volumeMounts:
+    - name: code
+      mountPath: /app
+      readOnly: true
+    readinessProbe:
+      tcpSocket:
+        port: 8080
+      periodSeconds: 2
+  volumes:
+  - name: code
+    configMap:
+      name: server-code
+  terminationGracePeriodSeconds: 1

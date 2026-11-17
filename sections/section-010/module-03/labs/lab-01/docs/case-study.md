@@ -4,4 +4,4 @@ exam_objectives:
 ---
 # Starting Environment
 
-The `starfleet-031-010-03-01` and `outpost-031-010-03-01` namespaces each run the `probe` stack, a `shuttle` pod and a `drifter` pod. The `dock-031-010-03-01` namespace has a `shuttle` pod and a `telemetry` pod. No NetworkPolicy exists.
+The namespace `starfleet-031-010-03-01` runs the pods `registry` and `courier`. The namespace `outpost-031-010-03-01` runs the pods `courier` and `idler`, and the namespace `dock-031-010-03-01` runs one more pod named `courier`. Each pod has the label `app: <pod name>`, so three pods carry `app: courier`. Each pod serves HTTP on TCP port 8080 and contains a small test client, `/app/client.py`. Each namespace has the automatic label `kubernetes.io/metadata.name: <namespace name>`. No NetworkPolicy exists.

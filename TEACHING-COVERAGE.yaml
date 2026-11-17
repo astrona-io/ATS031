@@ -4,31 +4,60 @@ version: 1
 labs:
   sections/section-010/module-01/labs/lab-01:
     preparation:
-    - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
     - sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
   sections/section-010/module-01/labs/lab-02:
     preparation:
     - sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+  sections/section-010/module-01/labs/lab-03:
+    preparation:
+    - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  sections/section-010/module-01/labs/lab-04:
+    preparation:
+    - sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
   sections/section-010/module-02/labs/lab-01:
+    preparation:
+    - sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
+  sections/section-010/module-02/labs/lab-02:
     preparation:
     - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
     - sections/section-010/module-02/course-02-deny-all-ingress.md
+  sections/section-010/module-02/labs/lab-03:
+    preparation:
     - sections/section-010/module-02/course-03-deny-all-egress-and-its-side-effects.md
-    - sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
+  sections/section-010/module-02/labs/lab-05:
+    preparation:
+    - sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
   sections/section-010/module-03/labs/lab-01:
     preparation:
-    - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
     - sections/section-010/module-03/course-02-cross-namespace-ingress.md
   sections/section-010/module-03/labs/lab-02:
     preparation:
     - sections/section-010/module-03/course-03-one-entry-versus-two-entries.md
+  sections/section-010/module-03/labs/lab-03:
+    preparation:
+    - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+  sections/section-010/module-03/labs/lab-04:
+    preparation:
+    - sections/section-010/module-03/course-04-ipblock-and-except.md
+  sections/section-010/module-03/labs/lab-05:
+    preparation:
+    - sections/section-010/module-03/course-05-ports-protocols-and-endport.md
+  sections/section-010/module-03/labs/lab-06:
+    preparation:
+    - sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
   sections/section-010/module-04/labs/lab-01:
     preparation:
+    - sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
+  sections/section-010/module-04/labs/lab-02:
+    preparation:
     - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+  sections/section-010/module-04/labs/lab-03:
+    preparation:
     - sections/section-010/module-04/course-02-egress-to-the-api-server-and-other-dependencies.md
+  sections/section-010/module-04/labs/lab-04:
+    preparation:
     - sections/section-010/module-04/course-03-probes-hostnetwork-and-node-traffic.md
     - sections/section-010/module-04/course-04-test-matrix-for-a-policy-set.md
-    - sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
   sections/section-020/module-01/labs/lab-01:
     preparation:
     - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
@@ -213,11 +242,6 @@ labs:
     preparation:
     - sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
 additional_readings:
-- sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
-- sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
-- sections/section-010/module-03/course-04-ipblock-and-except.md
-- sections/section-010/module-03/course-05-ports-protocols-and-endport.md
-- sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
 - sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
 - sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
 - sections/section-040/module-03/course-06-controls-outside-the-cluster.md

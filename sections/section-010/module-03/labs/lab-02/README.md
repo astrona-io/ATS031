@@ -4,6 +4,8 @@ exam_objectives:
 ---
 # Repair A Two-Entry Peer Rule
 
-Repair a policy whose two list entries admit too many peers. The grader checks the declared fields and bounded live requests. Python 3 is required on the grading host.
+A policy lists a namespaceSelector and a podSelector as two separate peer entries, so it admits far more than intended. Repair it into one combined entry and prove the result with live requests.
+
+The lab runs in its own pinned kind cluster with Calico, the network plugin that enforces NetworkPolicy. The graders read the policies and send bounded live requests between pods. Python 3 is required on the grading host.
 
 Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then the reference solution is applied and every outcome must pass.

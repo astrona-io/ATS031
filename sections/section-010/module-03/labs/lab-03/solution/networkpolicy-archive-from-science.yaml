@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: archive-from-science
+  namespace: starfleet-031-010-03-03
+spec:
+  podSelector:
+    matchLabels:
+      app: archive
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          division: science
+    ports:
+    - protocol: TCP
+      port: 8080

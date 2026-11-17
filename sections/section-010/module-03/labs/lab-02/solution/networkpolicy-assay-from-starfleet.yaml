@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: assay-from-starfleet
+  namespace: dock-031-010-03-02
+spec:
+  podSelector:
+    matchLabels:
+      app: assay
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: starfleet-031-010-03-02
+      podSelector:
+        matchLabels:
+          app: sampler
+    ports:
+    - protocol: TCP
+      port: 8080

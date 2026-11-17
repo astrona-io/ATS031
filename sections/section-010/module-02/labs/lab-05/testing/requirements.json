@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-02-05",
+  "cluster": "astro-ats-031-lab-010-02-05",
+  "namespace": "cargo-031-010-02-05",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "loader",
+      "namespace": "cargo-031-010-02-05",
+      "expected": {
+        "metadata": {
+          "name": "loader",
+          "namespace": "cargo-031-010-02-05",
+          "labels": {
+            "app": "loader"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "pump",
+      "namespace": "fuel-031-010-02-05",
+      "expected": {
+        "metadata": {
+          "name": "pump",
+          "namespace": "fuel-031-010-02-05",
+          "labels": {
+            "app": "pump"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "cook",
+      "namespace": "galley-031-010-02-05",
+      "expected": {
+        "metadata": {
+          "name": "cook",
+          "namespace": "galley-031-010-02-05",
+          "labels": {
+            "app": "cook"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

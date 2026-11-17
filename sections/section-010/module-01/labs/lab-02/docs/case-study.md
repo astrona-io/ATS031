@@ -4,6 +4,4 @@ exam_objectives:
 ---
 # Starting Environment
 
-The application and client fixtures are healthy. Complete the required change without replacing unrelated resources.
-
-Create `shuttle-egress` selecting `app: shuttle`. Allow DNS on TCP and UDP port 53 only to kube-system Pods labelled `k8s-app: kube-dns`, and allow TCP 8080 only to same-namespace Pods labelled `app: probe`. Keep a healthy `blocked-server` Pod with a different label. Shuttle must resolve and reach probe, while a direct request to the running blocked server must time out.
+The namespace `starfleet-031-010-01-02` runs the Deployment `archive` with two replicas and the Service `archive`, plus the pods `scanner`, `decoy` and `idler`. The Service listens on port 80 and sends requests to the container port named `http`, which is TCP port 8080. The `decoy` pod is a healthy listener on TCP port 8080 with the label `app: decoy`; it is there to prove that unlisted egress is blocked. Each pod has the label `app: <name>` and contains a small test client, `/app/client.py`. No NetworkPolicy exists. CoreDNS, the cluster DNS server, runs in `kube-system` in pods with the label `k8s-app: kube-dns`.

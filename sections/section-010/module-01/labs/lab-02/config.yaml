@@ -12,7 +12,6 @@ runtime:
     image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
     preloadImages:
     - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
     addons:
       cni: calico
 bootstrap:
@@ -37,18 +36,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: shuttle-egress-policy
-    description: NetworkPolicy shuttle-egress allows only DNS and probe on TCP 8080
+  - name: scanner-egress-policy
+    description: The scanner-egress policy allows UDP and TCP 53 to CoreDNS and TCP 8080 to the archive pods, and nothing wider
     type: file
-    source: validation/validate-shuttle-egress-policy.sh
+    source: validation/validate-scanner-egress-policy.sh
     points: 1
-  - name: blocked-server
-    description: Pod blocked-server is running with its own label
+  - name: scanner-reaches-archive
+    description: The scanner pod resolves the archive Service name and gets a reply from the Service
     type: file
-    source: validation/validate-blocked-server.sh
+    source: validation/validate-scanner-reaches-archive.sh
     points: 1
-  - name: shuttle-egress-enforced
-    description: Shuttle resolves and reaches probe and times out on blocked-server
+  - name: decoy-blocked
+    description: The scanner pod times out to the healthy decoy pod, which still answers the idler pod
     type: file
-    source: validation/validate-shuttle-egress-enforced.sh
-    points: 2
+    source: validation/validate-decoy-blocked.sh
+    points: 1

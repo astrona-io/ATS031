@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hub-from-tender
+  namespace: starfleet-031-010-01-01
+spec:
+  podSelector:
+    matchLabels:
+      app: hub
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: tender
+    ports:
+    - protocol: TCP
+      port: 8080

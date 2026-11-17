@@ -4,126 +4,21 @@
   "namespace": "starfleet-031-010-01-01",
   "resources": [
     {
-      "kind": "networkpolicy",
-      "name": "probe-shuttle",
-      "expected": {
-        "apiVersion": "networking.k8s.io/v1",
-        "kind": "NetworkPolicy",
-        "metadata": {
-          "name": "probe-shuttle",
-          "namespace": "starfleet-031-010-01-01"
-        },
-        "spec": {
-          "podSelector": {
-            "matchLabels": {
-              "app": "probe"
-            }
-          },
-          "policyTypes": [
-            "Ingress"
-          ],
-          "ingress": [
-            {
-              "from": [
-                {
-                  "podSelector": {
-                    "matchLabels": {
-                      "app": "shuttle"
-                    }
-                  }
-                }
-              ],
-              "ports": [
-                {
-                  "protocol": "TCP",
-                  "port": 8080
-                }
-              ]
-            }
-          ]
-        }
-      },
-      "outcome": "probe-shuttle-policy"
-    },
-    {
       "kind": "deployment",
-      "name": "probe",
+      "name": "hub",
+      "namespace": "starfleet-031-010-01-01",
       "expected": {
-        "apiVersion": "apps/v1",
-        "kind": "Deployment",
         "metadata": {
-          "name": "probe",
+          "name": "hub",
           "namespace": "starfleet-031-010-01-01"
         },
         "spec": {
           "replicas": 2,
-          "selector": {
-            "matchLabels": {
-              "app": "probe",
-              "release": "probe"
-            }
-          },
           "template": {
             "metadata": {
               "labels": {
-                "app": "probe",
-                "release": "probe"
+                "app": "hub"
               }
-            },
-            "spec": {
-              "containers": [
-                {
-                  "name": "probe",
-                  "image": "docker.io/library/python:3.13-alpine",
-                  "command": [
-                    "python",
-                    "/app/server.py"
-                  ],
-                  "env": [
-                    {
-                      "name": "VERSION",
-                      "value": "v1"
-                    }
-                  ],
-                  "ports": [
-                    {
-                      "name": "http",
-                      "containerPort": 8080
-                    }
-                  ],
-                  "readinessProbe": {
-                    "httpGet": {
-                      "path": "/ready",
-                      "port": "http"
-                    },
-                    "periodSeconds": 2
-                  },
-                  "resources": {
-                    "requests": {
-                      "cpu": "10m",
-                      "memory": "32Mi"
-                    },
-                    "limits": {
-                      "memory": "128Mi"
-                    }
-                  },
-                  "volumeMounts": [
-                    {
-                      "name": "app",
-                      "mountPath": "/app",
-                      "readOnly": true
-                    }
-                  ]
-                }
-              ],
-              "volumes": [
-                {
-                  "name": "app",
-                  "configMap": {
-                    "name": "probe-code"
-                  }
-                }
-              ]
             }
           }
         }
@@ -132,107 +27,64 @@
     },
     {
       "kind": "pod",
-      "name": "shuttle",
+      "name": "tender",
+      "namespace": "starfleet-031-010-01-01",
       "expected": {
-        "apiVersion": "v1",
-        "kind": "Pod",
         "metadata": {
-          "name": "shuttle",
+          "name": "tender",
           "namespace": "starfleet-031-010-01-01",
           "labels": {
-            "app": "shuttle"
+            "app": "tender"
           }
-        },
-        "spec": {
-          "containers": [
-            {
-              "name": "client",
-              "image": "docker.io/library/busybox:1.37.0",
-              "command": [
-                "sh",
-                "-c",
-                "sleep 3600"
-              ]
-            }
-          ],
-          "restartPolicy": "Never"
         }
       },
       "state": "pod"
     },
     {
       "kind": "pod",
-      "name": "drifter",
+      "name": "idler",
+      "namespace": "starfleet-031-010-01-01",
       "expected": {
-        "apiVersion": "v1",
-        "kind": "Pod",
         "metadata": {
-          "name": "drifter",
-          "namespace": "outpost-031-010-01-01",
+          "name": "idler",
+          "namespace": "starfleet-031-010-01-01",
           "labels": {
-            "app": "drifter"
+            "app": "idler"
           }
-        },
-        "spec": {
-          "containers": [
-            {
-              "name": "client",
-              "image": "docker.io/library/busybox:1.37.0",
-              "command": [
-                "sh",
-                "-c",
-                "sleep 3600"
-              ]
-            }
-          ],
-          "restartPolicy": "Never"
         }
       },
-      "state": "pod",
-      "namespace": "outpost-031-010-01-01"
-    }
-  ],
-  "behavior": [
-    {
-      "args": [
-        "kubectl",
-        "-n",
-        "starfleet-031-010-01-01",
-        "exec",
-        "shuttle",
-        "--",
-        "wget",
-        "-q",
-        "-T",
-        "3",
-        "-O-",
-        "http://probe/"
-      ],
-      "contains": [
-        "version=v1"
-      ],
-      "outcome": "drifter-denied"
+      "state": "pod"
     },
     {
-      "args": [
-        "kubectl",
-        "-n",
-        "outpost-031-010-01-01",
-        "exec",
-        "drifter",
-        "--",
-        "wget",
-        "-q",
-        "-T",
-        "3",
-        "-O-",
-        "http://probe.starfleet-031-010-01-01/"
-      ],
-      "denied": true,
-      "failure_markers": [
-        "timed out"
-      ],
-      "outcome": "drifter-denied"
+      "kind": "pod",
+      "name": "mirror",
+      "namespace": "starfleet-031-010-01-01",
+      "expected": {
+        "metadata": {
+          "name": "mirror",
+          "namespace": "starfleet-031-010-01-01",
+          "labels": {
+            "app": "mirror"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "stranger",
+      "namespace": "outpost-031-010-01-01",
+      "expected": {
+        "metadata": {
+          "name": "stranger",
+          "namespace": "outpost-031-010-01-01",
+          "labels": {
+            "app": "stranger"
+          }
+        }
+      },
+      "state": "pod"
     }
-  ]
+  ],
+  "behavior": []
 }

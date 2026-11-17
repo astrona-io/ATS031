@@ -4,37 +4,41 @@ exam_objectives:
 ---
 # Apply A Default-Deny Baseline And Allow One Path
 
-Allow about 10 minutes for the tasks.
+Allow about 12 minutes for the tasks.
 
-The `outpost-031-010-02-01` namespace must stop accepting and sending traffic by default, and only one path may stay open: the `shuttle` pod sends requests to the `probe` pods on port 8080.
+The `outpost-031-010-02-01` namespace must start from "nothing is allowed". After that, only the `smith` pod may send requests to the `forge` pod.
 
-## Objective
+## Connect to the lab
 
-Apply a combined default-deny baseline to `outpost-031-010-02-01` and add the allow rules for one path, then prove the allowed and the denied paths with requests.
-
-## Starting state
-
-The cluster has three namespaces, `starfleet-031-010-02-01`, `outpost-031-010-02-01` and `dock-031-010-02-01`. Each one runs the `probe` Deployment (two pods, port 8080), the `probe` Service (port 80) and a `shuttle` client pod with `wget`. No NetworkPolicy exists. Calico enforces policy in this cluster.
-
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-02-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-02-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Keep this connection for the whole task. Every script of the lab refuses to run against another context.
 
-## Required result
+## Starting state
 
-Work in the `outpost-031-010-02-01` namespace only. Create these three NetworkPolicy objects:
+The namespace `outpost-031-010-02-01` runs the pods `forge`, `smith` and `idler`, and the namespace `dock-031-010-02-01` runs the pod `visitor`. Each pod has the label `app: <pod name>`, serves HTTP on TCP port 8080 and contains a small test client, `/app/client.py`. No NetworkPolicy exists, so every pod can reach every other pod.
 
-1. `default-deny-all`: selects all pods and isolates them for both ingress and egress, with `policyTypes` listing `Ingress` and then `Egress`, and no rules.
-2. `probe-ingress-from-shuttle`: selects pods labelled `app: probe`, ingress only, and allows pods labelled `app: shuttle` in the same namespace on TCP port 8080.
-3. `shuttle-egress-to-probe`: selects pods labelled `app: shuttle`, egress only, with exactly two rules. The first allows pods labelled `app: probe` in the same namespace (a `podSelector` only) on TCP port 8080. The second allows DNS: one peer entry with the namespace `kube-system` (by the label `kubernetes.io/metadata.name`) and the pods labelled `k8s-app: kube-dns`, on UDP port 53 and TCP port 53.
+## Tasks
 
-Then the following must hold. The `shuttle` pod in `outpost-031-010-02-01` gets the `probe` response from `http://probe/`. The `shuttle` pod in `starfleet-031-010-02-01` times out when it requests `http://probe.outpost-031-010-02-01/`. The `shuttle` pod in `outpost-031-010-02-01` times out when it requests `http://probe.starfleet-031-010-02-01/`. The `starfleet-031-010-02-01` namespace stays open, so its `shuttle` still reaches its own `probe`. Do not change any other namespace and do not recreate the workloads.
+1. In `outpost-031-010-02-01`, create a NetworkPolicy named `default-deny-all` that selects every pod and isolates it for both ingress and egress, with no rules.
+2. Add one policy that lets the `forge` pod accept TCP port 8080 only from the `smith` pod.
+3. Add one policy that lets the `smith` pod send to the `forge` pod on TCP port 8080 only.
+4. Do not open anything else. The `idler` pod must stay fully isolated, and the `visitor` pod in `dock-031-010-02-01` must time out to `forge`.
 
-## Verify The Result
+## Check your work
 
-The grader checks the stated resource fields and live requests. Wait a few seconds after the last change so the network plugin can update its rules, then repeat your own test requests before you submit. Inspect actual results rather than relying on a sample transcript.
+The test client prints `open` with the reply, `blocked` when the connection times out, and `resolved` or `unresolved` for a DNS lookup:
+
+```sh
+FORGE_IP=$(kubectl -n outpost-031-010-02-01 get pod forge -o jsonpath='{.status.podIP}')
+kubectl -n outpost-031-010-02-01 exec smith -- python /app/client.py tcp "$FORGE_IP" 8080
+kubectl -n dock-031-010-02-01 exec visitor -- python /app/client.py tcp "$FORGE_IP" 8080
+kubectl -n outpost-031-010-02-01 exec idler -- python /app/client.py dns kubernetes.default.svc.cluster.local
+```
+
+The first command must print `open`, the second `blocked` and the third `unresolved`.
