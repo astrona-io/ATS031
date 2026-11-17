@@ -2,29 +2,34 @@
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Pin An Image By Digest And Prove It Runs
+# Verify A Signed apt Repository And An Installed Package
 
-Allow about 8 minutes for the tasks.
+Allow about 12 minutes for the tasks.
 
-The `relay` Deployment in `starfleet-031-050-03-02` runs `busybox` from a tag. The team wants the Deployment to run the exact image it runs now, whatever the tag points to later.
+The control plane node of the `starfleet` cluster has a local copy of the fleet apt repository, and the `fleet-tools` package from it is installed. Follow the chain of trust from the signed `Release` file down to each package file, then check the installed files of `fleet-tools`.
 
-## Starting state
+## Connect to the lab
 
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-03-02)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-03-02" || exit 1
-CONTROL=astro-ats-031-lab-050-03-02-control-plane
-WORKER=astro-ats-031-lab-050-03-02-worker
+node_name="astro-ats-031-lab-050-03-02-control-plane"
 ```
 
-Keep this connection selected. Host-level commands name only the node containers of this environment.
+The node of a `kind` cluster is a container on your machine. Run a command inside it with `podman exec "$node_name" <command>`. If your machine uses Docker, write `docker exec` instead.
 
-## Required result
+## Tasks
 
-Change the image of the `relay` Deployment in the `starfleet-031-050-03-02` namespace from `docker.io/library/busybox:1.36.1` to a reference that ends with `@sha256:<digest>`, where the digest is the one the currently running pod reports in its `imageID`. Keep the busybox repository. Wait for the rollout. Then record the result in a ConfigMap named `image-pin-review` in `starfleet-031-050-03-02` with the keys `digest` (the value `sha256:<digest>`) and `imageID` (the `imageID` that the new pod reports). The new pod must report an `imageID` with the same digest.
+The repository is in `/var/lib/fleet-apt` on the control plane node. It holds `Release`, its detached signature `Release.gpg`, the package index `Packages`, the package files in `pool/`, and `fleet-archive.gpg`, a keyring with the public key of the archive.
 
-## Verify The Result
+1. Verify `Release.gpg` with `gpgv` and the keyring `fleet-archive.gpg`.
+2. Check the digest of `Packages` against the `SHA256:` list in `Release`.
+3. Check the digest of every package file in `pool/` against its `SHA256:` field in `Packages`.
+4. Ask `dpkg` which installed file of `fleet-tools` no longer matches the package.
+5. Create the ConfigMap `repository-review` in the namespace `starfleet-031-050-03-02` with two keys:
+   - `bad-package`: the file name of the package whose digest differs from `Packages`, for example `fleet-agent_2.0.1_all.deb`.
+   - `changed-file`: the full path of the installed `fleet-tools` file that `dpkg` reports as changed.
 
-The grader reads the node files and the objects described above and recomputes every digest itself. Do not change the staged files.
+Do not change the repository, and do not reinstall or remove any package. The damaged package and the changed file are chosen at random each time the lab starts.

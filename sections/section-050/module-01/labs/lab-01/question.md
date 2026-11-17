@@ -2,31 +2,32 @@
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Verify Signed Artifact Checksums
+# Find The Files That Fail A Checksum Manifest
 
 Allow about 8 minutes for the tasks.
 
-Verify a signed checksum manifest and reject altered bytes before using a binary.
+The fleet build team copied six release files to the control plane node of the `starfleet` cluster. During the copy, some of the files changed. Find them before anyone installs them.
 
-## Starting state
+## Connect to the lab
 
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
-
-Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+Use a shell on your own machine. The kubeconfig file holds the address and the credentials of this lab's cluster, and `kubectl` uses it.
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-01-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-01-01" || exit 1
 node_name="astro-ats-031-lab-050-01-01-control-plane"
-worker_name="astro-ats-031-lab-050-01-01-worker"
 ```
 
-Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+The node of a `kind` cluster is a container on your machine. Run a command inside it with `podman exec "$node_name" <command>`. If your machine uses Docker, write `docker exec` instead.
 
-## Required result
+## Tasks
 
-Use the public key provisioned with the isolated fixture to verify checksums.sig over checksums.txt. Verify the staged kubectl digest matches the authenticated manifest and the tampered copy does not. Record the ConfigMap `artifact-review` in the namespace `starfleet-031-050-01-01` with `result: verified`, `tampered: rejected` and the exact `sha256`. The fixture key is a local exercise trust root, not proof of the upstream Kubernetes publisher identity.
+The directory `/var/lib/fleet-release` on the control plane node holds six files and a `SHA256SUMS` manifest. The manifest has one line for each file, in the form `digest`, two spaces, file name. The manifest itself is correct.
 
-## Verify The Result
+1. Check every file against `SHA256SUMS` and find the files that fail.
+2. Compute the current SHA-256 digest of `fleet-agent`, whether it passes or fails.
+3. Create the ConfigMap `manifest-check` in the namespace `starfleet-031-050-01-01` with two keys:
+   - `failed`: the names of all failing files, separated by commas, for example `fleet-cli,fleet-sync`.
+   - `agent-sha256`: the 64-character digest from step 2.
 
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+Do not change the files or the manifest. The failing files are chosen at random each time the lab starts.

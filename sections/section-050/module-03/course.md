@@ -17,7 +17,7 @@ After this module you can:
 
 ## Before you start
 
-You need Linux command line basics, `kubectl` and `podman`. The module has six parts. The first covers GPG signed repositories. The second covers package verification on a node and is reading only. The third covers cosign with a local key pair. The fourth covers keyless verification and release signatures and is reading only. The fifth covers image digests and pinning. The sixth covers software bills of materials and verification at admission and is reading only.
+You need Linux command line basics, `kubectl` and `podman`. The module has six parts. The first covers GPG signed repositories. The second covers package verification on a node. The third covers cosign with a local key pair. The fourth covers keyless verification and release signatures and is reading only. The fifth covers image digests and pinning. The sixth covers software bills of materials and verification at admission. Every part except the fourth is followed by a graded lab.
 
 Your playground is a `kind` cluster with one control plane node and one worker node. The control plane node container holds fixtures in `/var/lib/training-release/signed`. The bootstrap creates every key when the playground starts, deletes the private keys after signing, and has no network path to the real Kubernetes package repository.
 

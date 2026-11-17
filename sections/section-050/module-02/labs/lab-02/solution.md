@@ -2,68 +2,47 @@
 exam_objectives:
 - Verify platform binaries before deploying
 ---
-# Verify The Running kubelet Against A Release Checksum Solution
+# Verify Downloads With sha256sum --check: Solution
 
-This walkthrough solves the task step by step. Run the first block to select the environment:
+Connect to the lab first, so that `kubectl` talks to this lab's cluster and `$node_name` names its control plane node:
 
 ```sh
 export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-02-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-050-02-02" || exit 1
-CONTROL=astro-ats-031-lab-050-02-02-control-plane
-WORKER=astro-ats-031-lab-050-02-02-worker
+node_name="astro-ats-031-lab-050-02-02-control-plane"
 ```
 
-Find the process identifier of the `kubelet` on the worker node and resolve its binary:
+## Build the check file
+
+The release site publishes one `.sha256` file per binary, and it holds only the digest. `sha256sum --check` needs a different format: the digest, two spaces and the file name. Open a shell in the download directory on the node, then write one line for each download:
 
 ```sh
-KUBELET_PID=$(podman exec $WORKER sh -c "grep -l '^kubelet\$' /proc/[0-9]*/comm | head -n 1 | cut -d/ -f3")
-podman exec $WORKER readlink /proc/$KUBELET_PID/exe
-podman exec $WORKER kubelet --version
+podman exec -it -w /var/lib/k8s-downloads "$node_name" bash
+for tool in kubectl kubeadm kubelet; do
+  printf '%s  %s\n' "$(cat $tool.sha256)" "$tool"
+done > SHA256SUMS
+cat SHA256SUMS
 ```
 
-Compute the digest of the running binary and list the staged checksum files. There is one directory for each version, so use the one that matches the version the kubelet reported:
+The loop reads every digest from the published file. It never runs `sha256sum` on the download itself: a digest computed from the file you want to check always matches, so it proves nothing.
+
+## Run the strict check
+
+`--strict` makes `sha256sum` fail on any line that is not in the check format, so a broken line cannot be skipped in silence. Run the check inside the same shell and print the exit status right after it:
 
 ```sh
-podman exec $WORKER sha256sum /proc/$KUBELET_PID/exe
-podman exec $WORKER sh -c 'ls /var/lib/training-release/k8s/release/*/bin/linux/*/ && cat /var/lib/training-release/k8s/release/*/bin/linux/*/kubelet.sha256'
+sha256sum --check --strict SHA256SUMS; echo "exit status $?"
+exit
 ```
 
-Compare the digest with the checksum file under the directory for your version. The line below checks it, and the output ends with `OK` when it matches. Replace `<version>` with the reported version, for example `v1.35.0`:
+When every file matches, each line ends with `OK` and the exit status is `0`. When one file was changed, its line ends with `FAILED`, `sha256sum` prints a warning that one computed checksum did not match, and the exit status is `1`.
+
+## Record the result
+
+Use the exit status and the failing name that you saw. The example records a failed `kubeadm`:
 
 ```sh
-podman exec $WORKER sh -c "echo \"\$(cat /var/lib/training-release/k8s/release/<version>/bin/linux/*/kubelet.sha256)  /proc/$KUBELET_PID/exe\" | sha256sum --check"
+kubectl -n starfleet-031-050-02-02 create configmap download-check \
+  --from-literal=exit-status=1 --from-literal=failed=kubeadm
 ```
 
-Save the result as a ConfigMap. Save this as `configmap-kubelet-review.yaml`, with your own values:
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kubelet-review
-  namespace: starfleet-031-050-02-02
-data:
-  version: <version>
-  path: <path>
-  sha256: <digest>
-  result: <match-or-mismatch>
-```
-
-Apply it:
-
-```sh
-kubectl apply -f configmap-kubelet-review.yaml
-```
-
-Then check the result:
-
-```sh
-kubectl -n starfleet-031-050-02-02 get configmap kubelet-review -o yaml
-```
-
-After recording your result, remove the independent lab with `astrona destroy ats-031-lab-050-02-02`.
-
-## Common pitfalls
-
-> [!WARNING]
-> The checksum of another version gives `mismatch` for a genuine kubelet, so choose the file by the reported version. Hash `/proc/<pid>/exe` or the resolved path; do not guess a path. Keep the digest exactly as printed, in lower case.
+If every download passed, use `exit-status=0` and `failed=none`. The grader reads each `.sha256` file and `SHA256SUMS`, computes the digests itself and compares the result with the ConfigMap.

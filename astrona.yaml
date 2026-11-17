@@ -1336,30 +1336,68 @@ modules:
     title: Digests At Work And The Limits Of A Checksum
     path: sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
   - type: reading
-    title: Verify A Signed Manifest And Record The Result
-    path: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
-  - type: reading
-    title: Verify Signed Artifact Checksums — Task
+    title: Find The Files That Fail A Checksum Manifest — Task
     path: sections/section-050/module-01/labs/lab-01/question.md
   - type: lab
-    title: Verify Signed Artifact Checksums
+    title: Find The Files That Fail A Checksum Manifest
     path: sections/section-050/module-01/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: artifact-authenticity
     task_kind: build
     learning_goals:
-    - Verify a signed checksum manifest and reject altered bytes before using a binary.
+    - Check a release directory against its checksum manifest and name every file that fails.
     tags:
     - cks
     - artifact-authenticity
   - type: reading
-    title: Verify Signed Artifact Checksums — Solution
+    title: Find The Files That Fail A Checksum Manifest — Solution
     path: sections/section-050/module-01/labs/lab-01/solution.md
+  - type: reading
+    title: Verify A Signed Manifest And Record The Result
+    path: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+  - type: reading
+    title: Verify A Signed Checksum Manifest — Task
+    path: sections/section-050/module-01/labs/lab-02/question.md
+  - type: lab
+    title: Verify A Signed Checksum Manifest
+    path: sections/section-050/module-01/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: artifact-authenticity
+    task_kind: build
+    learning_goals:
+    - Verify the signature of a checksum manifest before trusting the digests in it.
+    tags:
+    - cks
+    - artifact-authenticity
+  - type: reading
+    title: Verify A Signed Checksum Manifest — Solution
+    path: sections/section-050/module-01/labs/lab-02/solution.md
   - type: reading
     title: Keep The Binding Through Delivery, And Identity-Based Signatures
     path: sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
+  - type: reading
+    title: Install A Verified Binary Into A Protected Directory — Task
+    path: sections/section-050/module-01/labs/lab-03/question.md
+  - type: lab
+    title: Install A Verified Binary Into A Protected Directory
+    path: sections/section-050/module-01/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: artifact-authenticity
+    task_kind: build
+    learning_goals:
+    - Install only the verified copy of a binary into a root-owned directory that other users cannot write.
+    tags:
+    - cks
+    - artifact-authenticity
+  - type: reading
+    title: Install A Verified Binary Into A Protected Directory — Solution
+    path: sections/section-050/module-01/labs/lab-03/solution.md
   - type: reading
     title: Summary
     path: sections/section-050/module-01/course-05-summary.md
@@ -1375,55 +1413,112 @@ modules:
     title: Kubernetes Release Artifacts
     path: sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
   - type: reading
+    title: Pick The Release Files For A Node — Task
+    path: sections/section-050/module-02/labs/lab-01/question.md
+  - type: lab
+    title: Pick The Release Files For A Node
+    path: sections/section-050/module-02/labs/lab-01
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: release-binary-verification
+    task_kind: build
+    learning_goals:
+    - Choose the release path and checksum that match the version and the architecture of a node.
+    tags:
+    - cks
+    - release-binary-verification
+  - type: reading
+    title: Pick The Release Files For A Node — Solution
+    path: sections/section-050/module-02/labs/lab-01/solution.md
+  - type: reading
     title: sha256sum And The Check Format
     path: sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+  - type: reading
+    title: Verify Downloads With sha256sum --check — Task
+    path: sections/section-050/module-02/labs/lab-02/question.md
+  - type: lab
+    title: Verify Downloads With sha256sum --check
+    path: sections/section-050/module-02/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    topic: release-binary-verification
+    task_kind: build
+    learning_goals:
+    - Write a checksum file in the check format and verify a set of downloads with sha256sum --check.
+    tags:
+    - cks
+    - release-binary-verification
+  - type: reading
+    title: Verify Downloads With sha256sum --check — Solution
+    path: sections/section-050/module-02/labs/lab-02/solution.md
   - type: reading
     title: Detect A Tampered Or Wrong Binary
     path: sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
   - type: reading
     title: Find The Binary That Fails Verification — Task
-    path: sections/section-050/module-02/labs/lab-01/question.md
+    path: sections/section-050/module-02/labs/lab-03/question.md
   - type: lab
     title: Find The Binary That Fails Verification
-    path: sections/section-050/module-02/labs/lab-01
+    path: sections/section-050/module-02/labs/lab-03
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 20m
+    estimated_duration: 10m
     topic: release-binary-verification
     task_kind: build
     learning_goals:
-    - Decide which of three staged binaries fails its published checksum.
+    - Find the one binary in a bundle whose digest does not match its published checksum.
     tags:
     - cks
     - release-binary-verification
   - type: reading
     title: Find The Binary That Fails Verification — Solution
-    path: sections/section-050/module-02/labs/lab-01/solution.md
+    path: sections/section-050/module-02/labs/lab-03/solution.md
   - type: reading
     title: Read The Version Of A Binary
     path: sections/section-050/module-02/course-04-read-the-version-of-a-binary.md
+  - type: reading
+    title: Classify Why Each Download Fails — Task
+    path: sections/section-050/module-02/labs/lab-04/question.md
+  - type: lab
+    title: Classify Why Each Download Fails
+    path: sections/section-050/module-02/labs/lab-04
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: release-binary-verification
+    task_kind: build
+    learning_goals:
+    - Tell a stale checksum, a wrong architecture, a wrong version and a tampered file apart.
+    tags:
+    - cks
+    - release-binary-verification
+  - type: reading
+    title: Classify Why Each Download Fails — Solution
+    path: sections/section-050/module-02/labs/lab-04/solution.md
   - type: reading
     title: Verify What Runs On A Node
     path: sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
   - type: reading
     title: Verify The Running kubelet Against A Release Checksum — Task
-    path: sections/section-050/module-02/labs/lab-02/question.md
+    path: sections/section-050/module-02/labs/lab-05/question.md
   - type: lab
     title: Verify The Running kubelet Against A Release Checksum
-    path: sections/section-050/module-02/labs/lab-02
+    path: sections/section-050/module-02/labs/lab-05
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 15m
     topic: release-binary-verification
     task_kind: build
     learning_goals:
-    - Verify the running kubelet on a node against a staged release checksum.
+    - Find the binary the kubelet process really runs and verify it against the release checksum.
     tags:
     - cks
     - release-binary-verification
   - type: reading
     title: Verify The Running kubelet Against A Release Checksum — Solution
-    path: sections/section-050/module-02/labs/lab-02/solution.md
+    path: sections/section-050/module-02/labs/lab-05/solution.md
   - type: reading
     title: Summary
     path: sections/section-050/module-02/course-06-summary.md
@@ -1439,30 +1534,68 @@ modules:
     title: GPG Signed Repositories
     path: sections/section-050/module-03/course-01-gpg-signed-repositories.md
   - type: reading
-    title: Package Verification On A Node
-    path: sections/section-050/module-03/course-02-package-verification-on-a-node.md
-  - type: reading
-    title: cosign With A Local Key Pair
-    path: sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
-  - type: reading
-    title: Identify The Forged Signature — Task
+    title: Verify Detached GPG Signatures With gpgv — Task
     path: sections/section-050/module-03/labs/lab-01/question.md
   - type: lab
-    title: Identify The Forged Signature
+    title: Verify Detached GPG Signatures With gpgv
     path: sections/section-050/module-03/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 20m
+    estimated_duration: 15m
     topic: signature-verification
     task_kind: build
     learning_goals:
-    - Verify a GPG and a cosign signature and identify the forged one.
+    - Verify detached GPG signatures with gpgv and a keyring, and reject every document without a good signature.
     tags:
     - cks
     - signature-verification
   - type: reading
-    title: Identify The Forged Signature — Solution
+    title: Verify Detached GPG Signatures With gpgv — Solution
     path: sections/section-050/module-03/labs/lab-01/solution.md
+  - type: reading
+    title: Package Verification On A Node
+    path: sections/section-050/module-03/course-02-package-verification-on-a-node.md
+  - type: reading
+    title: Verify A Signed apt Repository And An Installed Package — Task
+    path: sections/section-050/module-03/labs/lab-02/question.md
+  - type: lab
+    title: Verify A Signed apt Repository And An Installed Package
+    path: sections/section-050/module-03/labs/lab-02
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: signature-verification
+    task_kind: build
+    learning_goals:
+    - Follow the chain from a signed Release file to each package file, and find a changed file with dpkg --verify.
+    tags:
+    - cks
+    - signature-verification
+  - type: reading
+    title: Verify A Signed apt Repository And An Installed Package — Solution
+    path: sections/section-050/module-03/labs/lab-02/solution.md
+  - type: reading
+    title: cosign With A Local Key Pair
+    path: sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
+  - type: reading
+    title: Verify And Create Blob Signatures With cosign — Task
+    path: sections/section-050/module-03/labs/lab-03/question.md
+  - type: lab
+    title: Verify And Create Blob Signatures With cosign
+    path: sections/section-050/module-03/labs/lab-03
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: signature-verification
+    task_kind: build
+    learning_goals:
+    - Verify blob signatures with cosign and a public key, and sign a file with a new key pair.
+    tags:
+    - cks
+    - signature-verification
+  - type: reading
+    title: Verify And Create Blob Signatures With cosign — Solution
+    path: sections/section-050/module-03/labs/lab-03/solution.md
   - type: reading
     title: Keyless Verification And Release Signatures
     path: sections/section-050/module-03/course-04-keyless-verification-and-release-signatures.md
@@ -1471,13 +1604,13 @@ modules:
     path: sections/section-050/module-03/course-05-image-digests-and-pinning.md
   - type: reading
     title: Pin An Image By Digest And Prove It Runs — Task
-    path: sections/section-050/module-03/labs/lab-02/question.md
+    path: sections/section-050/module-03/labs/lab-04/question.md
   - type: lab
     title: Pin An Image By Digest And Prove It Runs
-    path: sections/section-050/module-03/labs/lab-02
+    path: sections/section-050/module-03/labs/lab-04
     examScope: namespace
     difficulty: intermediate
-    estimated_duration: 25m
+    estimated_duration: 10m
     topic: image-digest-pinning
     task_kind: build
     learning_goals:
@@ -1487,10 +1620,29 @@ modules:
     - image-digest-pinning
   - type: reading
     title: Pin An Image By Digest And Prove It Runs — Solution
-    path: sections/section-050/module-03/labs/lab-02/solution.md
+    path: sections/section-050/module-03/labs/lab-04/solution.md
   - type: reading
     title: SBOMs And Admission-Time Verification
     path: sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
+  - type: reading
+    title: Require Digest-Pinned Images At Admission — Task
+    path: sections/section-050/module-03/labs/lab-05/question.md
+  - type: lab
+    title: Require Digest-Pinned Images At Admission
+    path: sections/section-050/module-03/labs/lab-05
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 15m
+    topic: image-digest-pinning
+    task_kind: build
+    learning_goals:
+    - Deny Pods with tag-only images in one namespace with a ValidatingAdmissionPolicy.
+    tags:
+    - cks
+    - image-digest-pinning
+  - type: reading
+    title: Require Digest-Pinned Images At Admission — Solution
+    path: sections/section-050/module-03/labs/lab-05/solution.md
   - type: reading
     title: Summary
     path: sections/section-050/module-03/course-07-summary.md
