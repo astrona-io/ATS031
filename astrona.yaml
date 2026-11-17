@@ -2,7 +2,7 @@ training:
   id: ATS031
   title: 'CKS: Cluster Setup'
   description: 'Detailed reading material, labs and reusable YAML knowledge checks
-    for CKS: Cluster Setup. Technical content remains draft.'
+    for CKS: Cluster Setup.'
   certification:
     name: Certified Kubernetes Security Specialist
     code: CKS
@@ -1958,7 +1958,7 @@ modules:
     path: sections/section-050/module-01/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 10m
+    estimated_duration: 8m
     topic: artifact-authenticity
     task_kind: build
     learning_goals:
@@ -1980,7 +1980,7 @@ modules:
     path: sections/section-050/module-01/labs/lab-02
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 10m
     topic: artifact-authenticity
     task_kind: build
     learning_goals:
@@ -2002,7 +2002,7 @@ modules:
     path: sections/section-050/module-01/labs/lab-03
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 12m
     topic: artifact-authenticity
     task_kind: build
     learning_goals:
@@ -2035,7 +2035,7 @@ modules:
     path: sections/section-050/module-02/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 10m
+    estimated_duration: 6m
     topic: release-binary-verification
     task_kind: build
     learning_goals:
@@ -2057,7 +2057,7 @@ modules:
     path: sections/section-050/module-02/labs/lab-02
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 10m
+    estimated_duration: 8m
     topic: release-binary-verification
     task_kind: build
     learning_goals:
@@ -2079,7 +2079,7 @@ modules:
     path: sections/section-050/module-02/labs/lab-03
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 10m
+    estimated_duration: 6m
     topic: release-binary-verification
     task_kind: build
     learning_goals:
@@ -2101,7 +2101,7 @@ modules:
     path: sections/section-050/module-02/labs/lab-04
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 12m
     topic: release-binary-verification
     task_kind: build
     learning_goals:
@@ -2123,7 +2123,7 @@ modules:
     path: sections/section-050/module-02/labs/lab-05
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 12m
     topic: release-binary-verification
     task_kind: build
     learning_goals:
@@ -2156,7 +2156,7 @@ modules:
     path: sections/section-050/module-03/labs/lab-01
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 10m
     topic: signature-verification
     task_kind: build
     learning_goals:
@@ -2178,7 +2178,7 @@ modules:
     path: sections/section-050/module-03/labs/lab-02
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 12m
     topic: signature-verification
     task_kind: build
     learning_goals:
@@ -2200,7 +2200,7 @@ modules:
     path: sections/section-050/module-03/labs/lab-03
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 12m
     topic: signature-verification
     task_kind: build
     learning_goals:
@@ -2225,7 +2225,7 @@ modules:
     path: sections/section-050/module-03/labs/lab-04
     examScope: namespace
     difficulty: intermediate
-    estimated_duration: 10m
+    estimated_duration: 8m
     topic: image-digest-pinning
     task_kind: build
     learning_goals:
@@ -2247,7 +2247,7 @@ modules:
     path: sections/section-050/module-03/labs/lab-05
     examScope: cluster
     difficulty: intermediate
-    estimated_duration: 15m
+    estimated_duration: 12m
     topic: image-digest-pinning
     task_kind: build
     learning_goals:

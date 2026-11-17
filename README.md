@@ -8,7 +8,7 @@
 
 Certified Kubernetes Security Specialist (CKS): Cluster Setup, worth 15% of the official curriculum. This course belongs to ATP007.
 
-Developed reading explains mechanisms, responsible components, examples and limits. Every section has an introduction and every module closes with a summary. Reusable YAML checks contain 5–15 questions per bank. Each module is a short landing page followed by deep-dive parts that carry the hands-on steps, a closing summary and a ten-question knowledge check. Technical content remains draft. Private playgrounds and draft graded labs are included.
+Developed reading explains mechanisms, responsible components, examples and limits. Every section has an introduction and every module closes with a summary. Reusable YAML checks contain 5–15 questions per bank. Each module is a short landing page followed by deep-dive parts that carry the hands-on steps, a closing summary and a ten-question knowledge check. Private playgrounds and graded labs are included.
 
 ## Course Outline
 
