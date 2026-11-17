@@ -40,7 +40,9 @@ kubectl -n dock-031-040-03-01 exec inspector -- curl -s -m 3 -o /dev/null -w '%{
 kubectl -n dock-031-040-03-01 exec inspector -- curl -sk -m 3 -o /dev/null -w '%{http_code}\n' "https://$WORKER_IP:10250/pods"
 ```
 
-The `grep` on the running configuration finds no match, because the kubelet leaves out a port of `0`. The request to port 10255 prints `000`, because nothing listens on the port any more. The request to port 10250 prints `401`: the secure port still runs and still refuses a caller without a credential.
+The node can still show `Ready` from before the restart for a few seconds. If a command fails with `connect: connection refused` or `pod does not exist`, the kubelet is still starting; wait a few seconds and run the commands again.
+
+The `grep` on the running configuration finds no match, because the kubelet leaves out a port of `0`. The request to port 10255 prints `000`, and `kubectl` adds `command terminated with exit code 7`: curl could not connect, because nothing listens on the port any more. The request to port 10250 prints `401`: the secure port still runs and still refuses a caller without a credential.
 
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-040-03-01`.
 

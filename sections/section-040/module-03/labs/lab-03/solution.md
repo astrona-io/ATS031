@@ -84,7 +84,7 @@ kubectl -n dock-031-040-03-03 exec deploy/image-scanner -- ls /host/run/containe
 kubectl -n dock-031-040-03-03 exec deploy/image-scanner -- cat /etc/scanner/targets
 ```
 
-The user id is now `1000`. The `ls` command fails, because the path no longer exists in the container. The settings file still prints its two registry lines.
+The user id is now `1000`. The `ls` command fails with `ls: /host/run/containerd: No such file or directory`, because the path no longer exists in the container. The settings file still prints its two registry lines.
 
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-040-03-03`.
 
