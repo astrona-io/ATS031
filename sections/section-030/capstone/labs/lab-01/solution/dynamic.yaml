@@ -1,5 +1,0 @@
-tls:
-  options:
-    default:
-      minVersion: VersionTLS13
-      sniStrict: true

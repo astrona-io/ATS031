@@ -40,7 +40,7 @@ See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [questi
 
 ## Hands-On Coverage
 
-This course has 19 ungraded module playgrounds, 29 draft independent labs and 5 section capstone labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static checks only: YAML and JSON parse, shell syntax, Python compile, path and question-count checks. No playground, lab or grader has been booted or run, and runtime verification is pending.
+This course has 19 ungraded module playgrounds, 29 independent labs. Tasks and solutions are registered around each lab immediately after its teaching reading. Static checks only: YAML and JSON parse, shell syntax, Python compile, path and question-count checks. No playground, lab or grader has been booted or run, and runtime verification is pending.
 
 | Module | Labs in teaching order |
 | --- | --- |

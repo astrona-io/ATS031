@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Verify platform binaries before deploying
 ---
@@ -12,7 +11,6 @@ A binary arrives on a node and runs with high privilege. A checksum from the sam
 1. Verify Platform Binaries Before Deploying: the first module, with the playground and a signed-manifest lab. It covers integrity, authenticity, digests, a signed manifest and keeping the verified bytes bound to what is deployed.
 2. Verify Kubernetes Release Binaries Hands-On: the release layout, the `sha256sum --check` format, tampered and wrong-architecture files, binary versions, and the `kubelet` that runs on a node. Two labs.
 3. Verify Packages, Images And Signatures: GPG signed repositories, package verification, cosign with a local key pair, keyless verification as reading, image digests and pinning, SBOMs and admission-time verification. Two labs.
-4. Capstone: verify a signed release bundle, check the running `kubelet`, pin an image by digest and record a verification report.
 
 Each module ends with a summary and a ten-question knowledge check. The deep-dive parts carry the hands-on steps, and each lab follows the part that practises its skill. Every playground is a private `kind` cluster with Kubernetes v1.35 and no outside network path; launch it from the landing page and keep it running while you read.
 

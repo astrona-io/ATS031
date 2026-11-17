@@ -27,7 +27,7 @@ sections:
 - id: section-010
   title: Use Network security policies to restrict cluster level access
   curriculum_item: Use Network security policies to restrict cluster level access
-  capstone: true
+  capstone: false
   section_quiz: false
   modules:
   - id: module-01
@@ -113,7 +113,7 @@ sections:
     (etcd, kubelet, kubedns, kubeapi)
   curriculum_item: Use CIS benchmark to review the security configuration of Kubernetes
     components (etcd, kubelet, kubedns, kubeapi)
-  capstone: true
+  capstone: false
   section_quiz: false
   modules:
   - id: module-01
@@ -200,7 +200,7 @@ sections:
 - id: section-030
   title: Properly set up Ingress with TLS
   curriculum_item: Properly set up Ingress with TLS
-  capstone: true
+  capstone: false
   section_quiz: false
   modules:
   - id: module-01
@@ -276,7 +276,7 @@ sections:
 - id: section-040
   title: Protect node metadata and endpoints
   curriculum_item: Protect node metadata and endpoints
-  capstone: true
+  capstone: false
   section_quiz: false
   modules:
   - id: module-01
@@ -341,7 +341,7 @@ sections:
 - id: section-050
   title: Verify platform binaries before deploying
   curriculum_item: Verify platform binaries before deploying
-  capstone: true
+  capstone: false
   section_quiz: false
   modules:
   - id: module-01

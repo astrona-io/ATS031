@@ -1,5 +1,4 @@
 ---
-draft: true
 exam_objectives:
 - Properly set up Ingress with TLS
 ---
@@ -13,7 +12,6 @@ A client requests `probe.example.test` over HTTPS. Traefik picks the route, pres
 2. Run Traefik On kind: controller architecture, the installation objects, host header testing, path types and priority, several Services with a default backend, and inspection of the running controller. A graded lab routes two Services from one host.
 3. Build TLS With openssl For Traefik: certificate fundamentals, self-signed and CA-signed certificates, the TLS Secret, `spec.tls` with verification, the HTTPS redirect, HSTS and the default certificate. Two graded labs create a TLS route and repair a broken one.
 4. Harden And Troubleshoot Traefik TLS: TLS versions and strict server names, mutual TLS, the attack surface of the controller, certificate rotation and a fixed order of checks for failures. Two graded labs set the TLS policy and repair four broken Ingresses.
-5. Capstone: publish two hosts over HTTPS with their own certificates, a redirect to HTTPS and TLS 1.3, and repair a broken Ingress in one cluster.
 
 Each module ends with a summary and a ten-question knowledge check. Each lab follows the part that practises its skill. Every module has a playground, a private `kind` cluster with Kubernetes v1.35; launch it from the landing page and keep it running while you read.
 
