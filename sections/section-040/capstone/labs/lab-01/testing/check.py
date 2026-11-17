@@ -1,11 +1,29 @@
 #!/usr/bin/env python3
-"""Grader engine: reads requirements.json and runs bounded checks in one context."""
+"""Grader engine: reads requirements.json and runs bounded checks in one context.
+
+Run with no argument to grade the whole lab, or with an outcome id to grade
+one outcome. A check with an "outcome" belongs to that outcome; a check
+without one is a guard and runs for every outcome. The context is
+ASTRONA_KUBE_CONTEXT when astrona sets it, otherwise the one in
+requirements.json. It prints one `PASS:` or `FAIL:` line.
+"""
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 
 DIRECTORY = Path(__file__).resolve().parent
+SELECTED = sys.argv[1] if len(sys.argv) > 1 else None
+MATCHED = set()
+
+
+def wants(outcome):
+    """True when this outcome is being graded (or the whole lab is)."""
+    if SELECTED is None or SELECTED == outcome:
+        MATCHED.add(outcome)
+        return True
+    return False
 
 
 def run(args, timeout=20):
@@ -104,16 +122,19 @@ CHECKS = {
 
 def main():
     requirements = json.loads((DIRECTORY / 'requirements.json').read_text())
-    assert kubectl('config', 'current-context') == requirements['context'], 'Refusing to operate on another Kubernetes context'
+    context = os.environ.get('ASTRONA_KUBE_CONTEXT') or requirements['context']
+    assert kubectl('config', 'current-context') == context, 'Refusing to operate on another Kubernetes context'
     addresses = node_addresses()
     for check in requirements['checks']:
-        CHECKS[check['type']](check, addresses)
-    print('Required result verified')
+        if 'outcome' not in check or wants(check['outcome']):
+            CHECKS[check['type']](check, addresses)
+    assert SELECTED is None or SELECTED in MATCHED, 'Unknown outcome: ' + str(SELECTED)
+    print('PASS: ' + (SELECTED or 'every outcome'))
 
 
 if __name__ == '__main__':
     try:
         main()
     except (AssertionError, KeyError, ValueError, StopIteration, subprocess.SubprocessError) as error:
-        print(str(error), file=sys.stderr)
+        print('FAIL: ' + str(error))
         sys.exit(1)

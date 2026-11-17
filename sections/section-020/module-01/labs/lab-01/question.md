@@ -6,13 +6,9 @@ exam_objectives:
 ---
 # Disable API Server Profiling In A Private Node
 
-Allow about 8 minutes for the tasks.
+Solve this question on: `terminal`
 
-Review and correct one effective control-plane setting while keeping API access available.
-
-## Starting state
-
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
+The namespace `starfleet-031-020-01-01` runs the `probe` Deployment (two healthy replicas) behind an internal Service `probe`, and two client pods. The API server of this cluster runs as a static pod on the control plane node. A static pod is a pod that the kubelet starts from a manifest file in `/etc/kubernetes/manifests` on the node. The API server still runs with profiling at its default value, and no review record exists yet.
 
 Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
@@ -25,10 +21,22 @@ worker_name="astro-ats-031-lab-020-01-01-worker"
 
 Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
 
-## Required result
+Allow about 8 minutes for task work. Cluster startup adds time.
 
-Set the isolated API server flag `--profiling=false`. Create ConfigMap `benchmark-review` in the `starfleet-031-020-01-01` namespace, recording `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`. Keep the API ready and both application replicas available. This is one scoped configuration review, not a claim of full Center for Internet Security (CIS) benchmark compliance.
+## Tasks
 
-## Verify The Result
+1. Read the flags of the running API server pod in `kube-system` and find the profiling setting.
+2. Set the flag `--profiling=false` on the API server. Edit its static pod manifest on the control plane node and wait until the API server answers `ok` on `/readyz` again.
+3. Create the ConfigMap `benchmark-review` in the namespace `starfleet-031-020-01-01` with the keys `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`.
 
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+## Constraints
+
+- Keep the API server ready and both `probe` replicas available.
+- Keep the namespace, the workload names and unrelated components as they are.
+- This is one scoped configuration review, not a claim of full Center for Internet Security (CIS) benchmark compliance.
+
+## How the answer is checked
+
+The grader runs two checks. The first reads the command of the running API server pod in `kube-system` and needs `--profiling=false` in it. The second reads the ConfigMap `benchmark-review` in `starfleet-031-020-01-01` and needs the keys `component: kube-apiserver`, `control: disable-profiling` and `result: corrected`. Both checks also need the API server pod running and ready, `/readyz` returning `ok`, the `probe` Deployment fully rolled out, and a response with `version=v1` when `shuttle` requests `http://probe/`.
+
+Hint: keep a copy of the manifest outside `/etc/kubernetes/manifests` before you edit it. The kubelet restarts the API server when the file changes, so wait a minute before you check.

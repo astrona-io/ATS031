@@ -29,8 +29,24 @@ testing:
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validate.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: metadata-blocked
+    description: Only agent reaches 169.254.169.254; shuttle, drifter and tender are denied
+    type: file
+    source: validation/validate-metadata-blocked.sh
+    points: 1
+  - name: kubelet-ports-blocked
+    description: No client pod reaches port 10250 on either node or port 10255 on the worker
+    type: file
+    source: validation/validate-kubelet-ports-blocked.sh
+    points: 2
+  - name: runtime-socket-removed
+    description: runtime-peek no longer mounts the runtime socket and stays rolled out
+    type: file
+    source: validation/validate-runtime-socket-removed.sh
+    points: 1

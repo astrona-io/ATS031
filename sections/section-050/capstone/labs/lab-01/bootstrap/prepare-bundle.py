@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
 """Stage the capstone release bundle on the control plane node.
 
-Usage: prepare-bundle.py <cluster-name>
+Usage: prepare-bundle.py <lab-name>
 
 The bundle holds two stand-in binaries, a manifest that also lists the digest of
 the kubelet that runs on the worker, a signature over the manifest, the public
 key and an image reference. One of the two binaries is changed after the
 manifest was signed. All digests and keys are made here at run time.
 """
+import os
 import random
 import subprocess
 import sys
 
-CLUSTER = sys.argv[1]
-CONTEXT = "kind-astro-" + CLUSTER
-CONTROL = "astro-%s-control-plane" % CLUSTER
-WORKER = "astro-%s-worker" % CLUSTER
+LAB = sys.argv[1]
+CONTEXT = os.environ.get("ASTRONA_KUBE_CONTEXT") or "kind-astro-" + LAB
+KIND_CLUSTER = os.environ.get("ASTRONA_KIND_CLUSTER") or "astro-" + LAB
+ENGINE = os.environ.get("ASTRONA_CONTAINER_ENGINE") or "podman"
+CONTROL = KIND_CLUSTER + "-control-plane"
+WORKER = KIND_CLUSTER + "-worker"
 
 
 def run(*args):
@@ -28,10 +31,10 @@ def run(*args):
 
 assert run("kubectl", "config", "current-context") == CONTEXT, "Select the private environment"
 for name in (CONTROL, WORKER):
-    label = run("podman", "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
-    assert label == "astro-" + CLUSTER, "Refusing an unrelated node container"
+    label = run(ENGINE, "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
+    assert label == KIND_CLUSTER, "Refusing an unrelated node container"
 
-worker_digest = run("podman", "exec", WORKER, "sh", "-c", "sha256sum /usr/bin/kubelet | cut -d' ' -f1")
+worker_digest = run(ENGINE, "exec", WORKER, "sh", "-c", "sha256sum /usr/bin/kubelet | cut -d' ' -f1")
 victim = random.choice(["kubectl", "kubeadm"])
 
 SCRIPT = r"""
@@ -53,5 +56,5 @@ rm -f /tmp/bundle-publisher.key
 printf 'docker.io/library/busybox:1.37.0\n' > "$B/image.txt"
 printf 'altered' >> "$B/$2"
 """
-run("podman", "exec", CONTROL, "sh", "-ec", SCRIPT, "_", worker_digest, victim)
+run(ENGINE, "exec", CONTROL, "sh", "-ec", SCRIPT, "_", worker_digest, victim)
 print("Release bundle staged")

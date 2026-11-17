@@ -1,54 +1,63 @@
 {
   "context": "kind-astro-ats-031-capstone-040",
+  "cluster": "astro-ats-031-capstone-040",
+  "namespace": "starfleet",
   "checks": [
     {
       "type": "http",
       "from": "starfleet/shuttle",
       "url": "http://169.254.169.254/latest/meta-data/",
       "expect": "denied",
-      "label": "starfleet/shuttle must not reach the metadata address"
+      "label": "starfleet/shuttle must not reach the metadata address",
+      "outcome": "metadata-blocked"
     },
     {
       "type": "http",
       "from": "outpost/drifter",
       "url": "http://169.254.169.254/latest/meta-data/",
       "expect": "denied",
-      "label": "outpost/drifter must not reach the metadata address"
+      "label": "outpost/drifter must not reach the metadata address",
+      "outcome": "metadata-blocked"
     },
     {
       "type": "http",
       "from": "dock/tender",
       "url": "http://169.254.169.254/latest/meta-data/",
       "expect": "denied",
-      "label": "dock/tender must not reach the metadata address"
+      "label": "dock/tender must not reach the metadata address",
+      "outcome": "metadata-blocked"
     },
     {
       "type": "http",
       "from": "starfleet/agent",
       "url": "http://169.254.169.254/latest/meta-data/",
       "expect": "200",
-      "label": "agent must reach the metadata address"
+      "label": "agent must reach the metadata address",
+      "outcome": "metadata-blocked"
     },
     {
       "type": "http",
       "from": "starfleet/shuttle",
       "url": "http://{worker_ip}:10255/pods",
       "expect": "denied",
-      "label": "starfleet/shuttle must not reach the read-only port"
+      "label": "starfleet/shuttle must not reach the read-only port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "starfleet/shuttle",
       "url": "https://{worker_ip}:10250/pods",
       "expect": "denied",
-      "label": "starfleet/shuttle must not reach the worker kubelet port"
+      "label": "starfleet/shuttle must not reach the worker kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "starfleet/shuttle",
       "url": "https://{control_plane_ip}:10250/pods",
       "expect": "denied",
-      "label": "starfleet/shuttle must not reach the control plane kubelet port"
+      "label": "starfleet/shuttle must not reach the control plane kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
@@ -62,21 +71,24 @@
       "from": "starfleet/agent",
       "url": "http://{worker_ip}:10255/pods",
       "expect": "denied",
-      "label": "starfleet/agent must not reach the read-only port"
+      "label": "starfleet/agent must not reach the read-only port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "starfleet/agent",
       "url": "https://{worker_ip}:10250/pods",
       "expect": "denied",
-      "label": "starfleet/agent must not reach the worker kubelet port"
+      "label": "starfleet/agent must not reach the worker kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "starfleet/agent",
       "url": "https://{control_plane_ip}:10250/pods",
       "expect": "denied",
-      "label": "starfleet/agent must not reach the control plane kubelet port"
+      "label": "starfleet/agent must not reach the control plane kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
@@ -90,21 +102,24 @@
       "from": "outpost/drifter",
       "url": "http://{worker_ip}:10255/pods",
       "expect": "denied",
-      "label": "outpost/drifter must not reach the read-only port"
+      "label": "outpost/drifter must not reach the read-only port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "outpost/drifter",
       "url": "https://{worker_ip}:10250/pods",
       "expect": "denied",
-      "label": "outpost/drifter must not reach the worker kubelet port"
+      "label": "outpost/drifter must not reach the worker kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "outpost/drifter",
       "url": "https://{control_plane_ip}:10250/pods",
       "expect": "denied",
-      "label": "outpost/drifter must not reach the control plane kubelet port"
+      "label": "outpost/drifter must not reach the control plane kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
@@ -118,21 +133,24 @@
       "from": "dock/tender",
       "url": "http://{worker_ip}:10255/pods",
       "expect": "denied",
-      "label": "dock/tender must not reach the read-only port"
+      "label": "dock/tender must not reach the read-only port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "dock/tender",
       "url": "https://{worker_ip}:10250/pods",
       "expect": "denied",
-      "label": "dock/tender must not reach the worker kubelet port"
+      "label": "dock/tender must not reach the worker kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
       "from": "dock/tender",
       "url": "https://{control_plane_ip}:10250/pods",
       "expect": "denied",
-      "label": "dock/tender must not reach the control plane kubelet port"
+      "label": "dock/tender must not reach the control plane kubelet port",
+      "outcome": "kubelet-ports-blocked"
     },
     {
       "type": "http",
@@ -158,7 +176,8 @@
     {
       "type": "no_socket_mount",
       "namespace": "outpost",
-      "name": "runtime-peek"
+      "name": "runtime-peek",
+      "outcome": "runtime-socket-removed"
     },
     {
       "type": "labels",

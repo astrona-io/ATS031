@@ -1,0 +1,39 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "bounded-range",
+    "namespace": "ranges-training"
+  },
+  "spec": {
+    "podSelector": {
+      "matchLabels": {
+        "app": "range-server"
+      }
+    },
+    "policyTypes": [
+      "Ingress"
+    ],
+    "ingress": [
+      {
+        "from": [
+          {
+            "ipBlock": {
+              "cidr": "0.0.0.0/0",
+              "except": [
+                "0.0.0.0/32"
+              ]
+            }
+          }
+        ],
+        "ports": [
+          {
+            "protocol": "TCP",
+            "port": 8080,
+            "endPort": 8082
+          }
+        ]
+      }
+    ]
+  }
+}

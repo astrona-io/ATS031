@@ -1,5 +1,7 @@
 {
   "context": "kind-astro-ats-031-capstone-020",
+  "cluster": "astro-ats-031-capstone-020",
+  "namespace": "starfleet",
   "resources": [
     {
       "kind": "deployment",

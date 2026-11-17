@@ -27,8 +27,34 @@ testing:
   - name: reference-result
     type: file
     source: solution/apply.sh
-validation:
-  script:
-    name: verify-fields-and-live-evidence
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
     type: file
-    source: validation/validate-completed.sh
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: api-profiling
+    description: The kube-apiserver command contains --profiling=false
+    type: file
+    source: validation/validate-api-profiling.sh
+    points: 1
+  - name: etcd-data-dir
+    description: The etcd data directory /var/lib/etcd has mode 700
+    type: file
+    source: validation/validate-etcd-data-dir.sh
+    points: 1
+  - name: secret-encryption
+    description: launch-code is stored with aescbc in etcd and still readable through the API
+    type: file
+    source: validation/validate-secret-encryption.sh
+    points: 2
+  - name: kubelet-hardening
+    description: The worker kubelet denies anonymous requests, uses Webhook and closes port 10255
+    type: file
+    source: validation/validate-kubelet-hardening.sh
+    points: 2
+  - name: cis-evidence
+    description: ConfigMap cis-evidence marks six findings fixed with different before and after text
+    type: file
+    source: validation/validate-cis-evidence.sh
+    points: 1

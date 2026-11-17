@@ -1,6 +1,6 @@
 version: 1
-approval: Maintainer requested CKA and CKS playgrounds and graded labs on 2026-10-13,
-  superseding the earlier reading-only scope.
+approval: Maintainer requested CKA and CKS playgrounds and graded labs on 2026-10-13, superseding the
+  earlier reading-only scope.
 course:
   id: ATS031
   certification:
@@ -11,8 +11,8 @@ course:
     weight: 15
     competencies:
     - Use Network security policies to restrict cluster level access
-    - Use CIS benchmark to review the security configuration of Kubernetes components
-      (etcd, kubelet, kubedns, kubeapi)
+    - Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet,
+      kubedns, kubeapi)
     - Properly set up Ingress with TLS
     - Protect node metadata and endpoints
     - Verify platform binaries before deploying
@@ -33,16 +33,13 @@ sections:
   - id: module-01
     title: Restrict Pod Traffic With NetworkPolicy
     objectives:
-    - Explain which pods a policy isolates, in which direction, and how several policies
-      combine.
-    - Write an ingress policy that allows one labelled peer and denies all others,
-      including a peer in another namespace.
-    - Write an egress policy that allows DNS and one application dependency and blocks
-      everything else.
-    - Explain why `namespaceSelector` and `podSelector` in one peer entry differ from
-      two separate peer entries.
-    - Test a policy with an allowed request and a denied request, and tell a timeout
-      from a refused connection.
+    - Explain which pods a policy isolates, in which direction, and how several policies combine.
+    - Write an ingress policy that allows one labelled peer and denies all others, including a peer in
+      another namespace.
+    - Write an egress policy that allows DNS and one application dependency and blocks everything else.
+    - Explain why `namespaceSelector` and `podSelector` in one peer entry differ from two separate peer
+      entries.
+    - Test a policy with an allowed request and a denied request, and tell a timeout from a refused connection.
     outline:
     - How NetworkPolicy Isolation Works
     - Allow One Peer With An Ingress Policy
@@ -52,26 +49,24 @@ sections:
     module_lab: true
     sources:
     - reading: sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
-      adapted_from: 
+      adapted_from: null
     labs:
     - id: lab-01
       path: sections/section-010/module-01/labs/lab-01
       after_reading: sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
-      objective: Enforce both an allowed same-namespace peer and a denied peer in
-        another namespace.
+      objective: Enforce both an allowed same-namespace peer and a denied peer in another namespace.
       status: alpha
       runtime_verification: pending
     - id: lab-02
       path: sections/section-010/module-01/labs/lab-02
       after_reading: sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
-      objective: Allow name resolution and application access while denying a healthy
-        unrelated listener.
+      objective: Allow name resolution and application access while denying a healthy unrelated listener.
       status: alpha
       runtime_verification: pending
     practice_readings:
@@ -91,7 +86,9 @@ sections:
     - Baselines Across Many Namespaces
   - id: module-03
     title: Select Peers And Ports Precisely
-    objectives: []
+    objectives:
+    - The permitted client connects and the excluded address cannot; Every port in the requested range
+      works and adjacent ports remain denied
     outline:
     - Selectors Recap And The Namespace Name Label
     - Cross-Namespace Ingress
@@ -99,6 +96,18 @@ sections:
     - ipBlock And Except
     - Ports, Protocols And endPort
     - Policies On Services And Replicas
+    - Verify CIDR Exceptions And Port Ranges
+    sources:
+    - reading: sections/section-010/module-03/course-06a-verify-cidr-and-port-boundaries.md
+      adapted_from: null
+    labs:
+    - id: lab-03
+      path: sections/section-010/module-03/labs/lab-03
+      after_reading: sections/section-010/module-03/course-06a-verify-cidr-and-port-boundaries.md
+      objective: The permitted client connects and the excluded address cannot; Every port in the requested
+        range works and adjacent ports remain denied
+      status: alpha
+      runtime_verification: pending
   - id: module-04
     title: Policy For Real Cluster Traffic And Troubleshooting
     objectives: []
@@ -109,25 +118,22 @@ sections:
     - Test Matrix For A Policy Set
     - Audit And Troubleshoot Policies
 - id: section-020
-  title: Use CIS benchmark to review the security configuration of Kubernetes components
-    (etcd, kubelet, kubedns, kubeapi)
-  curriculum_item: Use CIS benchmark to review the security configuration of Kubernetes
-    components (etcd, kubelet, kubedns, kubeapi)
+  title: Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet,
+    kubedns, kubeapi)
+  curriculum_item: Use CIS benchmark to review the security configuration of Kubernetes components (etcd,
+    kubelet, kubedns, kubeapi)
   capstone: true
   section_quiz: false
   modules:
   - id: module-01
     title: Review Kubernetes Components With The CIS Benchmark
     objectives:
-    - Explain how the CIS benchmark is organised and which component each section
-      covers.
-    - Find the manifests, configuration files and certificates of a kubeadm cluster
-      on a node.
-    - Read a `kube-bench` check (its audit, test and remediation) and run the same
-      audit by hand.
+    - Explain how the CIS benchmark is organised and which component each section covers.
+    - Find the manifests, configuration files and certificates of a kubeadm cluster on a node.
+    - Read a `kube-bench` check (its audit, test and remediation) and run the same audit by hand.
     - Review the effective kubelet configuration and the permissions of its files.
-    - Correct an API server flag in the static pod manifest, wait for the API server
-      to return, and verify the new value.
+    - Correct an API server flag in the static pod manifest, wait for the API server to return, and verify
+      the new value.
     outline:
     - The Benchmark And Where The Settings Live
     - 'Read A Check: kube-bench And The Manual Audit'
@@ -137,19 +143,18 @@ sections:
     module_lab: true
     sources:
     - reading: sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-020/module-01/course-03-reviewing-the-kubelet.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
-      adapted_from: 
+      adapted_from: null
     labs:
     - id: lab-01
       path: sections/section-020/module-01/labs/lab-01
       after_reading: sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
-      objective: Review and correct one effective control-plane setting while keeping
-        API access available.
+      objective: Review and correct one effective control-plane setting while keeping API access available.
       status: alpha
       runtime_verification: pending
     practice_readings:
@@ -208,12 +213,11 @@ sections:
     objectives:
     - Explain the roles of the Ingress object, the IngressClass and the Ingress controller.
     - Write Ingress rules with host, path, `pathType` and a backend Service port.
-    - Create a `kubernetes.io/tls` Secret from a certificate and a key, and check
-      that the two match.
-    - Configure `spec.tls` in an Ingress and explain which certificate a client receives
-      for a given host name.
-    - Test with `curl` and `openssl s_client` that the certificate is trusted for
-      the matching name and rejected for another name.
+    - Create a `kubernetes.io/tls` Secret from a certificate and a key, and check that the two match.
+    - Configure `spec.tls` in an Ingress and explain which certificate a client receives for a given host
+      name.
+    - Test with `curl` and `openssl s_client` that the certificate is trusted for the matching name and
+      rejected for another name.
     outline:
     - 'Ingress Routing: Controller, Class, Host And Path'
     - Certificates And The TLS Secret
@@ -223,19 +227,19 @@ sections:
     module_lab: true
     sources:
     - reading: sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
-      adapted_from: 
+      adapted_from: null
     labs:
     - id: lab-01
       path: sections/section-030/module-01/labs/lab-01
       after_reading: sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
-      objective: Route HTTPS through the controller and verify both matching and mismatched
-        certificate identities.
+      objective: Route HTTPS through the controller and verify both matching and mismatched certificate
+        identities.
       status: alpha
       runtime_verification: pending
     practice_readings:
@@ -266,13 +270,28 @@ sections:
     - HTTPS Redirect, HSTS And The Default Certificate
   - id: module-04
     title: Harden And Troubleshoot Traefik TLS
-    objectives: []
+    objectives:
+    - The active TLS Secret contains the supplied replacement certificate and matching key; A fresh verified
+      TLS connection receives the replacement certificate and the original application response
     outline:
     - TLS Versions, Ciphers And Server Names
     - Mutual TLS With Client Certificates
     - Shrink The Controller Attack Surface
     - Rotate And Replace Certificates
     - Troubleshoot TLS Ingress Failures
+    - Verify A Live Certificate Rotation
+    sources:
+    - reading: sections/section-030/module-04/course-04a-verify-live-certificate-rotation.md
+      adapted_from: null
+    labs:
+    - id: lab-03
+      path: sections/section-030/module-04/labs/lab-03
+      after_reading: sections/section-030/module-04/course-04a-verify-live-certificate-rotation.md
+      objective: The active TLS Secret contains the supplied replacement certificate and matching key;
+        A fresh verified TLS connection receives the replacement certificate and the original application
+        response
+      status: alpha
+      runtime_verification: pending
 - id: section-040
   title: Protect node metadata and endpoints
   curriculum_item: Protect node metadata and endpoints
@@ -282,16 +301,16 @@ sections:
   - id: module-01
     title: Protect Node Metadata And Management Endpoints
     objectives:
-    - 'Name the node-local endpoints that carry authority: the cloud metadata service,
-      the kubelet API and the container runtime socket.'
-    - Explain why the identity of a node differs from the identity of a workload,
-      and why RBAC does not cover a metadata service.
-    - Read the kubelet authentication and authorization settings from a running node,
-      and find pods that mount host paths or use the host network.
-    - Show with requests from two namespaces that a pod can reach a metadata-style
-      endpoint, and restrict it with an egress allow-list.
-    - Explain what a NetworkPolicy does not cover, and name provider-specific protections
-      that complement it.
+    - 'Name the node-local endpoints that carry authority: the cloud metadata service, the kubelet API
+      and the container runtime socket.'
+    - Explain why the identity of a node differs from the identity of a workload, and why RBAC does not
+      cover a metadata service.
+    - Read the kubelet authentication and authorization settings from a running node, and find pods that
+      mount host paths or use the host network.
+    - Show with requests from two namespaces that a pod can reach a metadata-style endpoint, and restrict
+      it with an egress allow-list.
+    - Explain what a NetworkPolicy does not cover, and name provider-specific protections that complement
+      it.
     outline:
     - Endpoints That Carry Authority
     - Network Paths To A Metadata-Style Endpoint
@@ -300,17 +319,17 @@ sections:
     module_lab: true
     sources:
     - reading: sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
-      adapted_from: 
+      adapted_from: null
     labs:
     - id: lab-01
       path: sections/section-040/module-01/labs/lab-01
       after_reading: sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
-      objective: Separate permitted application dependencies from a metadata-style
-        endpoint in the private network.
+      objective: Separate permitted application dependencies from a metadata-style endpoint in the private
+        network.
       status: alpha
       runtime_verification: pending
     practice_readings:
@@ -347,16 +366,14 @@ sections:
   - id: module-01
     title: Verify Platform Binaries Before Deploying
     objectives:
-    - Explain what a checksum proves, what it does not prove, and why the source of
-      the expected digest decides its value.
-    - Choose the exact artifact by version, operating system and architecture, and
-      record its digest.
-    - Verify a signature over a checksum manifest with a public key, and check the
-      binary against the authenticated manifest.
-    - Show that a forged checksum file matches a tampered binary, and that signature
-      verification rejects the forgery.
-    - Keep the verified bytes bound to what is deployed, and explain what verification
-      does not cover.
+    - Explain what a checksum proves, what it does not prove, and why the source of the expected digest
+      decides its value.
+    - Choose the exact artifact by version, operating system and architecture, and record its digest.
+    - Verify a signature over a checksum manifest with a public key, and check the binary against the
+      authenticated manifest.
+    - Show that a forged checksum file matches a tampered binary, and that signature verification rejects
+      the forgery.
+    - Keep the verified bytes bound to what is deployed, and explain what verification does not cover.
     outline:
     - Integrity, Authenticity And The Exact Artifact
     - Digests At Work And The Limits Of A Checksum
@@ -366,19 +383,18 @@ sections:
     module_lab: true
     sources:
     - reading: sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
-      adapted_from: 
+      adapted_from: null
     - reading: sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
-      adapted_from: 
+      adapted_from: null
     labs:
     - id: lab-01
       path: sections/section-050/module-01/labs/lab-01
       after_reading: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
-      objective: Verify a signed checksum manifest and reject altered bytes before
-        using a binary.
+      objective: Verify a signed checksum manifest and reject altered bytes before using a binary.
       status: alpha
       runtime_verification: pending
     practice_readings:

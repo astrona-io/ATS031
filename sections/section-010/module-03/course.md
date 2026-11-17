@@ -35,3 +35,7 @@ Your playground is a `kind` cluster running Kubernetes v1.35 with the Calico net
 `kubectl` already points at the playground cluster. Launch your playground now and keep it running while you read:
 
 <!-- astrona:playground -->
+
+## Independent live assessment
+
+Prepare with [Verify CIDR Exceptions And Port Ranges](course-06a-verify-cidr-and-port-boundaries.md). [Enforce An Address Exception And Port Range](labs/lab-03/question.md) uses its own kind environment. The permitted client connects and the excluded address cannot; Every port in the requested range works and adjacent ports remain denied.

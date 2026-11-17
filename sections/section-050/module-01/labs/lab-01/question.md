@@ -5,13 +5,9 @@ exam_objectives:
 ---
 # Verify Signed Artifact Checksums
 
-Allow about 8 minutes for the tasks.
+Solve this question on: `terminal`
 
-Verify a signed checksum manifest and reject altered bytes before using a binary.
-
-## Starting state
-
-The isolated environment has two healthy probe replicas, an internal Service and two client Pods. The required result has not been configured.
+A release of `kubectl` is staged on the control plane node in `/var/lib/training-release`. The folder holds the binary `kubectl`, a changed copy `kubectl-tampered`, the checksum manifest `checksums.txt`, its signature `checksums.sig` and the public key `publisher.pub`. The namespace `starfleet-031-050-01-01` has two healthy `probe` replicas, an internal Service and two client pods. Nothing is recorded yet. The key is a local exercise trust root, not proof of the identity of the upstream Kubernetes publisher.
 
 Use a host shell with the private kubeconfig for this independent kind environment. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
 
@@ -24,10 +20,21 @@ worker_name="astro-ats-031-lab-050-01-01-worker"
 
 Keep this connection selected. Host-level commands name only this environment's node containers. They do not operate on the host operating system.
 
-## Required result
+Allow about 8 minutes for task work. Cluster startup adds time.
 
-Use the public key provisioned with the isolated fixture to verify checksums.sig over checksums.txt. Verify the staged kubectl digest matches the authenticated manifest and the tampered copy does not. Record the ConfigMap `artifact-review` in the namespace `starfleet-031-050-01-01` with `result: verified`, `tampered: rejected` and the exact `sha256`. The fixture key is a local exercise trust root, not proof of the upstream Kubernetes publisher identity.
+## Tasks
 
-## Verify The Result
+1. On the control plane node, use `publisher.pub` to verify `checksums.sig` over `checksums.txt`, so you know the manifest is authentic.
+2. Compare the SHA-256 digest of `kubectl` and of `kubectl-tampered` with the digest in the verified manifest. The first must match and the second must not.
+3. Record the ConfigMap `artifact-review` in the namespace `starfleet-031-050-01-01` with the keys `result: verified`, `tampered: rejected` and `sha256`, set to the exact digest from the authenticated manifest.
 
-The grader checks the required object fields and actual observations. Wait for controller convergence before submitting. Preserve the task's namespace, workload names and unrelated components.
+## Constraints
+
+- Do not change the staged files in `/var/lib/training-release`.
+- Keep the namespace, the workload names and the other components as they are.
+
+## How the answer is checked
+
+The grader runs two checks. The first reads the ConfigMap `artifact-review` in `starfleet-031-050-01-01` and needs `result` set to `verified` and `tampered` set to `rejected`. The second needs `sha256` in the same ConfigMap to equal the first field of `checksums.txt`. Both checks first verify the signature again on the control plane node and recompute both digests, and fail if the staged files were changed.
+
+Hint: `openssl dgst -sha256 -verify <public key> -signature <signature> <file>` prints `Verified OK` for a valid signature.

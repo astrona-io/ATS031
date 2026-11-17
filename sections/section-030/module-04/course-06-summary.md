@@ -20,4 +20,10 @@ Key facts to remember:
 - An Ingress with an unserved class, a missing Secret or a wrong host is accepted and does not work.
 - The serial and the end date prove which certificate is on the wire.
 
+
+
+## Independent live assessment
+
+Prepare with [Verify A Live Certificate Rotation](course-04a-verify-live-certificate-rotation.md). [Rotate The Certificate Served By An Ingress](labs/lab-03/question.md) uses its own kind environment. The active TLS Secret contains the supplied replacement certificate and matching key; A fresh verified TLS connection receives the replacement certificate and the original application response.
+
 <!-- astrona:playground:destroy -->

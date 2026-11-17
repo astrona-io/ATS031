@@ -5,7 +5,7 @@ if [[ "$(kubectl config current-context)" != "kind-astro-$env_name" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-engine="${CONTAINER_ENGINE:-podman}"
+engine="${ASTRONA_CONTAINER_ENGINE:-${CONTAINER_ENGINE:-podman}}"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
 worker_name="astro-$env_name-worker"
 

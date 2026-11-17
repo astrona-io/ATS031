@@ -1,0 +1,49 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-031-lab-010-03-03
+  docs:
+    prerequisites: docs/prerequisites.md
+    examQuestion: question.md
+    caseStudy: docs/case-study.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    preloadImages:
+    - docker.io/library/python:3.13-alpine
+    - docker.io/library/busybox:1.37.0
+    nodes:
+      workers: 1
+    addons:
+      cni: calico
+bootstrap:
+  init:
+  - name: prepare-environment
+    type: file
+    source: bootstrap/setup.sh
+testing:
+  init:
+  - name: verify-start
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-solution
+    type: file
+    source: solution/apply.sh
+  - name: negative-cases
+    type: file
+    source: testing/regression.sh
+validation:
+  scripts:
+  - name: address-exception
+    description: The permitted client connects and the excluded address cannot
+    type: file
+    source: validation/validate-address-exception.sh
+    points: 1
+  - name: port-range
+    description: Every port in the requested range works and adjacent ports remain denied
+    type: file
+    source: validation/validate-port-range.sh
+    points: 1
+teardown:
+  keepCluster: false
