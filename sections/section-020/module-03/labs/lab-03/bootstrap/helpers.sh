@@ -53,6 +53,21 @@ wait_for_api() {
   return 1
 }
 
+# Wait until the Ready condition of a kube-system pod has one value (True or
+# False). The mirror pod of a static pod can be replaced while the kubelet
+# restarts it, so a missing pod counts as "not yet".
+wait_for_pod_ready() {
+  local pod="$1" expected="$2" attempt
+  for attempt in $(seq 1 60); do
+    if [[ "$(kubectl -n kube-system get pod "$pod" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null)" == "$expected" ]]; then
+      return 0
+    fi
+    sleep 3
+  done
+  printf 'Timed out waiting for pod %s Ready=%s\n' "$pod" "$expected" >&2
+  return 1
+}
+
 # Edit a static pod manifest the safe way: copy it to a work directory
 # outside /etc/kubernetes/manifests, run sed on the copy, move it back.
 edit_manifest() {
