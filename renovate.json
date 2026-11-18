@@ -3,44 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "customManagers": [
-    {
-      "description": "Dated cks QEMU image in qemu playgrounds and labs. The workflow qemu-image-checksums.yml refreshes the checksums on the Renovate branch.",
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)config\\.yaml$/"
-      ],
-      "matchStrings": [
-        "source: ghcr\\.io/astrona-io/ubuntu-qcow2-image:24\\.04-cks-(?<currentValue>\\d{8})-\\{ARCH\\}"
-      ],
-      "depNameTemplate": "ghcr.io/astrona-io/ubuntu-qcow2-image",
-      "datasourceTemplate": "docker",
-      "versioningTemplate": "regex:^(?<major>\\d{8})$",
-      "extractVersionTemplate": "^24\\.04-cks-(?<version>\\d{8})-amd64$"
-    }
-  ],
-  "packageRules": [
-    {
-      "description": "Course content pins its lab images on purpose; only the cks QEMU image is updated there.",
-      "matchFileNames": [
-        "sections/**"
-      ],
-      "enabled": false
-    },
-    {
-      "description": "One pull request bumps the cks image in every playground and lab.",
-      "matchManagers": [
-        "custom.regex"
-      ],
-      "matchDepNames": [
-        "ghcr.io/astrona-io/ubuntu-qcow2-image"
-      ],
-      "enabled": true,
-      "groupName": "cks QEMU image",
-      "commitMessageTopic": "cks QEMU image",
-      "labels": [
-        "qemu-image"
-      ]
-    }
+  "ignorePaths": [
+    "sections/**"
   ]
 }
