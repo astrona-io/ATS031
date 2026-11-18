@@ -19,36 +19,55 @@ etcd listens on two ports for two kinds of traffic. Port `2379` is the client po
 
 kubeadm also starts a listener for metrics on `127.0.0.1:2381` over plain HTTP, reachable only from the node itself. kubeadm creates a separate certificate authority (CA) for etcd. Its files are in `/etc/kubernetes/pki/etcd`. The CA signs the server certificate, the peer certificate and the client certificate that the API server uses.
 
-Set the node name once and list the etcd certificate files:
+Open a shell on the node and list the etcd certificate files. The directory is readable only by `root`, so the command uses `sudo`:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-04-control-plane
-podman exec $NODE ls /etc/kubernetes/pki/etcd
+astrona ssh astro-ats-031-playground-020-04
+sudo ls /etc/kubernetes/pki/etcd
 ```
 
-The listing shows `ca.crt` and `ca.key`, the server certificate and key, the peer certificate and key, and the client certificate that checks health. The API server uses a different client certificate, which is stored with the API server files in `/etc/kubernetes/pki`.
+The listing shows `ca.crt` and `ca.key`, the server certificate and key (`server.crt`, `server.key`), the peer certificate and key (`peer.crt`, `peer.key`), and the client certificate that checks health (`healthcheck-client.crt`, `healthcheck-client.key`). The API server uses a different client certificate, which is stored with the API server files in `/etc/kubernetes/pki`.
 
 ## Find the listeners
 
-The command below lists the TCP ports the node listens on. The host filter keeps the two etcd ports:
+The `ss -ltn` command lists the TCP ports the node listens on. The `grep` keeps the three etcd ports:
 
 ```sh
-podman exec $NODE ss -ltn | grep -e ':2379' -e ':2380' -e ':2381'
+ss -ltn | grep -e ':2379' -e ':2380' -e ':2381'
 ```
 
-Port `2379` and port `2380` appear. Port `2381` appears on the loopback address only. The client port also listens on the node address, so other hosts on the node network can open a connection to it. What stops them from reading data is the TLS configuration of etcd, which the next part examines.
+The output on the playground node:
+
+```text
+LISTEN 0      4096       10.0.2.15:2380       0.0.0.0:*          
+LISTEN 0      4096       10.0.2.15:2379       0.0.0.0:*          
+LISTEN 0      4096       127.0.0.1:2381       0.0.0.0:*          
+LISTEN 0      4096       127.0.0.1:2379       0.0.0.0:*          
+```
+
+Port `2381` listens on the loopback address only. Port `2379` listens on the loopback address and on the node address `10.0.2.15`, and port `2380` listens on the node address. Other hosts on the node network can therefore open a connection to the client port. What stops them from reading data is the TLS configuration of etcd, which the next part examines.
 
 ## See how the API server connects
 
 The API server pod lists the etcd settings in its command. The `--etcd-servers` flag gives the address, and three more flags give the CA and the client certificate and key that the API server presents. The command below prints the command as a JSON list and keeps the etcd flags:
 
 ```sh
+NODE=astro-ats-031-playground-020-04
 kubectl -n kube-system get pod kube-apiserver-$NODE -o jsonpath='{.spec.containers[0].command}' | tr ',' '\n' | grep etcd
 ```
 
-You see `--etcd-servers=https://127.0.0.1:2379`, `--etcd-cafile`, `--etcd-certfile` and `--etcd-keyfile`. The address is the loopback address because kubeadm runs etcd on the same node as the API server.
+The output on the playground node:
+
+```text
+"--etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt"
+"--etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt"
+"--etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key"
+"--etcd-servers=https://127.0.0.1:2379"
+```
+
+The address is the loopback address because kubeadm runs etcd on the same node as the API server. The client certificate `apiserver-etcd-client.crt` lies in `/etc/kubernetes/pki`, but the etcd CA signed it, and the API server checks the etcd server with the etcd CA in `ca.crt`.
 
 ```mermaid
 flowchart TB

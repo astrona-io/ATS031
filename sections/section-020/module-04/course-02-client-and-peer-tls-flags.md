@@ -20,42 +20,62 @@ The benchmark also asks that etcd uses its own CA and not the CA of the cluster.
 
 ## Read the flags
 
-Print the lines of the manifest that hold the TLS settings:
+Open a shell on the node and print the lines of the manifest that hold the TLS settings. The manifest is readable only by `root`, so the command uses `sudo`:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-04-control-plane
-podman exec $NODE grep -e 'cert-file' -e 'key-file' -e 'client-cert-auth' -e 'trusted-ca-file' -e 'auto-tls' /etc/kubernetes/manifests/etcd.yaml
+astrona ssh astro-ats-031-playground-020-04
+sudo grep -e 'cert-file' -e 'key-file' -e 'client-cert-auth' -e 'trusted-ca-file' -e 'auto-tls' /etc/kubernetes/manifests/etcd.yaml
 ```
 
-On a kubeadm cluster you see the certificate, key and CA flags for both the client and the peer side, and both `client-cert-auth` flags set to `true`. You see no line with `auto-tls`. A flag that is absent keeps its default, and the default of both `auto-tls` flags is `false`, so the absence passes the check. This differs from the API server, where an absent flag often means an insecure default.
+The output on the playground node:
+
+```text
+    - --cert-file=/etc/kubernetes/pki/etcd/server.crt
+    - --client-cert-auth=true
+    - --key-file=/etc/kubernetes/pki/etcd/server.key
+    - --peer-cert-file=/etc/kubernetes/pki/etcd/peer.crt
+    - --peer-client-cert-auth=true
+    - --peer-key-file=/etc/kubernetes/pki/etcd/peer.key
+    - --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+    - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+```
+
+You see the certificate, key and CA flags for both the client and the peer side, and both `client-cert-auth` flags set to `true`. You see no line with `auto-tls`. A flag that is absent keeps its default, and the default of both `auto-tls` flags is `false`, so the absence passes the check. This differs from the API server, where an absent flag often means an insecure default.
 
 A reviewer can also confirm the flags on the running process, not only in the file. The kubelet may still run an older version of the pod if the file changed recently. The pod object lists the command the container really started with:
 
 ```sh
+NODE=astro-ats-031-playground-020-04
 kubectl -n kube-system get pod etcd-$NODE -o jsonpath='{.spec.containers[0].command}' | tr ',' '\n' | grep -e client-cert-auth -e auto-tls
 ```
 
-Compare the result with the file. Both must agree before you record a pass.
+The output is `"--client-cert-auth=true"` and `"--peer-client-cert-auth=true"`, and again no `auto-tls` line. Compare the result with the file. Both must agree before you record a pass.
 
 ## Prove what `--client-cert-auth` does
 
-A flag in a file is a claim. A request is a proof. The command below runs `curl` inside the node and asks etcd for its health without a client certificate. The `-k` option tells `curl` not to verify the server certificate, so the test measures only the client side:
+A flag in a file is a claim. A request is a proof. The command below runs `curl` on the node and asks etcd for its health without a client certificate. The `-k` option tells `curl` not to verify the server certificate, so the test measures only the client side. The `-sS` options hide the progress bar but still print errors:
 
 ```sh
-podman exec $NODE curl -sk https://127.0.0.1:2379/health
+curl -sSk https://127.0.0.1:2379/health
 ```
 
-etcd closes the handshake because the client sent no certificate, and `curl` reports a TLS error instead of a response. The exact error text depends on the `curl` and etcd versions, so do not rely on the wording. Now repeat the request with the health-check client certificate that kubeadm creates for etcd:
+etcd ends the handshake because the client sent no certificate, and `curl` reports a TLS error instead of a response. On the playground node the error is:
+
+```text
+curl: (56) OpenSSL SSL_read: OpenSSL/3.0.13: error:0A00045C:SSL routines::tlsv13 alert certificate required, errno 0
+```
+
+The words `certificate required` name the reason. The exact error text depends on the `curl` and OpenSSL versions, so do not rely on the wording. Now repeat the request with the health-check client certificate that kubeadm creates for etcd. The key file is readable only by `root`, so this request uses `sudo`:
 
 ```sh
-podman exec $NODE curl -s --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt --key /etc/kubernetes/pki/etcd/healthcheck-client.key https://127.0.0.1:2379/health
+sudo curl -s --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt --key /etc/kubernetes/pki/etcd/healthcheck-client.key https://127.0.0.1:2379/health; echo
 ```
 
-This request succeeds and returns a small JSON document that says whether etcd is healthy. The certificate is signed by the etcd CA, so etcd accepts the client.
+This request succeeds and returns `{"health":"true","reason":""}`. The certificate is signed by the etcd CA, so etcd accepts the client.
 
-## A limit of the test in kind
+## A limit of the test on one node
 
 The two requests prove client authentication on the local port. They do not prove the peer settings, because the playground has a single etcd member and no second member to connect. For the peer flags, the review relies on the manifest and on the running pod command. On a cluster with three control plane nodes, you would also check that the members connect to each other with the peer certificates.
 

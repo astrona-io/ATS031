@@ -17,15 +17,16 @@ The `aescbc` provider uses AES in CBC mode with a 32 byte key. Other providers a
 
 ## Save the configuration
 
-Generate a random 32 byte key and print it as base64 text. The value goes into the file in the next step:
+Open a shell on the node. Generate a random 32 byte key and print it as base64 text. The value goes into the file in the next step:
 
 <!-- astrona:playground:renew -->
 
 ```sh
+astrona ssh astro-ats-031-playground-020-04
 head -c 32 /dev/urandom | base64
 ```
 
-Copy the printed value. Save this as `encryption-config.yaml` and replace `<KEY>` with it:
+The output is one line of 44 characters that ends with `=`. Copy the printed value. Save this as `encryption-config.yaml` in your home directory on the node and replace `<KEY>` with it. The node has the editors `nano` and `vi`.
 
 ```yaml
 apiVersion: apiserver.config.k8s.io/v1
@@ -45,21 +46,21 @@ The name `key1` is a label that the API server stores with each encrypted value,
 
 ## Place the file on the node
 
-The API server runs as a container, so it can read only paths that its pod mounts. Copy the file to the control plane node, restrict its mode, and make a copy of the API server manifest on the host to edit:
+The API server runs as a container, so it can read only paths that its pod mounts. Copy the file to a new directory `/etc/kubernetes/enc`, restrict its mode, and make a copy of the API server manifest in your home directory to edit. The manifest is readable only by `root`, so `sudo cat` reads it and the shell writes the copy as your own file:
 
 ```sh
-NODE=astro-ats-031-playground-020-04-control-plane
-podman exec $NODE mkdir -p /etc/kubernetes/enc
-podman cp encryption-config.yaml $NODE:/etc/kubernetes/enc/encryption-config.yaml
-podman exec $NODE chmod 600 /etc/kubernetes/enc/encryption-config.yaml
-podman cp $NODE:/etc/kubernetes/manifests/kube-apiserver.yaml kube-apiserver.yaml
+sudo mkdir -p /etc/kubernetes/enc
+sudo cp encryption-config.yaml /etc/kubernetes/enc/encryption-config.yaml
+sudo chmod 600 /etc/kubernetes/enc/encryption-config.yaml
+sudo ls -l /etc/kubernetes/enc
+sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml > kube-apiserver.yaml
 ```
 
-A copy of the original manifest is already in `/opt/training/backup` on the node. Keep any other backup outside `/etc/kubernetes/manifests`, because the kubelet starts a pod from every file in that directory.
+The `ls` line shows `-rw------- 1 root root` for `encryption-config.yaml`, so only `root` can read the key. A copy of the original manifest is already in `/opt/training/backup` on the node. Keep any other backup outside `/etc/kubernetes/manifests`, because the kubelet starts a pod from every file in that directory. Hidden files are the exception: the kubelet ignores files whose names start with a dot, such as the empty `.kubelet-keep` file that the package put there.
 
 ## Edit the API server manifest
 
-Open `kube-apiserver.yaml` on the host and make three additions. The flag goes under the container `command`. The volume mount goes under the container `volumeMounts`. The volume goes under the pod `volumes`. Keep the indentation of the neighbouring lines.
+Open `kube-apiserver.yaml` in your home directory with `nano` or `vi` and make three additions. The flag goes under the container `command`, for example right after the line `- kube-apiserver`. The volume mount goes under the container `volumeMounts`. The volume goes under the pod `volumes`. Keep the indentation of the neighbouring lines.
 
 ```yaml
 # under spec.containers[0].command
@@ -77,18 +78,20 @@ Open `kube-apiserver.yaml` on the host and make three additions. The flag goes u
     name: enc
 ```
 
-Install the edited file. The copy goes to `/root` first and `mv` places it in the manifests directory in one step, so the kubelet never reads a half written file. Then wait until the new API server pod shows the flag. `kubectl` fails while the API server restarts, so the loop ignores errors and tries again, at most 60 times:
+Install the edited file. The copy goes to `/root` first, `chmod` gives it the mode `600` of the original manifest, and `mv` places it in the manifests directory in one step, so the kubelet never reads a half written file. Then wait until the pod object of the new API server shows the flag and the API server reports that it is ready. The pod object can show the new flag a few seconds before the new API server is ready, so the loop checks both. `kubectl` fails while the API server restarts, so the loop ignores errors and tries again, at most 60 times:
 
 ```sh
-podman cp kube-apiserver.yaml $NODE:/root/kube-apiserver.yaml.new
-podman exec $NODE mv /root/kube-apiserver.yaml.new /etc/kubernetes/manifests/kube-apiserver.yaml
+NODE=astro-ats-031-playground-020-04
+sudo cp kube-apiserver.yaml /root/kube-apiserver.yaml.new
+sudo chmod 600 /root/kube-apiserver.yaml.new
+sudo mv /root/kube-apiserver.yaml.new /etc/kubernetes/manifests/kube-apiserver.yaml
 for attempt in $(seq 1 60); do
-  if kubectl --request-timeout=3s -n kube-system get pod kube-apiserver-$NODE -o jsonpath='{.spec.containers[0].command}' 2>/dev/null | grep -q -e 'encryption-provider-config'; then echo "new flag visible"; break; fi
+  if kubectl --request-timeout=3s -n kube-system get pod kube-apiserver-$NODE -o jsonpath='{.spec.containers[0].command}' 2>/dev/null | grep -q -e 'encryption-provider-config' && kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then echo "new flag visible and API server ready"; break; fi
   sleep 3
 done
 ```
 
-If the loop never prints the message, the API server did not start with the new file. The usual causes are an indentation mistake or a wrong path. Read the kubelet log with `podman exec $NODE journalctl -u kubelet --no-pager -n 50`, or put the staged backup back into the manifests directory.
+The loop prints `new flag visible and API server ready`. On the playground node this took about 45 seconds; a restart of the API server can take between 40 and 70 seconds there. If the loop never prints the message, the API server did not start with the new file. The usual causes are an indentation mistake or a wrong path. Read the kubelet log with `sudo journalctl -u kubelet --no-pager -n 50`, or copy `/opt/training/backup/kube-apiserver.yaml` back into the manifests directory with `sudo cp`.
 
 ## Prove it with etcd
 
@@ -100,7 +103,14 @@ ETCD_POD=etcd-$NODE
 kubectl -n kube-system exec $ETCD_POD -- etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key get /registry/secrets/starfleet/dock-code --print-value-only | grep -a -o 'k8s:enc:aescbc:v1:key1'
 ```
 
-The command prints `k8s:enc:aescbc:v1:key1`, which shows that this value is stored with the `aescbc` provider and `key1`. A search for `warp-nine-dock` in the same output finds nothing. Run the same read for `launch-code` and the plain word `warp-nine-launch` is still there.
+The output is:
+
+```text
+secret/dock-code created
+k8s:enc:aescbc:v1:key1
+```
+
+The prefix `k8s:enc:aescbc:v1:key1` shows that this value is stored with the `aescbc` provider and `key1`. A search for `warp-nine-dock` in the same output finds nothing. Run the same read for `launch-code` with `grep -a -o 'warp-nine-launch'`, and the plain word is still there.
 
 ## Re-encrypt the existing Secrets
 
@@ -110,9 +120,17 @@ To encrypt the old values, read every Secret through the API server and write it
 kubectl get secrets --all-namespaces -o json | kubectl replace -f -
 ```
 
-Run the etcd read for `launch-code` again. It now starts with the `aescbc` prefix, and the plain word is gone. The API still returns the original value, because the API server decrypts it. Only after this step do you have encryption at rest for the old data.
+The output on the playground node (the name of the bootstrap token differs on your node):
 
-The common check for this setting is a flag in the pod and a ciphertext prefix in etcd. A flag without the prefix proves nothing, because the API server could be using the file in a way that does not cover `secrets`.
+```text
+secret/bootstrap-token-rrlue1 replaced
+secret/dock-code replaced
+secret/launch-code replaced
+```
+
+Run the etcd read for `launch-code` again, this time with `grep -a -o -e 'k8s:enc:aescbc:v1:key1' -e 'warp-nine-launch'`. It now prints only `k8s:enc:aescbc:v1:key1`: the value starts with the `aescbc` prefix, and the plain word is gone. The API still returns the original value, because the API server decrypts it. Only after this step do you have encryption at rest for the old data.
+
+The common check for this setting is a flag in the pod and a ciphertext prefix in etcd. A flag without the prefix proves nothing, because the API server could be using the file in a way that does not cover `secrets`. kube-bench shows the same gap: its check `1.2.27` on the playground node passes as soon as the flag is set, and it does not read etcd.
 
 ## Limits
 
