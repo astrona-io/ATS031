@@ -68,4 +68,4 @@ The value is `true`, and the node is `Ready`.
 ## Common pitfalls
 
 > [!WARNING]
-> The drop-in directory holds more than one file on some nodes; take the list from `systemctl show`, not from memory. A missing field in `configz` means `false` for `rotateCertificates`. Do not set `protectKernelDefaults` on a kind node; the kubelet then refuses to start, because the node shares the kernel of the host.
+> The drop-in directory holds more than one file on some nodes; take the list from `systemctl show`, not from memory. A missing field in `configz` means `false` for `rotateCertificates`.
