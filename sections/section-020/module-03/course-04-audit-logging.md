@@ -41,24 +41,54 @@ The diagram shows that the policy goes into the container through a mount, and t
 
 ## Enable it
 
-Look at the staged policy first. It is on the node, and nothing references it yet.
+Look at the staged policy first. It is on the node, and nothing references it yet. Open a shell on the node with `astrona ssh astro-ats-031-playground-020-03` and print the file:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-03-control-plane
-podman exec $NODE cat /opt/training/audit-policy.yaml
+cat /opt/training/audit-policy.yaml
 ```
 
-Create the directories and put the policy in a directory that you can mount. Mounting a directory is more robust than mounting one file, because a file replaced by a new inode is not seen through a single file mount.
+The file has mode `644`, so `student` can read it without `sudo`. The output on the playground node:
+
+```text
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages:
+- RequestReceived
+rules:
+- level: None
+  nonResourceURLs:
+  - /healthz*
+  - /livez*
+  - /readyz*
+- level: Metadata
+  resources:
+  - group: ""
+    resources: ["secrets"]
+- level: Request
+  namespaces: ["starfleet"]
+  resources:
+  - group: ""
+    resources: ["pods"]
+- level: Metadata
+```
+
+Create the directories and put the policy in a directory that you can mount. Mounting a directory is more robust than mounting one file, because a file replaced by a new inode is not seen through a single file mount. Then copy the manifest to the work directory with `cp -p`, which keeps its mode:
 
 ```sh
-podman exec $NODE mkdir -p /etc/kubernetes/policy /var/log/kubernetes/audit /etc/kubernetes/edit
-podman exec $NODE cp /opt/training/audit-policy.yaml /etc/kubernetes/policy/audit-policy.yaml
-podman exec $NODE cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
+sudo mkdir -p /etc/kubernetes/policy /var/log/kubernetes/audit /etc/kubernetes/edit
+sudo cp /opt/training/audit-policy.yaml /etc/kubernetes/policy/audit-policy.yaml
+sudo cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
 ```
 
-Now edit the copy in the work directory. Use an editor such as `vi` through `podman exec -it`. Add the five flags to the `command` list of the container, after `- kube-apiserver`, with the same indentation as the other flags:
+Now edit the copy in the work directory with an editor. The file belongs to `root`, so start the editor with `sudo`, for example `sudo vi` (the node also has `vim` and `nano`):
+
+```sh
+sudo vi /etc/kubernetes/edit/kube-apiserver.yaml
+```
+
+Add the five flags to the `command` list of the container, right after the line `- kube-apiserver`, with the same indentation as the other flags:
 
 ```yaml
     - --audit-policy-file=/etc/kubernetes/policy/audit-policy.yaml
@@ -68,7 +98,7 @@ Now edit the copy in the work directory. Use an editor such as `vi` through `pod
     - --audit-log-maxsize=100
 ```
 
-Add two entries to the `volumeMounts` list of the container:
+Add two entries at the end of the `volumeMounts` list of the container, right before the line `  hostNetwork: true`:
 
 ```yaml
     - mountPath: /etc/kubernetes/policy
@@ -78,7 +108,7 @@ Add two entries to the `volumeMounts` list of the container:
       name: audit-log
 ```
 
-Add two entries to the `volumes` list at the end of the pod spec:
+Add two entries at the end of the `volumes` list of the pod spec, right before the last line `status: {}`:
 
 ```yaml
   - hostPath:
@@ -91,26 +121,73 @@ Add two entries to the `volumes` list at the end of the pod spec:
     name: audit-log
 ```
 
-These three snippets are fragments of the manifest, not files to apply with `kubectl`. After you save the copy, move it into place and wait for the API server:
+These three snippets are fragments of the manifest, not files to apply with `kubectl`. Save the copy and leave the editor. Then move the copy into place:
 
 ```sh
-podman exec -it $NODE vi /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec $NODE mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
-until kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; do sleep 3; done
+sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-The loop ends when the API server answers again, which can take a minute. If it does not end, use `crictl ps -a` and `crictl logs` on the node to find the error, and restore the backup.
+The kubelet sees the changed file and restarts the API server. Wait until the mirror pod shows the new flag and the API server is ready. The mirror pod can show the new flag a few seconds before the new API server is ready, so the loop checks both. `kubectl` fails while the API server is down, so the loop ignores errors and tries again, at most 60 times:
+
+```sh
+for attempt in $(seq 1 60); do
+  if kubectl --request-timeout=3s -n kube-system get pod kube-apiserver-astro-ats-031-playground-020-03 -o jsonpath='{.spec.containers[0].command}' 2>/dev/null | grep -q -e '--audit-policy-file' && kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then echo "new flag visible and API server ready"; break; fi
+  sleep 3
+done
+```
+
+The loop prints `new flag visible and API server ready`. On the playground node this took 42 seconds. If the loop ends without the message, run `sudo crictl ps -a --name kube-apiserver` and `sudo crictl logs` with the container ID to find the error. Then restore the backup from `/opt/training/backup` with `sudo cp -p` to the work directory and `sudo mv` into the manifests directory.
 
 ## Read an event
 
-Make a request and look at the end of the log. The log has one JSON object on each line.
+Make a request, then find its event in the log. The log has one JSON object on each line, and it belongs to `root`. Other requests from the cluster components also appear, so `grep` picks the line of your request, and `python3 -m json.tool` formats it:
 
 ```sh
 kubectl -n starfleet get pods
-podman exec $NODE tail -n 20 /var/log/kubernetes/audit/audit.log
+sudo grep '/namespaces/starfleet/pods?limit=500' /var/log/kubernetes/audit/audit.log | tail -n 1 | python3 -m json.tool
 ```
 
-Each event has fields such as `level`, `stage`, `verb`, `requestURI`, `user.username` and `responseStatus.code`. Other requests from the cluster components can also appear in the last lines, so look for the line of your request. It shows the verb `list`, the URI of the pods in `starfleet`, your user name and a response code of `200`. Because the policy gives `pods` in `starfleet` the `Request` level, a request that creates or changes a pod there also holds the request body.
+The output on the playground node, shortened: the last lines, with the timestamps and the `annotations` field, are left out:
+
+```text
+{
+    "kind": "Event",
+    "apiVersion": "audit.k8s.io/v1",
+    "level": "Request",
+    "auditID": "88e3b44c-9205-422b-8cba-98bb622be884",
+    "stage": "ResponseComplete",
+    "requestURI": "/api/v1/namespaces/starfleet/pods?limit=500",
+    "verb": "list",
+    "user": {
+        "username": "kubernetes-admin",
+        "groups": [
+            "kubeadm:cluster-admins",
+            "system:authenticated"
+        ],
+        "extra": {
+            "authentication.kubernetes.io/credential-id": [
+                "X509SHA256=8565cf7cb1556e2e0680e330e7dec27b2266b4f188975bf5be3ef5d605fad024"
+            ]
+        }
+    },
+    "sourceIPs": [
+        "10.0.2.15"
+    ],
+    "userAgent": "kubectl/v1.35.10 (linux/arm64) kubernetes/ae6fece",
+    "objectRef": {
+        "resource": "pods",
+        "namespace": "starfleet",
+        "apiVersion": "v1"
+    },
+    "responseStatus": {
+        "metadata": {},
+        "code": 200
+    },
+```
+
+The event shows the verb `list`, the URI of the pods in `starfleet`, your user name `kubernetes-admin` and a response code of `200`. The stage is `ResponseComplete`, because the policy skips `RequestReceived`. The level is `Request`, because the third rule of the policy matches `pods` in `starfleet`. A request that creates or changes a pod there also holds the request body. The `annotations` field, left out above, records the RBAC decision that allowed the request.
+
+The log grows fast. On the playground node it held about 240 kilobytes after one minute, which is why the rotation flags matter.
 
 You can now record every request. Next you reduce what the API server exposes about itself.
 

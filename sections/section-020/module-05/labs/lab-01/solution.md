@@ -5,24 +5,22 @@ exam_objectives:
 ---
 # Secure Kubelet Authentication And Authorization Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-05-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-05-01" || exit 1
-node_name="astro-ats-031-lab-020-05-01-control-plane"
-worker_name="astro-ats-031-lab-020-05-01-worker"
+astrona ssh astro-ats-031-lab-020-05-01
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-05-01`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## See the open kubelet API
 
-The kubelet API on port `10250` can list pods, read logs and run commands in containers. Send a request without credentials from the control plane node:
+The kubelet API on port `10250` can list pods, read logs and run commands in containers. Send a request without credentials from the node itself:
 
 ```sh
-worker_ip="$(kubectl get node "$worker_name" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')"
-podman exec "$node_name" curl -sk --max-time 5 -o /dev/null -w '%{http_code}\n' "https://$worker_ip:10250/pods"
+node_ip="$(kubectl get node "astro-ats-031-lab-020-05-01" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')"
+sudo curl -sk --max-time 5 -o /dev/null -w '%{http_code}\n' "https://$node_ip:10250/pods"
 ```
 
 The answer is `200`: the kubelet accepts the anonymous request and allows it. Two settings work together here. Authentication decides who the caller is; with `anonymous.enabled: true`, a caller without credentials becomes the user `system:anonymous`. Authorization decides what the caller may do; `AlwaysAllow` allows everything.
@@ -32,12 +30,12 @@ The answer is `200`: the kubelet accepts the anonymous request and allows it. Tw
 Keep a copy of the file, then change the two values:
 
 ```sh
-podman exec "$worker_name" cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.before
-podman exec "$worker_name" sed -i '/^  anonymous:/{n;s/enabled: true/enabled: false/}' /var/lib/kubelet/config.yaml
-podman exec "$worker_name" sed -i 's/^  mode: AlwaysAllow$/  mode: Webhook/' /var/lib/kubelet/config.yaml
-podman exec "$worker_name" grep -A6 '^authentication:' /var/lib/kubelet/config.yaml
-podman exec "$worker_name" grep -A1 '^authorization:' /var/lib/kubelet/config.yaml
-podman exec "$worker_name" systemctl restart kubelet
+sudo cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.before
+sudo sed -i '/^  anonymous:/{n;s/enabled: true/enabled: false/}' /var/lib/kubelet/config.yaml
+sudo sed -i 's/^  mode: AlwaysAllow$/  mode: Webhook/' /var/lib/kubelet/config.yaml
+sudo grep -A6 '^authentication:' /var/lib/kubelet/config.yaml
+sudo grep -A1 '^authorization:' /var/lib/kubelet/config.yaml
+sudo systemctl restart kubelet
 ```
 
 The first `sed` command finds the line `anonymous:` and changes `enabled` on the next line. With `Webhook`, the kubelet sends each request to the API server as a `SubjectAccessReview` and follows its answer.
@@ -47,9 +45,9 @@ The first `sed` command finds the line `anonymous:` and changes `enabled` on the
 The kubelet reads its configuration only when it starts. Restart it, then read the effective configuration through the API server. The `configz` endpoint returns the values that the running kubelet really uses, after all sources are merged:
 
 ```sh
-kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -m json.tool | grep -A2 -e '"anonymous"' -e '"authorization"'
-podman exec "$node_name" curl -sk --max-time 5 -o /dev/null -w '%{http_code}\n' "https://$worker_ip:10250/pods"
-kubectl get node "$worker_name"
+kubectl get --raw "/api/v1/nodes/astro-ats-031-lab-020-05-01/proxy/configz" | python3 -m json.tool | grep -A2 -e '"anonymous"' -e '"authorization"'
+sudo curl -sk --max-time 5 -o /dev/null -w '%{http_code}\n' "https://$node_ip:10250/pods"
+kubectl get node "astro-ats-031-lab-020-05-01"
 ```
 
 `anonymous` shows `enabled: false`, the mode is `Webhook`, and the request now returns `401` (Unauthorized), because the kubelet no longer accepts a caller without credentials. The API server still reaches the kubelet with its own client certificate, so `kubectl logs` and `kubectl exec` keep working.

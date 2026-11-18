@@ -5,24 +5,22 @@ exam_objectives:
 ---
 # Harden The Controller Manager And Scheduler Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-03-06)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-03-06" || exit 1
-node_name="astro-ats-031-lab-020-03-06-control-plane"
-worker_name="astro-ats-031-lab-020-03-06-worker"
+astrona ssh astro-ats-031-lab-020-03-06
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-03-06`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Read the current state
 
 The controller manager and the scheduler have the same `--profiling` flag as the API server, with the same default `true`. Read the flags of both running processes and the modes of the manifests:
 
 ```sh
-podman exec "$node_name" ps -eo args | grep -e '^kube-controller-manager' -e '^kube-scheduler' | tr ' ' '\n' | grep -e '^kube-' -e '--profiling'
-podman exec "$node_name" sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
+sudo ps -eo args | grep -e '^kube-controller-manager' -e '^kube-scheduler' | tr ' ' '\n' | grep -e '^kube-' -e '--profiling'
+sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
 ```
 
 The first command prints the two program names and no `--profiling` flag. The second shows mode `644` on two manifests.
@@ -32,13 +30,13 @@ The first command prints the two program names and no `--profiling` flag. The se
 Each component has its own manifest, so edit each one the safe way. The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. Edit a copy in a work directory outside that folder, check the copy, and move it back in one step, so that the kubelet never reads a half-written file:
 
 ```sh
-podman exec "$node_name" mkdir -p /etc/kubernetes/edit
-podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/edit/kube-controller-manager.yaml
-podman exec "$node_name" sed -i 's|^\( *\)- kube-controller-manager$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-controller-manager.yaml
-podman exec "$node_name" mv /etc/kubernetes/edit/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml
-podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec "$node_name" sed -i 's|^\( *\)- kube-scheduler$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec "$node_name" mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+sudo mkdir -p /etc/kubernetes/edit
+sudo cp -p /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/edit/kube-controller-manager.yaml
+sudo sed -i 's|^\( *\)- kube-controller-manager$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-controller-manager.yaml
+sudo mv /etc/kubernetes/edit/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml
+sudo cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
+sudo sed -i 's|^\( *\)- kube-scheduler$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-scheduler.yaml
+sudo mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
 ```
 
 The `sed` expression adds the new flag on the line after the program name, with the same indentation.
@@ -48,8 +46,8 @@ The `sed` expression adds the new flag on the line after the program name, with 
 `cp -p` kept the old mode, so the two moved files still have mode `644`. Set mode `600` on every manifest. A mode change does not restart a static pod:
 
 ```sh
-podman exec "$node_name" sh -c 'chmod 600 /etc/kubernetes/manifests/*.yaml'
-podman exec "$node_name" sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
+sudo sh -c 'chmod 600 /etc/kubernetes/manifests/*.yaml'
+sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
 ```
 
 ## Verify the running processes
@@ -57,7 +55,7 @@ podman exec "$node_name" sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/
 Wait about a minute for the kubelet to start the new pods. Then read the flags again and check the pods:
 
 ```sh
-podman exec "$node_name" ps -eo args | grep -e '^kube-controller-manager' -e '^kube-scheduler' | tr ' ' '\n' | grep -e '^kube-' -e '--profiling'
+sudo ps -eo args | grep -e '^kube-controller-manager' -e '^kube-scheduler' | tr ' ' '\n' | grep -e '^kube-' -e '--profiling'
 kubectl -n kube-system get pods -l tier=control-plane
 ```
 

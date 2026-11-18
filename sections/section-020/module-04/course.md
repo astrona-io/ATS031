@@ -23,9 +23,9 @@ After this module you can:
 
 You need Kubernetes basics: pods, namespaces, Secrets, static pods and `kubectl`. The module has five parts. The first explains what etcd stores and which components talk to it. The second reads the TLS flags. The third covers the data directory. The fourth queries etcd with `etcdctl`. The fifth enables encryption at rest.
 
-Your playground is a `kind` cluster running Kubernetes v1.35 with one control plane node and one worker node. A kind node is a container that runs the kubelet and the control plane as a normal kubeadm node does. etcd runs as a static pod on the control plane node. The `starfleet` namespace holds the `probe` Deployment, the `probe` Service, the `shuttle` client pod and a Secret named `launch-code`. The playground sets the permissions of the etcd data directory wider than the benchmark allows, on purpose.
+Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-04` is the control plane and also runs your pods. etcd runs on it as a static pod, a pod that the kubelet starts from a file in `/etc/kubernetes/manifests`. The `starfleet` namespace holds the `probe` Deployment, the `probe` Service, the `shuttle` client pod and a Secret named `launch-code`. The playground sets the permissions of the etcd data directory wider than the benchmark allows, on purpose. A copy of the original API server and etcd manifests is in `/opt/training/backup` on the node.
 
-Commands for the node start with `podman exec` and name the node container of this playground. `kubectl` already points at the cluster. A kind node is a container on a shared host, so some findings differ from a dedicated virtual machine. Where this matters, the part says so.
+You work in a shell on the node. Open it with `astrona ssh astro-ats-031-playground-020-04`. You log in as the user `student`, which has `sudo` and a kubeconfig for the cluster, so `kubectl` already points at the cluster. Commands that read or change node files start with `sudo`.
 
 Launch your playground now and keep it running while you read:
 

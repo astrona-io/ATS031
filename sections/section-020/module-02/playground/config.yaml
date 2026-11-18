@@ -3,16 +3,18 @@ metadata:
   name: ats-031-playground-020-02
   docs:
     guide: docs/overview.md
+# A real kubeadm node, so kube-bench reads the real kubelet, etcd and API
+# server files and processes instead of a kind node container.
 runtime:
-  type: kind
-  kind:
-    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
-    preloadImages:
-    - docker.io/library/python:3.13-alpine
-    - docker.io/library/busybox:1.37.0
-    - docker.io/aquasec/kube-bench:v0.10.6
-    nodes:
-      workers: 1
+  type: qemu
+  qemu:
+  - image:
+      type: oci
+      source: ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks
+    cpus: 2
+    memoryMB: 4096
+    diskSizeGB: 25
+    display: false
 bootstrap:
   init:
   - name: seed-private-environment

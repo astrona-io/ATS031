@@ -34,7 +34,7 @@ The `audit` field is a shell command. The `tests` field says how to judge the te
 
 Most audit commands read one of two things. Flag checks read the arguments of a running process, such as the API server. File checks run `stat` on a file and compare its mode and owner. The program also reads the kubelet configuration file and, for some checks, asks the `kubectl` binary for objects.
 
-This explains a requirement that surprises many learners: `kube-bench` must run where the processes and files are. Run in an ordinary pod, it sees only its own container. To audit a node, the pod must share the process namespace of the node (`hostPID: true`) and it must mount the host directories that the audits read, such as `/etc/kubernetes` and `/var/lib/kubelet`.
+This explains a requirement that surprises many learners: `kube-bench` must run where the processes and files are. Run as root on the node itself, it sees every process and file. Run in an ordinary pod, it sees only its own container. To audit a node, the pod must share the process namespace of the node (`hostPID: true`) and it must mount the host directories that the audits read, such as `/etc/kubernetes` and `/var/lib/kubelet`.
 
 ```mermaid
 flowchart TB
@@ -47,25 +47,66 @@ flowchart TB
 
 The diagram shows that the result comes from a definition file, an audit command that reads the node, and a test that compares the output with an expected value.
 
-## Look inside the image
+## Look inside the definition files
 
-The `kube-bench` image keeps its definition files in one directory. You can read them without running an audit, by starting a short pod that lists the directory. The image is already loaded on the nodes, so the pod starts without a download.
+The definition files are plain text, so you can read them without running an audit. On the playground node they are in `/etc/kube-bench/cfg`. The `kube-bench` container image keeps the same files in `/opt/kube-bench/cfg`.
 
 <!-- astrona:playground:renew -->
 
-```sh
-kubectl run kube-bench-list --rm -i --restart=Never --image-pull-policy=IfNotPresent --image=docker.io/aquasec/kube-bench:v0.10.6 --command -- ls /opt/kube-bench/cfg
-```
-
-The command prints the names of the edition directories and the file `config.yaml`. The path `/opt/kube-bench/cfg` is where the project's image keeps them. If the command reports that the directory does not exist, the image layout differs, and the same listing is available from the program documentation of that version. Now print the mapping file:
+Open a shell on the node and list the directories of the CIS editions:
 
 ```sh
-kubectl run kube-bench-config --rm -i --restart=Never --image-pull-policy=IfNotPresent --image=docker.io/aquasec/kube-bench:v0.10.6 --command -- cat /opt/kube-bench/cfg/config.yaml
+astrona ssh astro-ats-031-playground-020-02
+ls /etc/kube-bench/cfg | grep '^cis-'
 ```
 
-Look for the part that maps versions to editions, and for the part that maps targets to definition files. Read the highest Kubernetes version in the mapping and compare it with the cluster version, which is 1.35. The mapping lags behind new Kubernetes releases, because a new benchmark edition appears after the Kubernetes version it targets. The next parts return to this limit.
+The output is one line per edition directory:
 
-You now know that a result is the output of an audit command, judged by a test from a definition file for one benchmark edition. The next question is how to run the program against a node when it is not installed there.
+```text
+cis-1.10
+cis-1.20
+cis-1.23
+cis-1.24
+cis-1.24-microk8s
+cis-1.5
+cis-1.6
+cis-1.6-k3s
+cis-1.7
+cis-1.8
+cis-1.9
+```
+
+The other directories in `/etc/kube-bench/cfg` hold benchmarks for managed services and other distributions, such as `eks-1.5.0` and `gke-1.6.0`. Inside one edition there is one file for each target:
+
+```sh
+ls /etc/kube-bench/cfg/cis-1.10
+```
+
+```text
+config.yaml
+controlplane.yaml
+etcd.yaml
+master.yaml
+node.yaml
+policies.yaml
+```
+
+The top-level `config.yaml` holds the mapping from Kubernetes versions to editions in a block named `version_mapping`. Print the newest Kubernetes versions in that block:
+
+```sh
+grep -E '^  "1\.(2[89]|3[0-9])"' /etc/kube-bench/cfg/config.yaml
+```
+
+```text
+  "1.28": "cis-1.9"
+  "1.29": "cis-1.9"
+  "1.30": "cis-1.10"
+  "1.31": "cis-1.10"
+```
+
+The highest version in the mapping is 1.31, and the cluster runs 1.35. The mapping lags behind new Kubernetes releases, because a new benchmark edition appears after the Kubernetes version it targets. When the version is not in the mapping, kube-bench tries the next lower minor version until it finds one, so this node is judged with `cis-1.10`. The next parts return to this limit.
+
+You now know that a result is the output of an audit command, judged by a test from a definition file for one benchmark edition. The next question is how to run the program against a node: as a binary on the node, or as a pod in the cluster.
 
 ## Common pitfalls
 

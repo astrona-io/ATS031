@@ -6,9 +6,12 @@ Usage: prepare-k8s-mirror.py <cluster-name> <playground|lab1|lab2>
 All digests are computed here at run time inside the node containers.
 Nothing is downloaded, and no digest is written in advance.
 """
+import os
 import random
 import subprocess
 import sys
+
+ENGINE = os.environ.get("ASTRONA_CONTAINER_ENGINE", "podman")
 
 CLUSTER = sys.argv[1]
 MODE = sys.argv[2]
@@ -27,12 +30,12 @@ def run(*args):
 
 assert run("kubectl", "config", "current-context") == CONTEXT, "Select the private environment"
 for name in (CONTROL, WORKER):
-    label = run("podman", "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
+    label = run(ENGINE, "inspect", name, "--format", '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')
     assert label == "astro-" + CLUSTER, "Refusing an unrelated node container"
 
 
 def node(name, script):
-    return run("podman", "exec", name, "sh", "-ec", script)
+    return run(ENGINE, "exec", name, "sh", "-ec", script)
 
 
 # Shell fragment shared by the modes. It sets the version, the node architecture

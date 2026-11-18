@@ -15,7 +15,7 @@ Three rules follow. Keep every backup outside the manifests directory, because t
 
 ## The profiling flag
 
-The `--profiling` flag of the API server enables the `/debug/pprof` endpoints, which expose performance profiles and can be used to learn about internal state or to cause load. The default is `true`, and the benchmark recommends `false`. Before you change anything, look at what is exposed. A cluster administrator can read this endpoint through `kubectl`:
+The `--profiling` flag of the API server enables the `/debug/pprof` endpoints, which expose performance profiles and can be used to learn about internal state or to cause load. The default is `true`, and the benchmark recommends `false`. Before you change anything, look at what is exposed. A cluster administrator can read this endpoint through `kubectl`. Open a shell with `astrona ssh astro-ats-031-playground-020-01` and run:
 
 <!-- astrona:playground:renew -->
 
@@ -23,46 +23,75 @@ The `--profiling` flag of the API server enables the `/debug/pprof` endpoints, w
 kubectl get --raw /debug/pprof/
 ```
 
-With profiling enabled, the API server answers with an index of the available profiles.
+With profiling enabled, the API server answers with an HTML page that lists the available profiles. The output is long. Its first lines are:
+
+```text
+<html>
+<head>
+<title>/debug/pprof/</title>
+```
 
 ## Make the change
 
-Set the node name, take a backup in `/root` (outside the manifests directory), make a working copy, and add the flag in the working copy right below the `kube-apiserver` command. The `sed` command inserts the line `- --profiling=false` after the line `- kube-apiserver`, with the same indentation.
+Take a backup in `/root` (outside the manifests directory), make a working copy, and add the flag in the working copy right below the `kube-apiserver` command. The `sed` command inserts the line `- --profiling=false` after the line `- kube-apiserver`, with the same indentation.
 
 ```sh
-NODE=astro-ats-031-playground-020-01-control-plane
-podman exec $NODE cp /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml.bak
-podman exec $NODE cp /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml.new
-podman exec $NODE sed -i 's/^    - kube-apiserver$/    - kube-apiserver\n    - --profiling=false/' /root/kube-apiserver.yaml.new
-podman exec $NODE grep -n -e 'kube-apiserver$' -e 'profiling' /root/kube-apiserver.yaml.new
+sudo cp /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml.bak
+sudo cp /etc/kubernetes/manifests/kube-apiserver.yaml /root/kube-apiserver.yaml.new
+sudo sed -i 's/^    - kube-apiserver$/    - kube-apiserver\n    - --profiling=false/' /root/kube-apiserver.yaml.new
+sudo grep -n -e 'kube-apiserver$' -e 'profiling' /root/kube-apiserver.yaml.new
+```
+
+The output on the playground node:
+
+```text
+7:    component: kube-apiserver
+9:  name: kube-apiserver
+14:    - kube-apiserver
+15:    - --profiling=false
+55:    name: kube-apiserver
 ```
 
 The `grep` must show the flag on the line right after `kube-apiserver`. If it shows no `profiling` line, do not install the file: the pattern did not match the indentation of your manifest. Install the new file only when the flag is in place:
 
 ```sh
-podman exec $NODE cp /root/kube-apiserver.yaml.new /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo cp /root/kube-apiserver.yaml.new /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
 ## Wait for the new instance
 
-The kubelet notices the change after a short delay, so the old API server can still answer for a few seconds. Do not treat an early `ok` as success. Wait until the pod object that the new instance registers shows the new flag. `kubectl` fails while the API server is down, so the loop ignores errors and tries again, at most 60 times:
+The kubelet notices the change after a short delay, so the old API server can still answer for a few seconds. Do not treat an early `ok` as success. Wait until the pod object that the new instance registers shows the new flag, and until the API server reports that it is ready. The pod object can show the new flag a few seconds before the new API server is ready, so the loop checks both. `kubectl` fails while the API server is down, so the loop ignores errors and tries again, at most 60 times:
 
 ```sh
 for attempt in $(seq 1 60); do
-  if kubectl --request-timeout=3s -n kube-system get pod kube-apiserver-$NODE -o jsonpath='{.spec.containers[0].command}' 2>/dev/null | grep -q -e '--profiling=false'; then echo "new flag visible"; break; fi
+  if kubectl --request-timeout=3s -n kube-system get pod kube-apiserver-astro-ats-031-playground-020-01 -o jsonpath='{.spec.containers[0].command}' 2>/dev/null | grep -q -e '--profiling=false' && kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then echo "new flag visible and API server ready"; break; fi
   sleep 3
 done
 ```
 
-Then verify three things: the API server is ready, the profiling endpoint is gone, and the application still answers.
+The loop prints `new flag visible and API server ready`. On the playground node this took between 40 and 70 seconds.
+
+Then verify four things: the API server is ready, the profiling endpoint is gone, the application still answers, and kube-bench now passes the check.
 
 ```sh
-kubectl get --raw=/readyz
+kubectl get --raw=/readyz; echo
 kubectl get --raw /debug/pprof/
 kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
+sudo kube-bench run --check 1.2.15 | grep 1.2.15
 ```
 
-The first command prints `ok`. The second now fails with a `NotFound` error from the API server, because the endpoint is no longer served. The third prints the `probe` response, which proves that the application kept running. If the loop never printed the message, the API server did not start with the new manifest. Read the kubelet log on the node with `podman exec $NODE journalctl -u kubelet --no-pager -n 50`, or copy the backup back to `/etc/kubernetes/manifests/kube-apiserver.yaml` to return to the earlier state.
+The output on the playground node (the pod name in the `host=` field differs on your node):
+
+```text
+ok
+Error from server (NotFound): the server could not find the requested resource
+version=v1 host=probe-7db6ffd7d6-5pkl9 greeting=hello
+[PASS] 1.2.15 Ensure that the --profiling argument is set to false (Automated)
+```
+
+The first command prints `ok`; the `echo` only adds a line break after it. The second now fails with a `NotFound` error from the API server, because the endpoint is no longer served. The third prints the `probe` response, which proves that the application kept running. The fourth shows that kube-bench, which checks the arguments of the running API server process, sees the new flag. kube-bench reads the arguments of the running process. If it still shows `[FAIL]`, the old API server process has not stopped yet; wait a few seconds and run the check again. A new run of the `master` target on this node shows 40 PASS and 8 FAIL instead of 39 PASS and 9 FAIL.
+
+If the loop never printed the message, the API server did not start with the new manifest. Read the kubelet log on the node with `sudo journalctl -u kubelet --no-pager -n 50`, or copy the backup back to `/etc/kubernetes/manifests/kube-apiserver.yaml` with `sudo cp` to return to the earlier state.
 
 ## Record the decision
 

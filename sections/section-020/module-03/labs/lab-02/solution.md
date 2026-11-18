@@ -5,16 +5,14 @@ exam_objectives:
 ---
 # Disable Profiling And Raise The API Server TLS Minimum Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-03-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-03-02" || exit 1
-node_name="astro-ats-031-lab-020-03-02-control-plane"
-worker_name="astro-ats-031-lab-020-03-02-worker"
+astrona ssh astro-ats-031-lab-020-03-02
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-03-02`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Confirm both findings
 
@@ -22,7 +20,7 @@ The profiling endpoint `/debug/pprof/` returns data about the memory and CPU use
 
 ```sh
 kubectl get --raw /debug/pprof/ | head -n 5
-podman exec "$node_name" ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' -e '--tls-min-version'
+sudo ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' -e '--tls-min-version'
 ```
 
 The first command prints the start of an HTML page, so the endpoint answers. The second shows `--tls-min-version=VersionTLS10` and no `--profiling` flag, so profiling has its default value `true`.
@@ -32,20 +30,20 @@ The first command prints the start of an HTML page, so the endpoint answers. The
 TLS 1.0 and 1.1 have known weaknesses. The benchmark asks for TLS 1.2 or newer. Change the TLS line and add `--profiling=false` in the same edit, so the API server restarts only once. The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. Edit a copy in a work directory outside that folder, check the copy, and move it back in one step, so that the kubelet never reads a half-written file:
 
 ```sh
-podman exec "$node_name" mkdir -p /etc/kubernetes/edit
-podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec "$node_name" sed -i -e 's|--tls-min-version=VersionTLS10|--tls-min-version=VersionTLS12|' -e 's|^\( *\)- kube-apiserver$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec "$node_name" grep -e '--profiling' -e '--tls-min-version' /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec "$node_name" mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo mkdir -p /etc/kubernetes/edit
+sudo cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
+sudo sed -i -e 's|--tls-min-version=VersionTLS10|--tls-min-version=VersionTLS12|' -e 's|^\( *\)- kube-apiserver$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-apiserver.yaml
+sudo grep -e '--profiling' -e '--tls-min-version' /etc/kubernetes/edit/kube-apiserver.yaml
+sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
 ## Verify the running API server
 
-Wait until the API server answers, then repeat the checks:
+The kubelet sees the changed file and starts a new API server; on the lab VM that takes about 45 seconds, and kubectl fails until it is back. Wait until the API server answers, then repeat the checks:
 
 ```sh
 kubectl get --raw=/readyz
-podman exec "$node_name" ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' -e '--tls-min-version'
+sudo ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' -e '--tls-min-version'
 kubectl get --raw /debug/pprof/
 ```
 

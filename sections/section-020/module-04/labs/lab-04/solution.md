@@ -5,30 +5,28 @@ exam_objectives:
 ---
 # Restrict The etcd Data Directory Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-04-04)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-04-04" || exit 1
-node_name="astro-ats-031-lab-020-04-04-control-plane"
-worker_name="astro-ats-031-lab-020-04-04-worker"
+astrona ssh astro-ats-031-lab-020-04-04
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-04-04`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Find the data directory
 
 The benchmark checks the directory that etcd really uses, so read it from the running process instead of guessing the default:
 
 ```sh
-podman exec "$node_name" sh -c 'tr "\0" "\n" < /proc/$(pgrep -n etcd)/cmdline' | grep -e '^--data-dir'
+sudo sh -c 'tr "\0" "\n" < /proc/$(pgrep -n etcd)/cmdline' | grep -e '^--data-dir'
 ```
 
 The value is `/var/lib/etcd` on a kubeadm cluster. Now read the mode, the owner and the user that runs etcd:
 
 ```sh
-podman exec "$node_name" stat -c '%a %U:%G %n' /var/lib/etcd
-podman exec "$node_name" ps -o user= -p "$(podman exec "$node_name" pgrep -n etcd)"
+sudo stat -c '%a %U:%G %n' /var/lib/etcd
+sudo ps -o user= -p "$(sudo pgrep -n etcd)"
 ```
 
 The mode is `755`, so every user on the node can list the directory. The owner is `root:root`, and etcd runs as `root`. The benchmark text asks for the owner `etcd:etcd`, which fits only when etcd runs as a user called `etcd`. Here the owner must stay `root:root`, or etcd can no longer write its data.
@@ -38,8 +36,8 @@ The mode is `755`, so every user on the node can list the directory. The owner i
 Change only the mode, then check it and the health of etcd through the API server:
 
 ```sh
-podman exec "$node_name" chmod 700 /var/lib/etcd
-podman exec "$node_name" stat -c '%a %U:%G %n' /var/lib/etcd
+sudo chmod 700 /var/lib/etcd
+sudo stat -c '%a %U:%G %n' /var/lib/etcd
 kubectl get --raw='/readyz/etcd'
 ```
 

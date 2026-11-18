@@ -13,31 +13,51 @@ The kubelet listens on several ports. Port `10250` is the HTTPS API, protected b
 
 ## Show the exposure
 
-The `shuttle` pod is a client pod in the cluster. Pods can reach the IP address of a node, so a compromised pod could read this port. The command below sends a request from `shuttle` to port `10255` of the worker:
+The `shuttle` pod is a client pod in the cluster. Pods can reach the IP address of a node, so a compromised pod could read this port. Open a shell on the node, find the InternalIP address of the node and send a request from `shuttle` to port `10255` at that address. The `head -c 300` command keeps only the first 300 characters of the answer:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-WORKER=astro-ats-031-playground-020-05-worker
-WORKER_IP=$(kubectl get node $WORKER -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
-kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://$WORKER_IP:10255/pods
+astrona ssh astro-ats-031-playground-020-05
+NODE=astro-ats-031-playground-020-05
+NODE_IP=$(kubectl get node $NODE -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
+kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://$NODE_IP:10255/pods | head -c 300; echo
 ```
 
-The output is a JSON document that lists the pods of the node, including their images, environment variable names and volumes. The request carried no credentials and no certificate. The same request to a closed port fails after the time limit of three seconds.
+The answer is a JSON document of kind `PodList`. It starts like this:
+
+```text
+{"kind":"PodList","apiVersion":"v1","metadata":{},"items":[{"metadata":{"name":"kube-controller-manager-astro-ats-031-playground-020-05","namespace":"kube-system","uid":"9ff03813badd74cbda79c7178a12ec51","labels":{"component":"kube-controller-manager","tier":"control-plane"},"annotations":{"kubernet
+```
+
+The full document lists every pod of the node, including their images, environment variable names and volumes. On this node the list includes the control plane pods, because the node runs them. The request carried no credentials and no certificate.
 
 ## Close the port
 
-The key must exist only once, so the commands remove any existing line and append the new one. A blank line before the new key protects against a file that does not end with a line break:
+The key must exist only once, so the commands remove any existing line and append the new one. A blank line before the new key protects against a file that does not end with a line break. The file belongs to `root`, so `sudo tee -a` appends the line:
 
 ```sh
-podman exec $WORKER cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.bak
-podman exec $WORKER sed -i '/^readOnlyPort:/d' /var/lib/kubelet/config.yaml
-podman exec $WORKER sh -c "printf '\nreadOnlyPort: 0\n' >> /var/lib/kubelet/config.yaml"
-podman exec $WORKER grep -n 'readOnlyPort' /var/lib/kubelet/config.yaml
-podman exec $WORKER systemctl restart kubelet
+sudo cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.bak
+sudo sed -i '/^readOnlyPort:/d' /var/lib/kubelet/config.yaml
+printf '\nreadOnlyPort: 0\n' | sudo tee -a /var/lib/kubelet/config.yaml >/dev/null
+sudo grep -n 'readOnlyPort' /var/lib/kubelet/config.yaml
+sudo systemctl restart kubelet
 ```
 
-The `grep` shows exactly one line with `readOnlyPort: 0`. After the restart, repeat the request from `shuttle`. It now fails with a timeout or a connection error, and `wget` exits with a nonzero status. Wait for the kubelet to restart before you judge: run the request again after about ten seconds if it still answers.
+The `grep` shows exactly one line, `54:readOnlyPort: 0` on this node. Wait about ten seconds for the kubelet to restart, then repeat the request from `shuttle`:
+
+```sh
+kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://$NODE_IP:10255/pods
+```
+
+Now the kubelet no longer listens on the port, so the node refuses the connection:
+
+```text
+wget: can't connect to remote host (10.0.2.15): Connection refused
+command terminated with exit code 1
+```
+
+If the request still returns the pod list, the kubelet has not restarted yet. Run the request again after a few seconds.
 
 ## TLS settings of port 10250
 
@@ -50,13 +70,19 @@ Three fields in the file shape the TLS connection of port `10250`.
 Set the minimum version with the same remove-and-append routine, and check the effective value after the restart:
 
 ```sh
-podman exec $WORKER sed -i '/^tlsMinVersion:/d' /var/lib/kubelet/config.yaml
-podman exec $WORKER sh -c "printf '\ntlsMinVersion: VersionTLS12\n' >> /var/lib/kubelet/config.yaml"
-podman exec $WORKER systemctl restart kubelet
-kubectl get --raw "/api/v1/nodes/$WORKER/proxy/configz" | python3 -m json.tool | grep -e tlsMinVersion -e readOnlyPort
+sudo sed -i '/^tlsMinVersion:/d' /var/lib/kubelet/config.yaml
+printf '\ntlsMinVersion: VersionTLS12\n' | sudo tee -a /var/lib/kubelet/config.yaml >/dev/null
+sudo systemctl restart kubelet
+kubectl get --raw "/api/v1/nodes/$NODE/proxy/configz" | python3 -m json.tool | grep -e tlsMinVersion -e readOnlyPort
 ```
 
-The `configz` output shows `"tlsMinVersion": "VersionTLS12"`. The field `readOnlyPort` is absent, because the kubelet omits a zero value from the output, and absent means the port is closed. If the request returns an error right after the restart, wait a few seconds and run it again.
+The `configz` output is one line:
+
+```text
+        "tlsMinVersion": "VersionTLS12",
+```
+
+The field `readOnlyPort` is absent, because the kubelet omits a zero value from the output, and absent means the port is closed. If the request returns an error right after the restart, wait a few seconds and run it again.
 
 ## Certificates and rotation
 

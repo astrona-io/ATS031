@@ -1,24 +1,172 @@
 #!/usr/bin/env bash
+# Runs inside the playground VM as the astrona user. astrona copies only this
+# file into the VM, so the start objects are inlined below.
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-031-playground-020-03" ]]; then
+cluster="astro-ats-031-playground-020-03"
+# The learner logs in as student, so student gets the admin kubeconfig too.
+kube_users=(--user "$(id -un)")
+getent passwd student >/dev/null && kube_users+=(--user student)
+sudo /usr/local/sbin/astrona-kubeadm-init --cluster-name "$cluster" "${kube_users[@]}"
+if [[ "$(kubectl config current-context)" != "kubernetes-admin@$cluster" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-node_name="astro-ats-031-playground-020-03-control-plane"
-worker_name="astro-ats-031-playground-020-03-worker"
-kubectl apply -f "$lab_directory/bootstrap/manifests/start.yaml"
+kubectl apply -f - <<'MANIFEST'
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: starfleet
+  labels:
+    project: cks
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: outpost
+  labels:
+    project: outpost
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: probe-code
+  namespace: starfleet
+data:
+  server.py: "from http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib\
+    \ import Path\nimport os\nimport socket\n\nclass Handler(BaseHTTPRequestHandler):\n\
+    \    def do_GET(self):\n        marker = {\"/ready\": \"/tmp/not-ready\", \"/health\"\
+    : \"/tmp/unhealthy\"}.get(self.path)\n        status = 503 if marker and Path(marker).exists()\
+    \ else 200\n        settings = Path(\"/settings/greeting\")\n        greeting\
+    \ = settings.read_text().strip() if settings.exists() else os.getenv(\"GREETING\"\
+    , \"hello\")\n        body = f\"version={os.getenv('VERSION', 'v1')} host={socket.gethostname()}\
+    \ greeting={greeting}\\n\"\n        self.send_response(status)\n        self.send_header(\"\
+    Content-Type\", \"text/plain\")\n        self.end_headers()\n        self.wfile.write(body.encode())\n\
+    \nHTTPServer((\"0.0.0.0\", 8080), Handler).serve_forever()\n"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: probe
+      release: probe
+  template:
+    metadata:
+      labels:
+        app: probe
+        release: probe
+    spec:
+      containers:
+      - name: probe
+        image: docker.io/library/python:3.13-alpine
+        command:
+        - python
+        - /app/server.py
+        env:
+        - name: VERSION
+          value: v1
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+        volumeMounts:
+        - name: app
+          mountPath: /app
+          readOnly: true
+      volumes:
+      - name: app
+        configMap:
+          name: probe-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe
+  namespace: starfleet
+spec:
+  selector:
+    app: probe
+    release: probe
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shuttle
+  namespace: starfleet
+  labels:
+    app: shuttle
+spec:
+  containers:
+  - name: client
+    image: docker.io/library/busybox:1.37.0
+    command:
+    - sh
+    - -c
+    - sleep 3600
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: drifter
+  namespace: outpost
+  labels:
+    app: drifter
+spec:
+  containers:
+  - name: client
+    image: docker.io/library/busybox:1.37.0
+    command:
+    - sh
+    - -c
+    - sleep 3600
+  restartPolicy: Never
+MANIFEST
 kubectl -n starfleet rollout status deployment/probe --timeout=180s
 kubectl -n starfleet wait --for=condition=Ready pod/shuttle --timeout=120s
 kubectl -n outpost wait --for=condition=Ready pod/drifter --timeout=120s
-if [[ "$(podman inspect "$node_name" --format '{{index .Config.Labels "io.x-k8s.kind.cluster"}}')" != "astro-ats-031-playground-020-03" ]]; then
-  printf 'Refusing to operate on an unrelated node container\n' >&2
-  exit 1
-fi
-# Working copies of the original manifests, kept outside the manifests directory.
-podman exec "$node_name" mkdir -p /opt/training/backup
-podman exec "$node_name" sh -c 'cp -p /etc/kubernetes/manifests/*.yaml /opt/training/backup/'
-# Stage an audit policy that no component references yet.
-podman exec -i "$node_name" sh -c 'cat > /opt/training/audit-policy.yaml' < "$lab_directory/bootstrap/audit-policy.yaml"
-# Widen the file permissions on purpose so that the benchmark file checks fail.
-podman exec "$node_name" sh -c 'chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml'
+# Keep copies of the static pod manifests and stage the audit policy that the
+# guide places, then open the manifest modes for the file permission checks.
+sudo mkdir -p /opt/training/backup
+sudo sh -c 'cp -p /etc/kubernetes/manifests/*.yaml /opt/training/backup/'
+sudo tee /opt/training/audit-policy.yaml >/dev/null <<'POLICY'
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages:
+- RequestReceived
+rules:
+- level: None
+  nonResourceURLs:
+  - /healthz*
+  - /livez*
+  - /readyz*
+- level: Metadata
+  resources:
+  - group: ""
+    resources: ["secrets"]
+- level: Request
+  namespaces: ["starfleet"]
+  resources:
+  - group: ""
+    resources: ["pods"]
+- level: Metadata
+POLICY
+sudo chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml

@@ -15,7 +15,7 @@ A security review asks whether the cluster meets the CIS Kubernetes Benchmark. T
 4. Review etcd Security Configuration: the etcd client and peer TLS flags, the data directory, a direct query with `etcdctl` and encryption at rest.
 5. Harden The kubelet And CoreDNS, Then Remediate End To End: kubelet authentication, authorization and ports, the CoreDNS review and a full remediation.
 
-Each module ends with a summary and a ten-question knowledge check. Each lab follows the part that practises its skill. Every module has a private `kind` playground with Kubernetes v1.35; launch it from the landing page and keep it running while you read. A `kind` node is a container that shares the kernel of the host, so the playgrounds cannot test every kernel-level or host-level setting, and each part says where a check does not apply.
+Each module ends with a summary and a ten-question knowledge check. Each lab follows the part that practises its skill. Every module has a private playground; launch it from the landing page and keep it running while you read. The playground is a virtual machine (VM) that runs a one-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. Because the node is a real machine, you read and change the real static pod manifests, etcd files and kubelet settings, as on a node in the exam.
 
 ## Learning Outcomes
 
