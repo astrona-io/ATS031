@@ -27,32 +27,59 @@ A review also depends on who can change the component. On a cluster that you run
 
 ## The layout of a kubeadm node
 
-Set the names of the two node containers once. The variables are used by the commands in this part.
+The files of a kubeadm node belong to `root`, so you read them from a shell on the node with `sudo`. Open a shell on the playground node. You log in as the `student` user, and the second command shows that `kubectl` points at this cluster:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-01-control-plane
-WORKER=astro-ats-031-playground-020-01-worker
+astrona ssh astro-ats-031-playground-020-01
+kubectl config current-context
 ```
+
+The context is `kubernetes-admin@astro-ats-031-playground-020-01`. Run every other command in this part in that shell. Commands with `sudo` change only the playground VM, not your own computer.
 
 On a control plane node, `kubeadm` places the control plane components as **static pods**. A static pod is a pod that the kubelet starts from a manifest file in a directory on the node, without the API server. The directory is `/etc/kubernetes/manifests`. List it, together with the owner and the permission mode of each file:
 
 ```sh
-podman exec $NODE ls /etc/kubernetes/manifests
-podman exec $NODE sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
+sudo ls /etc/kubernetes/manifests
+sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
 ```
 
-You should see four files: `etcd.yaml`, `kube-apiserver.yaml`, `kube-controller-manager.yaml` and `kube-scheduler.yaml`. The `stat` format prints the mode in octal (for example `600`), then the owner and group, then the path. The benchmark (checks 1.1.1 to 1.1.8) asks for mode `600` or stricter and owner `root:root` for these files.
+The output on the playground node:
 
-The certificates and keys live in `/etc/kubernetes/pki`, the credentials of the administrator and of the components in `/etc/kubernetes/*.conf`, and the etcd data in `/var/lib/etcd`. The kubelet reads its settings from `/var/lib/kubelet/config.yaml` and its credentials from `/etc/kubernetes/kubelet.conf`.
+```text
+etcd.yaml
+kube-apiserver.yaml
+kube-controller-manager.yaml
+kube-scheduler.yaml
+600 root:root /etc/kubernetes/manifests/etcd.yaml
+600 root:root /etc/kubernetes/manifests/kube-apiserver.yaml
+600 root:root /etc/kubernetes/manifests/kube-controller-manager.yaml
+600 root:root /etc/kubernetes/manifests/kube-scheduler.yaml
+```
+
+The `stat` format prints the mode in octal (for example `600`), then the owner and group, then the path. The benchmark (checks 1.1.1 to 1.1.8) asks for mode `600` or stricter and owner `root:root` for these files, so all four pass.
+
+The certificates and keys live in `/etc/kubernetes/pki`, the credentials of the administrator and of the components in `/etc/kubernetes/*.conf`, and the etcd data in `/var/lib/etcd`. The kubelet reads its settings from `/var/lib/kubelet/config.yaml` and its credentials from `/etc/kubernetes/kubelet.conf`. In a cluster with several nodes, the kubelet files exist on every node. In the playground, one node holds both the control plane files and the kubelet files.
 
 ```sh
-podman exec $NODE sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/*.conf /var/lib/etcd /var/lib/kubelet/config.yaml"
-podman exec $WORKER sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/kubelet.conf /var/lib/kubelet/config.yaml /etc/kubernetes/pki/ca.crt"
+sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/*.conf /var/lib/etcd /var/lib/kubelet/config.yaml /etc/kubernetes/pki/ca.crt"
 ```
 
-Compare each mode with what the benchmark asks: configuration files `600` or stricter, certificate files `644` or stricter, key files `600`, the etcd data directory `700` or stricter and owned by the `etcd` user. A `kubeadm` cluster does not always meet every file check. Some findings are expected until you change a mode or create the `etcd` user, and some are accepted exceptions.
+The output on the playground node:
+
+```text
+600 root:root /etc/kubernetes/admin.conf
+600 root:root /etc/kubernetes/controller-manager.conf
+600 root:root /etc/kubernetes/kubelet.conf
+600 root:root /etc/kubernetes/scheduler.conf
+600 root:root /etc/kubernetes/super-admin.conf
+700 root:root /var/lib/etcd
+644 root:root /var/lib/kubelet/config.yaml
+644 root:root /etc/kubernetes/pki/ca.crt
+```
+
+Compare each mode with what the benchmark asks: configuration files `600` or stricter, certificate files `644` or stricter, key files `600`, the etcd data directory `700` or stricter and owned by the `etcd` user. A `kubeadm` cluster does not meet every file check. On this node the etcd data directory has the right mode but belongs to `root`, because kubeadm creates no `etcd` user. The kubelet configuration file has mode `644`, which is wider than `600`. Some findings like these are expected until you change a mode or create the `etcd` user, and some are accepted exceptions.
 
 ## DNS in the cluster
 

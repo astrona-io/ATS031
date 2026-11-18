@@ -30,50 +30,96 @@ flowchart TB
 
 The diagram shows that the original is never edited in place: the copy is edited outside the watched directory and then renamed into it.
 
-A copy of every original manifest was saved in `/opt/training/backup` when the playground started. Look at the directory and at the backups:
+A copy of every original manifest was saved in `/opt/training/backup` when the playground started. The files belong to `root`, so you work in a shell on the node and use `sudo`. Open the shell. You log in as the `student` user, and the second command shows that `kubectl` points at this cluster:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-03-control-plane
-podman exec $NODE ls -l /etc/kubernetes/manifests /opt/training/backup
+astrona ssh astro-ats-031-playground-020-03
+kubectl config current-context
 ```
 
-The first listing shows the four control plane manifests: `etcd`, `kube-apiserver`, `kube-controller-manager` and `kube-scheduler`. The mode of the three that this playground widened is `-rw-r--r--`, which is `644`. The backup keeps the original mode. List the running control plane containers with the container runtime tool of the node, `crictl`, which talks to the container runtime and not to the API server:
+The context is `kubernetes-admin@astro-ats-031-playground-020-03`. Run every other command in this part in that shell. Commands with `sudo` change only the playground VM, not your own computer. Now look at the manifests directory and at the backups:
 
 ```sh
-podman exec $NODE crictl ps --name kube-scheduler
+sudo ls -l /etc/kubernetes/manifests /opt/training/backup
 ```
+
+The output on the playground node:
+
+```text
+/etc/kubernetes/manifests:
+total 16
+-rw------- 1 root root 2624 Nov 18 08:52 etcd.yaml
+-rw-r--r-- 1 root root 3940 Nov 18 08:52 kube-apiserver.yaml
+-rw-r--r-- 1 root root 3480 Nov 18 08:52 kube-controller-manager.yaml
+-rw-r--r-- 1 root root 1727 Nov 18 08:52 kube-scheduler.yaml
+
+/opt/training/backup:
+total 16
+-rw------- 1 root root 2624 Nov 18 08:52 etcd.yaml
+-rw------- 1 root root 3940 Nov 18 08:52 kube-apiserver.yaml
+-rw------- 1 root root 3480 Nov 18 08:52 kube-controller-manager.yaml
+-rw------- 1 root root 1727 Nov 18 08:52 kube-scheduler.yaml
+```
+
+The first listing shows the four control plane manifests: `etcd`, `kube-apiserver`, `kube-controller-manager` and `kube-scheduler`. The mode of the three that this playground widened is `-rw-r--r--`, which is `644`. The backup keeps the original mode, `600`. The directory also holds a hidden empty file, `.kubelet-keep`, which `ls -a` shows. The kubelet ignores it because its name starts with a dot.
+
+List the running scheduler container with `crictl`, the command-line tool of the container runtime. It talks to the container runtime (containerd on this node), not to the API server:
+
+```sh
+sudo crictl ps --name kube-scheduler
+```
+
+The output shows one container in the state `Running`, with the pod `kube-scheduler-astro-ats-031-playground-020-03` in the `kube-system` namespace.
 
 ## Break and recover the scheduler
 
-You practise recovery on the scheduler, because a stopped scheduler does not stop the API. The edit adds a flag that does not exist. Make the copy, add the flag after the `--bind-address` line, and move the copy into place.
+You practise recovery on the scheduler, because a stopped scheduler does not stop the API. The edit adds a flag that does not exist. Make the copy, add the flag after the `--bind-address` line, check the copy, and move it into place.
 
 ```sh
-podman exec $NODE mkdir -p /etc/kubernetes/edit
-podman exec $NODE cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec $NODE sed -i 's|^\( *\)- --bind-address=127.0.0.1|&\n\1- --no-such-flag=true|' /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec $NODE mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+sudo mkdir -p /etc/kubernetes/edit
+sudo cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
+sudo sed -i 's|^\( *\)- --bind-address=127.0.0.1|&\n\1- --no-such-flag=true|' /etc/kubernetes/edit/kube-scheduler.yaml
+sudo grep -n -e bind-address -e no-such /etc/kubernetes/edit/kube-scheduler.yaml
+sudo mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
 ```
 
-If your manifest has no `--bind-address=127.0.0.1` line, the `sed` command changes nothing. Then add the flag by hand in the copy with an editor before you move it. After about half a minute, list all containers, including the stopped ones, and read the log of the newest scheduler container:
+The `grep` prints `15:    - --bind-address=127.0.0.1` and `16:    - --no-such-flag=true`. If your manifest has no `--bind-address=127.0.0.1` line, the `sed` command changes nothing. Then add the flag by hand in the copy with an editor, such as `sudo vi`, before you move it.
+
+After about half a minute, list all scheduler containers, including the stopped ones, and read the last line of the log of the newest one:
 
 ```sh
-podman exec $NODE crictl ps -a --name kube-scheduler
-podman exec $NODE crictl logs $(podman exec $NODE crictl ps -a --name kube-scheduler -q | head -n 1)
+sudo crictl ps -a --name kube-scheduler
+sudo crictl logs --tail 1 $(sudo crictl ps -a --name kube-scheduler -q | head -n 1)
 ```
 
-The first command shows a scheduler container that exited. The second prints the reason, which for an unknown flag is an error line from the scheduler that names the flag. This is the method for any control plane failure: find the container with `crictl ps -a`, read its log with `crictl logs`, and fix the manifest. With the API server down, `crictl` is the only tool that works.
+The output on the playground node:
+
+```text
+CONTAINER           IMAGE               CREATED             STATE               NAME                ATTEMPT             POD ID              POD                                              NAMESPACE
+62a3536c0e201       e06a7254ac4fc       16 seconds ago      Exited              kube-scheduler      2                   db1d58f411132       kube-scheduler-astro-ats-031-playground-020-03   kube-system
+Error: unknown flag: --no-such-flag
+```
+
+The first command shows a scheduler container that exited, and the kubelet keeps starting new attempts. The second prints the reason. Without `--tail 1`, the log first prints the full usage text of the scheduler, and the error line is the last line. This is the method for any control plane failure: find the container with `crictl ps -a`, read its log with `crictl logs`, and fix the manifest. With the API server down, `crictl` on the node is the only tool that shows the container log. Meanwhile `kubectl -n kube-system get pods -l component=kube-scheduler` shows the mirror pod as `0/1` with the status `Error`.
 
 Restore the original from the backup, through the same move:
 
 ```sh
-podman exec $NODE cp -p /opt/training/backup/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec $NODE mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+sudo cp -p /opt/training/backup/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
+sudo mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
 kubectl -n kube-system get pods -l component=kube-scheduler
 ```
 
-The mirror pod returns to `Running` and `1/1` ready after the kubelet restarts the container. You now have the loop for every change in this module: copy, edit, move, wait, verify, and a backup to return to. The loop now applies to the flags that control who can reach the API server.
+The kubelet restarts the container. About half a minute later the output on the playground node was:
+
+```text
+NAME                                             READY   STATUS    RESTARTS   AGE
+kube-scheduler-astro-ats-031-playground-020-03   1/1     Running   0          34s
+```
+
+The backup has mode `600`, so after this restore the scheduler manifest has mode `600` and no longer `644`. You now have the loop for every change in this module: copy, edit, move, wait, verify, and a backup to return to. The loop now applies to the flags that control who can reach the API server.
 
 ## Common pitfalls
 
@@ -82,3 +128,4 @@ The mirror pod returns to `Running` and `1/1` ready after the kubelet restarts t
 > - **Editing in place with an editor that writes temporary files.** Some editors create files in the directory while saving. Edit a copy and move it.
 > - **Forgetting the file mode.** A plain `cp` without `-p` can change the mode of the file. Use `cp -p`, and check the mode afterwards.
 > - **Looking for the log with `kubectl`.** When the API server is down, only `crictl` on the node shows the container log.
+> - **Running node commands without `sudo`.** The manifests, the backups and `crictl` need root. Without `sudo` the command fails with a permission error, not with the answer.

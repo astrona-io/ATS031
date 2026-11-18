@@ -40,7 +40,7 @@ questions:
     difficulty: beginner
     learning_objective: "Explain why the kube-bench Job needs host access."
     source_readings:
-      - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+      - sections/section-020/module-02/course-02-run-kube-bench-on-a-kubeadm-node.md
     prompt: "A `kube-bench` pod runs without `hostPID` and without host mounts. What goes wrong?"
     options:
       - id: a
@@ -222,13 +222,13 @@ questions:
   - id: ats031-020-02-q10
     type: single_choice
     difficulty: advanced
-    learning_objective: "Handle a false finding in a kind cluster."
+    learning_objective: "Handle a false finding on a kubeadm node."
     source_readings:
       - sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
-    prompt: "A file owner check fails on a kind node because the node container has other users than a real host. What is the right action?"
+    prompt: "On a kubeadm node, check `1.1.12` fails because `/var/lib/etcd` belongs to `root:root` and not to `etcd:etcd`. The node has no `etcd` user. What is the right action?"
     options:
       - id: a
-        text: "Change the owner of the file until the check passes."
+        text: "Change the owner of the directory until the check passes."
         explanation: "Changing a working cluster only to clear a mismatched check adds risk."
       - id: b
         text: "Delete the result from the report."
@@ -240,4 +240,4 @@ questions:
         text: "Read the audit, confirm the real value, and record that the finding does not apply and why."
         explanation: "Correct. The record is as important as a fix."
     correct_option: d
-    explanation: "A reviewer separates findings that apply from findings caused by the test setup, and writes down the reason for each exception."
+    explanation: "A reviewer separates findings that apply from findings whose audit does not fit the installation, and writes down the reason for each exception."

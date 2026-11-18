@@ -14,7 +14,7 @@ A tool report is not a verdict. `kube-bench` reads the processes and files of on
 After this module you can:
 
 - Explain what `kube-bench` reads on a node and how it decides `PASS` or `FAIL`.
-- Run `kube-bench` as a Kubernetes Job for the control plane and the worker node.
+- Run `kube-bench` on a kubeadm node with `sudo`, and as a Kubernetes Job that uses the `kube-bench` image.
 - Choose a target and a benchmark edition, and say what happens when the edition does not match the cluster version.
 - Read the result lines, the summary counts and the remediation text of a failing check.
 - Run one check or one group, export the result as JSON, and filter it with `jq`.
@@ -22,9 +22,11 @@ After this module you can:
 
 ## Before you start
 
-You need Kubernetes basics: pods, Jobs, namespaces and `kubectl`. The module has six parts. The first explains what the tool reads. The second runs it on a kind node. The third covers targets, editions and versions. The fourth reads a result. The fifth selects checks and exports results. The sixth covers manual checks and false findings.
+You need Kubernetes basics: pods, Jobs, namespaces and `kubectl`. The module has six parts. The first explains what the tool reads. The second runs it on a kubeadm node. The third covers targets, editions and versions. The fourth reads a result. The fifth selects checks and exports results. The sixth covers manual checks and false findings.
 
-Your playground is a `kind` cluster running Kubernetes v1.35 with one control plane node and one worker node. A kind node is a container that runs the kubelet and the control plane as a normal kubeadm node does. The `kube-bench` container image is already loaded on both nodes, so no download is needed. The `starfleet` namespace holds the `probe` Deployment, the `probe` Service and the `shuttle` client pod. Commands for the nodes start with `podman exec` and name the node container of this playground. `kubectl` already points at the cluster. The commands that filter JSON need `jq` on your machine.
+Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-02` is the control plane and also runs your pods, so the control plane checks and the kubelet checks run on the same machine. The `starfleet` namespace holds the `probe` Deployment (two pods), the `probe` Service and the `shuttle` client pod.
+
+You open a shell on the node with `astrona ssh astro-ats-031-playground-020-02`. You log in as the `student` user, which can run commands as root with `sudo` and already has `kubectl` set up for the cluster. The `kube-bench` binary is installed in `/usr/local/bin/kube-bench`, and its definition files are in `/etc/kube-bench/cfg`. The `kube-bench` container image is already on the node, so a pod that uses it starts without a download. `jq`, a command-line tool that reads JSON, is installed on the node too.
 
 Launch your playground now and keep it running while you read:
 

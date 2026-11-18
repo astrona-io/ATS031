@@ -21,26 +21,31 @@ Every kubelet has a credential for the API server. The `NodeRestriction` plugin 
 
 By default a container may use an image that is already cached on the node, depending on the pull policy. A second pod on the same node can then run a private image without any registry credentials, because the image is already there. The `AlwaysPullImages` plugin changes every new pod so that its containers use the pull policy `Always`. The kubelet then checks with the registry on every start, and the check needs valid credentials.
 
-This has a cost. Each container start pulls image metadata from the registry, so startup is slower and the registry must be reachable. In an offline cluster such as the playground, enabling the plugin would make pods fail to start, because their images are only on the node. The plugin is a level 1 recommendation in the benchmark, but a reviewer weighs it against the environment.
+This has a cost. Each container start pulls image metadata from the registry, so startup is slower and the registry must be reachable. In an offline cluster, enabling the plugin would make pods fail to start, because their images are only on the node. The plugin is a level 1 recommendation in the benchmark, but a reviewer weighs it against the environment.
 
 ## Read the active plugins
 
-First read the flags in the manifest and in the running pod:
+First read the flags in the manifest. Open a shell on the node with `astrona ssh astro-ats-031-playground-020-03`. The manifest belongs to `root`, so read it with `sudo`:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-03-control-plane
-podman exec $NODE grep -e 'admission-plugins' /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo grep -e 'admission-plugins' /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-A kubeadm cluster shows `--enable-admission-plugins=NodeRestriction`, and no `--disable-admission-plugins` line. To see which plugins are on by default, read the help text of the API server binary inside the running container. The binary needs no shell, because `exec` runs it directly:
+The output on the playground node is `    - --enable-admission-plugins=NodeRestriction`, and there is no `--disable-admission-plugins` line. To see which plugins are on by default, read the help text of the API server binary inside the running container. The binary needs no shell, because `exec` runs it directly:
 
 ```sh
-kubectl -n kube-system exec kube-apiserver-$NODE -- kube-apiserver -h | grep -A4 -e '--enable-admission-plugins'
+kubectl -n kube-system exec kube-apiserver-astro-ats-031-playground-020-03 -- kube-apiserver -h | grep -e '--enable-admission-plugins strings'
 ```
 
-The help text lists the plugins that exist, and states which are enabled by default. If `exec` cannot find the binary by name in your image, the same text is in the documentation of your Kubernetes version. Compare the two lists: the active set is the default set, plus the plugins from `--enable-admission-plugins`, minus the plugins from `--disable-admission-plugins`.
+The output is one very long line. It starts with the default list of Kubernetes v1.35.10, shortened here to that list:
+
+```text
+      --enable-admission-plugins strings             admission plugins that should be enabled in addition to default enabled ones (NamespaceLifecycle, LimitRanger, ServiceAccount, TaintNodesByCondition, PodSecurity, Priority, DefaultTolerationSeconds, DefaultStorageClass, StorageObjectInUseProtection, PersistentVolumeClaimResize, RuntimeClass, CertificateApproval, CertificateSigning, ClusterTrustBundleAttest, CertificateSubjectRestriction, DefaultIngressClass, PodTopologyLabels, NodeDeclaredFeatureValidator, MutatingAdmissionPolicy, MutatingAdmissionWebhook, ValidatingAdmissionPolicy, ValidatingAdmissionWebhook, ResourceQuota). ...
+```
+
+The list in brackets is the default set. After it, the line lists every plugin that exists, including `AlwaysPullImages` and `NodeRestriction`, which are not in the default set. `ServiceAccount` is in the default set, so it runs without any flag. Compare the two lists: the active set is the default set, plus the plugins from `--enable-admission-plugins`, minus the plugins from `--disable-admission-plugins`. On this node that is the default set plus `NodeRestriction`.
 
 ## Change the list
 
@@ -50,7 +55,7 @@ To add `AlwaysPullImages` to a real cluster, change the value to a comma-separat
 - --enable-admission-plugins=NodeRestriction,AlwaysPullImages
 ```
 
-This line replaces the existing `--enable-admission-plugins` line in the manifest, by editing a copy outside the manifests directory and moving it into place. After the API server restarts, read the pod arguments again. Do not do this change in the playground, because the images of the playground exist only on its nodes.
+This line replaces the existing `--enable-admission-plugins` line in the manifest, by editing a copy outside the manifests directory and moving it into place. After the API server restarts, read the pod arguments again. Leave this change out of the playground. The module does not need it, and every new pod would then depend on the image registry being reachable from the VM.
 
 ```mermaid
 flowchart TB

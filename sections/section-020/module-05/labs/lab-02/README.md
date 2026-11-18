@@ -5,6 +5,6 @@ exam_objectives:
 ---
 # Remediate Five Kubelet Benchmark Findings
 
-Fix five kubelet findings on the worker node in one planned change: two file modes, certificate rotation, the streaming idle timeout and the minimum TLS version.
+Fix five kubelet findings on the node in one planned change: two file modes, certificate rotation, the streaming idle timeout and the minimum TLS version.
 
-The task and solution use a separate pinned kind cluster with one control plane node and one worker node. Run `astrona test` on this folder: `testing/verify-start.sh` checks that every outcome fails on the starting state, then `solution/apply.sh` applies the reference solution and every outcome must pass.
+The task and solution use a VM from the pinned `24.04-cks` image with a one-node kubeadm cluster (Kubernetes v1.35.10). `vm/` holds the scripts astrona pipes into the VM; regenerate them with `python3 scripts/ci/vm-lab.py <this folder>` after you change a lab file. Run `astrona test` on this folder: `vm/install.sh` builds the cluster and runs `bootstrap/setup.sh` in the VM, `testing/verify-start.sh` checks that every outcome fails on the starting state, then `solution/apply.sh` applies the reference solution and every outcome must pass.

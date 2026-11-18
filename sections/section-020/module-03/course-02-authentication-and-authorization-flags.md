@@ -21,29 +21,45 @@ The flag `--authorization-mode` takes a comma-separated list of authorizers, and
 
 ## Read the flags and test anonymous access
 
-Read the three flags in the manifest. `grep` prints only lines that exist, so a flag that is absent prints nothing and the API server uses its default.
+Read the four flags in the manifest. The manifest belongs to `root`, so open a shell on the node with `astrona ssh astro-ats-031-playground-020-03` and use `sudo`. `grep` prints only lines that exist, so a flag that is absent prints nothing and the API server uses its default.
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-03-control-plane
-podman exec $NODE grep -e '--anonymous-auth' -e '--authorization-mode' -e '--token-auth-file' -e '--kubelet-certificate-authority' /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo grep -e '--anonymous-auth' -e '--authorization-mode' -e '--token-auth-file' -e '--kubelet-certificate-authority' /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-A kubeadm cluster sets `--authorization-mode=Node,RBAC` and `--kubelet-certificate-authority` is usually absent. There should be no line for `--token-auth-file`. The `--anonymous-auth` line is absent, so the default `true` applies. Next, read the same values from the pod that the kubelet created, to see what runs:
+The output on the playground node is one line:
+
+```text
+    - --authorization-mode=Node,RBAC
+```
+
+A kubeadm cluster sets `--authorization-mode=Node,RBAC`, and `--kubelet-certificate-authority` is absent. There is no line for `--token-auth-file`. The `--anonymous-auth` line is absent, so the default `true` applies. Next, read the same values from the mirror pod of the API server, to see what runs. The pod name is the component name followed by the node name:
 
 ```sh
-kubectl -n kube-system get pod kube-apiserver-$NODE -o jsonpath='{.spec.containers[0].command}'
+kubectl -n kube-system get pod kube-apiserver-astro-ats-031-playground-020-03 -o jsonpath='{.spec.containers[0].command}'
 ```
 
-Now test what anonymous access really allows. The `can-i` command asks the authorizers a question for another user:
+The output is one long JSON list of all arguments. It contains `"--authorization-mode=Node,RBAC"` and no `--anonymous-auth` entry, so the running API server matches the file.
+
+Now test what anonymous access really allows. A request without credentials is an anonymous request, so send one with `curl` straight to the API server on port `6443` of the node. The `-k` option skips the check of the server certificate, which is acceptable for this one test on the node itself:
 
 ```sh
-kubectl auth can-i list pods --as=system:anonymous
-kubectl auth can-i get pods --as=system:anonymous -n kube-system
+curl -sk https://127.0.0.1:6443/api/v1/namespaces/kube-system/pods | grep message
+curl -sk https://127.0.0.1:6443/readyz; echo
 ```
 
-The answer for both should be `no`, because RBAC grants the anonymous user nothing on pods. This is the reason kubeadm clusters leave anonymous authentication on and still deny anonymous requests. If you ever see `yes`, someone created a binding for `system:anonymous` or for the group `system:unauthenticated`, which is a finding of its own.
+The output on the playground node:
+
+```text
+  "message": "pods is forbidden: User \"system:anonymous\" cannot list resource \"pods\" in API group \"\" in the namespace \"kube-system\"",
+ok
+```
+
+Authentication accepted the request as the user `system:anonymous`, and RBAC then denied the list of pods with the HTTP status `403`. The health endpoint `/readyz` answers `ok`, because the ClusterRole `system:public-info-viewer` allows it for the groups `system:authenticated` and `system:unauthenticated`. This is the reason kubeadm clusters leave anonymous authentication on and still deny anonymous requests. If an anonymous request to a resource ever succeeds, someone created a binding for `system:anonymous` or for the group `system:unauthenticated`, which is a finding of its own.
+
+You may know `kubectl auth can-i list pods --as=system:anonymous` as a way to test this. On this cluster it does not answer `no`. It fails with a `Forbidden` error, because `kubectl` sends the question as a SelfSubjectAccessReview in the name of the anonymous user, and the anonymous user may not create that object either. The error still shows that the anonymous user has no access, but the `curl` request shows the real behaviour.
 
 The flags set who can connect and what they may do. The next control sits behind them: the admission plugins that inspect every accepted request.
 
@@ -54,3 +70,4 @@ The flags set who can connect and what they may do. The next control sits behind
 > - **Reading only the manifest.** The running pod shows what the kubelet started.
 > - **Treating an absent flag as safe.** The default of `--anonymous-auth` is `true`.
 > - **Leaving `AlwaysAllow` in the list.** Even with `RBAC` after it, `AlwaysAllow` approves requests first.
+> - **Reading a `Forbidden` error from `kubectl auth can-i --as=system:anonymous` as a broken cluster.** The anonymous user may not ask the question. Send a request without credentials with `curl` instead.

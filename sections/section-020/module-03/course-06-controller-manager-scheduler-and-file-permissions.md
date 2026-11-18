@@ -28,37 +28,74 @@ The scheduler has two checks that matter: `--profiling=false`, and `--bind-addre
 
 The static pod manifests hold the exact flags of each component. A user who can write them can change the cluster. The benchmark asks that the manifests have mode `600` or stricter and are owned by `root:root`. The same applies to the kubeconfig files of the components in `/etc/kubernetes`. The directory `/etc/kubernetes/pki` should be owned by `root`. Keys in it should be mode `600`. Certificates are created by kubeadm with mode `644`, and the benchmark editions differ in what they ask for them, so read the audit text of your edition.
 
-Show the current state of the manifests in the playground, where the three control plane manifests were widened on purpose:
+Show the current state of the manifests in the playground, where the three control plane manifests were widened on purpose. Open a shell on the node with `astrona ssh astro-ats-031-playground-020-03` and read the mode, the owner and the group of each file:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-NODE=astro-ats-031-playground-020-03-control-plane
-podman exec $NODE stat -c '%a %U:%G %n' /etc/kubernetes/manifests/etcd.yaml /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
-podman exec $NODE stat -c '%a %U:%G %n' /etc/kubernetes/admin.conf /etc/kubernetes/controller-manager.conf /etc/kubernetes/scheduler.conf
+sudo stat -c '%a %U:%G %n' /etc/kubernetes/manifests/etcd.yaml /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+sudo stat -c '%a %U:%G %n' /etc/kubernetes/admin.conf /etc/kubernetes/controller-manager.conf /etc/kubernetes/scheduler.conf
 ```
 
-The first listing shows mode `600` for `etcd.yaml` and `644` for the other three. The second listing shows the kubeconfig files. Now fix the three widened manifests. A mode change does not change the content, so no copy is needed:
+The output on the playground node, after the scheduler manifest was restored from the backup once:
 
-```sh
-podman exec $NODE chown root:root /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
-podman exec $NODE chmod 600 /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+```text
+600 root:root /etc/kubernetes/manifests/etcd.yaml
+644 root:root /etc/kubernetes/manifests/kube-apiserver.yaml
+644 root:root /etc/kubernetes/manifests/kube-controller-manager.yaml
+600 root:root /etc/kubernetes/manifests/kube-scheduler.yaml
+600 root:root /etc/kubernetes/admin.conf
+600 root:root /etc/kubernetes/controller-manager.conf
+600 root:root /etc/kubernetes/scheduler.conf
 ```
 
-The kubelet runs as `root`, so it can still read the files. Verify with `stat` again, then check that the three components are still ready:
+On a fresh playground the scheduler manifest also shows `644`. The backups have mode `600`, so a restore with `cp -p` from `/opt/training/backup` sets it back to `600`. The kubeconfig files already pass. Now fix the widened manifests. A mode change does not change the content, so no copy is needed:
 
 ```sh
-podman exec $NODE stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*.yaml
+sudo chown root:root /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+sudo chmod 600 /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+```
+
+The kubelet runs as `root`, so it can still read the files. Verify with `stat` again, then check that the components are still ready. The user `student` cannot list `/etc/kubernetes/manifests`, so the `*.yaml` pattern must be expanded by a root shell, which `sudo sh -c` starts:
+
+```sh
+sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*.yaml"
 kubectl -n kube-system get pods -l tier=control-plane
 ```
 
-All four files should now show `600 root:root`, and the pods should stay `Running`. A change of attributes can make the kubelet look at the file again, so a brief restart of a component is possible. The pods return to ready without further action.
+All four files now show `600 root:root`, and the four pods stay `Running`. On the playground node the mode change restarted no component. If you changed the API server manifest in the minute before, its pod can still show `0/1` while the kubelet runs its probes, and it becomes ready without further action.
 
 ## Apply the component flags
 
-To add `--profiling=false` to the controller manager and the scheduler, copy each manifest with `cp -p` to `/etc/kubernetes/edit`, edit the copy and move it back, with the `sed` insert that follows the first command line. For the controller manager, insert after `- kube-controller-manager`, and for the scheduler, after `- kube-scheduler`. Move the copy back, then read the new pod arguments. Since a copy made with `cp -p` keeps the mode, the fixed permissions stay.
+To add `--profiling=false` to the controller manager and the scheduler, use the same method as for the API server. Copy each manifest with `cp -p` to `/etc/kubernetes/edit`, insert the flag with `sed` after the first line of the command list, check the copy, and move it back. For the controller manager the first line is `- kube-controller-manager`:
 
-The most common failure at this point is a manifest whose copy lost its mode, so always check `stat` after the final move.
+```sh
+sudo cp -p /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/edit/kube-controller-manager.yaml
+sudo sed -i 's|^\( *\)- kube-controller-manager$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-controller-manager.yaml
+sudo grep -n -e '- kube-controller-manager$' -e profiling /etc/kubernetes/edit/kube-controller-manager.yaml
+sudo mv /etc/kubernetes/edit/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml
+```
+
+The `grep` prints `12:    - kube-controller-manager` and `13:    - --profiling=false`. For the scheduler, run the same four commands with `kube-scheduler` in place of `kube-controller-manager`. The `grep` then prints `12:    - kube-scheduler` and `13:    - --profiling=false`. After about a minute, read the new arguments of both mirror pods and the modes of the files:
+
+```sh
+kubectl -n kube-system get pod kube-controller-manager-astro-ats-031-playground-020-03 -o jsonpath='{.spec.containers[0].command}' | tr ',' '\n' | grep profiling
+kubectl -n kube-system get pod kube-scheduler-astro-ats-031-playground-020-03 -o jsonpath='{.spec.containers[0].command}' | tr ',' '\n' | grep profiling
+sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*.yaml"
+```
+
+The output on the playground node:
+
+```text
+"--profiling=false"
+"--profiling=false"
+600 root:root /etc/kubernetes/manifests/etcd.yaml
+600 root:root /etc/kubernetes/manifests/kube-apiserver.yaml
+600 root:root /etc/kubernetes/manifests/kube-controller-manager.yaml
+600 root:root /etc/kubernetes/manifests/kube-scheduler.yaml
+```
+
+Since a copy made with `cp -p` keeps the mode, the fixed permissions stay. The most common failure at this point is a manifest whose copy lost its mode, so always check `stat` after the final move.
 
 You have now seen each kind of change that the benchmark asks for on the control plane: flags in a manifest, new volumes, and file attributes. The point of each change is a verified value on the running component, not a changed file.
 

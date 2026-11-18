@@ -5,7 +5,7 @@ exam_objectives:
 ---
 # Manual Checks And False Findings
 
-An automated report ends with counts, and a manager may read only the counts. A reviewer must know what those counts leave out. This part explains what `WARN` and `INFO` mean in practice, why a `PASS` can still hide a risk, why some `FAIL` results are not real findings in a kind cluster, and how to separate score from risk. It has no commands, because the reasoning applies to the logs you already have.
+An automated report ends with counts, and a manager may read only the counts. A reviewer must know what those counts leave out. This part explains what `WARN` and `INFO` mean in practice, why a `PASS` can still hide a risk, why some `FAIL` results are not real findings on a kubeadm node, and how to separate score from risk. It has no commands, because the reasoning applies to the logs you already have.
 
 ## Manual checks
 
@@ -19,11 +19,19 @@ Each automated check looks at one thing. A `PASS` for an audit that searches the
 
 Two more limits apply. The tool reads the state at the moment of the run, so a later change can undo a fix. And the tool trusts what it reads: a process started with a flag that the audit command does not match, for example through a configuration file instead of a flag, can produce a `FAIL` for a setting that is in fact correct, or a `PASS` for one that is overridden.
 
-## False findings in a kind cluster
+## False findings on a kubeadm node
 
-A kind node is a container that runs a kubeadm style cluster. Several `FAIL` results come from this setup and not from a design error. File ownership checks expect users and groups of a real host. Checks about the container network interface read files that the kind network plugin lays out differently. Checks about the kubelet service file read systemd paths that the node image may not keep where the audit expects. When the benchmark edition is older than Kubernetes 1.35, a check can fail because it looks for a flag or a file that no longer exists.
+A false finding is a `FAIL` that does not describe a real risk on this cluster. The audit ran, but its expectation does not fit the installation, or something else changed its result. The playground node, a kubeadm node with Kubernetes 1.35 judged by the edition `cis-1.10`, shows two kinds.
 
-For each such result, the reviewer does not change the cluster to turn the line green. The reviewer reads the audit, finds the real value on the node, and writes down why the finding does not apply. This record is as important as a fix. A reviewer who changes a working cluster to satisfy a mismatched check creates a risk to remove a warning.
+The first kind is an expectation that the installation does not share. Check `1.1.12` expects the etcd data directory `/var/lib/etcd` to belong to the user and group `etcd:etcd`. kubeadm runs etcd as a static pod and creates no `etcd` user on the node, so the directory belongs to `root:root` with mode `700`. Only root can read it. The audit is not wrong for an installation that runs etcd as its own user, but on a kubeadm node the right record is "not applicable", not a `chown` to a user that does not exist.
+
+The second kind comes from the way the tool runs. The audits of checks `1.1.7` and `1.1.8` contain the pattern `*etcd*` without quotes, so the shell matches it against the files of the current directory first. On the playground node, running kube-bench from a directory that held a file named `etcd.txt` turned both checks into `FAIL`, and running it from another directory gave `PASS` again. A Job with missing host mounts is similar: it reports `WARN` for checks whose files it cannot see. When the benchmark edition is older than the Kubernetes version, a check can also fail because it looks for a flag or a file that no longer exists.
+
+Not every `FAIL` from the node checks is false. Check `4.1.1` fails because the kubelet systemd unit file `/lib/systemd/system/kubelet.service` has mode `644`, and check `4.1.9` fails because `/var/lib/kubelet/config.yaml` has mode `644`. Those are real settings on a real host, and `chmod 600` fixes both.
+
+Some real findings need a decision before a fix. Check `1.2.5` wants `--kubelet-certificate-authority` on the API server, so that the API server verifies the serving certificate of each kubelet. By default each kubelet of a kubeadm cluster creates its own serving certificate, signed by a certificate authority that only that kubelet knows. Add the flag without first changing how the kubelets get their certificates, and requests from the API server to the kubelet, such as `kubectl logs` and `kubectl exec`, fail. The risk is real, but the fix is a project, so the reviewer records it as an accepted exception with a plan.
+
+For each false finding, the reviewer does not change the cluster to turn the line green. The reviewer reads the audit, finds the real value on the node, and writes down why the finding does not apply. This record is as important as a fix. A reviewer who changes a working cluster to satisfy a mismatched check creates a risk to remove a warning.
 
 ```mermaid
 flowchart TB

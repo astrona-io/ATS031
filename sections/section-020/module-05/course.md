@@ -15,7 +15,7 @@ After this module you can:
 
 - Edit `/var/lib/kubelet/config.yaml` safely, restart the kubelet and confirm the effective configuration.
 - Turn anonymous authentication off, set the authorization mode to `Webhook`, close the read-only port and set TLS and rotation options.
-- Explain `protectKernelDefaults`, `streamingConnectionIdleTimeout` and the kubelet file permission checks, and say why one of them is unsafe to turn on in a `kind` playground.
+- Explain `protectKernelDefaults`, `streamingConnectionIdleTimeout` and the kubelet file permission checks, and say what the node must have before you turn `protectKernelDefaults` on.
 - Review the CoreDNS Deployment and its Corefile for security-relevant settings.
 - Run the whole loop for a mixed set of findings and record the results from before and after.
 
@@ -23,9 +23,9 @@ After this module you can:
 
 You need Kubernetes basics: nodes, pods, Services, DNS in a cluster and `kubectl`. The module has six parts. The first covers where the kubelet gets its settings. The second covers authentication and authorization. The third covers ports and TLS. The fourth covers the remaining checks and the file permissions. The fifth reviews CoreDNS. The sixth runs the full remediation loop.
 
-Your playground is a `kind` cluster running Kubernetes v1.35 with one control plane node and one worker node. A kind node is a container that runs the kubelet as a normal kubeadm node does. The `starfleet` namespace holds the `probe` Deployment, the `probe` Service and the `shuttle` client pod. The playground weakens the kubelet on the worker node on purpose: anonymous authentication is on, the authorization mode is `AlwaysAllow`, the read-only port `10255` is open and two files are wider than the benchmark allows. A working copy of the original configuration is staged in `/opt/training/backup` on the worker node.
+Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-05` is the control plane and also runs your pods, so the kubelet you harden runs on the same machine as the API server. The `starfleet` namespace holds the `probe` Deployment, the `probe` Service and the `shuttle` client pod. The playground weakens the kubelet on purpose: anonymous authentication is on, the authorization mode is `AlwaysAllow`, the read-only port `10255` is open and two files are wider than the benchmark allows. A copy of the original kubelet configuration is in `/opt/training/backup` on the node.
 
-Commands for the nodes start with `podman exec` and name the node container of this playground. `kubectl` already points at the cluster. The kind nodes share the kernel of the host, which limits one kubelet setting. The part that covers it says so.
+You work in a shell on the node. Open it with `astrona ssh astro-ats-031-playground-020-05`. You log in as the user `student`, which has `sudo` and a kubeconfig for the cluster, so `kubectl` already points at the cluster. Commands that read or change node files start with `sudo`.
 
 Launch your playground now and keep it running while you read:
 

@@ -21,34 +21,52 @@ The two settings work together. With anonymous authentication off, a request wit
 
 ## Show the exposure
 
-Find the address of the worker node and send an anonymous request to the kubelet port from the control plane node. The option `-o /dev/null -w` prints only the HTTP status code:
+The playground has one node, so the request goes from the node to its own kubelet port. Open a shell on the node, find the InternalIP address of the node and send an anonymous request to port `10250` at that address. The request uses the node network address, not the loopback address, so it takes the same path as a request from another host. The option `-o /dev/null -w` prints only the HTTP status code:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-CONTROL=astro-ats-031-playground-020-05-control-plane
-WORKER=astro-ats-031-playground-020-05-worker
-WORKER_IP=$(kubectl get node $WORKER -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
-podman exec $CONTROL curl -sk -o /dev/null -w '%{http_code}\n' https://$WORKER_IP:10250/pods
+astrona ssh astro-ats-031-playground-020-05
+NODE=astro-ats-031-playground-020-05
+NODE_IP=$(kubectl get node $NODE -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
+echo $NODE_IP
+curl -sk -o /dev/null -w '%{http_code}\n' https://$NODE_IP:10250/pods
 ```
 
-The command prints `200`. A request with no credentials listed every pod on the worker. The same request to a hardened kubelet fails. This is the finding, and it is also the check the benchmark makes with the settings: anonymous access enabled and a mode that does not check permissions.
+The output is:
+
+```text
+10.0.2.15
+200
+```
+
+A request with no credentials listed every pod on the node, including the control plane pods. The same request to a hardened kubelet fails. This is the finding, and it is also what the benchmark checks in the settings: anonymous access enabled and a mode that does not check permissions.
 
 ## Fix the settings
 
 Take a backup, then change the two values. The first `sed` command finds the line `anonymous:` and changes `enabled` on the next line. The second changes the authorization mode. Both patterns depend on the layout that kubeadm writes, so print the result before you restart:
 
 ```sh
-podman exec $WORKER cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.bak
-podman exec $WORKER sed -i '/^  anonymous:/{n;s/enabled: true/enabled: false/}' /var/lib/kubelet/config.yaml
-podman exec $WORKER sed -i 's/^  mode: AlwaysAllow$/  mode: Webhook/' /var/lib/kubelet/config.yaml
-podman exec $WORKER grep -A1 -e '^  anonymous:' -e '^authorization:' /var/lib/kubelet/config.yaml
+sudo cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.bak
+sudo sed -i '/^  anonymous:/{n;s/enabled: true/enabled: false/}' /var/lib/kubelet/config.yaml
+sudo sed -i 's/^  mode: AlwaysAllow$/  mode: Webhook/' /var/lib/kubelet/config.yaml
+sudo grep -A1 -e '^  anonymous:' -e '^authorization:' /var/lib/kubelet/config.yaml
 ```
 
-The `grep` must show `enabled: false` after `anonymous:` and `mode: Webhook` after `authorization:`. If a line is unchanged, the layout of your file differs from the pattern, so do not restart the kubelet. Edit the file by hand with the same result. Restart the kubelet only when both lines are right:
+The `grep` prints:
+
+```text
+  anonymous:
+    enabled: false
+--
+authorization:
+  mode: Webhook
+```
+
+If a line is unchanged, the layout of your file differs from the pattern, so do not restart the kubelet. Edit the file by hand with the same result. Restart the kubelet only when both lines are right:
 
 ```sh
-podman exec $WORKER systemctl restart kubelet
+sudo systemctl restart kubelet
 ```
 
 ## Verify with a request, not with the file
@@ -57,17 +75,26 @@ The restart takes a few seconds. The loop below repeats the anonymous request un
 
 ```sh
 for attempt in $(seq 1 30); do
-  code=$(podman exec $CONTROL curl -sk -o /dev/null -w '%{http_code}' https://$WORKER_IP:10250/pods)
+  code=$(curl -sk -o /dev/null -w '%{http_code}' https://$NODE_IP:10250/pods)
   echo "attempt $attempt: $code"
   if [ "$code" = "401" ]; then break; fi
   sleep 3
 done
-kubectl get node $WORKER
+kubectl get node $NODE
 ```
 
-The loop ends with `401`: the kubelet now requires credentials. The node is `Ready` again because the API server connects with its client certificate, which the `x509` source accepts, and `Webhook` authorization allows the API server user. That the node stays `Ready` shows that the fix did not cut the control plane off from the kubelet.
+On this node the output was:
 
-Read the effective values again with `configz` as in the previous routine to confirm `anonymous` is `false` and the mode is `Webhook`.
+```text
+attempt 1: 000
+attempt 2: 401
+NAME                              STATUS   ROLES           AGE     VERSION
+astro-ats-031-playground-020-05   Ready    control-plane   3m42s   v1.35.10
+```
+
+The first attempt ran while the kubelet was still starting, so it could not connect. The loop then ends with `401`: the kubelet now requires credentials. The node stays `Ready` because the API server connects with its client certificate, which the `x509` source accepts, and `Webhook` authorization allows the API server user. That the node stays `Ready` shows that the fix did not cut the control plane off from the kubelet.
+
+Read the effective values again with the `configz` request (`kubectl get --raw "/api/v1/nodes/$NODE/proxy/configz"`) to confirm that `anonymous` is `false` and the mode is `Webhook`.
 
 ```mermaid
 flowchart TB
