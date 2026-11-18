@@ -5,39 +5,65 @@ exam_objectives:
 ---
 # Guided Practice: Run kube-bench In A Private Playground
 
-This ungraded playground has one control plane node and one worker node, with the `kube-bench` image loaded on both. Use a host shell with the private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool.
+This ungraded playground is one virtual machine (VM) that runs a single-node Kubernetes cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node is the control plane and also runs your pods. kube-bench is the tool that checks a node against the Center for Internet Security (CIS) Kubernetes Benchmark, a published list of secure settings. Its binary is in `/usr/local/bin/kube-bench`, and its benchmark files are in `/etc/kube-bench/cfg`.
+
+Because the node is a real machine, kube-bench reads the real files and processes of the API server, etcd and the kubelet. That is the same work you do on a node in the exam.
 
 <!-- astrona:playground:renew -->
 
+Open a shell on the node. You log in as the `student` user, which has `sudo` and a kubeconfig file for the cluster. A kubeconfig file tells kubectl, the Kubernetes command-line tool, which cluster to use and which credentials to send.
+
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-playground-020-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-playground-020-02" || exit 1
-node_name="astro-ats-031-playground-020-02-control-plane"
-worker_name="astro-ats-031-playground-020-02-worker"
+astrona ssh astro-ats-031-playground-020-02
+kubectl config current-context
 ```
 
-Host-level commands name only this environment's node containers. They do not operate on the host operating system.
+The second command prints `kubernetes-admin@astro-ats-031-playground-020-02`. Commands that use `sudo` change only this VM. They do not touch your own computer.
 
 ## Starting state
 
-The `starfleet` namespace has the `probe` Deployment, the `probe` Service and the `shuttle` pod. The cluster uses the kubeadm defaults, so some benchmark checks fail. No `kube-bench` Job exists yet.
+The `starfleet` namespace has the `probe` Deployment, the `probe` Service and the `shuttle` pod. The cluster uses the kubeadm defaults, so some benchmark checks fail.
 
 ```sh
-kubectl -n starfleet get pods -o wide
 kubectl get nodes -o wide
+kubectl -n starfleet get pods
 ```
+
+The node `astro-ats-031-playground-020-02` is `Ready` and runs Kubernetes `v1.35.10` with containerd `2.2.1`. The two `probe` pods and the `shuttle` pod are `Running`.
+
+## A first run
+
+kube-bench reads files that only root can read, such as the static pod manifests in `/etc/kubernetes/manifests`, so run it with `sudo`. The `master` target checks the control plane components.
+
+```sh
+sudo kube-bench run --targets master | tail -5
+```
+
+The summary at the end shows the totals. This output is shortened to the last lines:
+
+```text
+== Summary total ==
+39 checks PASS
+9 checks FAIL
+11 checks WARN
+0 checks INFO
+```
+
+kube-bench picks the benchmark edition from the Kubernetes version of the node. On this node it maps version `1.35` to `cis-1.10`. Each line in the full report starts with `[PASS]`, `[FAIL]`, `[WARN]` or `[INFO]` and the check number, so you can always find a check in the benchmark text again.
 
 ## Suggested exercises
 
-1. Write a Job for the `master` target with `hostPID`, the host mounts, a node selector and a toleration for the control plane taint. Run it and read the summary.
-2. Run a Job for the `node` target on the worker and compare its totals with the control plane totals.
-3. Run the `etcd` target as its own Job.
-4. Export the control plane result with `--json` and list the failing check numbers with `jq`.
-5. Run one check with `--check` and note which benchmark edition the first lines of the log name.
+These exercises use only the node and the commands above.
 
-Delete finished Jobs with `kubectl -n default delete job <name>` before you reuse a name. The result of a run on a kind node is practice for the workflow. It is not a claim of compliance for any cluster.
+1. Run the `node` target, which checks the kubelet, and the `etcd` target. Compare their totals with the `master` totals. On this node the `node` target gives 16 PASS, 2 FAIL and 6 WARN, and the `etcd` target gives 7 PASS.
+2. Export the `master` result as JSON with `--json` and list the numbers of the failing checks with `jq`, a command-line JSON tool that is installed on the node. On this node the list is `1.1.12 1.2.5 1.2.15 1.2.16 1.2.17 1.2.18 1.2.19 1.3.2 1.4.1`.
+3. Run one check with `sudo kube-bench run --check 1.2.15`. Read the remediation text. It tells you to set `--profiling=false` in `/etc/kubernetes/manifests/kube-apiserver.yaml`.
+4. Add `--profiling=false` to the API server manifest with `sudo`. The kubelet sees the changed file and restarts the API server static pod; on this node that took about 45 seconds. Run check `1.2.15` again and see that it now shows `[PASS]`.
+5. Run `sudo kube-bench run --targets master --v 1` and find the log line that names the benchmark version.
+
+The result of a run in this playground is practice for the workflow. It is not a claim of compliance for any other cluster.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Name the benchmark edition in every note you keep. Do not change a setting only to clear a check that does not fit a kind node.
+> Run kube-bench with `sudo`: without root it cannot read the manifests and the data directories, and checks fail for the wrong reason. Name the benchmark edition in every note you keep. A broken edit to a static pod manifest stops the API server, so kubectl fails until you fix the file; keep a copy of the file before you edit it.

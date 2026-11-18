@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-if [[ "$(kubectl config current-context)" != "kind-astro-ats-031-playground-020-02" ]]; then
+if [[ "$(kubectl config current-context)" != "kubernetes-admin@astro-ats-031-playground-020-02" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
