@@ -5,23 +5,21 @@ exam_objectives:
 ---
 # Record A Manual Audit Of The API Server And etcd Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-01-03)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-01-03" || exit 1
-node_name="astro-ats-031-lab-020-01-03-control-plane"
-worker_name="astro-ats-031-lab-020-01-03-worker"
+astrona ssh astro-ats-031-lab-020-01-03
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-01-03`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Read the running API server
 
 A manual audit reads the value that the component really uses. The kubelet starts each control plane component from a static pod manifest, and the flags in that manifest become the command line of the process. The `ps` command in the node shows that command line. Print it with one flag on each line:
 
 ```sh
-podman exec "$node_name" ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--authorization-mode' -e '--profiling'
+sudo ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--authorization-mode' -e '--profiling'
 ```
 
 The line `--authorization-mode=...` holds the first value to record. Copy it exactly as written. If the output has no `--profiling` line, the flag is not set and the default `true` applies. If it shows `--profiling=false`, record `false`.
@@ -31,13 +29,13 @@ The line `--authorization-mode=...` holds the first value to record. Copy it exa
 The etcd process runs on the same node. Read its client certificate flag the same way:
 
 ```sh
-podman exec "$node_name" ps -eo args | grep '^etcd' | tr ' ' '\n' | grep -e '--client-cert-auth'
+sudo ps -eo args | grep '^etcd' | tr ' ' '\n' | grep -e '--client-cert-auth'
 ```
 
 A kubeadm cluster sets `--client-cert-auth=true`. If the flag were missing, the default `false` would apply. The data directory is a path on the node, so read its mode with `stat`:
 
 ```sh
-podman exec "$node_name" stat -c '%a %U:%G %n' /var/lib/etcd
+sudo stat -c '%a %U:%G %n' /var/lib/etcd
 ```
 
 The first field is the octal mode. The benchmark asks for `700` or stricter. A wider mode is a finding, but this task only records it.

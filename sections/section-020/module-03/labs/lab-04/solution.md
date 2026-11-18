@@ -5,23 +5,21 @@ exam_objectives:
 ---
 # Restore API Server Authorization And Remove Anonymous Access Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-03-04)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-03-04" || exit 1
-node_name="astro-ats-031-lab-020-03-04-control-plane"
-worker_name="astro-ats-031-lab-020-03-04-worker"
+astrona ssh astro-ats-031-lab-020-03-04
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-03-04`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Reproduce the problem
 
 Start with the request that the test made. `curl -k` skips the check of the server certificate, and without a client certificate or token the API server treats the request as the user `system:anonymous`:
 
 ```sh
-podman exec "$node_name" curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:6443/api/v1/namespaces/starfleet-031-020-03-04/pods
+sudo curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:6443/api/v1/namespaces/starfleet-031-020-03-04/pods
 ```
 
 The API server returns `200`, so the anonymous request can list pods. Two parts decide this: the authentication step accepts the anonymous user, and the authorization step allows the request.
@@ -31,17 +29,17 @@ The API server returns `200`, so the anonymous request can list pods. Two parts 
 Read the authorization flag of the running API server:
 
 ```sh
-podman exec "$node_name" ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--authorization-mode' -e '--anonymous-auth'
+sudo ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--authorization-mode' -e '--anonymous-auth'
 ```
 
 The value is `AlwaysAllow`. This authorizer allows every request, so RBAC rules are never checked. The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. Edit a copy in a work directory outside that folder, check the copy, and move it back in one step, so that the kubelet never reads a half-written file:
 
 ```sh
-podman exec "$node_name" mkdir -p /etc/kubernetes/edit
-podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec "$node_name" sed -i 's|--authorization-mode=AlwaysAllow|--authorization-mode=Node,RBAC|' /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec "$node_name" grep -e '--authorization-mode' /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec "$node_name" mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo mkdir -p /etc/kubernetes/edit
+sudo cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
+sudo sed -i 's|--authorization-mode=AlwaysAllow|--authorization-mode=Node,RBAC|' /etc/kubernetes/edit/kube-apiserver.yaml
+sudo grep -e '--authorization-mode' /etc/kubernetes/edit/kube-apiserver.yaml
+sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
 The API server restarts, so `kubectl` fails for up to a minute. Wait until it answers again:
@@ -62,8 +60,8 @@ One binding gives the `view` ClusterRole to `system:anonymous`. Delete it, using
 
 ```sh
 kubectl delete clusterrolebinding <BINDING_NAME>
-podman exec "$node_name" curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:6443/api/v1/namespaces/starfleet-031-020-03-04/pods
-podman exec "$node_name" curl -sk https://127.0.0.1:6443/readyz
+sudo curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:6443/api/v1/namespaces/starfleet-031-020-03-04/pods
+sudo curl -sk https://127.0.0.1:6443/readyz
 ```
 
 The pod list now returns `403`, and `/readyz` still prints `ok`. Anonymous authentication stays on, but RBAC allows the anonymous user only the health and version paths.

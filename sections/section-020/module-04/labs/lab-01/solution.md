@@ -5,23 +5,21 @@ exam_objectives:
 ---
 # Enable Encryption At Rest For Secrets Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-04-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-04-01" || exit 1
-node_name="astro-ats-031-lab-020-04-01-control-plane"
-worker_name="astro-ats-031-lab-020-04-01-worker"
+astrona ssh astro-ats-031-lab-020-04-01
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-04-01`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## See the plain text in etcd
 
 Read the stored value of the Secret through `etcdctl` in the etcd pod. The `grep -a -o` filter prints only the readable word from the binary value:
 
 ```sh
-kubectl -n kube-system exec "etcd-$node_name" -- etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key get /registry/secrets/starfleet-031-020-04-01/launch-code --print-value-only | grep -a -o 'warp-nine-launch'
+kubectl -n kube-system exec "etcd-astro-ats-031-lab-020-04-01" -- etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key get /registry/secrets/starfleet-031-020-04-01/launch-code --print-value-only | grep -a -o 'warp-nine-launch'
 ```
 
 The word appears, so etcd stores the value as plain text. Base64 in the API is only an encoding, not encryption.
@@ -50,12 +48,12 @@ resources:
   - identity: {}
 ```
 
-Copy the file to the control plane node and restrict its mode, because the key in it decrypts every Secret:
+Copy the file to the folder that the API server will read and restrict its mode, because the key in it decrypts every Secret:
 
 ```sh
-podman exec "$node_name" mkdir -p /etc/kubernetes/enc
-podman cp encryption-config.yaml "$node_name:/etc/kubernetes/enc/encryption-config.yaml"
-podman exec "$node_name" chmod 600 /etc/kubernetes/enc/encryption-config.yaml
+sudo mkdir -p /etc/kubernetes/enc
+sudo cp encryption-config.yaml /etc/kubernetes/enc/encryption-config.yaml
+sudo chmod 600 /etc/kubernetes/enc/encryption-config.yaml
 ```
 
 ## Edit the API server manifest
@@ -63,9 +61,9 @@ podman exec "$node_name" chmod 600 /etc/kubernetes/enc/encryption-config.yaml
 The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. Edit a copy in a work directory outside that folder and move it back in one step, so that the kubelet never reads a half-written file:
 
 ```sh
-podman exec "$node_name" mkdir -p /etc/kubernetes/edit
-podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
-podman exec -it "$node_name" vi /etc/kubernetes/edit/kube-apiserver.yaml
+sudo mkdir -p /etc/kubernetes/edit
+sudo cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
+sudo vi /etc/kubernetes/edit/kube-apiserver.yaml
 ```
 
 Add the flag to the `command` list, the mount under `volumeMounts:` of the container, and the volume under `volumes:` of the pod:
@@ -90,7 +88,7 @@ Add the flag to the `command` list, the mount under `volumeMounts:` of the conta
 Save the file and move it back:
 
 ```sh
-podman exec "$node_name" mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
 ## Rewrite the Secrets and check
@@ -105,7 +103,7 @@ kubectl get secrets --all-namespaces -o json | kubectl replace -f -
 Read the stored value again, and read the Secret through the API:
 
 ```sh
-kubectl -n kube-system exec "etcd-$node_name" -- etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key get /registry/secrets/starfleet-031-020-04-01/launch-code --print-value-only | grep -a -o 'k8s:enc:aescbc:v1:key1'
+kubectl -n kube-system exec "etcd-astro-ats-031-lab-020-04-01" -- etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key get /registry/secrets/starfleet-031-020-04-01/launch-code --print-value-only | grep -a -o 'k8s:enc:aescbc:v1:key1'
 kubectl -n starfleet-031-020-04-01 get secret launch-code -o jsonpath='{.data.code}' | base64 -d
 ```
 

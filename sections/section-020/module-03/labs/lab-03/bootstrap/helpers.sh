@@ -1,22 +1,24 @@
-# Helper functions for the setup and solution scripts of this lab.
-# The calling script sets engine, node_name and worker_name after its context
-# guard, so every helper acts only on this lab's own node containers.
+# Helper functions for the setup and solution scripts of a qemu lab.
+# The scripts run inside the lab VM, which is the only node of the cluster:
+# node_name and worker_name both name it, and node commands run with sudo.
+# The calling script sets node_name, worker_name and namespace after its
+# context guard.
 
 run_on_node() {
-  "$engine" exec "$node_name" "$@"
+  sudo "$@"
 }
 
 run_on_worker() {
-  "$engine" exec "$worker_name" "$@"
+  sudo "$@"
 }
 
 # Print the command line of the newest process with this program name,
 # one argument on each line. Prints nothing when the process is not running.
 process_arguments() {
-  local container="$1" program="$2" pid
-  pid="$("$engine" exec "$container" pgrep -n -f "^(/[^ ]*/)?$program( |\$)" || true)"
+  local program="$2" pid
+  pid="$(sudo pgrep -n -f "^(/[^ ]*/)?$program( |\$)" || true)"
   if [[ -n "$pid" ]]; then
-    "$engine" exec "$container" cat "/proc/$pid/cmdline" 2>/dev/null | tr '\0' '\n' || true
+    sudo cat "/proc/$pid/cmdline" 2>/dev/null | tr '\0' '\n' || true
   fi
 }
 

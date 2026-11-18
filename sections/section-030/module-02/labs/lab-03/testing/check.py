@@ -15,12 +15,14 @@ names and the container engine come from the environment astrona sets too,
 so the same checks run on the lab's own cluster and on an exam cluster.
 
 A qemu lab ("runtime": "qemu" in requirements.json) runs this file inside its
-VM: the cluster is one kubeadm node named after the cluster, so NODE and
-WORKER are that node and node_exec() runs the command on the VM with sudo.
+VM: the cluster is one kubeadm node named after the VM's host name (astrona
+names the VM differently under `astrona test`), so NODE and WORKER are that
+node and node_exec() runs the command on the VM with sudo.
 """
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import sys
 
@@ -31,8 +33,8 @@ CLUSTER = os.environ.get('ASTRONA_KIND_CLUSTER') or REQUIREMENTS['cluster']
 ENGINE = os.environ.get('ASTRONA_CONTAINER_ENGINE') or 'podman'
 NAMESPACE = REQUIREMENTS['namespace']
 QEMU = REQUIREMENTS.get('runtime') == 'qemu'
-NODE = CLUSTER if QEMU else CLUSTER + '-control-plane'
-WORKER = CLUSTER if QEMU else CLUSTER + '-worker'
+NODE = socket.gethostname() if QEMU else CLUSTER + '-control-plane'
+WORKER = socket.gethostname() if QEMU else CLUSTER + '-worker'
 SELECTED = sys.argv[1] if len(sys.argv) > 1 else None
 MATCHED = set()
 

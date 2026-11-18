@@ -493,7 +493,6 @@ modules:
   - type: lab
     title: Restrict Control Plane Kubeconfig And Key Files
     path: sections/section-020/module-01/labs/lab-02
-    examScope: cluster
     difficulty: beginner
     estimated_duration: 8m
     topic: control-plane-file-permissions
@@ -517,7 +516,6 @@ modules:
   - type: lab
     title: Record A Manual Audit Of The API Server And etcd
     path: sections/section-020/module-01/labs/lab-03
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: manual-control-plane-audit
@@ -541,7 +539,6 @@ modules:
   - type: lab
     title: Report The Effective Kubelet Settings
     path: sections/section-020/module-01/labs/lab-04
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-effective-configuration
@@ -565,7 +562,6 @@ modules:
   - type: lab
     title: Correct The Scheduler Bind Address And Record It
     path: sections/section-020/module-01/labs/lab-01
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: api-profiling
@@ -599,7 +595,6 @@ modules:
   - type: lab
     title: Read A kube-bench Check Definition
     path: sections/section-020/module-02/labs/lab-02
-    examScope: cluster
     difficulty: beginner
     estimated_duration: 8m
     topic: kube-bench-definitions
@@ -623,7 +618,6 @@ modules:
   - type: lab
     title: Audit The Worker Node With A kube-bench Job
     path: sections/section-020/module-02/labs/lab-03
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: kube-bench-worker-job
@@ -647,7 +641,6 @@ modules:
   - type: lab
     title: Run The etcd Checks With A Pinned Benchmark Edition
     path: sections/section-020/module-02/labs/lab-04
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: kube-bench-targets
@@ -670,7 +663,6 @@ modules:
   - type: lab
     title: Record The Totals Of A kube-bench Report
     path: sections/section-020/module-02/labs/lab-05
-    examScope: cluster
     difficulty: beginner
     estimated_duration: 10m
     topic: kube-bench-results
@@ -694,7 +686,6 @@ modules:
   - type: lab
     title: Save The Failing API Server Check Ids
     path: sections/section-020/module-02/labs/lab-01
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
     topic: kube-bench-master
@@ -731,7 +722,6 @@ modules:
   - type: lab
     title: Recover A Broken Controller Manager Static Pod
     path: sections/section-020/module-03/labs/lab-03
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: static-pod-recovery
@@ -755,7 +745,6 @@ modules:
   - type: lab
     title: Restore API Server Authorization And Remove Anonymous Access
     path: sections/section-020/module-03/labs/lab-04
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
     topic: api-authorization
@@ -780,7 +769,6 @@ modules:
   - type: lab
     title: Enable NodeRestriction
     path: sections/section-020/module-03/labs/lab-05
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: node-restriction
@@ -804,7 +792,6 @@ modules:
   - type: lab
     title: Enable Audit Logging On The API Server
     path: sections/section-020/module-03/labs/lab-01
-    examScope: cluster
     difficulty: advanced
     estimated_duration: 15m
     topic: api-audit-logging
@@ -848,7 +835,6 @@ modules:
   - type: lab
     title: Harden The Controller Manager And Scheduler
     path: sections/section-020/module-03/labs/lab-06
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
     topic: controller-manager-scheduler-hardening
@@ -884,7 +870,6 @@ modules:
   - type: lab
     title: Record How The API Server Connects To etcd
     path: sections/section-020/module-04/labs/lab-02
-    examScope: cluster
     difficulty: beginner
     estimated_duration: 8m
     topic: etcd-clients
@@ -908,7 +893,6 @@ modules:
   - type: lab
     title: Require Client Certificates On etcd
     path: sections/section-020/module-04/labs/lab-03
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
     topic: etcd-client-auth
@@ -932,7 +916,6 @@ modules:
   - type: lab
     title: Restrict The etcd Data Directory
     path: sections/section-020/module-04/labs/lab-04
-    examScope: cluster
     difficulty: beginner
     estimated_duration: 8m
     topic: etcd-data-directory
@@ -956,7 +939,6 @@ modules:
   - type: lab
     title: Find A Secret Directly In etcd
     path: sections/section-020/module-04/labs/lab-05
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: etcdctl-queries
@@ -981,7 +963,6 @@ modules:
   - type: lab
     title: Enable Encryption At Rest For Secrets
     path: sections/section-020/module-04/labs/lab-01
-    examScope: cluster
     difficulty: advanced
     estimated_duration: 15m
     topic: etcd-encryption
@@ -1016,7 +997,6 @@ modules:
   - type: lab
     title: Remove A Kubelet Flag That Overrides The Configuration File
     path: sections/section-020/module-05/labs/lab-03
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-configuration-sources
@@ -1039,7 +1019,6 @@ modules:
   - type: lab
     title: Secure Kubelet Authentication And Authorization
     path: sections/section-020/module-05/labs/lab-01
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
     topic: kubelet-authentication
@@ -1064,7 +1043,6 @@ modules:
   - type: lab
     title: Close The Kubelet Read-Only Port And Raise Its TLS Minimum
     path: sections/section-020/module-05/labs/lab-04
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-read-only-port
@@ -1088,7 +1066,6 @@ modules:
   - type: lab
     title: Restrict The Kubelet Service Files And Turn On Certificate Rotation
     path: sections/section-020/module-05/labs/lab-05
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-service-files
@@ -1136,7 +1113,6 @@ modules:
   - type: lab
     title: Remediate Five Kubelet Benchmark Findings
     path: sections/section-020/module-05/labs/lab-02
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
     topic: kubelet-hardening

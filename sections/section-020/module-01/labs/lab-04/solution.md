@@ -5,30 +5,28 @@ exam_objectives:
 ---
 # Report The Effective Kubelet Settings Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-01-04)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-01-04" || exit 1
-node_name="astro-ats-031-lab-020-01-04-control-plane"
-worker_name="astro-ats-031-lab-020-01-04-worker"
+astrona ssh astro-ats-031-lab-020-01-04
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-01-04`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Read the effective values
 
 The kubelet takes its settings from three places: its defaults, the file `/var/lib/kubelet/config.yaml`, and command-line flags. A flag overrides the file. The API server can proxy a request to the kubelet and return the merged result at the path `configz`. Read the three values from it:
 
 ```sh
-kubectl get --raw "/api/v1/nodes/$worker_name/proxy/configz" | python3 -m json.tool | grep -A2 -e '"anonymous"' -e '"authorization"' -e '"readOnlyPort"'
+kubectl get --raw "/api/v1/nodes/astro-ats-031-lab-020-01-04/proxy/configz" | python3 -m json.tool | grep -A2 -e '"anonymous"' -e '"authorization"' -e '"readOnlyPort"'
 ```
 
-The output shows `"readOnlyPort": 10255`, but the configuration file does not set this field. Check the file and the flags file on the worker to see where the value comes from:
+The output shows `"readOnlyPort": 10255`, but the configuration file does not set this field. Check the file and the flags file on the node to see where the value comes from:
 
 ```sh
-podman exec "$worker_name" grep -i readonly /var/lib/kubelet/config.yaml
-podman exec "$worker_name" cat /var/lib/kubelet/kubeadm-flags.env
+sudo grep -i readonly /var/lib/kubelet/config.yaml
+sudo cat /var/lib/kubelet/kubeadm-flags.env
 ```
 
 The first command prints nothing. The second shows `--read-only-port=10255` in `KUBELET_KUBEADM_ARGS`. This flag is the override that the file review missed. The task asks you to report it, not to remove it.
@@ -58,9 +56,9 @@ kubectl apply -f configmap-kubelet-review.yaml
 The kubelet reads its configuration file when it starts, so a mode change needs no restart. Restrict the file and check it:
 
 ```sh
-podman exec "$worker_name" chmod 600 /var/lib/kubelet/config.yaml
-podman exec "$worker_name" stat -c '%a %U:%G %n' /var/lib/kubelet/config.yaml
-kubectl get node "$worker_name"
+sudo chmod 600 /var/lib/kubelet/config.yaml
+sudo stat -c '%a %U:%G %n' /var/lib/kubelet/config.yaml
+kubectl get node "astro-ats-031-lab-020-01-04"
 ```
 
 The `stat` line starts with `600 root:root`, and the node stays `Ready`.

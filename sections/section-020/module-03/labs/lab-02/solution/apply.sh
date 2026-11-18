@@ -7,9 +7,10 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 cluster="astro-ats-031-lab-020-03-02"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-# The VM is the only node: control plane and worker.
-node_name="$cluster"
-worker_name="$cluster"
+# The VM is the only node: control plane and worker. kubeadm names it after
+# the host name, which differs under `astrona test`.
+node_name="$(hostname)"
+worker_name="$node_name"
 namespace="starfleet-031-020-03-02"
 source "$lab_directory/bootstrap/helpers.sh"
 solution_directory="$lab_directory/solution"

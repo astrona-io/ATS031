@@ -69,5 +69,6 @@ if wants('controller-manager-running'):
     assert ready == 'True', 'The kube-controller-manager pod must be ready'
 if wants('manifest-mode-kept'):
     assert_mode_at_most(NODE, '/etc/kubernetes/manifests/kube-controller-manager.yaml', 0o600)
-    files = sorted(node_exec(NODE, 'ls', '-A', '/etc/kubernetes/manifests').stdout.split())
+    # The kubelet skips hidden files such as the .kubelet-keep placeholder of the package.
+    files = sorted(node_exec(NODE, 'ls', '/etc/kubernetes/manifests').stdout.split())
     assert files == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manager.yaml', 'kube-scheduler.yaml'], 'Keep only the four manifests in /etc/kubernetes/manifests'

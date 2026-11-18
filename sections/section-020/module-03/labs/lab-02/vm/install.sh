@@ -283,9 +283,10 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 cluster="astro-ats-031-lab-020-03-02"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-# The VM is the only node: control plane and worker.
-node_name="$cluster"
-worker_name="$cluster"
+# The VM is the only node: control plane and worker. kubeadm names it after
+# the host name, which differs under `astrona test`.
+node_name="$(hostname)"
+worker_name="$node_name"
 namespace="starfleet-031-020-03-02"
 source "$lab_directory/bootstrap/helpers.sh"
 kubectl apply -f "$lab_directory/bootstrap/manifests/start.yaml"
@@ -306,9 +307,10 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 cluster="astro-ats-031-lab-020-03-02"
 lab_directory="$(cd "$(dirname "$0")/.." && pwd)"
-# The VM is the only node: control plane and worker.
-node_name="$cluster"
-worker_name="$cluster"
+# The VM is the only node: control plane and worker. kubeadm names it after
+# the host name, which differs under `astrona test`.
+node_name="$(hostname)"
+worker_name="$node_name"
 namespace="starfleet-031-020-03-02"
 source "$lab_directory/bootstrap/helpers.sh"
 solution_directory="$lab_directory/solution"
@@ -334,12 +336,14 @@ names and the container engine come from the environment astrona sets too,
 so the same checks run on the lab's own cluster and on an exam cluster.
 
 A qemu lab ("runtime": "qemu" in requirements.json) runs this file inside its
-VM: the cluster is one kubeadm node named after the cluster, so NODE and
-WORKER are that node and node_exec() runs the command on the VM with sudo.
+VM: the cluster is one kubeadm node named after the VM's host name (astrona
+names the VM differently under `astrona test`), so NODE and WORKER are that
+node and node_exec() runs the command on the VM with sudo.
 """
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import sys
 
@@ -350,8 +354,8 @@ CLUSTER = os.environ.get('ASTRONA_KIND_CLUSTER') or REQUIREMENTS['cluster']
 ENGINE = os.environ.get('ASTRONA_CONTAINER_ENGINE') or 'podman'
 NAMESPACE = REQUIREMENTS['namespace']
 QEMU = REQUIREMENTS.get('runtime') == 'qemu'
-NODE = CLUSTER if QEMU else CLUSTER + '-control-plane'
-WORKER = CLUSTER if QEMU else CLUSTER + '-worker'
+NODE = socket.gethostname() if QEMU else CLUSTER + '-control-plane'
+WORKER = socket.gethostname() if QEMU else CLUSTER + '-worker'
 SELECTED = sys.argv[1] if len(sys.argv) > 1 else None
 MATCHED = set()
 

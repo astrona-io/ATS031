@@ -5,31 +5,29 @@ exam_objectives:
 ---
 # Correct The Scheduler Bind Address And Record It Solution
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-01-01" || exit 1
-node_name="astro-ats-031-lab-020-01-01-control-plane"
-worker_name="astro-ats-031-lab-020-01-01-worker"
+astrona ssh astro-ats-031-lab-020-01-01
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-01-01`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Confirm the finding
 
 Check 1.4.2 of the benchmark asks that the scheduler binds only to the loopback address `127.0.0.1`. The scheduler serves health and metrics on its secure port `10259`, and nothing outside the node needs to reach it. First, read the flag of the running process:
 
 ```sh
-podman exec "$node_name" ps -eo args | grep '^kube-scheduler' | tr ' ' '\n' | grep -e '--bind-address'
+sudo ps -eo args | grep '^kube-scheduler' | tr ' ' '\n' | grep -e '--bind-address'
 ```
 
 The flag is `--bind-address=0.0.0.0`. Now test the port from the node itself, once on the loopback address and once on the node's own address. The `/healthz` path of the scheduler answers without credentials:
 
 ```sh
-node_address="$(kubectl get node "$node_name" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')"
-podman exec "$node_name" curl -sk -m 3 https://127.0.0.1:10259/healthz
-podman exec "$node_name" curl -sk -m 3 "https://$node_address:10259/healthz"
+node_address="$(kubectl get node "astro-ats-031-lab-020-01-01" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')"
+sudo curl -sk -m 3 https://127.0.0.1:10259/healthz
+sudo curl -sk -m 3 "https://$node_address:10259/healthz"
 ```
 
 Both requests print `ok`. The second one shows the finding: any client that can reach the node address can reach the scheduler port.
@@ -39,12 +37,12 @@ Both requests print `ok`. The second one shows the finding: any client that can 
 The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. So keep the backup in another directory, edit a copy, and move the copy back in one step:
 
 ```sh
-podman exec "$node_name" mkdir -p /root/backup /etc/kubernetes/edit
-podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /root/backup/kube-scheduler.yaml
-podman exec "$node_name" cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec "$node_name" sed -i 's|--bind-address=0.0.0.0|--bind-address=127.0.0.1|' /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec "$node_name" grep -e '--bind-address' /etc/kubernetes/edit/kube-scheduler.yaml
-podman exec "$node_name" mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
+sudo mkdir -p /root/backup /etc/kubernetes/edit
+sudo cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /root/backup/kube-scheduler.yaml
+sudo cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
+sudo sed -i 's|--bind-address=0.0.0.0|--bind-address=127.0.0.1|' /etc/kubernetes/edit/kube-scheduler.yaml
+sudo grep -e '--bind-address' /etc/kubernetes/edit/kube-scheduler.yaml
+sudo mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
 ```
 
 The `grep` line shows the new value before the kubelet sees the file. The kubelet then stops the old scheduler and starts a new one. This takes up to a minute.
@@ -54,10 +52,10 @@ The `grep` line shows the new value before the kubelet sees the file. The kubele
 Run the checks from the start again until they show the new state:
 
 ```sh
-podman exec "$node_name" ps -eo args | grep '^kube-scheduler' | tr ' ' '\n' | grep -e '--bind-address'
-podman exec "$node_name" curl -sk -m 3 https://127.0.0.1:10259/healthz
-podman exec "$node_name" curl -sk -m 3 "https://$node_address:10259/healthz"
-kubectl -n kube-system get pod "kube-scheduler-$node_name"
+sudo ps -eo args | grep '^kube-scheduler' | tr ' ' '\n' | grep -e '--bind-address'
+sudo curl -sk -m 3 https://127.0.0.1:10259/healthz
+sudo curl -sk -m 3 "https://$node_address:10259/healthz"
+kubectl -n kube-system get pod "kube-scheduler-astro-ats-031-lab-020-01-01"
 ```
 
 The flag is now `--bind-address=127.0.0.1`. The request to `127.0.0.1` still prints `ok`, and the request to the node address fails because nothing listens there. The pod is `Running` and ready.

@@ -7,30 +7,28 @@ exam_objectives:
 
 Allow about 10 minutes for the tasks.
 
-From the `shuttle` pod in the `starfleet` cluster, anyone can read the pod list of the worker node over plain HTTP. The kubelet also still accepts TLS 1.0. Fix both.
+From the `shuttle` pod in the `starfleet` cluster, anyone can read the pod list of the node over plain HTTP. The kubelet also still accepts TLS 1.0. Fix both.
 
 ## Starting state
 
-The kind cluster has one control plane node and one worker node. The `starfleet-031-020-05-04` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The kubelet on the worker node serves the read-only port `10255` and accepts TLS 1.0. A copy of the original kubelet configuration is in `/opt/training/backup/kubelet-config.yaml` on the worker node.
+The lab VM runs a one-node Kubernetes cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-lab-020-05-04` is the control plane and also runs the pods. The `starfleet-031-020-05-04` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The kubelet on the node serves the read-only port `10255` and accepts TLS 1.0. A copy of the original kubelet configuration is in `/opt/training/backup/kubelet-config.yaml` on the node.
 
-Connect to this lab from a host shell. The command `astrona kubeconfig` prints the path of the lab's kubeconfig, the file that tells `kubectl` which cluster to use and which credentials to send. The two variables hold the names of the node containers: `node_name` is the control plane node and `worker_name` is the worker node.
+Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-020-05-04)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-020-05-04" || exit 1
-node_name="astro-ats-031-lab-020-05-04-control-plane"
-worker_name="astro-ats-031-lab-020-05-04-worker"
+astrona ssh astro-ats-031-lab-020-05-04
+kubectl config current-context
 ```
 
-Run node commands as `podman exec "$node_name" ...` or `podman exec "$worker_name" ...`. They change only the node containers of this lab, not your own computer.
+The second command prints `kubernetes-admin@astro-ats-031-lab-020-05-04`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
 
 ## Required result
 
-- The effective configuration of the kubelet on the worker node `astro-ats-031-lab-020-05-04-worker` has `readOnlyPort` set to `0`.
-- A request from the `shuttle` pod to `http://<worker-ip>:10255/pods` fails.
+- The effective configuration of the kubelet on the node `astro-ats-031-lab-020-05-04` has `readOnlyPort` set to `0`.
+- A request from the `shuttle` pod to `http://<node-ip>:10255/pods` fails.
 - The effective `tlsMinVersion` is `VersionTLS12` or `VersionTLS13`.
-- The worker node is `Ready`, and both `probe` replicas stay available.
+- The node is `Ready`, and both `probe` replicas stay available.
 
 ## Verify The Result
 
-The grader reads the effective kubelet configuration through the `configz` endpoint and sends a request from the `shuttle` pod to the read-only port of the worker node.
+The grader reads the effective kubelet configuration through the `configz` endpoint and sends a request from the `shuttle` pod to the read-only port of the node.
