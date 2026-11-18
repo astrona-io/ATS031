@@ -826,7 +826,6 @@ modules:
   - type: lab
     title: Disable Profiling And Raise The API Server TLS Minimum
     path: sections/section-020/module-03/labs/lab-02
-    examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
     topic: api-profiling-permissions
