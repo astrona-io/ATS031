@@ -36,7 +36,7 @@ The node `astro-ats-031-playground-020-02` is `Ready` and runs Kubernetes `v1.35
 kube-bench reads files that only root can read, such as the static pod manifests in `/etc/kubernetes/manifests`, so run it with `sudo`. The `master` target checks the control plane components.
 
 ```sh
-sudo kube-bench run --targets master | tail -5
+sudo kube-bench run --targets master | tail -n 6
 ```
 
 The summary at the end shows the totals. This output is shortened to the last lines:

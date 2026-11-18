@@ -228,7 +228,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain why the kube-bench Job needs host access.
   source_readings:
-  - sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+  - sections/section-020/module-02/course-02-run-kube-bench-on-a-kubeadm-node.md
   prompt: A `kube-bench` pod runs without `hostPID` and without host mounts. What goes wrong?
   options:
   - id: a

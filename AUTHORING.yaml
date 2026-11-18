@@ -163,7 +163,7 @@ sections:
     objectives: []
     outline:
     - What kube-bench Does Under The Hood
-    - Run kube-bench On A kind Node
+    - Run kube-bench On A kubeadm Node
     - Targets, Benchmarks And Versions
     - Read A Result
     - Select Checks And Export Results

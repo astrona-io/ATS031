@@ -610,8 +610,8 @@ modules:
     title: Read A kube-bench Check Definition — Solution
     path: sections/section-020/module-02/labs/lab-02/solution.md
   - type: reading
-    title: Run kube-bench On A kind Node
-    path: sections/section-020/module-02/course-02-run-kube-bench-on-a-kind-node.md
+    title: Run kube-bench On A kubeadm Node
+    path: sections/section-020/module-02/course-02-run-kube-bench-on-a-kubeadm-node.md
   - type: reading
     title: Audit The Worker Node With A kube-bench Job — Task
     path: sections/section-020/module-02/labs/lab-03/question.md
