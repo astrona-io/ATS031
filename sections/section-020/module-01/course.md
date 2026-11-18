@@ -25,7 +25,9 @@ After this module you can:
 
 You need Kubernetes basics: pods, namespaces, the control plane and `kubectl`. The module has four parts. The first maps the benchmark to the files of a kubeadm cluster. The second reads checks and audits the API server and etcd. The third reviews the kubelet. The fourth corrects a finding and records it.
 
-Your playground is a `kind` cluster running Kubernetes v1.35 with one control plane node and one worker node. A kind node is a container that runs the kubelet and the control plane as a normal kubeadm node does. The `starfleet` namespace holds the `probe` Deployment (two pods), the `probe` Service and the `shuttle` client pod. Commands for the nodes start with `podman exec` and name the node container of this playground. `kubectl` already points at the cluster.
+Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-01` is the control plane and also runs your pods, so the kubelet checks and the control plane checks run on the same machine. The `starfleet` namespace holds the `probe` Deployment (two pods), the `probe` Service and the `shuttle` client pod.
+
+You open a shell on the node with `astrona ssh astro-ats-031-playground-020-01`. You log in as the `student` user, which can run commands as root with `sudo` and already has `kubectl` set up for the cluster. The `kube-bench` binary is installed on the node.
 
 Launch your playground now and keep it running while you read:
 

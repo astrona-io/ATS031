@@ -5,13 +5,13 @@ exam_objectives:
 ---
 # Other Kubelet Checks
 
-Besides authentication and ports, the benchmark checks a handful of kubelet settings about kernel behaviour, firewall rules, event recording and idle connections, and it checks the permissions of the kubelet files. Each of these checks has a different risk when you apply it. Some are safe, one can stop the kubelet on the wrong machine, and some depend on how you run the node. This part explains each one and applies the safe ones.
+Besides authentication and ports, the benchmark checks a handful of kubelet settings about kernel behaviour, firewall rules, event recording and idle connections, and it checks the permissions of the kubelet files. Each of these checks has a different risk when you apply it. Some are safe, one stops the kubelet if the kernel is not prepared, and some depend on how you run the node. This part explains each one and applies them in a safe order.
 
 ## protectKernelDefaults
 
 The field `protectKernelDefaults: true` makes the kubelet compare a list of kernel parameters with the values it expects, such as `vm.overcommit_memory` and `kernel.panic`. If a value differs, the kubelet fails to start instead of changing the kernel. The benchmark asks for the setting because it prevents a node from running with unexpected kernel behaviour.
 
-Do not turn this on in the `kind` playground. A kind node is a container that shares the kernel of the host, so you cannot set kernel parameters per node, and a kubelet that expects other values refuses to start. The node would go `NotReady`. On a dedicated machine, set the kernel parameters first with a file in `/etc/sysctl.d`, and then enable the field. In a kind cluster a reviewer records this finding as not applicable to the environment, with the reason.
+The kubelet checks these kernel parameters: `vm.overcommit_memory` must be `1`, `vm.panic_on_oom` must be `0`, `kernel.panic` must be `10` and `kernel.panic_on_oops` must be `1`. Without `protectKernelDefaults`, the kubelet sets these values itself when it starts. That is why they can look correct on a running node even when no file sets them. After a reboot the kernel starts with its own defaults, and a kubelet with `protectKernelDefaults: true` then refuses to start. So the safe order is: write the values to a file in `/etc/sysctl.d`, load them, and only then enable the field.
 
 ## makeIPTablesUtilChains, eventRecordQPS and the idle timeout
 
@@ -21,29 +21,76 @@ Do not turn this on in the `kind` playground. A kind node is a container that sh
 
 ## Look at the effective values
 
-Print these fields from `configz`. The `grep` keeps only the lines you need:
+Open a shell on the node and print these fields from `configz`. The `grep` keeps only the lines you need:
 
 <!-- astrona:playground:renew -->
 
 ```sh
-WORKER=astro-ats-031-playground-020-05-worker
-kubectl get --raw "/api/v1/nodes/$WORKER/proxy/configz" | python3 -m json.tool | grep -e protectKernelDefaults -e makeIPTablesUtilChains -e eventRecordQPS -e streamingConnectionIdleTimeout -e rotateCertificates
+astrona ssh astro-ats-031-playground-020-05
+NODE=astro-ats-031-playground-020-05
+kubectl get --raw "/api/v1/nodes/$NODE/proxy/configz" | python3 -m json.tool | grep -e protectKernelDefaults -e makeIPTablesUtilChains -e eventRecordQPS -e streamingConnectionIdleTimeout -e rotateCertificates
 ```
 
-A field that equals its default can be missing from the output, as `readOnlyPort` is. Read each line next to the benchmark text. If a field you expect is not there, look in `config.yaml` to see whether the file sets it.
+In the starting state of the playground the output is:
 
-## Apply the safe settings
+```text
+        "eventRecordQPS": 50,
+        "streamingConnectionIdleTimeout": "4h0m0s",
+        "makeIPTablesUtilChains": true,
+```
 
-Set the idle timeout and certificate rotation with the remove-and-append routine, and restart the kubelet. Both settings are safe on `kind`:
+Two fields are missing. The kubelet omits a field whose value is `false`, so `protectKernelDefaults` and `rotateCertificates` do not appear. The file sets `streamingConnectionIdleTimeout: 0s`, but the effective value is `4h0m0s`, the default. This is the unclear case from above. Read each line next to the benchmark text. If a field you expect is not there, look in `config.yaml` to see whether the file sets it.
+
+## Apply the settings
+
+First prepare the kernel for `protectKernelDefaults`. Print the four parameters that the kubelet checks:
 
 ```sh
-podman exec $WORKER cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.bak
-podman exec $WORKER sed -i -e '/^streamingConnectionIdleTimeout:/d' -e '/^rotateCertificates:/d' /var/lib/kubelet/config.yaml
-podman exec $WORKER sh -c "printf '\nstreamingConnectionIdleTimeout: 5m\nrotateCertificates: true\n' >> /var/lib/kubelet/config.yaml"
-podman exec $WORKER systemctl restart kubelet
+sysctl vm.overcommit_memory vm.panic_on_oom kernel.panic kernel.panic_on_oops
 ```
 
-After about ten seconds, read the effective values again with the previous command. `streamingConnectionIdleTimeout` shows `5m0s` and `rotateCertificates` shows `true`.
+On this node they already have the expected values, because the kubelet set them when it started:
+
+```text
+vm.overcommit_memory = 1
+vm.panic_on_oom = 0
+kernel.panic = 10
+kernel.panic_on_oops = 1
+```
+
+No file in `/etc/sysctl.d` sets them yet, so they would not survive a reboot. Write them to a file and load the file with `sysctl -p`. Both commands print the four values again:
+
+```sh
+printf 'vm.overcommit_memory = 1\nvm.panic_on_oom = 0\nkernel.panic = 10\nkernel.panic_on_oops = 1\n' | sudo tee /etc/sysctl.d/90-kubelet.conf
+sudo sysctl -p /etc/sysctl.d/90-kubelet.conf
+```
+
+Now set the idle timeout, certificate rotation and kernel protection with the remove-and-append routine, and restart the kubelet:
+
+```sh
+sudo cp /var/lib/kubelet/config.yaml /root/kubelet-config.yaml.bak
+sudo sed -i -e '/^streamingConnectionIdleTimeout:/d' -e '/^rotateCertificates:/d' -e '/^protectKernelDefaults:/d' /var/lib/kubelet/config.yaml
+printf '\nstreamingConnectionIdleTimeout: 5m\nrotateCertificates: true\nprotectKernelDefaults: true\n' | sudo tee -a /var/lib/kubelet/config.yaml >/dev/null
+sudo systemctl restart kubelet
+```
+
+After about ten seconds, run the `configz` command from above again, then check the node:
+
+```text
+        "rotateCertificates": true,
+        "eventRecordQPS": 50,
+        "streamingConnectionIdleTimeout": "5m0s",
+        "protectKernelDefaults": true,
+        "makeIPTablesUtilChains": true,
+```
+
+Run `kubectl get node $NODE` and confirm that the node is still `Ready`. If one kernel parameter differs, the kubelet does not start. In a test on this node with `kernel.panic` set to `0`, the kubelet stayed in the state `activating`, and its log (`sudo journalctl -u kubelet`) showed this line:
+
+```text
+E1118 08:47:37.482173    3808 kubelet.go:1750] "Failed to start ContainerManager" err="invalid kernel flag: kernel/panic, expected value: 10, actual value: 0"
+```
+
+The log line names the parameter, the expected value and the actual value, so you know exactly which value to fix.
 
 ## Kubelet file permissions
 
@@ -52,19 +99,29 @@ The benchmark section on worker nodes also checks files. The kubelet service fil
 Print the current state, fix the two files and print again:
 
 ```sh
-podman exec $WORKER stat -c '%a %U:%G %n' /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf /etc/kubernetes/pki/ca.crt
-podman exec $WORKER chmod 600 /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
-podman exec $WORKER stat -c '%a %U:%G %n' /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
+sudo stat -c '%a %U:%G %n' /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf /etc/kubernetes/pki/ca.crt
+sudo chmod 600 /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
+sudo stat -c '%a %U:%G %n' /var/lib/kubelet/config.yaml /etc/kubernetes/kubelet.conf
 ```
 
-In the playground, the two files start with mode `644`. The second `stat` shows `600`. The CA certificate `ca.crt` is a public certificate, and the benchmark accepts mode `644` for certificate files, so do not change it to match a different rule.
+The output is:
 
-You have a list of the remaining kubelet checks and know which ones are safe to apply. The kubelet is only one of the components with a security-relevant configuration. Cluster DNS is the next one.
+```text
+644 root:root /var/lib/kubelet/config.yaml
+644 root:root /etc/kubernetes/kubelet.conf
+644 root:root /etc/kubernetes/pki/ca.crt
+600 root:root /var/lib/kubelet/config.yaml
+600 root:root /etc/kubernetes/kubelet.conf
+```
+
+In the playground, the two kubelet files start with mode `644`, and the second `stat` shows `600`. The CA (certificate authority) file `ca.crt` also shows `644`. The benchmark (check 4.1.7, a manual check) asks for `600` or stricter on this file, and kube-bench reports it as `[WARN]`, not `[FAIL]`. The file holds only a public certificate, so the risk is small, but a review still records it.
+
+You have a list of the remaining kubelet checks and know the safe order to apply them in. The kubelet is only one of the components with a security-relevant configuration. Cluster DNS is the next one.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Enabling `protectKernelDefaults` on `kind`.** The kubelet refuses to start when the shared kernel differs from its expectations.
+> - **Enabling `protectKernelDefaults` before the kernel parameters are in `/etc/sysctl.d`.** The values can look right on a running node because the kubelet set them, but after a reboot the kubelet refuses to start.
 > - **Copying a number from a guide.** Read the audit text of the benchmark edition you use and check the effective value.
 > - **Using `chmod -R` on `/etc/kubernetes`.** Certificates and manifests have different required modes. Change named files.
 > - **Counting a `0s` value as a secure setting.** An unclear value is a finding for review. Set an explicit value.
