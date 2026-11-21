@@ -26,11 +26,13 @@ as_worker() {
   "$engine" exec "$worker_name" kubectl --kubeconfig /etc/kubernetes/kubelet.conf --request-timeout=5s "$@"
 }
 for attempt in $(seq 1 80); do
-  if as_worker label node "$node_name" lab-check=open --overwrite --dry-run=server >/dev/null 2>&1; then
+  if output="$(as_worker label node "$node_name" lab-check=open --overwrite --dry-run=server 2>&1)"; then
     break
   fi
   if [[ "$attempt" == 80 ]]; then
-    printf 'Timed out waiting for the API server without NodeRestriction\n' >&2
+    printf 'Timed out waiting for the API server without NodeRestriction. Last answer:\n%s\n' "$output" >&2
+    "$engine" exec "$worker_name" sh -c 'command -v kubectl; ls -l /etc/kubernetes' >&2 || true
+    "$engine" exec "$node_name" grep -nE 'authorization-mode|admission-plugins' "$manifest" >&2 || true
     exit 1
   fi
   sleep 3
