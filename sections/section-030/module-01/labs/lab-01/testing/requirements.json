@@ -13,8 +13,7 @@
           "name": "probe",
           "namespace": "starfleet-031-030-01-01",
           "annotations": {
-            "traefik.ingress.kubernetes.io/router.entrypoints": "websecure",
-            "traefik.ingress.kubernetes.io/router.tls": "true"
+            "traefik.ingress.kubernetes.io/router.entrypoints": "websecure"
           }
         },
         "spec": {
@@ -42,9 +41,6 @@
           ],
           "tls": [
             {
-              "hosts": [
-                "probe.local"
-              ],
               "secretName": "probe-tls"
             }
           ]

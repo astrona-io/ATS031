@@ -201,6 +201,7 @@ for host in ('alpha', 'bravo', 'charlie', 'delta'):
         live('name = %r\n' % name + r"""
 pem, key = pems
 assert name in dns_names(pem), 'The certificate for ' + name + ' must name it in its SAN'
+assert not [value for value in dns_names(pem) if value.startswith('*') or value == 'wrong.example.test'], 'The certificate must not match another name, so a client that expects wrong.example.test rejects it'
 assert key_matches(pem, key), 'The key of the Secret for ' + name + ' must match its certificate'
 assert served(name) == der(pem), 'Traefik must serve the certificate of its Secret for ' + name
 response = answer(name, pem)

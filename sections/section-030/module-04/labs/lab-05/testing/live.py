@@ -198,7 +198,7 @@ assert der(pem) != der(old), 'orbit-tls must hold a new certificate'
 assert not key_matches(old, key), 'The new certificate must use a new private key'
 assert key_matches(pem, key), 'tls.key in orbit-tls must be the private key of tls.crt'
 assert 'orbit.example.test' in dns_names(pem), 'The new certificate must name DNS:orbit.example.test in its SAN'
-assert days_left(pem) >= 60, 'The new certificate must stay valid for at least 60 more days'
+assert 88 <= days_left(pem) <= 91, 'The new certificate must be valid for 90 days'
 """, tls_secret('orbit-tls') + [previous])
 if wants('orbit-served'):
     secret_name = [entry.get('secretName') for entry in get('ingress', 'orbit')['spec'].get('tls') or []]

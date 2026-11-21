@@ -16,3 +16,4 @@ openssl req -x509 -newkey rsa:2048 -nodes -days 365 \
   -keyout "$certificate_directory/ca.key" -out "$certificate_directory/ca.crt" \
   -subj "/CN=Starfleet Lab CA" -addext "basicConstraints=critical,CA:TRUE" -addext "keyUsage=critical,keyCertSign,cRLSign" >/dev/null 2>&1
 kubectl -n starfleet-031-030-03-04 create secret tls lab-ca --cert="$certificate_directory/ca.crt" --key="$certificate_directory/ca.key"
+kubectl -n starfleet-031-030-03-04 create configmap lab-ca-original --from-file=ca.crt="$certificate_directory/ca.crt"

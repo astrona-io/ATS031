@@ -196,9 +196,18 @@ if wants('controller-rbac'):
     for verb in ('get', 'list', 'watch'):
         assert can_i(verb, 'endpointslices.discovery.k8s.io', '--all-namespaces') == 'yes', \
             'The Traefik ServiceAccount must be allowed to ' + verb + ' EndpointSlices'
-    verbs = {verb for rule in get('clusterrole', 'traefik', None).get('rules') or [] for verb in rule.get('verbs') or []}
+    rules = get('clusterrole', 'traefik', None).get('rules') or []
+    assert not [rule for rule in rules if '*' in (rule.get('apiGroups') or []) or '*' in (rule.get('resources') or [])], \
+        'The ClusterRole traefik must not use * in apiGroups or resources'
+    assert [rule for rule in rules if 'discovery.k8s.io' in (rule.get('apiGroups') or []) and 'endpointslices' in (rule.get('resources') or [])], \
+        'The ClusterRole traefik must have a rule for endpointslices in the API group discovery.k8s.io'
+    verbs = {verb for rule in rules for verb in rule.get('verbs') or []}
     assert verbs <= {'get', 'list', 'watch'}, 'The ClusterRole traefik must grant only get, list and watch'
 if wants('cargo-routing'):
+    cargo = get('ingress', 'cargo')
+    assert cargo['spec'].get('ingressClassName') == 'traefik' and annotation(cargo, 'router.entrypoints') == 'web', \
+        'Do not change the Ingress cargo: it keeps the class traefik and the web entrypoint'
+    assert routes(cargo) == {('cargo.local', '/', 'Prefix', 'cargo', 80)}, 'Do not change the rules of the Ingress cargo'
     live(r"""
 response = http_get('cargo.local')
 assert ' 200 ' in status_of(response) + ' ' and 'app=cargo ' in response, 'http://cargo.local must answer 200 from the Service cargo'

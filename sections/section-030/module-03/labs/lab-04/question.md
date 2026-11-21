@@ -10,7 +10,7 @@ The relay team uses an internal certificate authority (CA) for its test services
 
 ## Starting state
 
-The namespace `starfleet-031-030-03-04` holds the Deployment `relay`, the Service `relay` on port 80 and the Ingress `relay`. The Ingress routes `relay.example.test` on the `websecure` entrypoint and names the Secret `relay-tls`, which does not exist. The Secret `lab-ca` of type `kubernetes.io/tls` holds the CA certificate in `tls.crt` and the CA private key in `tls.key`.
+The namespace `starfleet-031-030-03-04` holds the Deployment `relay`, the Service `relay` on port 80 and the Ingress `relay`. The Ingress routes `relay.example.test` on the `websecure` entrypoint and names the Secret `relay-tls`, which does not exist. The Secret `lab-ca` of type `kubernetes.io/tls` holds the CA certificate in `tls.crt` and the CA private key in `tls.key`. The ConfigMap `lab-ca-original` keeps a copy of the CA certificate for the grader; do not change it.
 
 Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
 
