@@ -15,7 +15,7 @@ manifest=/etc/kubernetes/manifests/kube-apiserver.yaml
 
 # Wait until the restarted API server refuses the same write as forbidden.
 for attempt in $(seq 1 80); do
-  output="$("$engine" exec "$worker_name" kubectl --kubeconfig /etc/kubernetes/kubelet.conf --request-timeout=5s label node "$node_name" lab-check=open --overwrite --dry-run=server 2>&1 || true)"
+  output="$("$engine" exec "$worker_name" kubectl --kubeconfig /etc/kubernetes/kubelet.conf --request-timeout=5s label node "$worker_name" node-restriction.kubernetes.io/lab-check=open --overwrite --dry-run=server 2>&1 || true)"
   if grep -qi forbidden <<<"$output"; then
     break
   fi

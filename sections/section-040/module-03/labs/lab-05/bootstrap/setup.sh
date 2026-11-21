@@ -20,13 +20,13 @@ kubectl apply -f "$lab_directory/bootstrap/manifests/namespace.yaml"
 # Edit a copy outside the manifests directory, then move it back.
 "$engine" exec "$node_name" sh -c "mkdir -p /etc/kubernetes/edit && cp -p $manifest /etc/kubernetes/edit/kube-apiserver.yaml && sed -i '/^ *- --enable-admission-plugins=NodeRestriction\$/d' /etc/kubernetes/edit/kube-apiserver.yaml && mv /etc/kubernetes/edit/kube-apiserver.yaml $manifest"
 
-# The restarted API server accepts a server-side dry run of a write to
-# another node from the worker credential once NodeRestriction is off.
+# The restarted API server accepts a server-side dry run of the protected
+# label from the worker credential once NodeRestriction is off.
 as_worker() {
   "$engine" exec "$worker_name" kubectl --kubeconfig /etc/kubernetes/kubelet.conf --request-timeout=5s "$@"
 }
 for attempt in $(seq 1 80); do
-  if output="$(as_worker label node "$node_name" lab-check=open --overwrite --dry-run=server 2>&1)"; then
+  if output="$(as_worker label node "$worker_name" node-restriction.kubernetes.io/dedicated=payments --overwrite --dry-run=server 2>&1)"; then
     break
   fi
   if [[ "$attempt" == 80 ]]; then

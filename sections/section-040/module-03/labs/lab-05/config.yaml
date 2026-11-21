@@ -40,7 +40,7 @@ validation:
     source: validation/validate-admission-plugin.sh
     points: 1
   - name: node-writes-refused
-    description: The worker kubelet credential cannot label the control plane node or set a node-restriction.kubernetes.io/ label on its own node
+    description: The worker kubelet credential cannot set a node-restriction.kubernetes.io/ label or the node-role.kubernetes.io/control-plane label on its own node
     type: file
     source: validation/validate-node-writes-refused.sh
     points: 2

@@ -33,7 +33,7 @@ if wants('admission-plugin'):
     assert 'Node' in modes and 'RBAC' in modes and 'AlwaysAllow' not in modes, 'The running kube-apiserver must use Node and RBAC authorization and not AlwaysAllow'
 
 if wants('node-writes-refused'):
-    expect_forbidden('Label the control plane node', 'label', 'node', NODE, 'lab-check=open', '--overwrite')
+    expect_forbidden('Give the worker node the control plane role label', 'label', 'node', WORKER, 'node-role.kubernetes.io/control-plane=', '--overwrite')
     expect_forbidden('Set a protected label on the worker node', 'label', 'node', WORKER, 'node-restriction.kubernetes.io/lab-check=open', '--overwrite')
 
 if wants('protected-label-removed'):

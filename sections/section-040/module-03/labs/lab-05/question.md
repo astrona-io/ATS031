@@ -22,11 +22,11 @@ Keep this connection selected for the whole task. The nodes are containers named
 ## Required result
 
 - The kube-apiserver static pod runs with `NodeRestriction` in `--enable-admission-plugins`, and `--authorization-mode` still contains `Node` and `RBAC`.
-- The worker kubelet's own credential can no longer label the control plane node, and it can no longer set a label with the prefix `node-restriction.kubernetes.io/` on the worker node.
+- The worker kubelet's own credential can no longer set a label with the prefix `node-restriction.kubernetes.io/` or the label `node-role.kubernetes.io/control-plane` on the worker node.
 - The worker node no longer carries the label `node-restriction.kubernetes.io/dedicated`, and it is `Ready`.
 
 Do not edit the manifest inside `/etc/kubernetes/manifests` in place, and do not leave a backup copy in that directory: the kubelet starts every file there.
 
 ## Verify the result
 
-The grader reads the command of the kube-apiserver pod. It then runs `kubectl` on the worker node with the kubelet's kubeconfig file and sends both label writes as server-side dry runs (`--dry-run=server`). The API server runs its admission plugins for a dry run but does not store the change. Both writes must be refused with a `Forbidden` error. The API server restarts after a manifest change, so wait until `kubectl` answers again before you check.
+The grader reads the command of the kube-apiserver pod. It then runs `kubectl` on the worker node with the kubelet's kubeconfig file and sends both label writes to the worker node as server-side dry runs (`--dry-run=server`). The API server runs its admission plugins for a dry run but does not store the change. Both writes must be refused with a `Forbidden` error. The API server restarts after a manifest change, so wait until `kubectl` answers again before you check.

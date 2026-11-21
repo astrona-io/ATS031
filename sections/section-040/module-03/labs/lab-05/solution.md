@@ -12,16 +12,16 @@ Start with the flags of the API server. The kubelet starts the API server from i
 podman exec astro-ats-031-lab-040-03-05-control-plane grep -E 'authorization-mode|admission-plugins' /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-It prints only the line `- --authorization-mode=Node,RBAC`. There is no `--enable-admission-plugins` line. The node authorizer is on, so the kubelet credential may read and write Node objects. Without `NodeRestriction`, nothing limits those writes to the kubelet's own node.
+It prints only the line `- --authorization-mode=Node,RBAC`. There is no `--enable-admission-plugins` line. The node authorizer is on, so the kubelet credential may read and update only its own Node object. The authorizer does not look at labels. Without `NodeRestriction`, nothing stops the kubelet from setting any label on its own node.
 
 Now test the worker kubelet's credential directly. The command runs `kubectl` inside the worker node container with the kubelet's kubeconfig file. The option `--dry-run=server` sends the request through authorization and admission, but the API server does not store the change:
 
 ```sh
-podman exec astro-ats-031-lab-040-03-05-worker kubectl --kubeconfig /etc/kubernetes/kubelet.conf label node astro-ats-031-lab-040-03-05-control-plane lab-check=open --dry-run=server
+podman exec astro-ats-031-lab-040-03-05-worker kubectl --kubeconfig /etc/kubernetes/kubelet.conf label node astro-ats-031-lab-040-03-05-worker node-restriction.kubernetes.io/lab-check=open --dry-run=server
 kubectl get node astro-ats-031-lab-040-03-05-worker --show-labels | tr ',' '\n' | grep node-restriction
 ```
 
-The first command succeeds: the worker credential may label another node. The second shows the label `node-restriction.kubernetes.io/dedicated=payments` on the worker.
+The first command succeeds: the worker credential may set a protected label on its own node. The second shows the label `node-restriction.kubernetes.io/dedicated=payments` on the worker.
 
 ## Turn the plugin back on
 
@@ -56,12 +56,12 @@ kubectl label node astro-ats-031-lab-040-03-05-worker node-restriction.kubernete
 Send the two writes again with the worker credential:
 
 ```sh
-podman exec astro-ats-031-lab-040-03-05-worker kubectl --kubeconfig /etc/kubernetes/kubelet.conf label node astro-ats-031-lab-040-03-05-control-plane lab-check=open --dry-run=server
 podman exec astro-ats-031-lab-040-03-05-worker kubectl --kubeconfig /etc/kubernetes/kubelet.conf label node astro-ats-031-lab-040-03-05-worker node-restriction.kubernetes.io/lab-check=open --dry-run=server
+podman exec astro-ats-031-lab-040-03-05-worker kubectl --kubeconfig /etc/kubernetes/kubelet.conf label node astro-ats-031-lab-040-03-05-worker node-role.kubernetes.io/control-plane= --dry-run=server
 kubectl get nodes
 ```
 
-Both writes now fail with a `Forbidden` error that names the node user `system:node:astro-ats-031-lab-040-03-05-worker`. The first is refused because a kubelet may change only its own Node object. The second is refused because the prefix `node-restriction.kubernetes.io/` is protected even on the kubelet's own node. If a write still succeeds, the old API server may still be running; wait a few seconds and send it again. Both nodes are `Ready`. Then submit.
+Both writes now fail with a `Forbidden` error that names the node user `system:node:astro-ats-031-lab-040-03-05-worker`. `NodeRestriction` refuses both, because a kubelet may not set labels with the prefix `node-restriction.kubernetes.io/`, nor most labels under `kubernetes.io`, such as the role label `node-role.kubernetes.io/control-plane`. A node that could give itself the control plane role label could attract workloads meant for the control plane. If a write still succeeds, the old API server may still be running; wait a few seconds and send it again. Both nodes are `Ready`. Then submit.
 
 After recording your result, remove the independent lab with `astrona destroy ats-031-lab-040-03-05`.
 
