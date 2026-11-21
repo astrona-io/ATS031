@@ -582,8 +582,9 @@ def etcdctl(*arguments):
 
 import base64
 
-# Keep every backup outside /etc/kubernetes/manifests: the kubelet starts every file there.
-manifests = sorted(node_exec(NODE, 'ls', '-A', '/etc/kubernetes/manifests').stdout.split())
+# Keep every backup outside /etc/kubernetes/manifests: the kubelet starts every file there
+# that is not hidden.
+manifests = sorted(node_exec(NODE, 'ls', '/etc/kubernetes/manifests').stdout.split())
 assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manager.yaml', 'kube-scheduler.yaml'], \
     '/etc/kubernetes/manifests must hold only the four control plane manifests, not ' + ', '.join(manifests)
 

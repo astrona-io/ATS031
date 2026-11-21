@@ -68,8 +68,9 @@ def assert_node_ready(node):
     assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
 
 
-# Keep every backup outside /etc/kubernetes/manifests: the kubelet starts every file there.
-manifests = sorted(node_exec(NODE, 'ls', '-A', '/etc/kubernetes/manifests').stdout.split())
+# Keep every backup outside /etc/kubernetes/manifests: the kubelet starts every file there
+# that is not hidden.
+manifests = sorted(node_exec(NODE, 'ls', '/etc/kubernetes/manifests').stdout.split())
 assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manager.yaml', 'kube-scheduler.yaml'], \
     '/etc/kubernetes/manifests must hold only the four control plane manifests, not ' + ', '.join(manifests)
 arguments = process_arguments(NODE, 'kube-apiserver')
