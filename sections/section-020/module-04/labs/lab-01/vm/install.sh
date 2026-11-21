@@ -252,7 +252,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -269,7 +269,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -520,20 +520,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -576,14 +582,30 @@ def etcdctl(*arguments):
 
 import base64
 
+# Keep every backup outside /etc/kubernetes/manifests: the kubelet starts every file there
+# that is not hidden.
+manifests = sorted(node_exec(NODE, 'ls', '/etc/kubernetes/manifests').stdout.split())
+assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manager.yaml', 'kube-scheduler.yaml'], \
+    '/etc/kubernetes/manifests must hold only the four control plane manifests, not ' + ', '.join(manifests)
+
 if wants('encryption-provider'):
     path = flag_value(process_arguments(NODE, 'kube-apiserver'), 'encryption-provider-config')
     assert path == '/etc/kubernetes/enc/encryption-config.yaml', 'Set --encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml'
     text = node_exec(NODE, 'cat', path).stdout
-    assert re.search(r'^\s*-?\s*secrets\s*$', text, re.M), 'The configuration must name the resource secrets'
-    first = re.search(r'^\s*-\s*(aescbc|aesgcm|secretbox|kms|identity)\s*:', text, re.M)
-    assert first and first.group(1) == 'aescbc', 'The first provider must be aescbc, before identity'
-    assert_mode_at_most(NODE, path, 0o600)
+    named = re.search(r'''^\s*-\s*["']?secrets["']?\s*(#.*)?$''', text, re.M) or \
+        re.search(r'''^\s*resources\s*:\s*\[[^\]]*["']?\bsecrets\b["']?''', text, re.M)
+    assert named, 'The configuration must name the resource secrets'
+    providers = re.findall(r'''^\s*-\s*["']?(aescbc|aesgcm|secretbox|kms|identity)["']?\s*:''', text, re.M)
+    assert providers[:1] == ['aescbc'], 'The first provider must be aescbc'
+    assert 'identity' in providers[1:], 'identity must follow aescbc in the provider list'
+    key = re.search(r'''^\s*secret\s*:\s*["']?([A-Za-z0-9+/=]+)["']?\s*(#.*)?$''', text, re.M)
+    assert key, 'The aescbc provider needs a key with a secret'
+    try:
+        length = len(base64.b64decode(key.group(1), validate=True))
+    except Exception:
+        length = 0
+    assert length == 32, 'The aescbc key must be 32 random bytes, base64 encoded'
+    assert_mode_at_most(NODE, path, 0o600, owner=None)
 if wants('secret-encrypted'):
     stored = etcdctl('get', '/registry/secrets/' + NAMESPACE + '/launch-code', '--print-value-only')
     assert b'k8s:enc:aescbc:v1:' in stored, 'The Secret is not stored with the aescbc provider'

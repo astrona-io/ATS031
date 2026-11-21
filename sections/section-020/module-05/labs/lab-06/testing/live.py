@@ -18,20 +18,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -68,9 +74,16 @@ if wants('coredns-write-access'):
         assert answer == 'no', 'The default service account of outpost-031-020-05-06 can still ' + verb + ' the coredns ConfigMap'
     coredns_role = kubectl('get', 'clusterrolebinding', 'system:coredns', '-o', 'jsonpath={.roleRef.name}')
     assert coredns_role == 'system:coredns', 'Keep the system:coredns ClusterRoleBinding'
+    subjects = get('clusterrolebinding', 'system:coredns', namespace=None).get('subjects') or []
+    assert any(item.get('kind') == 'ServiceAccount' and item.get('name') == 'coredns' and item.get('namespace') == 'kube-system' for item in subjects), \
+        'Keep the coredns service account in the system:coredns ClusterRoleBinding'
+    get('serviceaccount', 'coredns', namespace='kube-system')
+    for resource in ('endpoints', 'services', 'pods', 'namespaces', 'endpointslices.discovery.k8s.io'):
+        answer = command(['kubectl', 'auth', 'can-i', 'watch', resource, '--as=system:serviceaccount:kube-system:coredns'], success=False).stdout.strip()
+        assert answer == 'yes', 'Do not change the system:coredns ClusterRole: coredns must still watch ' + resource
 if wants('pod-records'):
     corefile = get('configmap', 'coredns', namespace='kube-system')['data']['Corefile']
-    assert 'pods insecure' not in corefile, 'The Corefile still uses pods insecure'
-    assert re.search(r'^\s*pods (verified|disabled)\s*$', corefile, re.M), 'Set pods verified or pods disabled in the Corefile'
+    assert not re.search(r'^[^#]*\bpods\s+insecure\b', corefile, re.M), 'The Corefile still uses pods insecure'
+    assert re.search(r'^\s*pods\s+(verified|disabled)\s*(#.*)?$', corefile, re.M), 'Set pods verified or pods disabled in the Corefile'
     lookup = command(['kubectl', '-n', NAMESPACE, 'exec', 'shuttle', '--', 'nslookup', 'probe.' + NAMESPACE + '.svc.cluster.local'], success=False)
     assert lookup.returncode == 0, 'The shuttle pod can no longer resolve the probe Service'

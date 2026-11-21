@@ -252,7 +252,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -269,7 +269,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ASTRONA_LAB_FILE
 write_file 0755 bootstrap/setup.sh <<'ASTRONA_LAB_FILE'
@@ -498,6 +498,7 @@ write_file 0644 testing/live.py <<'ASTRONA_LAB_FILE'
 # containers. check.py runs this file with NODE, WORKER, node_exec(),
 # kubectl(), get() and wants() already defined.
 import re
+import shlex
 import time
 
 
@@ -514,20 +515,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -618,8 +625,12 @@ def learner_job(name):
 
 
 def command_line(pod_spec):
+    """The words of the container command, with a "sh -c" script split into words."""
     container = pod_spec['containers'][0]
-    return container.get('command', []) + container.get('args', [])
+    words = container.get('command', []) + container.get('args', [])
+    if len(words) >= 3 and words[0].split('/')[-1] in ('sh', 'bash', 'ash') and words[1] == '-c':
+        words = shlex.split(words[2])
+    return words
 
 
 def option(arguments, name):
@@ -634,6 +645,8 @@ def option(arguments, name):
 
 job, pod, log = learner_job('node-audit')
 if wants('node-job-completed'):
+    image = pod['spec']['containers'][0]['image']
+    assert image in ('docker.io/aquasec/kube-bench:v0.10.6', 'aquasec/kube-bench:v0.10.6'), 'Run the Job with the image docker.io/aquasec/kube-bench:v0.10.6'
     arguments = command_line(pod['spec'])
     assert option(arguments, 'targets') == 'node', 'Run kube-bench with --targets node'
     assert re.search(r'^\[(PASS|FAIL|WARN)\] 4\.2\.', log, re.M), 'The log holds no kubelet results of section 4.2'

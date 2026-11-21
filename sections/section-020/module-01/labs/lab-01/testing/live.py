@@ -18,20 +18,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -62,6 +68,11 @@ def assert_node_ready(node):
     assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
 
 
+# Keep every backup outside /etc/kubernetes/manifests: the kubelet starts every file there
+# that is not hidden.
+manifests = sorted(node_exec(NODE, 'ls', '/etc/kubernetes/manifests').stdout.split())
+assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manager.yaml', 'kube-scheduler.yaml'], \
+    '/etc/kubernetes/manifests must hold only the four control plane manifests, not ' + ', '.join(manifests)
 if wants('scheduler-bind-address'):
     arguments = process_arguments(NODE, 'kube-scheduler')
     assert flag_value(arguments, 'bind-address') == '127.0.0.1', 'kube-scheduler must run with --bind-address=127.0.0.1'

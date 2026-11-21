@@ -106,7 +106,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -123,5 +123,5 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never

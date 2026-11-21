@@ -18,20 +18,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -64,7 +70,9 @@ def assert_node_ready(node):
 
 def worker_address():
     node = get('node', WORKER, namespace=None)
-    return [item['address'] for item in node['status']['addresses'] if item['type'] == 'InternalIP'][0]
+    address = next((item['address'] for item in node['status'].get('addresses', []) if item['type'] == 'InternalIP'), None)
+    assert address, WORKER + ' has no InternalIP address'
+    return address
 
 assert_node_ready(WORKER)
 settings = configz(WORKER)

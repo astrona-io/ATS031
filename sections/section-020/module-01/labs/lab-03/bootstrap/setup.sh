@@ -28,3 +28,7 @@ if [[ "$profiling" == false ]]; then
   wait_for_argument "$node_name" kube-apiserver --profiling=false present
   wait_for_api
 fi
+# The grader compares the running cluster with the settings chosen here.
+run_on_node mkdir -p /var/lib/astrona-lab
+printf 'profiling=%s\ndata_mode=%s\n' "$profiling" "$data_mode" | run_on_node tee /var/lib/astrona-lab/020-01-03-staged >/dev/null
+run_on_node chmod 0600 /var/lib/astrona-lab/020-01-03-staged

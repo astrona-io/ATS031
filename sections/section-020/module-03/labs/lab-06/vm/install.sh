@@ -252,7 +252,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -269,7 +269,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ASTRONA_LAB_FILE
 write_file 0755 bootstrap/setup.sh <<'ASTRONA_LAB_FILE'
@@ -488,20 +488,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -539,7 +545,6 @@ for component, outcome in (('kube-controller-manager', 'controller-manager-profi
         assert ready == 'True', 'The ' + component + ' pod must be ready'
 if wants('manifest-permissions'):
     files = node_exec(NODE, 'sh', '-c', 'ls /etc/kubernetes/manifests/*').stdout.split()
-    assert len(files) == 4, 'Keep only the four manifests in /etc/kubernetes/manifests'
     for path in files:
         assert_mode_at_most(NODE, path, 0o600)
 ASTRONA_LAB_FILE

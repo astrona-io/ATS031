@@ -252,7 +252,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -269,7 +269,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ASTRONA_LAB_FILE
 write_file 0755 bootstrap/setup.sh <<'ASTRONA_LAB_FILE'
@@ -303,6 +303,10 @@ if [[ "$profiling" == false ]]; then
   wait_for_argument "$node_name" kube-apiserver --profiling=false present
   wait_for_api
 fi
+# The grader compares the running cluster with the settings chosen here.
+run_on_node mkdir -p /var/lib/astrona-lab
+printf 'profiling=%s\ndata_mode=%s\n' "$profiling" "$data_mode" | run_on_node tee /var/lib/astrona-lab/020-01-03-staged >/dev/null
+run_on_node chmod 0600 /var/lib/astrona-lab/020-01-03-staged
 ASTRONA_LAB_FILE
 write_file 0755 solution/apply.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
@@ -503,20 +507,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -547,6 +557,14 @@ def assert_node_ready(node):
     assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
 
 
+staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/020-01-03-staged', success=False)
+assert staged.returncode == 0, 'The record of the starting settings is missing; start the lab again'
+chosen = dict(line.split('=', 1) for line in staged.stdout.split())
+running = process_arguments(NODE, 'kube-apiserver')
+assert (flag_value(running, 'profiling') or 'true') == chosen['profiling'], 'Do not change the --profiling setting of the API server'
+assert flag_value(running, 'authorization-mode') == 'Node,RBAC', 'Do not change the --authorization-mode of the API server'
+assert flag_value(process_arguments(NODE, 'etcd'), 'client-cert-auth') == 'true', 'Do not change the --client-cert-auth setting of etcd'
+assert node_exec(NODE, 'stat', '-c', '%a', '/var/lib/etcd').stdout.strip() == chosen['data_mode'], 'Do not change the mode of /var/lib/etcd'
 saved = get('configmap', 'manual-audit').get('data', {})
 if wants('apiserver-values'):
     arguments = process_arguments(NODE, 'kube-apiserver')
