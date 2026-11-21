@@ -79,7 +79,9 @@ The output on the playground node:
 644 root:root /etc/kubernetes/pki/ca.crt
 ```
 
-Compare each mode with what the benchmark asks: configuration files `600` or stricter, certificate files `644` or stricter, key files `600`, the etcd data directory `700` or stricter and owned by the `etcd` user. A `kubeadm` cluster does not meet every file check. On this node the etcd data directory has the right mode but belongs to `root`, because kubeadm creates no `etcd` user. The kubelet configuration file has mode `644`, which is wider than `600`. Some findings like these are expected until you change a mode or create the `etcd` user, and some are accepted exceptions.
+Compare each mode with what the benchmark asks: configuration files `600` or stricter, key files `600`, the etcd data directory `700` or stricter and owned by the `etcd` user. Certificate files such as `ca.crt` also have a `600` rule, but it is a manual check. A certificate holds no secret, so kube-bench reports the kubeadm mode `644` as `[WARN]`, not `[FAIL]`, and a reviewer decides whether to change it.
+
+A `kubeadm` cluster does not meet every file check. On this node the etcd data directory has the right mode but belongs to `root`, because kubeadm creates no `etcd` user. The kubelet configuration file has mode `644`, which is wider than `600`. Some findings like these are expected until you change a mode or create the `etcd` user, and some are accepted exceptions.
 
 ## DNS in the cluster
 

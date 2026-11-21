@@ -50,4 +50,4 @@ The command prints `ok`.
 ## Common pitfalls
 
 > [!WARNING]
-> Do not change the owner to a user that the component does not run as; on a kubeadm node the owner stays `root`. Do not restrict certificate files to `600` by habit: they hold no secret, and some clients need to read them. A pattern such as `/etc/kubernetes/pki/*.key` misses the files in `/etc/kubernetes/pki/etcd`.
+> Do not change the owner to a user that the component does not run as; on a kubeadm node the owner stays `root`. Do not restrict certificate files to `600` by habit: they hold no secret, some clients need to read them, and the benchmark checks their mode only as a manual check. A pattern such as `/etc/kubernetes/pki/*.key` misses the files in `/etc/kubernetes/pki/etcd`.
