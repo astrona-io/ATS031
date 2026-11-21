@@ -28,7 +28,7 @@ The second command prints `kubernetes-admin@astro-ats-031-lab-020-01-02`. You ar
 - Every private key file (`*.key`) under `/etc/kubernetes/pki` on the control plane node has mode `600` or stricter and the owner `root:root`.
 - The API server stays ready and both `probe` replicas stay available.
 
-Do not change certificate files (`*.crt`); the benchmark allows mode `644` for them.
+Do not change certificate files (`*.crt`). They hold no secret, and the benchmark checks their mode only as a manual check, so this review leaves them at mode `644`.
 
 ## Verify The Result
 
