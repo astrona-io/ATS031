@@ -42,11 +42,16 @@ sudo grep -e '--authorization-mode' /etc/kubernetes/edit/kube-apiserver.yaml
 sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-The API server restarts, so `kubectl` fails for up to a minute. Wait until it answers again:
+The API server restarts, so `kubectl` fails for about a minute. Wait until it answers again:
 
 ```sh
-kubectl get --raw=/readyz
+for attempt in $(seq 1 60); do
+  if sudo ps -eo args | grep '^kube-apiserver ' | grep -q -e '--authorization-mode=Node,RBAC' && kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then echo "new flag visible and API server ready"; break; fi
+  sleep 3
+done
 ```
+
+The old API server process can still answer for a few seconds after the `mv`, so the loop waits until the running API server process has the new flag and the API server is ready. It prints `new flag visible and API server ready`. If it ends without that message, run `sudo crictl ps -a --name kube-apiserver` and read the logs of the exited container.
 
 ## Remove the anonymous binding
 

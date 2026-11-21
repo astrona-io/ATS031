@@ -613,24 +613,24 @@ modules:
     title: Run kube-bench On A kubeadm Node
     path: sections/section-020/module-02/course-02-run-kube-bench-on-a-kubeadm-node.md
   - type: reading
-    title: Audit The Worker Node With A kube-bench Job — Task
+    title: Run The Node Checks With A kube-bench Job — Task
     path: sections/section-020/module-02/labs/lab-03/question.md
   - type: lab
-    title: Audit The Worker Node With A kube-bench Job
+    title: Run The Node Checks With A kube-bench Job
     path: sections/section-020/module-02/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: kube-bench-worker-job
     task_kind: build
     learning_goals:
-    - Run kube-bench as a Job on the worker node with access to the node processes
+    - Run kube-bench as a Job on the node with access to the node processes
       and files.
     tags:
     - cks
     - kube-bench
     - cis-benchmark
   - type: reading
-    title: Audit The Worker Node With A kube-bench Job — Solution
+    title: Run The Node Checks With A kube-bench Job — Solution
     path: sections/section-020/module-02/labs/lab-03/solution.md
   - type: reading
     title: Targets, Benchmarks And Versions
@@ -1851,6 +1851,20 @@ modules:
     title: Node Identity And NodeRestriction
     path: sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
   - type: reading
+    title: Turn On NodeRestriction And Remove A Protected Node Label — Task
+    path: sections/section-040/module-03/labs/lab-05/question.md
+  - type: lab
+    title: Turn On NodeRestriction And Remove A Protected Node Label
+    path: sections/section-040/module-03/labs/lab-05
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    learning_goals:
+    - Turn on the NodeRestriction admission plugin and prove that a kubelet credential cannot write other nodes or protected labels.
+  - type: reading
+    title: Turn On NodeRestriction And Remove A Protected Node Label — Solution
+    path: sections/section-040/module-03/labs/lab-05/solution.md
+  - type: reading
     title: Runtime Socket And hostPath Exposure
     path: sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
   - type: reading
@@ -2198,7 +2212,7 @@ modules:
   - type: lab
     title: Pin An Image By Digest And Prove It Runs
     path: sections/section-050/module-03/labs/lab-04
-    examScope: namespace
+    examScope: cluster
     difficulty: intermediate
     estimated_duration: 8m
     topic: image-digest-pinning

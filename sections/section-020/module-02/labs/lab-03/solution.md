@@ -3,7 +3,7 @@ exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Audit The Worker Node With A kube-bench Job Solution
+# Run The Node Checks With A kube-bench Job Solution
 
 Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 

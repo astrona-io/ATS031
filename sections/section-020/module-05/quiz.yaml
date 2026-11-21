@@ -135,19 +135,19 @@ questions:
   learning_objective: "Apply protectKernelDefaults with care."
   source_readings:
   - sections/section-020/module-05/course-04-other-kubelet-checks.md
-  prompt: "Why is it unsafe to set `protectKernelDefaults: true` on a kind node?"
+  prompt: "Why must the kernel parameters be written to `/etc/sysctl.d` before you set `protectKernelDefaults: true`?"
   options:
   - id: a
-    text: "kind nodes cannot run the kubelet with a configuration file."
-    explanation: "They can. The problem is the kernel."
+    text: "The kubelet reads its configuration only from `/etc/sysctl.d`."
+    explanation: "The kubelet reads its configuration from `/var/lib/kubelet/config.yaml`, not from `/etc/sysctl.d`."
   - id: b
     text: "The setting deletes the pods of the node."
     explanation: "The setting does not delete pods."
   - id: c
-    text: "The node shares the kernel of the host, so the kubelet can refuse to start when kernel parameters differ from its expectations."
-    explanation: "Correct. A container cannot set the kernel parameters per node."
+    text: "Without the file, the kernel starts with its own defaults after a reboot, and the kubelet then refuses to start."
+    explanation: "Correct. The values look right on a running node only because the kubelet set them itself."
   correct_option: c
-  explanation: "protectKernelDefaults needs kernel parameters that match the kubelet expectations. A kind node cannot guarantee that."
+  explanation: "With protectKernelDefaults the kubelet no longer sets the kernel parameters; it fails when they differ. A file in /etc/sysctl.d keeps the values after a reboot."
 - id: ats031-020-05-q08
   type: single_choice
   difficulty: intermediate

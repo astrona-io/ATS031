@@ -46,7 +46,7 @@ validation:
     source: vm/validate-flags-file-clean.sh
     points: 1
   - name: webhook-effective
-    description: The effective kubelet configuration of the worker node uses the Webhook authorization mode
+    description: The effective kubelet configuration of the node uses the Webhook authorization mode
     type: file
     source: vm/validate-webhook-effective.sh
     points: 2

@@ -41,7 +41,7 @@ testing:
 validation:
   scripts:
   - name: read-only-port
-    description: The kubelet read-only port is 0 and a pod can no longer reach port 10255 on the worker node
+    description: The kubelet read-only port is 0 and a pod can no longer reach port 10255 on the node
     type: file
     source: vm/validate-read-only-port.sh
     points: 2

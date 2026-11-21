@@ -96,7 +96,15 @@ sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-
 Wait until the new API server is ready. The API server encrypts only on write, so the existing Secret is still plain text. Replace every Secret without a change, so that the API server writes each one again:
 
 ```sh
-kubectl get --raw=/readyz
+for attempt in $(seq 1 60); do
+  if sudo ps -eo args | grep '^kube-apiserver ' | grep -q -e '--encryption-provider-config' && kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then echo "new flag visible and API server ready"; break; fi
+  sleep 3
+done
+```
+
+The old API server process can still answer for a few seconds after the `mv`, so the loop waits until the running API server process has the new flag and the API server is ready. It prints `new flag visible and API server ready`. If it ends without that message, run `sudo crictl ps -a --name kube-apiserver` and read the logs of the exited container.
+
+```sh
 kubectl get secrets --all-namespaces -o json | kubectl replace -f -
 ```
 

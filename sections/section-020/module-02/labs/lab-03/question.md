@@ -3,7 +3,7 @@ exam_objectives:
 - Use CIS benchmark to review the security configuration of Kubernetes components
   (etcd, kubelet, kubedns, kubeapi)
 ---
-# Audit The Worker Node With A kube-bench Job
+# Run The Node Checks With A kube-bench Job
 
 Allow about 10 minutes for the tasks.
 
