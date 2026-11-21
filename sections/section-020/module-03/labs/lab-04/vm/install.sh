@@ -252,7 +252,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -269,7 +269,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ASTRONA_LAB_FILE
 write_file 0755 bootstrap/setup.sh <<'ASTRONA_LAB_FILE'
@@ -491,20 +491,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -538,7 +544,7 @@ def assert_node_ready(node):
 if wants('authorization-mode'):
     modes = flag_list(process_arguments(NODE, 'kube-apiserver'), 'authorization-mode')
     assert 'AlwaysAllow' not in modes, 'Remove AlwaysAllow from --authorization-mode'
-    assert 'Node' in modes and 'RBAC' in modes, 'The API server must use the Node and RBAC authorizers'
+    assert modes == ['Node', 'RBAC'], 'The API server must run with --authorization-mode=Node,RBAC'
 if wants('anonymous-denied'):
     status = node_exec(NODE, 'curl', '-sk', '-m', '5', '-o', '/dev/null', '-w', '%{http_code}', 'https://127.0.0.1:6443/api/v1/namespaces/' + NAMESPACE + '/pods', success=False).stdout.strip()
     assert status in ('401', '403'), 'An anonymous request to list pods returned HTTP ' + status

@@ -252,7 +252,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -269,7 +269,7 @@ spec:
     command:
     - sh
     - -c
-    - sleep 3600
+    - sleep 86400
   restartPolicy: Never
 ASTRONA_LAB_FILE
 write_file 0755 bootstrap/setup.sh <<'ASTRONA_LAB_FILE'
@@ -493,20 +493,26 @@ def process_arguments(container, program):
 def flag_value(arguments, name):
     """The value a single-value flag takes: the last occurrence wins."""
     value = None
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
             value = item.split('=', 1)[1]
         elif item == '--' + name:
-            value = 'true'
+            following = arguments[position + 1] if position + 1 < len(arguments) else ''
+            value = following if following and not following.startswith('-') else 'true'
     return value
 
 
 def flag_list(arguments, name):
     """The items of a list flag: every occurrence adds its items."""
     items = []
-    for item in arguments:
+    for position, item in enumerate(arguments):
         if item.startswith('--' + name + '='):
-            items += [part.strip() for part in item.split('=', 1)[1].split(',') if part.strip()]
+            listed = item.split('=', 1)[1]
+        elif item == '--' + name and position + 1 < len(arguments):
+            listed = arguments[position + 1]
+        else:
+            continue
+        items += [part.strip() for part in listed.split(',') if part.strip()]
     return items
 
 
@@ -540,7 +546,7 @@ def assert_node_ready(node):
 assert_node_ready(WORKER)
 if wants('flags-file-clean'):
     flags = node_exec(WORKER, 'cat', '/var/lib/kubelet/kubeadm-flags.env').stdout
-    assert 'authorization-mode' not in flags, 'kubeadm-flags.env still sets --authorization-mode'
+    assert not re.search(r'^[^#]*--authorization-mode\b', flags, re.M), 'kubeadm-flags.env still sets --authorization-mode'
     assert flag_value(process_arguments(WORKER, 'kubelet'), 'authorization-mode') is None, 'The running kubelet still has an --authorization-mode flag'
 if wants('webhook-effective'):
     assert configz(WORKER)['authorization']['mode'] == 'Webhook', 'The effective kubelet authorization mode must be Webhook'
