@@ -56,15 +56,26 @@ def remove_test_pods():
 
 
 RUNTIME_PATHS = ('containerd', 'docker.sock', 'crio')
+RUNTIME_DIRECTORIES = ('/run/containerd', '/var/run/containerd', '/var/lib/containerd', '/run/docker.sock', '/var/run/docker.sock', '/run/crio', '/var/run/crio')
+LOG_SHIPPER = {
+    'containers': [{'name': 'shipper', 'image': 'docker.io/curlimages/curl:8.11.1', 'command': ['sleep', '86400'],
+                    'volumeMounts': [{'name': 'node-logs', 'mountPath': '/host/var/log', 'readOnly': True}]}],
+    'volumes': [{'name': 'node-logs', 'hostPath': {'path': '/var/log', 'type': 'Directory'}}],
+}
 
 
 def runtime_host_paths(pod_spec):
     paths = [volume['hostPath']['path'] for volume in pod_spec.get('volumes', []) if 'hostPath' in volume]
-    return [path for path in paths if any(word in path for word in RUNTIME_PATHS)]
+    def exposes(path):
+        parent = path.rstrip('/') + '/'
+        return any(word in path for word in RUNTIME_PATHS) or any(directory.startswith(parent) for directory in RUNTIME_DIRECTORIES)
+    return [path for path in paths if exposes(path)]
 
 
 def scanner_container(pod_spec):
-    return next(container for container in pod_spec['containers'] if container['name'] == 'scanner')
+    container = next((container for container in pod_spec['containers'] if container['name'] == 'scanner'), None)
+    assert container is not None, 'The image-scanner pod must keep its container named scanner'
+    return container
 
 
 def running_scanner_pod():
@@ -86,8 +97,8 @@ assert 'emptyDir' in volumes.get('scratch', {}), 'The scratch emptyDir volume mu
 assert volumes.get('settings', {}).get('configMap', {}).get('name') == 'scanner-settings', 'The settings ConfigMap volume must stay'
 mounts = {mount['name']: mount['mountPath'] for mount in scanner_container(template).get('volumeMounts', [])}
 assert mounts.get('scratch') == '/scratch' and mounts.get('settings') == '/etc/scanner', 'The scanner container must keep its /scratch and /etc/scanner mounts'
-shipper = get('deployment', 'log-shipper')['spec']['template']['spec']
-assert [volume.get('hostPath', {}).get('path') for volume in shipper.get('volumes', [])] == ['/var/log'], 'The log-shipper Deployment must stay unchanged'
+shipper = get('deployment', 'log-shipper')
+assert shipper['spec'].get('replicas') == 1 and contains(shipper['spec']['template']['spec'], LOG_SHIPPER), 'The log-shipper Deployment must stay unchanged'
 pod = running_scanner_pod()
 pod_name = pod['metadata']['name']
 settings = in_pod(pod_name, 'cat', '/etc/scanner/targets')

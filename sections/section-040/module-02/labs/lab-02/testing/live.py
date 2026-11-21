@@ -57,11 +57,11 @@ def remove_test_pods():
 
 METADATA = 'http://169.254.169.254/latest/meta-data/'
 try:
-    labels = get('pod', 'agent')['metadata'].get('labels', {})
-    assert labels.get('role') == 'cloud-agent', 'Pod %s/agent must keep label role=cloud-agent' % NAMESPACE
-    assert 'role' not in get('pod', 'shuttle')['metadata'].get('labels', {}), 'Pod %s/shuttle must not have label role' % NAMESPACE
+    assert get('pod', 'agent')['metadata'].get('labels', {}) == {'app': 'agent', 'role': 'cloud-agent'}, 'Do not add or remove labels on pod %s/agent' % NAMESPACE
+    assert get('pod', 'shuttle')['metadata'].get('labels', {}) == {'app': 'shuttle'}, 'Do not add or remove labels on pod %s/shuttle' % NAMESPACE
     expect_http('metadata-stub-031-040-02-02', 'control', METADATA, '200', 'The control pod must still reach the metadata server')
     expect_http('outpost-031-040-02-02', 'drifter', METADATA, '200', 'outpost-031-040-02-02 must stay unchanged')
+    expect_http('dock-031-040-02-02', 'tender', METADATA, '200', 'dock-031-040-02-02 must stay unchanged')
     expect_http(NAMESPACE, 'agent', METADATA, '200', 'agent must reach the metadata address')
     expect_http(NAMESPACE, 'shuttle', 'http://probe/', '200', 'shuttle must reach the probe Service')
     expect_http(NAMESPACE, 'agent', 'http://probe/', '200', 'agent must reach the probe Service')
