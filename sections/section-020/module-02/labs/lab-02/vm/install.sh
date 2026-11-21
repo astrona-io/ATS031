@@ -298,6 +298,10 @@ edition_count="$(grep -c . <<<"$editions")"
 test "$edition_count" -ge 1
 edition="$(sed -n "$((RANDOM % edition_count + 1))p" <<<"$editions")"
 kubectl -n "$namespace" create configmap audit-request --from-literal=edition="$edition"
+# The grader compares the cluster settings with this list of digests.
+run_on_node mkdir -p /var/lib/astrona-lab
+run_on_node sh -c 'sha256sum /etc/kubernetes/manifests/*.yaml /var/lib/kubelet/config.yaml > /var/lib/astrona-lab/020-02-02-staged'
+run_on_node chmod 0600 /var/lib/astrona-lab/020-02-02-staged
 ASTRONA_LAB_FILE
 write_file 0755 solution/apply.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
@@ -620,6 +624,17 @@ def option(arguments, name):
             value = item.split('=', 1)[1]
     return value
 
+staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/020-02-02-staged', success=False)
+assert staged.returncode == 0, 'The record of the starting settings is missing; start the lab again'
+assert node_exec(NODE, 'sha256sum', '--check', '--quiet', '/var/lib/astrona-lab/020-02-02-staged', success=False).returncode == 0, \
+    'Do not change the cluster: a control plane manifest or the kubelet configuration changed'
+for pod in json.loads(kubectl('-n', NAMESPACE, 'get', 'pods', '-o', 'json'))['items']:
+    if pod['metadata']['name'].startswith(('grader-', 'kube-bench-editions')):
+        continue
+    if 'kube-bench' in pod['spec']['containers'][0].get('image', ''):
+        words = command_line(pod['spec'])
+        assert 'run' not in words and not any(word.endswith('kube-bench') and index + 1 < len(words) and words[index + 1] == 'run' for index, word in enumerate(words)), \
+            'Do not run an audit: the pod ' + pod['metadata']['name'] + ' runs kube-bench run'
 edition = get('configmap', 'audit-request').get('data', {}).get('edition', '')
 assert re.fullmatch(r'cis-1\.\d+', edition), 'The ConfigMap audit-request has no valid edition: ' + edition
 saved = get('configmap', 'check-definition').get('data', {})

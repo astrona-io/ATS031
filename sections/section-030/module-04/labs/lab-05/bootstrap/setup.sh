@@ -21,3 +21,8 @@ make_certificate() {
 make_certificate orbit orbit.example.test 2
 kubectl -n starfleet-031-030-04-05 create secret tls orbit-tls --cert="$certificate_directory/orbit.crt" --key="$certificate_directory/orbit.key"
 kubectl -n starfleet-031-030-04-05 create configmap orbit-previous --from-file=tls.crt="$certificate_directory/orbit.crt"
+# The grader checks that these objects are kept and not deleted and created again.
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-030-04-05}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
+kubectl -n starfleet-031-030-04-05 get secret orbit-tls -o jsonpath='{range .items[*]}{.metadata.name} {.metadata.uid} {.metadata.resourceVersion}{"\n"}{end}' |
+  "$engine" exec -i "$cluster-control-plane" sh -c 'mkdir -p /var/lib/astrona-lab && cat > /var/lib/astrona-lab/030-04-05-staged && chmod 0600 /var/lib/astrona-lab/030-04-05-staged'

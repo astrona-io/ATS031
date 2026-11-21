@@ -68,6 +68,10 @@ def assert_node_ready(node):
     assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
 
 
+staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/020-04-02-staged', success=False)
+assert staged.returncode == 0, 'The record of the starting settings is missing; start the lab again'
+assert node_exec(NODE, 'sha256sum', '--check', '--quiet', '/var/lib/astrona-lab/020-04-02-staged', success=False).returncode == 0, \
+    'Do not change the cluster: a control plane manifest or the kubelet configuration changed'
 arguments = process_arguments(NODE, 'kube-apiserver')
 saved = get('configmap', 'etcd-connection').get('data', {})
 checks = {'server-recorded': [('servers', 'etcd-servers')],

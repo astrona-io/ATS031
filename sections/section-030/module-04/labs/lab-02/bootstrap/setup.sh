@@ -35,3 +35,8 @@ make_certificate charlie charlie.example.test 30
 kubectl -n starfleet-031-030-04-02 create secret tls charlie-tls --cert="$certificate_directory/charlie.crt" --key="$certificate_directory/charlie.key"
 make_certificate delta delta.example.test 30
 kubectl -n starfleet-031-030-04-02 create secret tls delta-tls --cert="$certificate_directory/delta.crt" --key="$certificate_directory/delta.key"
+# The grader checks that these objects are kept and not deleted and created again.
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-030-04-02}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
+kubectl -n starfleet-031-030-04-02 get ingress alpha bravo charlie delta -o jsonpath='{range .items[*]}{.metadata.name} {.metadata.uid} {.metadata.resourceVersion}{"\n"}{end}' |
+  "$engine" exec -i "$cluster-control-plane" sh -c 'mkdir -p /var/lib/astrona-lab && cat > /var/lib/astrona-lab/030-04-02-staged && chmod 0600 /var/lib/astrona-lab/030-04-02-staged'

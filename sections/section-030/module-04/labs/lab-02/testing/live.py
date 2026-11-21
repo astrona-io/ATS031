@@ -188,6 +188,12 @@ def traefik_args():
     deployment = get('deployment', 'traefik', 'ingress-system')
     return deployment['spec']['template']['spec']['containers'][0].get('args') or []
 
+staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/030-04-02-staged', success=False)
+assert staged.returncode == 0 and staged.stdout.strip(), 'The record of the starting objects is missing; start the lab again'
+for line in staged.stdout.splitlines():
+    name, uid, version = line.split()
+    found = command(['kubectl', '-n', NAMESPACE, 'get', 'ingress', name, '-o', 'jsonpath={.metadata.uid} {.metadata.resourceVersion}'], success=False).stdout.split()
+    assert found[:1] == [uid], 'Do not delete the Ingress ' + name + ' and create it again'
 for host in ('alpha', 'bravo', 'charlie', 'delta'):
     if wants(host + '-ingress'):
         name = host + '.example.test'
