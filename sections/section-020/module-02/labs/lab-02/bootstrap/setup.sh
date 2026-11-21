@@ -23,3 +23,7 @@ edition_count="$(grep -c . <<<"$editions")"
 test "$edition_count" -ge 1
 edition="$(sed -n "$((RANDOM % edition_count + 1))p" <<<"$editions")"
 kubectl -n "$namespace" create configmap audit-request --from-literal=edition="$edition"
+# The grader compares the cluster settings with this list of digests.
+run_on_node mkdir -p /var/lib/astrona-lab
+run_on_node sh -c 'sha256sum /etc/kubernetes/manifests/*.yaml /var/lib/kubelet/config.yaml > /var/lib/astrona-lab/020-02-02-staged'
+run_on_node chmod 0600 /var/lib/astrona-lab/020-02-02-staged

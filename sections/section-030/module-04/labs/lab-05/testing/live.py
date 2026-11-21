@@ -191,6 +191,12 @@ def traefik_args():
 previous = (get('configmap', 'orbit-previous').get('data') or {}).get('tls.crt', '')
 assert previous, 'The ConfigMap orbit-previous must keep the old certificate; do not change it'
 previous = base64.b64encode(previous.encode()).decode()
+staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/030-04-05-staged', success=False)
+assert staged.returncode == 0 and staged.stdout.strip(), 'The record of the starting objects is missing; start the lab again'
+for line in staged.stdout.splitlines():
+    name, uid, version = line.split()
+    found = command(['kubectl', '-n', NAMESPACE, 'get', 'secret', name, '-o', 'jsonpath={.metadata.uid} {.metadata.resourceVersion}'], success=False).stdout.split()
+    assert found[:1] == [uid], 'Replace the data of the Secret in place; do not delete ' + name + ' and create it again'
 if wants('orbit-renewed'):
     live(r"""
 pem, key, old = pems

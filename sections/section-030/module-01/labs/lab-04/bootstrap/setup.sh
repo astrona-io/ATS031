@@ -23,3 +23,8 @@ for host in bridge dock; do
   make_certificate "$host" "$host.local" 30
   kubectl -n starfleet-031-030-01-04 create secret tls "$host-tls" --cert="$certificate_directory/$host.crt" --key="$certificate_directory/$host.key"
 done
+# The grader checks that these objects are kept and not deleted and created again.
+cluster="${ASTRONA_KIND_CLUSTER:-astro-ats-031-lab-030-01-04}"
+engine="${ASTRONA_CONTAINER_ENGINE:-podman}"
+kubectl -n starfleet-031-030-01-04 get secret bridge-tls dock-tls -o jsonpath='{range .items[*]}{.metadata.name} {.metadata.uid} {.metadata.resourceVersion}{"\n"}{end}' |
+  "$engine" exec -i "$cluster-control-plane" sh -c 'mkdir -p /var/lib/astrona-lab && cat > /var/lib/astrona-lab/030-01-04-staged && chmod 0600 /var/lib/astrona-lab/030-01-04-staged'
