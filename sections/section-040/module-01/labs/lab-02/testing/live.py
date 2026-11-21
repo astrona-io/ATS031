@@ -80,5 +80,7 @@ try:
         new_pod = test_pod(NAMESPACE, 'app=courier')
         expect_http(NAMESPACE, new_pod, 'http://probe/', '200', 'A new pod with app=courier must reach the probe Service')
         expect_http(NAMESPACE, new_pod, simulator, 'denied', 'A new pod with app=courier must not reach metadata-simulator')
+        other_pod = test_pod(NAMESPACE, 'app=other')
+        expect_http(NAMESPACE, other_pod, beacon, '200', 'The NetworkPolicy must apply only to pods with app=courier: a pod with another label must still reach beacon')
 finally:
     remove_test_pods()

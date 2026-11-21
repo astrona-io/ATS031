@@ -77,7 +77,7 @@ try:
     expect_http(NAMESPACE, 'inspector', 'https://%s:10250/pods' % worker_ip, '401', 'The kubelet must still serve its HTTPS port 10250 and refuse anonymous requests', attempts=5)
     if wants('config-closed'):
         result = node_exec(WORKER, 'cat', '/var/lib/kubelet/config.yaml')
-        values = [line.split(':', 1)[1].strip() for line in result.stdout.splitlines() if line.startswith('readOnlyPort:')]
+        values = [line.split(':', 1)[1].split('#', 1)[0].strip().strip('"\'') for line in result.stdout.splitlines() if line.startswith('readOnlyPort:')]
         assert all(value == '0' for value in values), 'readOnlyPort in /var/lib/kubelet/config.yaml on the worker must be 0 or absent, found %s' % values
     if wants('port-closed'):
         assert running_read_only_port() == 0, 'The running kubelet on the worker still uses a read-only port; restart it after changing the file'

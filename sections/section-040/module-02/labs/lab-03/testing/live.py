@@ -66,7 +66,11 @@ CLIENTS = {
 def check_repaired(role):
     namespace, client = CLIENTS[role]
     assert get('pod', client, namespace)['status'].get('phase') == 'Running', 'Pod %s/%s must still be running' % (namespace, client)
-    for pod in (client, test_pod(namespace)):
+    pods = [client, test_pod(namespace)]
+    if role == 'starfleet':
+        assert get('pod', 'agent', namespace)['status'].get('phase') == 'Running', 'Pod %s/agent must still be running' % namespace
+        pods += ['agent', test_pod(namespace, 'role=cloud-agent')]
+    for pod in pods:
         expect_http(namespace, pod, METADATA, 'denied', 'Pod %s/%s must not reach the metadata address' % (namespace, pod))
         expect_http(namespace, pod, 'http://probe/', '200', 'Pod %s/%s must still reach the probe Service' % (namespace, pod))
 

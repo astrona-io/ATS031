@@ -62,6 +62,8 @@ try:
     assert get('pod', 'drifter', OUTPOST)['status'].get('phase') == 'Running', 'Pod %s/drifter must still be running' % OUTPOST
     expect_http('metadata-stub-031-040-02-01', 'control', METADATA, '200', 'The control pod must still reach the metadata server')
     expect_http(NAMESPACE, 'shuttle', METADATA, '200', 'Namespace %s must stay unchanged' % NAMESPACE)
+    expect_http(NAMESPACE, 'agent', METADATA, '200', 'Namespace %s must stay unchanged' % NAMESPACE)
+    expect_http('dock-031-040-02-01', 'tender', METADATA, '200', 'Namespace dock-031-040-02-01 must stay unchanged')
     if wants('metadata-blocked'):
         expect_http(OUTPOST, 'drifter', METADATA, 'denied', 'drifter must not reach the metadata address')
         expect_http(OUTPOST, 'drifter', 'http://probe/', '200', 'drifter must still reach the probe Service in its namespace')

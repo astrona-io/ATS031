@@ -4,7 +4,9 @@ PROTECTED_LABEL = 'node-restriction.kubernetes.io/dedicated'
 def flag_values(arguments, flag):
     """The comma-separated values of one flag, or an empty list when it is missing."""
     prefix = flag + '='
-    return [value for argument in arguments if argument.startswith(prefix) for value in argument[len(prefix):].split(',')]
+    values = [argument[len(prefix):] for argument in arguments if argument.startswith(prefix)]
+    values += [following for argument, following in zip(arguments, arguments[1:]) if argument == flag]
+    return [value for item in values for value in item.split(',')]
 
 
 def apiserver_arguments():
@@ -29,6 +31,8 @@ if wants('admission-plugin'):
     arguments = apiserver_arguments()
     assert 'NodeRestriction' in flag_values(arguments, '--enable-admission-plugins'), 'The running kube-apiserver has no NodeRestriction in --enable-admission-plugins'
     assert 'NodeRestriction' not in flag_values(arguments, '--disable-admission-plugins'), 'The running kube-apiserver disables NodeRestriction'
+    copies = node_exec(NODE, 'sh', '-c', "grep -lE '^[[:space:]]*- kube-apiserver[[:space:]]*$' /etc/kubernetes/manifests/* 2>/dev/null", success=False).stdout.split()
+    assert copies == ['/etc/kubernetes/manifests/kube-apiserver.yaml'], 'Leave only kube-apiserver.yaml in /etc/kubernetes/manifests, no backup copy: found %s' % copies
     modes = flag_values(arguments, '--authorization-mode')
     assert 'Node' in modes and 'RBAC' in modes and 'AlwaysAllow' not in modes, 'The running kube-apiserver must use Node and RBAC authorization and not AlwaysAllow'
 

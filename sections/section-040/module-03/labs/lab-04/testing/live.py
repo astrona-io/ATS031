@@ -57,6 +57,7 @@ def remove_test_pods():
 
 OUTPOST = 'outpost-031-040-03-04'
 ORIGINAL_PODS = {NAMESPACE: ['net-tool', 'port-watch', 'tender'], OUTPOST: ['sniffer', 'debug-shell', 'drifter']}
+HOST_NETWORK_PODS = {NAMESPACE + '/net-tool', NAMESPACE + '/port-watch', OUTPOST + '/sniffer'}
 
 
 def pods_in(namespace):
@@ -80,12 +81,17 @@ for namespace, names in ORIGINAL_PODS.items():
     running = {pod['metadata']['name'] for pod in pods_in(namespace) if pod['status'].get('phase') == 'Running'}
     missing = sorted(set(names) - running)
     assert not missing, 'Do not delete or recreate pods; not running in %s: %s' % (namespace, missing)
+    changed = sorted(pod['metadata']['name'] for pod in pods_in(namespace) if pod['metadata']['name'] in names
+                     and bool(pod['spec'].get('hostNetwork')) != ('%s/%s' % (namespace, pod['metadata']['name']) in HOST_NETWORK_PODS))
+    assert not changed, 'Do not change or recreate pods; hostNetwork changed in %s: %s' % (namespace, changed)
 
 if wants('host-network-listed'):
-    expected = {'%s/%s' % (namespace, pod['metadata']['name']) for namespace in ORIGINAL_PODS for pod in pods_in(namespace) if pod['spec'].get('hostNetwork')}
+    expected = HOST_NETWORK_PODS
     result = run(['kubectl', '-n', NAMESPACE, 'get', 'configmap', 'host-network-pods', '-o', 'json'])
     assert result is not None and result.returncode == 0, 'The ConfigMap host-network-pods is missing in %s' % NAMESPACE
-    value = json.loads(result.stdout).get('data', {}).get('pods', '')
+    configmap = json.loads(result.stdout)
+    assert set(configmap.get('data') or {}) == {'pods'} and not configmap.get('binaryData'), 'The ConfigMap host-network-pods must have one key, pods'
+    value = configmap['data']['pods']
     listed = [line.strip() for line in value.splitlines() if line.strip()]
     assert len(listed) == len(set(listed)), 'The list has duplicate lines'
     extra = sorted(set(listed) - expected)

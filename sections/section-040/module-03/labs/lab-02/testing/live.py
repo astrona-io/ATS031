@@ -65,6 +65,7 @@ worker_ip = node_ip(WORKER)
 control_plane_ip = node_ip(NODE)
 try:
     expect_http(NAMESPACE, 'shuttle', 'http://%s:10255/pods' % worker_ip, '200', NAMESPACE + ' must stay unchanged')
+    expect_http('dock-031-040-03-02', 'tender', 'http://%s:10255/pods' % worker_ip, '200', 'dock-031-040-03-02 must stay unchanged')
     expect_http('metadata-stub-031-040-03-02', 'control', 'http://%s:10255/pods' % worker_ip, '200', 'The control pod must still reach the read-only port')
     expect_http(OUTPOST, 'drifter', 'http://probe/', '200', 'drifter must reach the probe Service')
     expect_http(OUTPOST, 'drifter', PROBE_STARFLEET, '200', 'drifter must reach a Service in another namespace by DNS name')

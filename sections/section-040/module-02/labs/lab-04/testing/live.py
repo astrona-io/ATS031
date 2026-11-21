@@ -70,9 +70,10 @@ def check_covered(namespace, client):
 
 try:
     expect_http('metadata-stub-031-040-02-04', 'control', METADATA, '200', 'The control pod must still reach the metadata server')
-    assert get('pod', 'agent', STARFLEET)['metadata'].get('labels', {}).get('role') == 'cloud-agent', 'Pod %s/agent must keep label role=cloud-agent' % STARFLEET
-    assert 'role' not in get('pod', 'shuttle', STARFLEET)['metadata'].get('labels', {}), 'Pod %s/shuttle must not have label role' % STARFLEET
+    assert get('pod', 'agent', STARFLEET)['metadata'].get('labels', {}) == {'app': 'agent', 'role': 'cloud-agent'}, 'Do not add or remove labels on pod %s/agent' % STARFLEET
+    assert get('pod', 'shuttle', STARFLEET)['metadata'].get('labels', {}) == {'app': 'shuttle'}, 'Do not add or remove labels on pod %s/shuttle' % STARFLEET
     expect_http(STARFLEET, 'shuttle', METADATA, 'denied', 'shuttle must stay blocked from the metadata address')
+    expect_http(STARFLEET, 'shuttle', 'http://probe/', '200', 'shuttle must still reach the probe Service')
     if wants('outpost-covered'):
         check_covered(OUTPOST, 'drifter')
     if wants('dock-covered'):
@@ -83,5 +84,7 @@ try:
         plain_pod = test_pod(STARFLEET)
         expect_http(STARFLEET, plain_pod, METADATA, 'denied', 'A new pod without the label must not reach the metadata address')
         expect_http(STARFLEET, plain_pod, 'http://probe/', '200', 'A new pod without the label must still reach the probe Service')
+        labelled_pod = test_pod(STARFLEET, 'role=cloud-agent')
+        expect_http(STARFLEET, labelled_pod, METADATA, '200', 'The exception must follow the label: a new pod with role=cloud-agent must reach the metadata address')
 finally:
     remove_test_pods()

@@ -56,6 +56,15 @@ def remove_test_pods():
 
 
 OUTPOST = 'outpost-031-040-01-01'
+STARFLEET_EGRESS = {
+    'podSelector': {},
+    'policyTypes': ['Egress'],
+    'egress': [
+        {'to': [{'namespaceSelector': {'matchLabels': {'kubernetes.io/metadata.name': 'kube-system'}}, 'podSelector': {'matchLabels': {'k8s-app': 'kube-dns'}}}],
+         'ports': [{'protocol': 'UDP', 'port': 53}, {'protocol': 'TCP', 'port': 53}]},
+        {'to': [{'podSelector': {'matchLabels': {'app': 'probe'}}}], 'ports': [{'protocol': 'TCP', 'port': 8080}]},
+    ],
+}
 
 
 def relay_pods():
@@ -78,7 +87,7 @@ try:
     simulator = 'http://%s:8080/' % simulator_pod['status']['podIP']
     expect_http(OUTPOST, 'drifter', simulator, '200', 'drifter must still reach metadata-simulator, so the listener works')
     policy = get('networkpolicy', 'starfleet-egress')
-    assert policy['spec'].get('podSelector') in ({}, None), 'NetworkPolicy starfleet-egress must keep selecting every pod'
+    assert policy['spec'] == STARFLEET_EGRESS, 'Do not change the NetworkPolicy starfleet-egress'
     if wants('pod-network'):
         assert not relay['spec']['template']['spec'].get('hostNetwork'), 'The relay pod template must not use hostNetwork'
         pod = running_relay()
