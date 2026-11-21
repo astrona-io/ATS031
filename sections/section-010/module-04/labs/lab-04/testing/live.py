@@ -105,11 +105,18 @@ def expect_dns(namespace, pod, works=True):
 
 NS, OUTPOST = 'starfleet-031-010-04-04', 'outpost-031-010-04-04'
 ROWS = [('rover-to-hangar', 'starfleet-031-010-04-04', 'rover', 'starfleet-031-010-04-04', 'hangar'), ('rover-to-vault', 'starfleet-031-010-04-04', 'rover', 'starfleet-031-010-04-04', 'vault'), ('tanker-to-hangar', 'starfleet-031-010-04-04', 'tanker', 'starfleet-031-010-04-04', 'hangar'), ('drone-to-hangar', 'outpost-031-010-04-04', 'drone', 'starfleet-031-010-04-04', 'hangar'), ('drone-to-vault', 'outpost-031-010-04-04', 'drone', 'starfleet-031-010-04-04', 'vault')]
+BASELINE = {
+    'default-deny-all': {'podSelector': {}, 'policyTypes': ['Ingress', 'Egress']},
+    'hangar-ingress': {'podSelector': {'matchLabels': {'app': 'hangar'}}, 'policyTypes': ['Ingress'], 'ingress': [{'from': [{'podSelector': {'matchLabels': {'app': 'rover'}}}, {'namespaceSelector': {'matchLabels': {'kubernetes.io/metadata.name': OUTPOST}}}], 'ports': [{'protocol': 'TCP', 'port': 8080}]}]},
+    'rover-egress': {'podSelector': {'matchLabels': {'app': 'rover'}}, 'policyTypes': ['Egress'], 'egress': [{'to': [{'podSelector': {'matchLabels': {'app': 'hangar'}}}], 'ports': [{'protocol': 'TCP', 'port': 8080}]}, {'to': [{'namespaceSelector': {'matchLabels': {'kubernetes.io/metadata.name': 'kube-system'}}, 'podSelector': {'matchLabels': {'k8s-app': 'kube-dns'}}}], 'ports': [{'protocol': 'UDP', 'port': 53}, {'protocol': 'TCP', 'port': 53}]}]},
+}
 DNS_ROWS = [('rover-dns', 'starfleet-031-010-04-04', 'rover'), ('tanker-dns', 'starfleet-031-010-04-04', 'tanker')]
 
 def recorded():
     names = sorted(item['metadata']['name'] for item in policies(NS))
     assert names == ['default-deny-all', 'hangar-ingress', 'rover-egress'], 'Do not change the policies; only record what they do'
+    for name, spec in BASELINE.items():
+        assert get('networkpolicy', name, NS)['spec'] == spec, 'Do not change the policy ' + name
     assert not policies(OUTPOST), 'Do not create policies in the outpost namespace'
     return get('configmap', 'test-matrix', NS).get('data') or {}
 

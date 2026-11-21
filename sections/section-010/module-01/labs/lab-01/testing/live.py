@@ -105,6 +105,14 @@ def expect_dns(namespace, pod, works=True):
 
 NS, OUTPOST = 'starfleet-031-010-01-01', 'outpost-031-010-01-01'
 
+def only_this_namespace(peer, namespace):
+    """A peer without a namespaceSelector stays in the policy's namespace; with one, it must match only that namespace."""
+    if 'namespaceSelector' not in peer:
+        return True
+    items = json.loads(kubectl('get', 'namespace', '-o', 'json'))['items']
+    matched = [item['metadata']['name'] for item in items if selector_matches(peer['namespaceSelector'], item['metadata'].get('labels') or {})]
+    return matched == [namespace]
+
 def hub_ips():
     pods = json.loads(kubectl('-n', NS, 'get', 'pods', '-l', 'app=hub', '-o', 'json'))['items']
     addresses = [item['status'].get('podIP') for item in pods if item['status'].get('phase') == 'Running']
@@ -131,7 +139,7 @@ if wants('hub-policy'):
             assert 'ipBlock' not in peer, 'Admit the pod by its label, not by its address'
             assert selector_matches(peer.get('podSelector'), pod_labels(NS, 'tender')), 'The peer must select the tender pod'
             assert not selector_matches(peer.get('podSelector'), pod_labels(NS, 'idler')), 'The peer must not select the idler pod'
-            assert 'namespaceSelector' not in peer, 'The tender pod is in the same namespace; no namespaceSelector is needed'
+            assert only_this_namespace(peer, NS), 'The peer must select pods in ' + NS + ' only'
 if wants('tender-allowed'):
     hub_policy()
     expect_open(NS, 'tender', service_ip(NS, 'hub'), 80, note='through the Service ')

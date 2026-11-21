@@ -108,6 +108,7 @@ if wants('relay-egress-isolated'):
     policy = get('networkpolicy', 'relay-egress-isolation', NS)
     assert selector_matches(policy['spec'].get('podSelector'), pod_labels(NS, 'relay')), 'The policy must select the relay pod'
     assert 'Egress' in policy['spec'].get('policyTypes', []), 'The policy must isolate relay for egress'
+    assert not policy['spec'].get('egress'), 'Allow no egress at all: the policy must have no egress rules'
     expect_blocked(NS, 'relay', pod_ip(NS, 'lander'), 8080)
     expect_dns(NS, 'relay', works=False)
 if wants('ingress-and-neighbours-open'):

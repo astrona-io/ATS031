@@ -104,15 +104,24 @@ def expect_dns(namespace, pod, works=True):
         assert output == 'unresolved', f'{namespace}/{pod} must not resolve names but got: {output}'
 
 NS = 'starfleet-031-010-04-03'
+BASELINE = {
+    'default-deny-all': {'podSelector': {}, 'policyTypes': ['Ingress', 'Egress']},
+    'allow-dns': {'podSelector': {}, 'policyTypes': ['Egress'], 'egress': [{'to': [{'namespaceSelector': {'matchLabels': {'kubernetes.io/metadata.name': 'kube-system'}}, 'podSelector': {'matchLabels': {'k8s-app': 'kube-dns'}}}], 'ports': [{'protocol': 'UDP', 'port': 53}, {'protocol': 'TCP', 'port': 53}]}]},
+}
+
+def baseline_intact():
+    for name, spec in BASELINE.items():
+        assert get('networkpolicy', name, NS)['spec'] == spec, 'Keep ' + name + ' unchanged'
 
 def endpoint():
     slices = json.loads(kubectl('-n', 'default', 'get', 'endpointslice', '-l', 'kubernetes.io/service-name=kubernetes', '-o', 'json'))['items']
     return slices[0]['endpoints'][0]['addresses'][0], slices[0]['ports'][0]['port']
 
 def operator_rules():
+    baseline_intact()
     get('networkpolicy', 'operator-to-api-server', NS)
     address, port = endpoint()
-    rules = [rule for rule in rules_for(NS, pod_labels(NS, 'operator'), 'Egress') if ('UDP', '53', None) not in port_set(rule)]
+    rules = [rule for policy in selecting(NS, pod_labels(NS, 'operator'), 'Egress') if policy['metadata']['name'] != 'allow-dns' for rule in policy['spec'].get('egress') or []]
     assert rules, 'The operator pod needs an egress rule to the API server'
     no_open_rules(rules)
     return rules, address, port

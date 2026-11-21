@@ -124,6 +124,7 @@ if wants('archive-admits-division'):
             assert selector, 'Admit the group with a namespaceSelector'
             assert selector_matches(selector, {'division': 'science'}), 'The namespaceSelector must match division=science'
             assert not selector_matches(selector, {'kubernetes.io/metadata.name': SURVEY}), 'Select the namespaces by the division label, not by name'
+            assert peer.get('podSelector') in (None, {}), 'Admit every pod in those namespaces: leave out the podSelector or use podSelector: {}'
     expect_open(SURVEY, 'mapper', pod_ip(HOME, 'archive'), 8080)
     expect_open(SALVAGE, 'mapper', pod_ip(HOME, 'archive'), 8080)
     expect_blocked(OUTPOST, 'mapper', pod_ip(HOME, 'archive'), 8080)

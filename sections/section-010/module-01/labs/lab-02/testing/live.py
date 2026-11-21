@@ -105,15 +105,32 @@ def expect_dns(namespace, pod, works=True):
 
 NS = 'starfleet-031-010-01-02'
 
+def only_this_namespace(peer, namespace):
+    """A peer without a namespaceSelector stays in the policy's namespace; with one, it must match only that namespace."""
+    if 'namespaceSelector' not in peer:
+        return True
+    items = json.loads(kubectl('get', 'namespace', '-o', 'json'))['items']
+    matched = [item['metadata']['name'] for item in items if selector_matches(peer['namespaceSelector'], item['metadata'].get('labels') or {})]
+    return matched == [namespace]
+
 def scanner_rules():
-    get('networkpolicy', 'scanner-egress', NS)
+    selector = get('networkpolicy', 'scanner-egress', NS)['spec'].get('podSelector')
+    assert selector_matches(selector, pod_labels(NS, 'scanner')), 'scanner-egress must select the scanner pod'
+    for labels in (pod_labels(NS, 'decoy'), pod_labels(NS, 'idler'), {'app': 'archive'}):
+        assert not selector_matches(selector, labels), 'scanner-egress must select only the scanner pod, not ' + labels.get('app', 'other pods')
     rules = rules_for(NS, pod_labels(NS, 'scanner'), 'Egress')
     assert rules, 'The scanner pod needs egress rules'
     no_open_rules(rules)
     return rules
 
 def is_dns_peer(peer):
-    return selector_matches(peer.get('namespaceSelector'), {'kubernetes.io/metadata.name': 'kube-system'}) and selector_matches(peer.get('podSelector'), {'k8s-app': 'kube-dns'}) and 'namespaceSelector' in peer and 'podSelector' in peer
+    """One peer entry that selects only the kube-dns pods in kube-system."""
+    if 'namespaceSelector' not in peer or 'podSelector' not in peer:
+        return False
+    return (selector_matches(peer['namespaceSelector'], {'kubernetes.io/metadata.name': 'kube-system'})
+            and not selector_matches(peer['namespaceSelector'], {'kubernetes.io/metadata.name': 'default'})
+            and selector_matches(peer['podSelector'], {'k8s-app': 'kube-dns'})
+            and not selector_matches(peer['podSelector'], {'k8s-app': 'other'}))
 
 if wants('scanner-egress-policy'):
     rules = scanner_rules()
@@ -128,7 +145,7 @@ if wants('scanner-egress-policy'):
         for peer in peers_of(rule):
             assert 'ipBlock' not in peer and selector_matches(peer.get('podSelector'), {'app': 'archive'}), 'The archive rule must select the archive pods by label'
             assert not selector_matches(peer.get('podSelector'), pod_labels(NS, 'decoy')), 'The archive rule must not select the decoy pod'
-            assert 'namespaceSelector' not in peer, 'The archive pods are in the same namespace; no namespaceSelector is needed'
+            assert only_this_namespace(peer, NS), 'The archive rule must select pods in ' + NS + ' only'
 if wants('scanner-reaches-archive'):
     scanner_rules()
     output = client(NS, 'scanner', 'dns', 'archive.' + NS + '.svc.cluster.local')

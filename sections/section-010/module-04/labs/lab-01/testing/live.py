@@ -105,6 +105,15 @@ def expect_dns(namespace, pod, works=True):
 
 NS = 'starfleet-031-010-04-01'
 
+def is_dns_peer(peer):
+    """One peer entry that selects only the kube-dns pods in kube-system."""
+    if 'namespaceSelector' not in peer or 'podSelector' not in peer:
+        return False
+    return (selector_matches(peer['namespaceSelector'], {'kubernetes.io/metadata.name': 'kube-system'})
+            and not selector_matches(peer['namespaceSelector'], {'kubernetes.io/metadata.name': 'default'})
+            and selector_matches(peer['podSelector'], {'k8s-app': 'kube-dns'})
+            and not selector_matches(peer['podSelector'], {'k8s-app': 'other'}))
+
 def guard():
     names = sorted(item['metadata']['name'] for item in policies(NS))
     assert 'default-deny-all' in names, 'Keep the default-deny-all policy'
@@ -121,6 +130,11 @@ if wants('pathfinder-dependencies'):
     expect_open(NS, 'pathfinder', pod_ip(NS, 'datastore'), 6379)
     expect_open(NS, 'pathfinder', service_ip('default', 'kubernetes'), 443, note='through the kubernetes Service ')
     expect_blocked(NS, 'pathfinder', pod_ip(NS, 'stranger'), 8080)
+    dns_ports = set()
+    for rule in rules_for(NS, pod_labels(NS, 'pathfinder'), 'Egress'):
+        if peers_of(rule) and all(is_dns_peer(peer) for peer in peers_of(rule)):
+            dns_ports |= port_set(rule)
+    assert dns_ports == {('UDP', '53', None), ('TCP', '53', None)}, 'pathfinder-egress must allow UDP 53 and TCP 53 to the kube-dns pods, selected by the kube-system name label and k8s-app: kube-dns'
     for rule in rules_for(NS, pod_labels(NS, 'pathfinder'), 'Egress'):
         for peer in peers_of(rule):
             if 'ipBlock' in peer:

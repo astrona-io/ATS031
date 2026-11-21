@@ -113,6 +113,13 @@ def meter_rules():
     ports = set()
     for rule in rules:
         ports |= port_set(rule)
+        for peer in peers_of(rule):
+            assert 'namespaceSelector' in peer and 'podSelector' in peer, 'Put the namespaceSelector and the podSelector in the same peer entry'
+            assert selector_matches(peer['namespaceSelector'], get('namespace', OUTPOST, None)['metadata'].get('labels') or {}), 'The namespaceSelector must select ' + OUTPOST
+            assert not selector_matches(peer['namespaceSelector'], get('namespace', HOME, None)['metadata'].get('labels') or {}), 'The namespaceSelector must not select ' + HOME
+            assert selector_matches(peer['podSelector'], pod_labels(OUTPOST, 'surveyor')), 'The podSelector must select the surveyor pod'
+            assert not selector_matches(peer['podSelector'], pod_labels(OUTPOST, 'loiterer')), 'The podSelector must not select the loiterer pod'
+    assert ports == {('TCP', '7000', 7002), ('UDP', 'tick', None)}, 'Allow exactly two port items: TCP 7000 with endPort 7002, and UDP by the name tick'
     return ports
 
 if wants('tcp-port-range'):
@@ -126,6 +133,11 @@ if wants('udp-named-port'):
     ports = meter_rules()
     assert ('UDP', 'tick', None) in ports, 'Allow UDP by the container port name tick'
     meter = pod_ip(HOME, 'meter')
-    expect_open(OUTPOST, 'surveyor', meter, 7200, protocol='udp')
+    # UDP has no handshake, so one lost datagram is not a failure: try three times.
+    for attempt in range(3):
+        if client(OUTPOST, 'surveyor', 'udp', meter, 7200).startswith('open'):
+            break
+    else:
+        expect_open(OUTPOST, 'surveyor', meter, 7200, protocol='udp')
     expect_blocked(OUTPOST, 'surveyor', meter, 7100)
     expect_blocked(OUTPOST, 'loiterer', meter, 7200, protocol='udp')

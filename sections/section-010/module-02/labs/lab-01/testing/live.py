@@ -105,6 +105,14 @@ def expect_dns(namespace, pod, works=True):
 
 NS, DOCK = 'outpost-031-010-02-01', 'dock-031-010-02-01'
 
+def only_this_namespace(peer, namespace):
+    """A peer without a namespaceSelector stays in the policy's namespace; with one, it must match only that namespace."""
+    if 'namespaceSelector' not in peer:
+        return True
+    items = json.loads(kubectl('get', 'namespace', '-o', 'json'))['items']
+    matched = [item['metadata']['name'] for item in items if selector_matches(peer['namespaceSelector'], item['metadata'].get('labels') or {})]
+    return matched == [namespace]
+
 def baseline():
     policy = get('networkpolicy', 'default-deny-all', NS)
     spec = policy['spec']
@@ -129,7 +137,7 @@ if wants('forge-ingress-from-smith'):
     for rule in rules:
         assert port_set(rule) == {('TCP', '8080', None)}, 'Admit only TCP 8080 to forge'
         for peer in peers_of(rule):
-            assert 'ipBlock' not in peer and 'namespaceSelector' not in peer, 'Admit the smith pod by its label in the same namespace'
+            assert 'ipBlock' not in peer and only_this_namespace(peer, NS), 'Admit the smith pod by its label in the same namespace'
             assert selector_matches(peer.get('podSelector'), pod_labels(NS, 'smith')), 'The ingress peer must select the smith pod'
             assert not selector_matches(peer.get('podSelector'), pod_labels(NS, 'idler')), 'The ingress peer must not select the idler pod'
     expect_blocked(DOCK, 'visitor', pod_ip(NS, 'forge'), 8080)
@@ -140,7 +148,7 @@ if wants('smith-egress-to-forge'):
     for rule in rules:
         assert port_set(rule) == {('TCP', '8080', None)}, 'Allow smith only TCP 8080'
         for peer in peers_of(rule):
-            assert 'ipBlock' not in peer and 'namespaceSelector' not in peer, 'Select the forge pod by its label in the same namespace'
+            assert 'ipBlock' not in peer and only_this_namespace(peer, NS), 'Select the forge pod by its label in the same namespace'
             assert selector_matches(peer.get('podSelector'), pod_labels(NS, 'forge')), 'The egress peer must select the forge pod'
             assert not selector_matches(peer.get('podSelector'), pod_labels(NS, 'idler')), 'The egress peer must not select the idler pod'
     expect_open(NS, 'smith', pod_ip(NS, 'forge'), 8080)
