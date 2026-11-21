@@ -11,7 +11,7 @@ The security team of the `starfleet` cluster needs the list of failing API serve
 
 ## Starting state
 
-The lab VM runs a one-node Kubernetes cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-lab-020-02-01` is the control plane and also runs the pods. The `starfleet-031-020-02-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The `kube-bench` image `docker.io/aquasec/kube-bench:v0.10.6` is already loaded on both nodes. The control plane node runs with the kubeadm defaults. No kube-bench result has been collected.
+The lab VM runs a one-node Kubernetes cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-lab-020-02-01` is the control plane and also runs the pods. The `starfleet-031-020-02-01` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The `kube-bench` image `docker.io/aquasec/kube-bench:v0.10.6` is already loaded on the node. The control plane node runs with the kubeadm defaults. No kube-bench result has been collected.
 
 Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 

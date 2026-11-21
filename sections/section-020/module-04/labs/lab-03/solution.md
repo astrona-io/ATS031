@@ -49,7 +49,15 @@ The `grep` command shows both flags set to `true` before you move the file back.
 The kubelet restarts etcd. During the restart the API server cannot read or write data, so wait until it is ready again:
 
 ```sh
-kubectl get --raw=/readyz
+for attempt in $(seq 1 60); do
+  if sudo ps -eo args | grep '^etcd ' | grep -q -e '--client-cert-auth=true' && kubectl --request-timeout=3s get --raw=/readyz >/dev/null 2>&1; then echo "new flag visible and API server ready"; break; fi
+  sleep 3
+done
+```
+
+The old etcd process can still answer for a few seconds after the `mv`, so the loop waits until the running etcd process has the new flag and the API server is ready. It prints `new flag visible and API server ready`. If it ends without that message, run `sudo crictl ps -a --name etcd` and read the logs of the exited container.
+
+```sh
 sudo sh -c 'tr "\0" "\n" < /proc/$(pgrep -n etcd)/cmdline' | grep -e 'cert-auth'
 sudo curl -sk --max-time 5 https://127.0.0.1:2379/health; echo "exit code $?"
 ```
@@ -59,4 +67,4 @@ The first command prints `ok`. Both flags are `true`. The `curl` command prints 
 ## Common pitfalls
 
 > [!WARNING]
-> The sed pattern `--client-cert-auth=false` also matches inside `--peer-client-cert-auth=false`; check both lines after the edit. While etcd restarts, `kubectl` commands fail for a short time; wait instead of editing again. A copy of `etcd.yaml` left in `/etc/kubernetes/manifests` starts a second etcd pod.
+> A sed pattern without the leading `- `, such as `--client-cert-auth=false`, also matches inside `--peer-client-cert-auth=false`; check both lines after the edit. While etcd restarts, `kubectl` commands fail for a short time; wait instead of editing again. A copy of `etcd.yaml` left in `/etc/kubernetes/manifests` starts a second etcd pod.

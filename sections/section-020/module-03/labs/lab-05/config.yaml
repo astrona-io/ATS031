@@ -46,7 +46,7 @@ validation:
     source: vm/validate-noderestriction-enabled.sh
     points: 2
   - name: node-label-denied
-    description: The worker kubelet credentials can no longer set a node-restriction.kubernetes.io/ label on the worker node
+    description: The kubelet credentials of the node can no longer set a node-restriction.kubernetes.io/ label on the node
     type: file
     source: vm/validate-node-label-denied.sh
     points: 1

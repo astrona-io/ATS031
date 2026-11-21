@@ -113,4 +113,4 @@ You now know where the settings live and who owns them. The next question is how
 > - **Reporting a setting you cannot see.** On a managed control plane you have no access to the API server flags. Mark it as not assessable, not as passed.
 > - **Using the wrong edition.** A check written for an older Kubernetes version can misjudge a newer cluster. Record the edition.
 > - **Treating the benchmark as a repair script.** Some recommendations stop a workload or a component if you apply them without thought.
-> - **Looking at the wrong node.** Control plane files exist on the control plane node. The worker has no static pod manifests.
+> - **Looking at the wrong node.** Control plane files exist on the control plane node. On a cluster with separate worker nodes, a worker has no static pod manifests.

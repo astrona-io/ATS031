@@ -540,7 +540,7 @@ if wants('node-label-denied'):
     attempt = node_exec(WORKER, 'kubectl', '--kubeconfig', '/etc/kubernetes/kubelet.conf', 'label', 'node', WORKER, 'node-restriction.kubernetes.io/lab-check=kubelet', '--overwrite', success=False)
     if attempt.returncode == 0:
         kubectl('label', 'node', WORKER, 'node-restriction.kubernetes.io/lab-check-')
-    assert attempt.returncode != 0, 'The worker kubelet can still set a node-restriction.kubernetes.io/ label'
+    assert attempt.returncode != 0, 'The kubelet of the node can still set a node-restriction.kubernetes.io/ label'
     assert 'forbidden' in (attempt.stdout + attempt.stderr).lower(), 'The label request failed for another reason than an admission denial'
 ASTRONA_LAB_FILE
 write_file 0644 testing/requirements.json <<'ASTRONA_LAB_FILE'

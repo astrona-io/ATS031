@@ -11,7 +11,7 @@ The etcd team of the `starfleet` cluster must report against one fixed benchmark
 
 ## Starting state
 
-The lab VM runs a one-node Kubernetes cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-lab-020-02-04` is the control plane and also runs the pods. The `starfleet-031-020-02-04` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The `kube-bench` image `docker.io/aquasec/kube-bench:v0.10.6` is already loaded on both nodes. The ConfigMap `audit-request` in the `starfleet-031-020-02-04` namespace names the benchmark edition under the key `benchmark`. No kube-bench Job exists.
+The lab VM runs a one-node Kubernetes cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-lab-020-02-04` is the control plane and also runs the pods. The `starfleet-031-020-02-04` namespace runs two `probe` replicas behind the `probe` Service and a `shuttle` client pod. The `kube-bench` image `docker.io/aquasec/kube-bench:v0.10.6` is already loaded on the node. The ConfigMap `audit-request` in the `starfleet-031-020-02-04` namespace names the benchmark edition under the key `benchmark`. No kube-bench Job exists.
 
 Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
 

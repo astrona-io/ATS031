@@ -47,7 +47,7 @@ kubectl -n dock-031-010-02-02 exec crane -- python /app/client.py tcp "$VISITOR_
 
 The first two commands must print `blocked`, also the one from the same namespace. The last one must print `open`.
 
-The `visitor` pod in `outpost-031-010-02-02` times out to `vault`, because every pod in `dock-031-010-02-02` is now isolated for ingress. The `vault` pod still reaches `visitor`, because the policy does not isolate egress.
+The `visitor` pod in `outpost-031-010-02-02` times out to `vault`, because every pod in `dock-031-010-02-02` is now isolated for ingress. The `crane` pod in `dock-031-010-02-02` still reaches `visitor`, because the policy does not isolate egress.
 
 When you are done, remove the lab with `astrona destroy ats-031-lab-010-02-02`.
 

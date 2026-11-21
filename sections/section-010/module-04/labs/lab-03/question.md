@@ -32,7 +32,7 @@ The namespace `starfleet-031-010-04-03` runs the pods `operator` and `helper`. T
 
 ## Check your work
 
-The test client prints `open` with the first reply line, or `blocked` when the connection times out. Test the Service address, as a real client does:
+The test client prints `open` with the last reply line, or `blocked` when the connection times out. Test the Service address, as a real client does:
 
 ```sh
 API_SERVICE_IP=$(kubectl -n default get service kubernetes -o jsonpath='{.spec.clusterIP}')

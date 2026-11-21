@@ -1,0 +1,17 @@
+{
+  "context": "kind-astro-ats-031-lab-040-03-05",
+  "cluster": "astro-ats-031-lab-040-03-05",
+  "namespace": "starfleet-031-040-03-05",
+  "resources": [
+    {
+      "kind": "Namespace",
+      "name": "starfleet-031-040-03-05",
+      "namespace": "",
+      "expected": {
+        "metadata": {
+          "name": "starfleet-031-040-03-05"
+        }
+      }
+    }
+  ]
+}

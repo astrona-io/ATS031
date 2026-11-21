@@ -24,7 +24,7 @@ AUTHORING.yaml records measurable goals and adaptation sources. Every objective 
 
 ## Hands-On Coverage
 
-This course has 19 ungraded module playgrounds and 86 independent labs. Each lab's task and solution are registered immediately after the reading it practises. Every lab passed `astrona validate` and `astrona test` on kind (arm64 node image) on 2026-11-17.
+This course has 19 ungraded module playgrounds and 87 independent labs. Each lab's task and solution are registered immediately after the reading it practises. CI ran `astrona test` on every lab and playground on 2026-11-18 (amd64, kind and qemu): all 86 labs and 19 playgrounds of that date passed.
 
 | Module | Labs in teaching order |
 | --- | --- |
