@@ -41,12 +41,12 @@ testing:
 validation:
   scripts:
   - name: node-job-completed
-    description: Job node-audit ran kube-bench with the node target and completed with worker node results
+    description: Job node-audit ran kube-bench with the node target and completed with node check results
     type: file
     source: vm/validate-node-job-completed.sh
     points: 1
   - name: ran-on-worker
-    description: The pod of Job node-audit ran on the worker node with hostPID
+    description: The pod of Job node-audit ran on the node with hostPID
     type: file
     source: vm/validate-ran-on-worker.sh
     points: 1

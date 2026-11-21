@@ -2,9 +2,9 @@
 exam_objectives:
 - Properly set up Ingress with TLS
 ---
-# Guided Practice: Verify TLS Termination And Server Identity
+# Playground Guide: TLS Termination And Server Identity
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+Work in a shell on your own computer. `kubectl`, the Kubernetes command-line tool, normally already points at the playground cluster after the playground starts. A kubeconfig is the file that tells `kubectl` which cluster to use and which credentials to send. To be sure that you work on the playground and not on another cluster, select the playground's kubeconfig and check the context:
 
 <!-- astrona:playground:renew -->
 
@@ -13,13 +13,11 @@ export KUBECONFIG="$(astrona kubeconfig ats-031-playground-030-01)"
 test "$(kubectl config current-context)" = "kind-astro-ats-031-playground-030-01" || exit 1
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+The `test` line stops the shell when the context belongs to another cluster. Keep this shell open while you work through the pages of the module.
 
-## Inspect And Explain
+## Look at the starting state
 
-The lab includes a working Traefik Ingress controller and healthy application. The required route has not been created.
-
-Inspect the relevant evidence:
+This playground is a `kind` cluster that runs the Traefik Ingress controller in the `ingress-system` namespace. An Ingress controller is the pod that receives HTTP and HTTPS requests from outside the cluster and forwards them to Services. The `starfleet` namespace runs the `probe` application behind the `probe` Service and holds the TLS Secret `probe-tls`. No Ingress exists yet. List the Ingresses, the Service and the last log lines of Traefik:
 
 ```sh
 kubectl -n starfleet get ingress
@@ -27,10 +25,11 @@ kubectl -n starfleet get service probe
 kubectl -n ingress-system logs deployment/traefik --tail=20
 ```
 
-Transport Layer Security (TLS) authenticates the server name and protects the client connection. The Ingress controller terminates TLS with its Secret while forwarding to the application listener. A trusted certificate still requires the correct server name. The author verification checks the matching response and rejects a mismatched identity.
+Transport Layer Security (TLS) encrypts the connection and proves the identity of the server. Traefik terminates TLS: it uses the certificate and key from the Secret, decrypts the request and forwards it over plain HTTP to the `probe` Service. A client accepts the certificate only when it trusts the certificate and the server name in the request matches a name in the certificate.
 
+## Create the TLS Ingress
 
-Save this as `ingress-probe.yaml`:
+The Ingress below sends HTTPS requests for `probe.local` to the `probe` Service on port 80 and tells Traefik to use the `probe-tls` Secret on the `websecure` entry point, the HTTPS port of Traefik. Save this as `ingress-probe.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -60,21 +59,21 @@ spec:
     secretName: probe-tls
 ```
 
-Apply the required change:
+Apply it:
 
 ```sh
 kubectl apply -f ingress-probe.yaml
 ```
 
-## Verify The Result
+## Check the result
 
-Observe the actual result. A denied-request command returns a nonzero status when the denial works. Run denial checks separately from a shell sequence that stops on the first nonzero status.
+Then check the result. `kubectl describe` shows the host, the path, the backend Service and the TLS Secret that Traefik uses for the Ingress:
 
 ```sh
-kubectl -n starfleet get deployment probe -o yaml
+kubectl -n starfleet describe ingress probe
 ```
 
-Create a TLS Ingress `probe` for class `traefik`, host `probe.local`, Prefix path `/` and backend Service `probe` port 80. Use the supplied TLS Secret `probe-tls` and websecure entrypoint. A client trusting the supplied certificate must receive version one for the matching server name and must reject a mismatched server name. Preserve the original application and Service.
+The `probe` Deployment and the `probe` Service stay unchanged: the Ingress only adds a route in front of them. A request from a client that trusts the certificate and sends the server name `probe.local` reaches the application. A request with another server name fails the certificate check, even though the certificate itself is trusted.
 
 
 ## Common pitfalls

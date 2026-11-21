@@ -11,7 +11,7 @@ A benchmark report lists dozens of results, and some of them are wrong for the c
 
 `kube-bench` is a program written in Go that reads the benchmark checks from configuration files and runs them on the node where it runs. It needs access to the node's processes and files, so you run it on the node itself, or as a Kubernetes Job that mounts the host paths and shares the host process namespace. It detects the Kubernetes version and loads the matching benchmark edition. The flag `--benchmark` selects an edition by name when detection is wrong.
 
-You choose what to check with targets. The target `master` covers the control plane checks in sections 1 and 3, `etcd` covers section 2, `node` covers section 4, and `policies` covers section 5. The playground node has the `kube-bench` binary in `/usr/local/bin/kube-bench` and the benchmark files in `/etc/kube-bench/cfg`. Open a shell with `astrona ssh astro-ats-031-playground-020-01` and run the control plane checks. kube-bench reads files that only `root` can read, so run it with `sudo`:
+You choose what to check with targets. The target `master` covers the control plane component checks in section 1, `etcd` covers section 2, `controlplane` covers section 3, `node` covers section 4, and `policies` covers section 5. The playground node has the `kube-bench` binary in `/usr/local/bin/kube-bench` and the benchmark files in `/etc/kube-bench/cfg`. Open a shell with `astrona ssh astro-ats-031-playground-020-01` and run the control plane checks. kube-bench reads files that only `root` can read, so run it with `sudo`:
 
 <!-- astrona:playground:renew -->
 

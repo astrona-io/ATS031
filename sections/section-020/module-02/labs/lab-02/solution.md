@@ -27,7 +27,7 @@ The value is the name of a directory such as `cis-1.10`. The variable `edition` 
 
 ## List the definition files
 
-The image keeps the editions under `/opt/kube-bench/cfg`. A short pod with the image can list one directory without running an audit. The image is already on the nodes, so `--image-pull-policy=IfNotPresent` avoids a download:
+The image keeps the editions under `/opt/kube-bench/cfg`. A short pod with the image can list one directory without running an audit. The image is already on the node, so `--image-pull-policy=IfNotPresent` avoids a download:
 
 ```sh
 kubectl -n starfleet-031-020-02-02 run kube-bench-files --rm -i --restart=Never --image-pull-policy=IfNotPresent --image=docker.io/aquasec/kube-bench:v0.10.6 --command -- ls "/opt/kube-bench/cfg/$edition"
