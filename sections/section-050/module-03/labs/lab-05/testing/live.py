@@ -1,3 +1,4 @@
+import re
 import subprocess
 
 OUTPOST = 'outpost-031-050-03-05'
@@ -25,9 +26,12 @@ if wants('denies-tags'):
     assert denied_by_policy(dry_run_pod(NAMESPACE, None, init_image=TAGGED)), \
         'A Pod whose init container uses a tag-only image must be denied too'
 if wants('allows-digests'):
-    bindings = json.loads(kubectl('get', 'validatingadmissionpolicybindings', '-o', 'json'))['items']
-    assert any('Deny' in (binding['spec'].get('validationActions') or []) for binding in bindings), \
-        'Bind the policy with validationActions: [Deny]'
+    denial = dry_run_pod(NAMESPACE, TAGGED)
+    assert denied_by_policy(denial), 'A Pod with the tag-only image ' + TAGGED + ' must be denied by a ValidatingAdmissionPolicy in ' + NAMESPACE
+    binding_name = re.search(r"with binding '([^']+)'", denial.stderr)
+    assert binding_name, 'The denial must name the ValidatingAdmissionPolicyBinding: ' + denial.stderr.strip()
+    binding = get('validatingadmissionpolicybinding', binding_name.group(1), namespace=None)
+    assert binding['spec'].get('validationActions') == ['Deny'], 'Bind the policy with validationActions: ["Deny"]'
     for image in (PINNED, 'docker.io/library/python@sha256:' + 'fedcba9876543210' * 4):
         result = dry_run_pod(NAMESPACE, image)
         assert result.returncode == 0, 'A Pod with the digest-pinned image ' + image + ' must be admitted: ' + result.stderr.strip()

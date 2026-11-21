@@ -24,4 +24,8 @@ if (( RANDOM % 4 != 0 )); then
   flip_byte "$(printf '%s\n' kubectl kubeadm kubelet | shuf -n 1)"
 fi
 touch -r kubectl.sha256 kubectl kubeadm kubelet
+# The grader compares the downloads with this list of staged digests.
+mkdir -p /var/lib/astrona-lab
+(cd "$downloads" && sha256sum kubectl kubeadm kubelet kubectl.sha256 kubeadm.sha256 kubelet.sha256) > /var/lib/astrona-lab/050-02-02-staged
+chmod 0600 /var/lib/astrona-lab/050-02-02-staged
 echo "Staged $downloads"

@@ -6,6 +6,10 @@ published = {tool: node_exec(NODE, 'cat', f'{downloads}/{tool}.sha256').stdout.s
 actual = {tool: node_exec(NODE, 'sha256sum', f'{downloads}/{tool}').stdout.split()[0] for tool in tools}
 failing = [tool for tool in tools if published[tool] != actual[tool]]
 assert len(failing) <= 1, 'The downloads were changed; start the lab again'
+staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/050-02-02-staged', success=False)
+assert staged.returncode == 0, 'The record of the staged files is missing; start the lab again'
+assert node_exec(NODE, 'sh', '-c', 'cd /var/lib/k8s-downloads && sha256sum --check --quiet /var/lib/astrona-lab/050-02-02-staged', success=False).returncode == 0, \
+    'The downloads or their .sha256 files were changed; start the lab again'
 
 if wants('check-file'):
     found = node_exec(NODE, 'cat', downloads + '/SHA256SUMS', success=False)
