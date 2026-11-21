@@ -120,7 +120,7 @@ def ip_blocks():
 
 if wants('range-admits-courier'):
     blocks = ip_blocks()
-    assert any(ipaddress.ip_network(block['cidr'], strict=False).subnet_of(POD_RANGE) and ipaddress.ip_address(pod_ip(OUTPOST, 'courier')) in ipaddress.ip_network(block['cidr'], strict=False) for block in blocks), 'The ipBlock cidr must lie inside the pod range and contain the courier address'
+    assert blocks and all(ipaddress.ip_network(block['cidr'], strict=False) == POD_RANGE for block in blocks), 'The ipBlock cidr must be the pod range 192.168.0.0/16'
     expect_open(OUTPOST, 'courier', pod_ip(HOME, 'ledger'), 7070)
 if wants('except-blocks-rogue'):
     blocks = ip_blocks()
@@ -128,9 +128,7 @@ if wants('except-blocks-rogue'):
     courier = ipaddress.ip_address(pod_ip(OUTPOST, 'courier'))
     for block in blocks:
         excluded = [ipaddress.ip_network(item, strict=False) for item in block.get('except') or []]
-        if rogue in ipaddress.ip_network(block['cidr'], strict=False):
-            assert any(rogue in network for network in excluded), 'An except entry must remove the rogue address'
         assert not any(courier in network for network in excluded), 'The except list must not remove the courier address'
-        assert all(network.prefixlen == 32 for network in excluded), 'Remove exactly one address with a /32 entry'
+        assert excluded == [ipaddress.ip_network(str(rogue) + '/32')], 'The except list must hold exactly one entry: ' + str(rogue) + '/32'
     expect_blocked(OUTPOST, 'rogue', pod_ip(HOME, 'ledger'), 7070)
     expect_open(OUTPOST, 'courier', pod_ip(HOME, 'ledger'), 7070)

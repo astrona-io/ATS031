@@ -105,6 +105,14 @@ def expect_dns(namespace, pod, works=True):
 
 NS = 'outpost-031-010-01-04'
 
+def only_this_namespace(peer, namespace):
+    """A peer without a namespaceSelector stays in the policy's namespace; with one, it must match only that namespace."""
+    if 'namespaceSelector' not in peer:
+        return True
+    items = json.loads(kubectl('get', 'namespace', '-o', 'json'))['items']
+    matched = [item['metadata']['name'] for item in items if selector_matches(peer['namespaceSelector'], item['metadata'].get('labels') or {})]
+    return matched == [namespace]
+
 def baseline_intact():
     baseline = get('networkpolicy', 'default-deny-all', NS)['spec']
     assert baseline.get('podSelector') in ({}, None) and sorted(baseline.get('policyTypes', [])) == ['Egress', 'Ingress'], 'default-deny-all must still select every pod for both directions'
@@ -115,13 +123,22 @@ if wants('lander-reaches-depot'):
     expect_open(NS, 'lander', pod_ip(NS, 'depot'), 8080)
 if wants('baseline-and-narrow-rules'):
     baseline_intact()
+    names = sorted(item['metadata']['name'] for item in policies(NS))
+    assert names == ['default-deny-all', 'depot-ingress', 'lander-egress'], 'Repair depot-ingress in place: keep exactly the policies default-deny-all, depot-ingress and lander-egress'
+    lander_rules = rules_for(NS, pod_labels(NS, 'lander'), 'Egress')
+    no_open_rules(lander_rules)
+    for rule in lander_rules:
+        assert port_set(rule) == {('TCP', '8080', None)}, 'lander-egress must still allow only TCP port 8080'
+        for peer in peers_of(rule):
+            assert 'podSelector' in peer and 'ipBlock' not in peer and only_this_namespace(peer, NS), 'lander-egress must still select the depot pod in ' + NS
+            assert not selector_matches(peer['podSelector'], pod_labels(NS, 'stray')), 'lander-egress must not select the stray pod'
     depot_rules = rules_for(NS, pod_labels(NS, 'depot'), 'Ingress')
     assert depot_rules, 'The depot pod needs an ingress rule'
     no_open_rules(depot_rules)
     for rule in depot_rules:
         assert port_set(rule) == {('TCP', '8080', None)}, 'The depot ingress rule must allow only TCP port 8080'
         for peer in peers_of(rule):
-            assert set(peer) == {'podSelector'}, 'Admit the lander pod with a podSelector in the same namespace'
+            assert 'podSelector' in peer and 'ipBlock' not in peer and only_this_namespace(peer, NS), 'Admit the lander pod with a podSelector in the same namespace'
             assert selector_matches(peer['podSelector'], pod_labels(NS, 'lander')), 'The peer must select the lander pod'
             assert not selector_matches(peer['podSelector'], pod_labels(NS, 'stray')), 'The peer must not select the stray pod'
     expect_blocked(NS, 'stray', pod_ip(NS, 'depot'), 8080)

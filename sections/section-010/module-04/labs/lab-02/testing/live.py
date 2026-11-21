@@ -105,6 +105,15 @@ def expect_dns(namespace, pod, works=True):
 
 NS = 'starfleet-031-010-04-02'
 
+def is_dns_peer(peer):
+    """One peer entry that selects only the kube-dns pods in kube-system."""
+    if 'namespaceSelector' not in peer or 'podSelector' not in peer:
+        return False
+    return (selector_matches(peer['namespaceSelector'], {'kubernetes.io/metadata.name': 'kube-system'})
+            and not selector_matches(peer['namespaceSelector'], {'kubernetes.io/metadata.name': 'default'})
+            and selector_matches(peer['podSelector'], {'k8s-app': 'kube-dns'})
+            and not selector_matches(peer['podSelector'], {'k8s-app': 'other'}))
+
 def baseline_intact():
     spec = get('networkpolicy', 'default-deny-all', NS)['spec']
     assert spec.get('podSelector') in ({}, None) and sorted(spec.get('policyTypes', [])) == ['Egress', 'Ingress'] and not spec.get('egress') and not spec.get('ingress'), 'Keep default-deny-all unchanged'
@@ -125,8 +134,12 @@ if wants('dns-only'):
     rules = rules_for(NS, pod_labels(NS, 'navigator'), 'Egress')
     assert rules, 'The navigator pod needs an egress rule'
     no_open_rules(rules)
+    ports = set()
     for rule in rules:
         assert port_set(rule) <= {('UDP', '53', None), ('TCP', '53', None)}, 'Allow only UDP and TCP port 53'
+        assert all(is_dns_peer(peer) for peer in peers_of(rule)), 'Select the kube-system namespace by its name label and the pods by k8s-app: kube-dns in one peer entry'
+        ports |= port_set(rule)
+    assert ports == {('UDP', '53', None), ('TCP', '53', None)}, 'Allow both UDP 53 and TCP 53'
     for policy in policies(NS):
         if policy['metadata']['name'] != 'navigator-dns':
             assert policy['metadata']['name'] == 'default-deny-all', 'Create only the navigator-dns policy'

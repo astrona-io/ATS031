@@ -113,6 +113,9 @@ def kiosk_ips():
 
 def kiosk_rules():
     get('networkpolicy', 'kiosk-ingress', NS)
+    assert sorted(item['metadata']['name'] for item in policies(NS)) == ['default-deny-ingress', 'kiosk-ingress'], 'Repair kiosk-ingress in place and add no other policy'
+    baseline = get('networkpolicy', 'default-deny-ingress', NS)['spec']
+    assert baseline.get('podSelector') in ({}, None) and baseline.get('policyTypes') == ['Ingress'] and not baseline.get('ingress'), 'Keep default-deny-ingress as it is'
     rules = rules_for(NS, {'app': 'kiosk'}, 'Ingress')
     no_open_rules(rules)
     return rules
