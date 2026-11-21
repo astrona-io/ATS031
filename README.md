@@ -40,7 +40,7 @@ See [curriculum coverage](CURRICULUM.md), [primary sources](SOURCES.md), [questi
 
 ## Hands-On Coverage
 
-This course has 19 ungraded module playgrounds and 86 independent labs. Each lab's task and solution are registered immediately after the reading it practises. CI (`.github/workflows/labs.yml`) checks registration, lab layout, teaching coverage and question banks, and runs `astrona test` on changed labs. Every lab passed `astrona validate` and `astrona test` on kind (arm64 node image) on 2026-11-17; the playgrounds have not been booted in CI yet.
+This course has 19 ungraded module playgrounds and 87 independent labs. Each lab's task and solution are registered immediately after the reading it practises. CI (`.github/workflows/labs.yml`) checks registration, lab layout, teaching coverage and question banks, and runs `astrona test` on changed labs. CI ran `astrona test` on every lab and playground on 2026-11-18 (amd64, kind and qemu): all 86 labs and 19 playgrounds of that date passed.
 
 | Module | Labs in teaching order |
 | --- | --- |
@@ -67,6 +67,7 @@ This course has 19 ungraded module playgrounds and 86 independent labs. Each lab
 | 040/02 | Block The Metadata Address For A Namespace |
 | 040/02 | Allow The Metadata Address For One Labelled Pod |
 | 040/03 | Block Pod Access To The Kubelet Ports |
+| 040/03 | Turn On NodeRestriction And Remove A Protected Node Label |
 | 040/03 | Find Pods That Expose The Runtime Or The Host Network |
 | 050/01 | Verify Signed Artifact Checksums |
 | 050/02 | Find The Binary That Fails Verification |

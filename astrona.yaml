@@ -1851,6 +1851,20 @@ modules:
     title: Node Identity And NodeRestriction
     path: sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
   - type: reading
+    title: Turn On NodeRestriction And Remove A Protected Node Label — Task
+    path: sections/section-040/module-03/labs/lab-05/question.md
+  - type: lab
+    title: Turn On NodeRestriction And Remove A Protected Node Label
+    path: sections/section-040/module-03/labs/lab-05
+    examScope: cluster
+    difficulty: intermediate
+    estimated_duration: 10m
+    learning_goals:
+    - Turn on the NodeRestriction admission plugin and prove that a kubelet credential cannot write other nodes or protected labels.
+  - type: reading
+    title: Turn On NodeRestriction And Remove A Protected Node Label — Solution
+    path: sections/section-040/module-03/labs/lab-05/solution.md
+  - type: reading
     title: Runtime Socket And hostPath Exposure
     path: sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
   - type: reading

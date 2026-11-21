@@ -232,6 +232,9 @@ labs:
   sections/section-040/module-03/labs/lab-02:
     preparation:
     - sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
+  sections/section-040/module-03/labs/lab-05:
+    preparation:
+    - sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
   sections/section-040/module-03/labs/lab-03:
     preparation:
     - sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
@@ -281,5 +284,4 @@ labs:
     - sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
 additional_readings:
 - sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
-- sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
 - sections/section-040/module-03/course-06-controls-outside-the-cluster.md

@@ -1,0 +1,51 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-031-lab-040-03-05
+  docs:
+    prerequisites: docs/prerequisites.md
+    examQuestion: question.md
+    caseStudy: docs/case-study.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-private-environment
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: admission-plugin
+    description: kube-apiserver runs with NodeRestriction in --enable-admission-plugins and Node and RBAC in --authorization-mode
+    type: file
+    source: validation/validate-admission-plugin.sh
+    points: 1
+  - name: node-writes-refused
+    description: The worker kubelet credential cannot label the control plane node or set a node-restriction.kubernetes.io/ label on its own node
+    type: file
+    source: validation/validate-node-writes-refused.sh
+    points: 2
+  - name: protected-label-removed
+    description: The worker node no longer carries the node-restriction.kubernetes.io/dedicated label and stays Ready
+    type: file
+    source: validation/validate-protected-label-removed.sh
+    points: 1
