@@ -37,4 +37,8 @@ done
 rm -rf "$keys"
 printf 'release: fleet-%s\napproved-by: release-manager\n' "$(date -u +%Y%m%d)" > "$approval/approval.txt"
 touch -r "$records/fleet.pub" "$records"/* "$approval/approval.txt"
+# The grader compares the build records with this list of staged digests.
+mkdir -p /var/lib/astrona-lab
+(cd "$records" && sha256sum *) > /var/lib/astrona-lab/050-03-03-staged
+chmod 0600 /var/lib/astrona-lab/050-03-03-staged
 echo "Staged $records and $approval"

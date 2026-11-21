@@ -25,4 +25,8 @@ for name in $(printf '%s\n' "${files[@]}" | shuf -n $(( 1 + RANDOM % 3 ))); do
   flip_byte "$name"
 done
 touch -r SHA256SUMS "${files[@]}"
+# The grader compares the files with this list of staged digests.
+mkdir -p /var/lib/astrona-lab
+(cd "$release" && sha256sum SHA256SUMS "${files[@]}") > /var/lib/astrona-lab/050-01-01-staged
+chmod 0600 /var/lib/astrona-lab/050-01-01-staged
 echo "Staged $release"

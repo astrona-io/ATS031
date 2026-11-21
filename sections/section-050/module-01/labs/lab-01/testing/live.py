@@ -7,6 +7,10 @@ for line in node_exec(NODE, 'cat', release + '/SHA256SUMS').stdout.splitlines():
     digest, name = line.split(None, 1)
     listed[name.strip()] = digest
 assert sorted(listed) == sorted(names), 'SHA256SUMS was changed; start the lab again'
+staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/050-01-01-staged', success=False)
+assert staged.returncode == 0, 'The record of the staged files is missing; start the lab again'
+assert node_exec(NODE, 'sh', '-c', 'cd /var/lib/fleet-release && sha256sum --check --quiet /var/lib/astrona-lab/050-01-01-staged', success=False).returncode == 0, \
+    'The files or SHA256SUMS were changed; start the lab again'
 current = {}
 for line in node_exec(NODE, 'sha256sum', *[release + '/' + name for name in names]).stdout.splitlines():
     digest, path = line.split(None, 1)
