@@ -60,4 +60,4 @@ The diagram shows two paths of risk: the data plane reaches the pod from outside
 > - **Leaving `--api.insecure=true` on a shared cluster.** Remove it or protect the API with a router and authentication.
 > - **Assuming a TLS Secret is the only Secret the controller can read.** The default role covers every Secret.
 > - **Exposing the Service as `LoadBalancer` with all ports.** Publish only 80 and 443.
-> - **Running the controller as an admin ServiceAccount.** Give it a purpose-built role and nothing more.
+> - **Running the controller as a ServiceAccount with administrator rights.** Give it a purpose-built role and nothing more.
