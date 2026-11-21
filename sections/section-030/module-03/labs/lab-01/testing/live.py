@@ -192,6 +192,7 @@ if wants('scout-tls-secret'):
     live(r"""
 pem, key = pems
 assert 'scout.example.test' in dns_names(pem), 'The scout-tls certificate must name DNS:scout.example.test in its SAN'
+assert not [value for value in dns_names(pem) if value.startswith('*') or value == 'wrong.example.test'], 'The certificate must not match another name, so a client that expects wrong.example.test rejects it'
 assert key_matches(pem, key), 'tls.key in scout-tls must be the private key of tls.crt'
 """, tls_secret('scout-tls'))
 if wants('scout-ingress'):

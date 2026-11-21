@@ -192,7 +192,7 @@ if wants('fleet-tls'):
     fleet = get('ingress', 'fleet')
     assert tls_entries(fleet) == {(('bridge.local',), 'bridge-tls'), (('dock.local',), 'dock-tls')}, \
         'spec.tls must have one entry for bridge.local with bridge-tls and one for dock.local with dock-tls'
-    assert {('bridge.local', '/', 'Prefix', 'bridge', 80), ('dock.local', '/', 'Prefix', 'dock', 80)} <= routes(fleet), \
+    assert {('bridge.local', '/', 'Prefix', 'bridge', 80), ('dock.local', '/', 'Prefix', 'dock', 80)} == routes(fleet), \
         'The rules for bridge.local and dock.local must stay unchanged'
 if wants('dock-https'):
     live(r"""

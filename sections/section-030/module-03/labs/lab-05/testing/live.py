@@ -190,8 +190,15 @@ def traefik_args():
 
 if wants('https-redirect'):
     arguments = traefik_args()
+    # Traefik reads flag names without regard to case.
+    folded = [item.split('=', 1)[0].lower() + '=' + item.split('=', 1)[1] if '=' in item else item.lower() for item in arguments]
     for required in ('--entryPoints.web.http.redirections.entryPoint.to=websecure', '--entryPoints.web.http.redirections.entryPoint.scheme=https'):
-        assert required in arguments, 'Traefik must have the argument ' + required
+        key, value = required.split('=', 1)
+        assert key.lower() + '=' + value in folded, 'Traefik must have the argument ' + required
+    for kept in ('--providers.kubernetesingress=true', '--providers.kubernetesingress.ingressclass=traefik', '--providers.file.directory=/etc/traefik/dynamic',
+                 '--providers.file.watch=true', '--entrypoints.web.address=:8000', '--entrypoints.websecure.address=:8443', '--log.level=info'):
+        key, value = kept.split('=', 1)
+        assert key.lower() + '=' + value in [item.lower() for item in folded], 'Keep the existing argument ' + kept
     live(r"""
 response = http_get('harbor.example.test', '/cargo')
 assert code_of(response) in ('301', '308'), 'http://harbor.example.test/cargo must get a permanent redirect, not ' + status_of(response)
@@ -199,6 +206,8 @@ location = header(response, 'Location') or ''
 assert location.startswith('https://harbor.example.test') and location.endswith('/cargo'), 'The redirect must point to https://harbor.example.test with the same path'
 """)
 if wants('hsts-header'):
+    dynamic = (get('configmap', 'traefik-dynamic', 'ingress-system').get('data') or {}).get('dynamic.yaml', '')
+    assert 'default:' in dynamic and 'VersionTLS12' in dynamic, 'dynamic.yaml must keep the TLS option default with minVersion: VersionTLS12'
     assert annotation(get('ingress', 'harbor'), 'router.middlewares') == 'hsts@file', \
         'The Ingress harbor must have the annotation traefik.ingress.kubernetes.io/router.middlewares: hsts@file'
     live(r"""

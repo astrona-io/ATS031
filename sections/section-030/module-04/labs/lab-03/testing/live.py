@@ -197,8 +197,26 @@ if wants('mtls-option'):
     assert client_ca.strip() == base64.b64decode(expected).decode().strip(), \
         'The ConfigMap client-ca in ingress-system must hold the crew CA certificate under the key client-ca.crt'
     dynamic = (get('configmap', 'traefik-dynamic', 'ingress-system').get('data') or {}).get('dynamic.yaml', '')
-    assert 'RequireAndVerifyClientCert' in dynamic and '/etc/traefik/client-ca/client-ca.crt' in dynamic, \
-        'dynamic.yaml must define a TLS option that requires and verifies client certificates from /etc/traefik/client-ca/client-ca.crt'
+    def option_block(text, name):
+        """The lines under tls.options.<name>, without comments."""
+        lines = [line.split('#', 1)[0].rstrip() for line in text.splitlines()]
+        lines = [line for line in lines if line.strip()]
+        for index, line in enumerate(lines):
+            if line.strip() == name + ':':
+                indent = len(line) - len(line.lstrip())
+                block = []
+                for following in lines[index + 1:]:
+                    if len(following) - len(following.lstrip()) <= indent:
+                        break
+                    block.append(following.strip())
+                return block
+        return None
+    mtls = option_block(dynamic, 'mtls')
+    assert mtls is not None, 'dynamic.yaml must define the TLS option mtls'
+    assert 'clientAuthType: RequireAndVerifyClientCert' in mtls and '- /etc/traefik/client-ca/client-ca.crt' in mtls, \
+        'The TLS option mtls must set clientAuthType: RequireAndVerifyClientCert and list /etc/traefik/client-ca/client-ca.crt in caFiles'
+    default = option_block(dynamic, 'default')
+    assert default is not None and 'clientAuth:' not in default, 'Keep the TLS option default without client authentication'
 if wants('mtls-enforced'):
     client = tls_secret('crew-client')
     live(r"""

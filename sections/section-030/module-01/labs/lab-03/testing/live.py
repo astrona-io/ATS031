@@ -195,7 +195,7 @@ assert key_matches(pems[0], pems[1]), 'tls.key in vault-tls must be the private 
 if wants('vault-certificate'):
     live(r"""
 assert 'vault.local' in dns_names(pems[0]), 'The certificate must name DNS:vault.local in its Subject Alternative Name'
-assert days_left(pems[0]) >= 80, 'The certificate must stay valid for at least 80 more days'
+assert 88 <= days_left(pems[0]) <= 91, 'The certificate must be valid for 90 days'
 """, tls_secret('vault-tls')[:1])
 if wants('vault-https'):
     live(r"""

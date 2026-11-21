@@ -191,6 +191,8 @@ def traefik_args():
 if wants('api-closed'):
     assert not [item for item in traefik_args() if item.startswith('--api.insecure') and not item.endswith('=false')], \
         'Traefik must run without --api.insecure'
+    container = get('deployment', 'traefik', 'ingress-system')['spec']['template']['spec']['containers'][0]
+    assert all(port.get('containerPort') != 8080 for port in container.get('ports') or []), 'The Deployment traefik must not declare the container port 8080'
     ports = get('service', 'traefik', 'ingress-system')['spec'].get('ports') or []
     assert all(port.get('port') != 8080 for port in ports), 'The Service traefik must not publish port 8080'
     live(r"""
@@ -202,6 +204,8 @@ except OSError:
 assert not reachable, 'Port 8080 of the Traefik Service must not accept connections'
 """)
 if wants('secret-scope'):
+    assert '--providers.kubernetesingress.namespaces=' + NAMESPACE in traefik_args(), \
+        'Traefik must have the argument --providers.kubernetesingress.namespaces=' + NAMESPACE
     assert can_i('get', 'secrets', '-n', 'kube-system') == 'no', 'The Traefik ServiceAccount must not read Secrets in kube-system'
     assert can_i('list', 'secrets', '--all-namespaces') == 'no', 'The Traefik ServiceAccount must not list Secrets in every namespace'
     for verb in ('get', 'list', 'watch'):
