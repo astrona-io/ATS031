@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 360" width="840" height="360" role="img" aria-labelledby="title desc">
+  <title id="title">IMDSv1 compared with IMDSv2</title>
+  <desc id="desc">IMDSv1 answers one plain GET request with data and credentials. IMDSv2 first needs a PUT request to /latest/api/token with a header that sets the token lifetime. It returns a session token whose IP time to live is 1 by default. Every later GET request must carry the token in a header.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <line class="sep" x1="30" y1="150" x2="810" y2="150"/>
+
+  <text class="strong" x="30" y="38">IMDSv1: one plain request</text>
+  <path class="line" d="M190 84 H526" marker-end="url(#arrow)"/>
+  <text class="label" x="358" y="74" text-anchor="middle"><tspan class="code">GET /latest/meta-data/...</tspan></text>
+  <path class="line" d="M530 110 H194" marker-end="url(#arrow)"/>
+  <text class="label bad" x="358" y="130" text-anchor="middle">data and credentials</text>
+  <rect class="box" x="40" y="70" width="150" height="54" rx="8"/>
+  <text x="115" y="102" text-anchor="middle">client</text>
+  <rect class="ask" x="530" y="70" width="270" height="54" rx="8"/>
+  <text x="665" y="102" text-anchor="middle">metadata service</text>
+
+  <text class="strong" x="30" y="182">IMDSv2: token first, then requests</text>
+  <path class="line" d="M190 226 H526" marker-end="url(#arrow)"/>
+  <text class="label" x="358" y="216" text-anchor="middle">1. <tspan class="code">PUT /latest/api/token</tspan> + lifetime header</text>
+  <path class="line" d="M530 248 H194" marker-end="url(#arrow)"/>
+  <text class="label" x="358" y="268" text-anchor="middle">2. session token (IP TTL 1 by default)</text>
+  <path class="line" d="M190 300 H526" marker-end="url(#arrow)"/>
+  <text class="label" x="358" y="292" text-anchor="middle">3. <tspan class="code">GET</tspan> with the token in a header</text>
+  <path class="line" d="M530 322 H194" marker-end="url(#arrow)"/>
+  <text class="label" x="358" y="342" text-anchor="middle">4. data and credentials</text>
+  <rect class="box" x="40" y="212" width="150" height="124" rx="8"/>
+  <text x="115" y="278" text-anchor="middle">client</text>
+  <rect class="ask" x="530" y="212" width="270" height="124" rx="8"/>
+  <text x="665" y="278" text-anchor="middle">metadata service</text>
+</svg>

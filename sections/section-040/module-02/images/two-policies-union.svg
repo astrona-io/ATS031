@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 350" width="840" height="350" role="img" aria-labelledby="title desc">
+  <title id="title">Two egress policies add up</title>
+  <desc id="desc">Top: the tender pod without the role label is selected only by block-metadata. It reaches any other address, and its request to 169.254.169.254 port 80 is dropped. Bottom: with the label role=cloud-agent, tender is selected by block-metadata and allow-metadata-agent. The union of both policies lets it reach any other address and 169.254.169.254 port 80.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <line class="sep" x1="30" y1="176" x2="810" y2="176"/>
+
+  <text class="strong" x="30" y="34">Pod without the label</text>
+  <path class="line" d="M210 98 H266" marker-end="url(#arrow)"/>
+  <path class="okline" d="M450 90 C 500 90, 510 72, 566 72" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M450 106 C 500 106, 510 136, 566 136" marker-end="url(#arrowbad)"/>
+  <rect class="box" x="40" y="70" width="170" height="56" rx="8"/>
+  <text x="125" y="94" text-anchor="middle" class="code">tender</text>
+  <text x="125" y="114" text-anchor="middle" class="label">no role label</text>
+  <rect class="policy" x="270" y="74" width="180" height="48" rx="8"/>
+  <text x="360" y="103" text-anchor="middle" class="code">block-metadata</text>
+  <rect class="ok" x="570" y="50" width="240" height="44" rx="8"/>
+  <text x="690" y="77" text-anchor="middle">any other address</text>
+  <rect class="drop" x="570" y="114" width="240" height="44" rx="8"/>
+  <text x="690" y="141" text-anchor="middle" class="code">169.254.169.254:80</text>
+
+  <text class="strong" x="30" y="206">Pod with <tspan class="code">role=cloud-agent</tspan></text>
+  <path class="line" d="M210 268 C 240 268, 240 246, 266 246" marker-end="url(#arrow)"/>
+  <path class="line" d="M210 284 C 240 284, 240 308, 266 308" marker-end="url(#arrow)"/>
+  <path class="okline" d="M450 246 H566" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M450 308 H566" marker-end="url(#arrowok)"/>
+  <rect class="box" x="40" y="248" width="170" height="56" rx="8"/>
+  <text x="125" y="272" text-anchor="middle" class="code">tender</text>
+  <text x="125" y="292" text-anchor="middle" class="label">labelled</text>
+  <rect class="policy" x="270" y="222" width="180" height="48" rx="8"/>
+  <text x="360" y="251" text-anchor="middle" class="code">block-metadata</text>
+  <rect class="policy" x="270" y="284" width="180" height="48" rx="8"/>
+  <text x="360" y="313" text-anchor="middle" class="code">allow-metadata-agent</text>
+  <rect class="ok" x="570" y="224" width="240" height="44" rx="8"/>
+  <text x="690" y="251" text-anchor="middle">any other address</text>
+  <rect class="ok" x="570" y="286" width="240" height="44" rx="8"/>
+  <text x="690" y="313" text-anchor="middle" class="code">169.254.169.254:80</text>
+</svg>
