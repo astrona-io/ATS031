@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 280" width="840" height="280" role="img" aria-labelledby="title desc">
+  <title id="title">Where the Traefik TLS policy comes from</title>
+  <desc id="desc">The ConfigMap traefik-dynamic holds the key dynamic.yaml. The Traefik pod mounts it at /etc/traefik/dynamic. The file provider reads the folder and loads the TLS option default, which applies to every TLS router.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M250 145 H318" marker-end="url(#arrow)"/>
+  <path class="line" d="M435 139 V168" marker-end="url(#arrow)"/>
+  <path class="line" d="M550 192 H590 V130 H618" marker-end="url(#arrow)"/>
+  <path class="okline" d="M720 160 V198" marker-end="url(#arrowok)"/>
+  <rect class="frame" x="20" y="40" width="560" height="210" rx="10"/>
+  <text class="label" x="32" y="60">namespace ingress-system</text>
+  <rect class="frame" x="300" y="70" width="270" height="160" rx="10"/>
+  <text class="label" x="312" y="90">traefik pod</text>
+  <text class="label" x="274" y="136" text-anchor="middle">mount</text>
+  <text class="label" x="730" y="184" text-anchor="start">applies to</text>
+  <rect class="box" x="40" y="105" width="210" height="80" rx="8"/>
+  <text x="145.0" y="130" text-anchor="middle">ConfigMap</text>
+  <text class="code" x="145.0" y="150" text-anchor="middle">traefik-dynamic</text>
+  <text x="145.0" y="170" text-anchor="middle">key dynamic.yaml</text>
+  <rect class="box" x="320" y="95" width="230" height="44" rx="8"/>
+  <text class="code" x="435.0" y="122" text-anchor="middle">/etc/traefik/dynamic</text>
+  <rect class="box" x="320" y="170" width="230" height="44" rx="8"/>
+  <text x="435.0" y="197" text-anchor="middle">file provider</text>
+  <rect class="ask" x="620" y="100" width="200" height="60" rx="8"/>
+  <text x="720.0" y="125" text-anchor="middle">TLS option</text>
+  <text class="code" x="720.0" y="145" text-anchor="middle">default</text>
+  <rect class="ok" x="620" y="200" width="200" height="50" rx="8"/>
+  <text x="720.0" y="230" text-anchor="middle">every TLS router</text>
+</svg>
