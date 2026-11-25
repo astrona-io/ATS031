@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 190" width="840" height="190" role="img" aria-labelledby="title desc">
+  <title id="title">How kube-bench v0.10.6 finds an edition for Kubernetes 1.35</title>
+  <desc id="desc">Kubernetes 1.35, 1.34, 1.33 and 1.32 are not in the version mapping of kube-bench v0.10.6. The tool tries each lower minor version until it finds 1.31, which maps to the edition cis-1.10.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="dashed" d="M130 92 H164" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M266 92 H300" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M402 92 H436" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M538 92 H572" marker-end="url(#arrowbad)"/>
+  <path class="okline" d="M674 92 H708" marker-end="url(#arrowok)"/>
+  <line class="sep" x1="30" y1="134" x2="538" y2="134"/>
+
+  <text x="30" y="36">Kubernetes 1.35 with <tspan class="code">kube-bench v0.10.6</tspan>: try the next lower minor version until one is found</text>
+
+  <rect class="drop" x="30" y="70" width="100" height="44" rx="8"/>
+  <text class="code" x="80" y="97" text-anchor="middle">1.35</text>
+  <rect class="drop" x="166" y="70" width="100" height="44" rx="8"/>
+  <text class="code" x="216" y="97" text-anchor="middle">1.34</text>
+  <rect class="drop" x="302" y="70" width="100" height="44" rx="8"/>
+  <text class="code" x="352" y="97" text-anchor="middle">1.33</text>
+  <rect class="drop" x="438" y="70" width="100" height="44" rx="8"/>
+  <text class="code" x="488" y="97" text-anchor="middle">1.32</text>
+  <rect class="ok" x="574" y="70" width="100" height="44" rx="8"/>
+  <text class="code" x="624" y="97" text-anchor="middle">1.31</text>
+  <rect class="ok" x="710" y="70" width="110" height="44" rx="8"/>
+  <text class="code strong" x="765" y="97" text-anchor="middle">cis-1.10</text>
+
+  <text class="label bad" x="284" y="158" text-anchor="middle">not in the version mapping</text>
+  <text class="label good" x="624" y="158" text-anchor="middle">in the mapping</text>
+  <text class="label good" x="765" y="158" text-anchor="middle">edition used</text>
+</svg>

@@ -1,10 +1,14 @@
 # Run kube-bench On A kubeadm Node
 
-On a node where you have a shell, you can run `kube-bench` as a binary. That is the usual way in the exam: you log in to a node and run the program as root. In a cluster you can also run it as a Kubernetes Job, which is an object that runs a pod until it finishes. A Job can be scheduled on a chosen node and leaves its output in the pod log. This part runs the binary on the kubeadm node of the playground, then runs the same audit as a Job, and compares the two results.
+You can run `kube-bench` in two ways, and the two ways do not always give the same result. On a node where you have a shell, you run it as a binary. That is the usual way in the exam: you log in to a node and run the program as root.
+
+In a cluster, you can also run it as a Kubernetes Job. A Job is an object that runs a pod until the pod finishes. You can schedule a Job on a chosen node, and it leaves its output in the pod log. This page runs the binary on the kubeadm node of the playground, then runs the same audit as a Job, and compares the two results.
 
 ## Run the binary on the node
 
-The playground node has the binary in `/usr/local/bin/kube-bench`. It reads files that only root can read, such as the static pod manifests in `/etc/kubernetes/manifests`, so run it with `sudo`. A static pod is a pod that the kubelet starts from a manifest file on the node, without the API server; kubeadm runs the API server, the controller manager, the scheduler and etcd this way.
+The playground node has the binary in `/usr/local/bin/kube-bench`. The program reads files that only root can read, such as the static pod manifests in `/etc/kubernetes/manifests`. So you run it with `sudo`.
+
+A static pod is a pod that the kubelet starts from a manifest file on the node, without the API server. kubeadm runs the API server, the controller manager, the scheduler and etcd as static pods.
 
 <!-- astrona:playground:renew -->
 
@@ -17,7 +21,7 @@ head -n 4 master.txt
 tail -n 6 master.txt
 ```
 
-The first lines start the first section of the benchmark, and the last lines hold the totals:
+The first lines start the first section of the benchmark. The last lines hold the totals:
 
 ```text
 [INFO] 1 Control Plane Security Configuration
@@ -31,7 +35,7 @@ The first lines start the first section of the benchmark, and the last lines hol
 0 checks INFO
 ```
 
-The report does not print the name of the benchmark edition. To see which edition judged the node, add `--v 1`, which turns on log messages, and search for the line that names the edition:
+The report does not print the name of the benchmark edition. To see which edition judged the node, add `--v 1`. This option turns on log messages. Then search for the line that names the edition:
 
 ```sh
 sudo kube-bench run --targets master --v 1 2>&1 | grep 'Benchmark version'
@@ -41,11 +45,11 @@ sudo kube-bench run --targets master --v 1 2>&1 | grep 'Benchmark version'
 I1118 09:06:28.751611   14047 common.go:351] Kubernetes version: "1.35" to Benchmark version: "cis-1.10"
 ```
 
-The log line shows that kube-bench detected Kubernetes 1.35 and chose the edition `cis-1.10`. The time stamp and the process number differ on every run.
+The log line shows that `kube-bench` detected Kubernetes 1.35 and chose the edition `cis-1.10`. The time stamp and the process number differ on every run.
 
 ## Audit the kubelet on the same node
 
-The kubelet is the agent on every node that starts the pods. Its checks are in the `node` target. On a cluster with separate worker nodes you run this target on each worker. In the playground the control plane node also runs the pods, so the `node` target runs on the same machine:
+The control plane checks do not cover the kubelet. The kubelet is the agent on every node that starts the pods, and its checks are in the `node` target. On a cluster with separate worker nodes, you run this target on each worker. In the playground, the control plane node also runs the pods, so the `node` target runs on the same machine:
 
 ```sh
 sudo kube-bench run --targets node | tail -n 6
@@ -59,13 +63,18 @@ sudo kube-bench run --targets node | tail -n 6
 0 checks INFO
 ```
 
-The `node` target covers other checks than the `master` target. A control plane node runs a kubelet too, so a complete review of it runs both targets.
+The `node` target covers different checks from the `master` target. A control plane node runs a kubelet too, so a complete review of a control plane node runs both targets.
 
 ## Run the audit as a Job
 
-A Job runs the program from the `kube-bench` container image instead of the binary on the node. The Job must do four things. It must share the host process namespace (`hostPID: true`), so that the audit can see the API server process. It must run on the control plane node, so it needs a node selector. It must mount the host directories that the audits read. It must run the program with the `master` target.
+Sometimes you have `kubectl` but no shell on the node. Then you run the program from the `kube-bench` container image in a Job. The Job must do four things:
 
-On most clusters the control plane node carries the taint `node-role.kubernetes.io/control-plane:NoSchedule`. A taint is a mark on a node that keeps away every pod without a matching toleration. The playground node has no taint, because it also runs your pods. The Job below has the toleration anyway, so the same file works on a cluster where the taint is set.
+1. Share the host process namespace (`hostPID: true`), so that the audit can see the API server process.
+2. Run on the control plane node, so it needs a node selector.
+3. Mount the host directories that the audits read.
+4. Run the program with the `master` target.
+
+On most clusters, the control plane node carries the taint `node-role.kubernetes.io/control-plane:NoSchedule`. A taint is a mark on a node that keeps away every pod without a matching toleration. The playground node has no taint, because it also runs your pods. The Job below has the toleration anyway, so the same file also works on a cluster where the taint is set.
 
 Save this as `job-kube-bench-master.yaml`:
 
@@ -106,7 +115,7 @@ spec:
       - {name: usr-bin, hostPath: {path: /usr/bin}}
 ```
 
-The mount of `/usr/bin` at `/usr/local/mount-from-host/bin` gives the program access to the `kubectl` and `kubelet` binaries of the node, which it uses to find the Kubernetes version. All mounts are read only, because the tool only reads. Apply it:
+The Job mounts `/usr/bin` of the node at `/usr/local/mount-from-host/bin`. This gives the program access to the `kubectl` and `kubelet` binaries of the node, which it uses to find the Kubernetes version. All mounts are read only, because the tool only reads. Apply it:
 
 ```sh
 kubectl apply -f job-kube-bench-master.yaml
@@ -128,11 +137,11 @@ job.batch/kube-bench-master condition met
 0 checks INFO
 ```
 
-If the Job does not complete, read why with `kubectl -n default describe job kube-bench-master` and `kubectl -n default logs job/kube-bench-master`. A missing image on the node, a taint without a toleration and a failed host mount are the usual causes.
+If the Job does not complete, find out why with `kubectl -n default describe job kube-bench-master` and `kubectl -n default logs job/kube-bench-master`. The usual causes are a missing image on the node, a taint without a toleration, and a failed host mount.
 
 ## Binary or Job: why the totals differ
 
-The Job found the same 9 failures as the binary, but one check moved from `PASS` to `WARN`. Compare check `1.1.10` in the two reports. The pattern `] 1.1.10 ` matches only the result line, not the remediation text of the check:
+The Job found the same 9 failures as the binary, but one check moved from `PASS` to `WARN`. To find it, compare check `1.1.10` in the two reports. The pattern `] 1.1.10 ` matches only the result line, not the remediation text of the check:
 
 ```sh
 grep '\] 1.1.10 ' master.txt
@@ -144,14 +153,18 @@ kubectl -n default logs job/kube-bench-master | grep '\] 1.1.10 '
 [WARN] 1.1.10 Ensure that the Container Network Interface file ownership is set to root:root (Manual)
 ```
 
-The audit of this check reads the files of the container network interface (CNI) plugin, the program that gives each pod its network, under `/var/lib/cni/networks`. The binary on the node can read that directory. The Job does not mount it, so the audit finds no files and the program reports `WARN`. A Job sees only the host directories that it mounts.
+The audit of this check reads the files of the Container Network Interface (CNI) plugin under `/var/lib/cni/networks`. The CNI plugin is the program that gives each pod its network. The binary on the node can read that directory. The Job does not mount it, so the audit finds no files and the program reports `WARN`.
 
-The binary on the node is the simplest and most complete way to run the audit when you have a shell on the node. The Job is the way to run it when you only have `kubectl`, and its result depends on the mounts in its file. The next question is how the program chooses what to check, and what to do when its choice is wrong.
+![Diagram: the kube-bench binary on the node reads /var/lib/cni/networks and check 1.1.10 passes, while the Job pod does not mount that directory and check 1.1.10 reports WARN](images/binary-vs-job-cni.svg)
+
+The drawing shows the rule behind the difference: a Job sees only the host directories that it mounts.
+
+So which way should you choose? The binary on the node is the simplest and most complete way to run the audit when you have a shell on the node. The Job is the way to run it when you only have `kubectl`, and its result depends on the mounts in its file. The open question is how the program chooses what to check, and what to do when its choice is wrong.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Running the binary without `sudo`.** Without root the program cannot read the manifests and data directories, and checks fail for the wrong reason.
+> - **Running the binary without `sudo`.** Without root, the program cannot read the manifests and data directories, and checks fail for the wrong reason.
 > - **Forgetting the toleration on a tainted control plane.** On a cluster where the control plane carries the taint, the Job stays `Pending`.
 > - **Running only one target.** The `master` target does not audit the kubelet. Run `node` too, on every node.
 > - **Leaving old Jobs in place.** A Job keeps its name. Delete a finished Job before you create one with the same name, or give each run its own name.

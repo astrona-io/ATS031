@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 250" width="840" height="250" role="img" aria-labelledby="title desc">
+  <title id="title">Compare failing checks before and after a fix</title>
+  <desc id="desc">Before the fix, kube-bench writes baseline-master.json and jq turns it into a list of failing check numbers. After the fix, a second run writes a second JSON file and a second list. diff compares the two lists: a number that is gone is fixed, and a new number is a side effect.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M195 64 H223" marker-end="url(#arrow)"/>
+  <path class="line" d="M400 64 H428" marker-end="url(#arrow)"/>
+  <path class="line" d="M195 174 H223" marker-end="url(#arrow)"/>
+  <path class="line" d="M400 174 H428" marker-end="url(#arrow)"/>
+  <path class="line" d="M107 88 V148" marker-end="url(#arrow)"/>
+  <path class="line" d="M605 64 H630 V104 H658" marker-end="url(#arrow)"/>
+  <path class="line" d="M605 174 H630 V134 H658" marker-end="url(#arrow)"/>
+
+  <text class="label" x="414" y="54" text-anchor="middle">jq</text>
+  <text class="label" x="414" y="164" text-anchor="middle">jq</text>
+  <text class="label" x="119" y="124">fix settings</text>
+  <text class="label" x="312" y="108" text-anchor="middle">keep unchanged</text>
+
+  <rect class="box" x="20" y="40" width="175" height="48" rx="8"/>
+  <text x="107" y="69" text-anchor="middle">Audit before the fix</text>
+  <rect class="box" x="225" y="40" width="175" height="48" rx="8"/>
+  <text class="code" x="312" y="69" text-anchor="middle">baseline-master.json</text>
+  <rect class="box" x="430" y="40" width="175" height="48" rx="8"/>
+  <text class="code" x="517" y="69" text-anchor="middle">failing-1-2.txt</text>
+
+  <rect class="box" x="20" y="150" width="175" height="48" rx="8"/>
+  <text x="107" y="179" text-anchor="middle">Audit again</text>
+  <rect class="box" x="225" y="150" width="175" height="48" rx="8"/>
+  <text x="312" y="179" text-anchor="middle">second JSON file</text>
+  <rect class="box" x="430" y="150" width="175" height="48" rx="8"/>
+  <text x="517" y="179" text-anchor="middle">second failing list</text>
+
+  <rect class="ask" x="660" y="95" width="160" height="48" rx="8"/>
+  <text class="code strong" x="740" y="124" text-anchor="middle">diff</text>
+
+  <text class="good" x="740" y="176" text-anchor="middle">number gone: fixed</text>
+  <text class="bad" x="740" y="200" text-anchor="middle">new number: side effect</text>
+</svg>

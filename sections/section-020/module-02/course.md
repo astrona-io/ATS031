@@ -1,28 +1,49 @@
 # Run kube-bench And Read Its Output
 
-The Center for Internet Security (CIS) Kubernetes Benchmark is a long list of recommended settings. Nobody checks hundreds of settings by hand during a review or an exam. `kube-bench` is an open source program that runs the audit commands of the benchmark on a node and prints one result for each recommendation. This module teaches you to run it, to read what it prints, to run only the checks you need, and to judge how far a result can be trusted.
+The Center for Internet Security (CIS) Kubernetes Benchmark is a long list of recommended security settings for a cluster. Nobody checks hundreds of settings by hand, not in a security review and not in an exam. You need a tool that does the checking for you.
 
-A tool report is not a verdict. `kube-bench` reads the processes and files of one node at one moment, and it follows a benchmark edition that may not match the Kubernetes version of your cluster. You need to know what the tool looks at so that you can tell a real finding from a false one.
+`kube-bench` is that tool. It is an open source program that runs the audit commands of the benchmark on a node and prints one result for each recommendation. An audit command is a short shell command that reads one setting on the node.
 
-## Learning objectives
+A tool report is not a final verdict, though. `kube-bench` reads the processes and files of one node at one moment. It also follows a benchmark edition, a version of the rules, that may not match the Kubernetes version of your cluster. So you need to know what the tool looks at, to tell a real finding from a false one.
 
-After this module you can:
+## What you will learn
 
-- Explain what `kube-bench` reads on a node and how it decides `PASS` or `FAIL`.
-- Run `kube-bench` on a kubeadm node with `sudo`, and as a Kubernetes Job that uses the `kube-bench` image.
-- Choose a target and a benchmark edition, and say what happens when the edition does not match the cluster version.
-- Read the result lines, the summary counts and the remediation text of a failing check.
-- Run one check or one group, export the result as JSON, and filter it with `jq`.
-- Explain why `WARN` and `INFO` results need a person, and why a `PASS` is only as good as its audit.
+After this module, you can:
+
+- explain what `kube-bench` reads on a node and how it decides `PASS` or `FAIL`;
+- run `kube-bench` on a kubeadm node with `sudo`, and as a Kubernetes Job that uses the `kube-bench` container image;
+- choose a target and a benchmark edition, and say what happens when the edition does not match the cluster version;
+- read the result lines, the summary counts and the remediation text of a failing check;
+- run one check or one group, export the result as JSON, and filter it with `jq`;
+- explain why `WARN` and `INFO` results need a person, and why a `PASS` is only as good as its audit.
+
+## How the module is laid out
+
+You start with **What kube-bench Does Under The Hood**, which shows what the tool reads and where each result comes from. **Run kube-bench On A kubeadm Node** then runs the tool as a binary on the node and as a Job in the cluster. **Targets, Benchmarks And Versions** explains how to pick the group of checks and the edition of the rules.
+
+**Read A Result** shows the layout of the report and the order in which to read it. **Select Checks And Export Results** reruns single checks and saves results as JSON for a before and after comparison. **Manual Checks And False Findings** closes the module with the results that a person must judge.
 
 ## Before you start
 
-You need Kubernetes basics: pods, Jobs, namespaces and `kubectl`. The module has six parts. The first explains what the tool reads. The second runs it on a kubeadm node. The third covers targets, editions and versions. The fourth reads a result. The fifth selects checks and exports results. The sixth covers manual checks and false findings.
+You should know the Kubernetes basics: pods, Jobs, namespaces and `kubectl`. You should also be able to open a shell on a Linux machine and run commands with `sudo`.
 
-Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-02` is the control plane and also runs your pods, so the control plane checks and the kubelet checks run on the same machine. The `starfleet` namespace holds the `probe` Deployment (two pods), the `probe` Service and the `shuttle` client pod.
+## Your playground
 
-You open a shell on the node with `astrona ssh astro-ats-031-playground-020-02`. You log in as the `student` user, which can run commands as root with `sudo` and already has `kubectl` set up for the cluster. The `kube-bench` binary is installed in `/usr/local/bin/kube-bench`, and its definition files are in `/etc/kube-bench/cfg`. The `kube-bench` container image is already on the node, so a pod that uses it starts without a download. `jq`, a command-line tool that reads JSON, is installed on the node too.
+Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster. The cluster was built with kubeadm, the standard tool that installs Kubernetes on a Linux machine. The node `astro-ats-031-playground-020-02` is the control plane and also runs your pods, so the control plane checks and the kubelet checks run on the same machine.
 
-Launch your playground now and keep it running while you read:
+| Where | Object | What it is |
+| --- | --- | --- |
+| Node | `astro-ats-031-playground-020-02` | The only node: control plane and workloads |
+| Node | `/usr/local/bin/kube-bench` | The `kube-bench` program |
+| Node | `/etc/kube-bench/cfg` | The definition files of the benchmark editions |
+| Node | `kube-bench` container image | Already on the node, so a pod that uses it starts without a download |
+| Node | `jq` | A command-line tool that reads JSON |
+| `starfleet` | `probe` Deployment (two pods) and `probe` Service | A small example workload |
+| `starfleet` | `shuttle` pod | A client pod |
+| `outpost` | `drifter` pod | A client pod in another namespace |
+
+You open a shell on the node with `astrona ssh astro-ats-031-playground-020-02`. You log in as the `student` user. This user can run commands as root with `sudo` and already has `kubectl` set up for the cluster.
+
+Start your playground now and keep it running while you read:
 
 <!-- astrona:playground -->

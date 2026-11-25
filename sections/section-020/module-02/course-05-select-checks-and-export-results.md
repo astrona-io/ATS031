@@ -1,10 +1,14 @@
 # Select Checks And Export Results
 
-A full run takes time and prints far more than you need while you fix one setting. During a fix you want to run a single check again and see only its result. At the end of a review you want a file that a script or a colleague can read. This part shows how to select checks, how to export JSON, and how to keep a baseline for a before and after comparison.
+A full run takes time and prints far more than you need while you fix one setting. During a fix, you want to run a single check again and see only its result. At the end of a review, you want a file that a script or a colleague can read.
+
+This page shows how to select checks, how to export the result as JSON, and how to keep a baseline for a before and after comparison. A baseline is a saved result from before any fix.
 
 ## Select checks
 
-The `--check` option takes a comma-separated list of check numbers and runs only those. The `--group` option takes a group number, which is a block of related checks such as all of `1.2`. Because numbers differ between editions, first find the numbers in a full report, then use them in the same edition.
+Two options limit a run. The `--check` option takes a comma-separated list of check numbers and runs only those checks. The `--group` option takes a group number, which is a block of related checks, such as all checks under `1.2`.
+
+Check numbers differ between editions. So first find the numbers in a full report, and then use them with the same edition.
 
 <!-- astrona:playground:renew -->
 
@@ -41,7 +45,7 @@ on the control plane node and set the below parameter.
 
 ```
 
-The report keeps its normal layout: check lines, remediation for the `WARN`, and a summary that counts only the two checks. A group works the same way. Group `1.4` holds the scheduler checks:
+The report keeps its normal layout: the check lines, the remediation for the `WARN`, and a summary that counts only the two checks. A group works the same way. Group `1.4` holds the scheduler checks:
 
 ```sh
 sudo kube-bench run --targets master --group 1.4 | tail -n 6
@@ -55,11 +59,11 @@ sudo kube-bench run --targets master --group 1.4 | tail -n 6
 0 checks INFO
 ```
 
-A rerun of one check has a clear job in the remediation loop: change the setting, wait for the component to restart, run only that check, and see it pass. This is faster than a full run, and it avoids reading hundreds of lines. At the end, one full run proves that the fix did not change other results.
+Rerunning one check has a clear job when you fix things. You change the setting, wait for the component to restart, run only that check, and see it pass. This is faster than a full run, and you do not have to read hundreds of lines. At the end, one full run proves that the fix did not change other results.
 
 ## Export JSON
 
-The text report is made for people. The `--json` option prints the same result as one JSON document, so a script can read it. Run the control plane audit with this option and save the output as the baseline file, the result before any fix:
+The text report is made for people. A script needs something else. The `--json` option prints the same result as one JSON document. Run the control plane audit with this option and save the output as the baseline file:
 
 ```sh
 sudo kube-bench run --targets master --json > baseline-master.json
@@ -73,7 +77,9 @@ jq 'keys' baseline-master.json
 ]
 ```
 
-Do not assume the layout of the document; look at its keys first, as here. `Controls` holds one entry per target, and `Totals` holds the counts. Each control has a list of tests, and each test has a list of results. Print the fields of one control and the counts:
+Do not assume the layout of the document. Look at its keys first, as here. `Controls` holds one entry per target, and `Totals` holds the counts. Each control has a list of tests, and each test has a list of results.
+
+Print the fields of one control and the counts:
 
 ```sh
 jq -c '.Controls[0] | {id, version, detected_version, node_type}' baseline-master.json
@@ -85,11 +91,11 @@ jq -c '.Totals' baseline-master.json
 {"total_pass":39,"total_fail":9,"total_warn":11,"total_info":0}
 ```
 
-Unlike the text report, the JSON document names the edition (`version`) and the Kubernetes version that kube-bench detected (`detected_version`). A result is an object with fields such as `test_number`, `test_desc`, `status`, `audit` and `actual_value`. The field names can change between tool versions, so check them in your file before you rely on them.
+Unlike the text report, the JSON document names the edition (`version`) and the Kubernetes version that `kube-bench` detected (`detected_version`). A single result is an object with fields such as `test_number`, `test_desc`, `status`, `audit` and `actual_value`. The field names can change between tool versions, so check them in your own file before you rely on them.
 
 ## Filter with jq
 
-The filter below walks the whole document and picks every object that has a `test_number` and the status `FAIL`. It prints only the numbers, so it does not depend on how the controls are nested.
+With the document saved, `jq` can pull out exactly what you need. The filter below walks the whole document and picks every object that has a `test_number` and the status `FAIL`. It prints only the numbers, so it does not depend on how the controls are nested.
 
 ```sh
 jq -r '[.. | objects | select(has("test_number")) | select(.status == "FAIL") | .test_number] | sort | .[]' baseline-master.json
@@ -107,7 +113,9 @@ jq -r '[.. | objects | select(has("test_number")) | select(.status == "FAIL") | 
 1.4.1
 ```
 
-The `sort` of `jq` compares the numbers as text, so `1.2.5` comes after `1.2.19`. The order does not matter for a comparison, because both lists are sorted the same way. To keep only the API server checks, filter the numbers that start with `1.2.` and save them in a file:
+The `sort` of `jq` compares the numbers as text, so `1.2.5` comes after `1.2.19`. The order does not matter for a comparison, because both lists are sorted the same way.
+
+To keep only the API server checks, filter the numbers that start with `1.2.` and save them in a file:
 
 ```sh
 jq -r '[.. | objects | select(has("test_number")) | select(.status == "FAIL") | .test_number | select(startswith("1.2."))] | sort | .[]' baseline-master.json > failing-1-2.txt
@@ -123,9 +131,13 @@ cat failing-1-2.txt
 1.2.5
 ```
 
-The file `failing-1-2.txt` now holds one failing check number on each line. Keep `baseline-master.json` unchanged. After you fix settings, run the audit again into a second file and compare the two lists with `diff`. A check that disappeared from the failing list is fixed, and a check that appeared is a side effect of your change.
+The file `failing-1-2.txt` now holds one failing check number on each line. Keep `baseline-master.json` unchanged. After you fix settings, run the audit again into a second file, build a second list the same way, and compare the two lists with `diff`.
 
-You can now select checks and keep results. A list of failures is only the start of a judgement, so the last question is which results a person must still decide.
+![Diagram: the audit before the fix gives baseline-master.json and failing-1-2.txt, the audit after the fix gives a second JSON file and a second failing list, and diff compares the two lists](images/baseline-compare.svg)
+
+The drawing shows how to read the `diff` output: a check that disappeared from the failing list is fixed, and a check that appeared is a side effect of your change.
+
+You can now rerun single checks and keep results that a script can compare. A list of failures is only the start of a judgement, though. The open question is which results a person must still decide.
 
 ## Common pitfalls
 
@@ -133,5 +145,5 @@ You can now select checks and keep results. A list of failures is only the start
 > - **Mixing log lines with JSON.** `jq` stops at the first line that is not JSON. Do not add `--v 1` with `2>&1` to a JSON run, and keep only the document in the file.
 > - **Filtering on a fixed nesting.** The depth of the document can change between versions. Walk it with `..` and select on field names.
 > - **Overwriting the baseline.** Save the before result under one name and the after result under another.
-> - **Saving files with `etcd` in the name.** The audits of checks `1.1.7` and `1.1.8` use an unquoted `*etcd*` pattern, which the shell matches against the current directory. A file such as `etcd.txt` in the directory where you run kube-bench makes both checks `FAIL`. Keep such files elsewhere or run kube-bench from another directory.
+> - **Saving files with `etcd` in the name.** The audits of checks `1.1.7` and `1.1.8` use an unquoted `*etcd*` pattern, which the shell matches against the current directory. A file such as `etcd.txt` in the directory where you run `kube-bench` makes both checks `FAIL`. Keep such files elsewhere, or run `kube-bench` from another directory.
 > - **Rerunning one check and stopping.** After the last fix, run the full target once more.
