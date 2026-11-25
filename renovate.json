@@ -5,5 +5,8 @@
   ],
   "ignorePaths": [
     "sections/**"
-  ]
+  ],
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": false
 }
