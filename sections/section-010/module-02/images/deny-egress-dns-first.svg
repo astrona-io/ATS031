@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 380" width="840" height="380" role="img" aria-labelledby="title desc">
+  <title id="title">Default deny egress in dock</title>
+  <desc id="desc">The default-deny-egress policy isolates every pod in dock for egress. The DNS query from the shuttle pod to CoreDNS in kube-system on port 53 is dropped, and the direct request from shuttle to the IP address of a probe pod in starfleet on TCP port 8080 is dropped too.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="policy" x="30" y="40" width="300" height="280" rx="10"/>
+  <text class="label" x="44" y="62">Namespace <tspan class="code">dock</tspan></text>
+  <text class="label" x="44" y="306"><tspan class="code">default-deny-egress</tspan> isolates egress</text>
+  <rect class="frame" x="540" y="40" width="270" height="110" rx="10"/>
+  <text class="label" x="554" y="62">Namespace <tspan class="code">kube-system</tspan></text>
+  <rect class="frame" x="540" y="190" width="270" height="130" rx="10"/>
+  <text class="label" x="554" y="212">Namespace <tspan class="code">starfleet</tspan></text>
+
+  <path class="dashed" d="M265 162 H400 V100 H578" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M265 182 H400 V252 H578" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="472" y="92" text-anchor="middle">DNS query, port 53</text>
+  <text class="label bad" x="472" y="244" text-anchor="middle">pod IP, TCP 8080</text>
+
+  <rect class="box" x="95" y="150" width="170" height="44" rx="8"/>
+  <text x="180" y="177" text-anchor="middle"><tspan class="code">shuttle</tspan> pod</text>
+  <rect class="box" x="580" y="78" width="190" height="44" rx="8"/>
+  <text x="675" y="105" text-anchor="middle">CoreDNS pod</text>
+  <rect class="box" x="580" y="230" width="190" height="44" rx="8"/>
+  <text x="675" y="257" text-anchor="middle"><tspan class="code">probe</tspan> pod</text>
+
+  <path class="dashed" d="M40 356 H80" marker-end="url(#arrowbad)"/>
+  <text class="label" x="90" y="361">dropped: no egress rule allows it, so the name lookup and the connection both fail</text>
+</svg>

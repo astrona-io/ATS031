@@ -1,10 +1,14 @@
 # Combine Baselines With Allow Rules
 
-A baseline alone makes a namespace unusable. The useful result is a namespace that denies everything except the paths the application needs. This part applies one combined baseline to `outpost`, then adds three allow policies on top and explains why the order of the steps matters.
+A baseline alone makes a namespace unusable. What you really want is a namespace that denies everything except the paths the application needs.
+
+On this page, you apply one baseline for both directions to the `outpost` namespace. Then you add allow policies on top, until one request works again, and you learn why the order of the steps matters.
 
 ## One policy for both directions
 
-A single policy can isolate ingress and egress together. Its `policyTypes` lists both values, and it still has no `ingress` or `egress` section. Start from a clean namespace so that earlier experiments do not change the result:
+A single policy can isolate ingress and egress together. Its `policyTypes` lists both values, and it still has no `ingress` or `egress` section.
+
+Start from a clean namespace, so that earlier experiments do not change the result. The command below deletes every NetworkPolicy in `outpost`:
 
 <!-- astrona:playground:renew -->
 
@@ -33,7 +37,7 @@ Apply it:
 kubectl apply -f networkpolicy-default-deny-all.yaml
 ```
 
-Then check the result. The `shuttle` pod can no longer send a request to the `probe` Service in its own namespace. The request stops after the three second limit, because the DNS query and the connection are both dropped.
+Then check the result. The `shuttle` pod can no longer send a request to the `probe` Service in its own namespace. The request stops after the three-second limit, because the network plugin drops both the DNS query and the connection.
 
 ```sh
 kubectl -n outpost exec shuttle -- wget -q -T 3 -O- http://probe/
@@ -41,21 +45,25 @@ kubectl -n outpost exec shuttle -- wget -q -T 3 -O- http://probe/
 
 ## Union of policies
 
-The network plugin does not read policies in order. For each pod and direction it takes every policy that selects the pod and combines their allow rules into one set. A connection passes when any rule in that set allows it. Adding a policy therefore never removes access that another policy gives, and the name or the age of a policy has no meaning.
+Before you open a path, you need to know how the network plugin reads several policies. It does not read them in order. For each pod and each direction, it takes every policy that selects the pod and combines their allow rules into one set, the union. A connection passes when any rule in that set allows it.
 
-A connection between two isolated pods needs two allowances. The source needs an egress rule, and the destination needs an ingress rule. The component that enforces each side is the network plugin on the node of that pod. If you write only one side, the connection still fails.
+So adding a policy never removes access that another policy gives. The name or the age of a policy has no meaning.
 
-```mermaid
-flowchart LR
-    S["shuttle"] -->|"egress rule"| P["probe"]
-    P -.->|"ingress rule"| S
-```
+A connection between two isolated pods needs two allowances. The source needs an egress rule, and the destination needs an ingress rule. The network plugin on the node of each pod enforces that pod's side. If you write only one side, the connection still fails.
 
-The diagram shows that the egress rule of `shuttle` and the ingress rule of `probe` are two separate requirements for the same connection.
+![Diagram: the request from shuttle to probe passes the egress check of shuttle and then the ingress check of probe, and both checks must allow it](images/two-sided-allowance.svg)
+
+The drawing shows one connection with two checks. The egress rule of `shuttle` and the ingress rule of `probe` are two separate requirements, and the request passes only when both allow it.
 
 ## Add the allow rules
 
-Three allowances are needed for the request from `shuttle` to `probe`: ingress to `probe` on port 8080, egress from `shuttle` to `probe` on port 8080, and egress from `shuttle` to CoreDNS on port 53. Save the ingress rule first as `networkpolicy-probe-ingress.yaml`:
+With that rule in mind, count what the request from `shuttle` to `probe` needs. It needs three allowances:
+
+- ingress to `probe` on port 8080;
+- egress from `shuttle` to `probe` on port 8080;
+- egress from `shuttle` to CoreDNS on port 53.
+
+Start with the ingress rule. Save this as `networkpolicy-probe-ingress.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -85,7 +93,9 @@ Apply it:
 kubectl apply -f networkpolicy-probe-ingress.yaml
 ```
 
-The request from `shuttle` still fails, because its egress is not open yet. Add the egress policy. It has two rules: one to the `probe` pods and one to CoreDNS. CoreDNS pods carry the label `k8s-app: kube-dns` in the `kube-system` namespace, and DNS uses UDP port 53 and TCP port 53. Save this as `networkpolicy-shuttle-egress.yaml`:
+The request from `shuttle` still fails, because its egress is not open yet. So add the egress policy next. It has two rules: one to the `probe` pods and one to CoreDNS.
+
+The CoreDNS pods run in the `kube-system` namespace and carry the label `k8s-app: kube-dns`. DNS uses UDP port 53 and TCP port 53, so the rule lists both. Save this as `networkpolicy-shuttle-egress.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -127,25 +137,31 @@ Apply it:
 kubectl apply -f networkpolicy-shuttle-egress.yaml
 ```
 
-Then check the result. The first request, from `shuttle` to its `probe` Service, must work. The second request, from `shuttle` in `starfleet` to the `probe` Service in `outpost`, must time out, because `probe-ingress` allows only the `shuttle` pods of its own namespace.
+Then check the result. The first request, from `shuttle` to the `probe` Service in its own namespace, must work. The second request, from `shuttle` in `starfleet` to the `probe` Service in `outpost`, must time out. The `probe-ingress` policy allows only the `shuttle` pods of its own namespace.
 
 ```sh
 kubectl -n outpost exec shuttle -- wget -q -T 3 -O- http://probe/
 kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe.outpost/
 ```
 
+![Diagram: in outpost, default-deny-all isolates every pod, shuttle-egress lets shuttle reach CoreDNS on port 53 and probe on port 8080, probe-ingress lets shuttle in, and the request from shuttle in starfleet is dropped](images/outpost-baseline-with-allows.svg)
+
+The drawing shows the namespace after the three policies. The `shuttle` pod in `outpost` can resolve the name and reach the `probe` pods, while the request from the `starfleet` namespace is dropped.
+
 ## A safe order and self-lockout
 
-Apply the allow rules before or together with the baseline in a namespace that already serves traffic. If you apply the baseline first, the running application is cut off until the allow rules arrive. In the exam the namespace is usually empty of users, so the order is not a risk there, but in a real cluster the gap is an outage.
+The policies now work, but the order in which you applied them matters on a live system. In a namespace that already serves traffic, apply the allow rules before the baseline or together with it. If you apply the baseline first, the running application is cut off until the allow rules arrive.
 
-Self-lockout has a second meaning: a policy can block the traffic you use to repair it. Policies do not block `kubectl` itself, because `kubectl` talks to the API server and not to a pod. They do block `kubectl exec` tests that need DNS from inside an isolated pod, which is why you test with a pod IP address when DNS is in doubt.
+In the exam, no real users usually depend on the namespace, so the order is not a risk there. In a real cluster, that gap is an outage.
 
-You can now build a namespace that denies everything but one path, and you know that the source and the destination need a rule each. The remaining question is how to do this for many namespaces without writing every file by hand.
+Self-lockout has a second meaning: a policy can block the traffic you use to repair it. Policies do not block `kubectl` itself, because `kubectl` talks to the API server and not to a pod. They do block `kubectl exec` tests that need DNS from inside an isolated pod. That is why you test with a pod IP address when you are not sure that DNS works.
+
+You can now build a namespace that denies everything but one path, and you know that the source and the destination each need a rule. The open question is how to do this for many namespaces without writing every file by hand.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Writing only the ingress half.** The connection needs egress at the source and ingress at the destination when both are isolated.
+> - **Writing only the ingress half.** When both sides are isolated, the connection needs egress at the source and ingress at the destination.
 > - **Leaving out UDP or TCP for DNS.** DNS uses UDP port 53 and falls back to TCP port 53 for large answers. Allow both.
 > - **Applying the baseline first on a live namespace.** The running workload loses traffic until the allow rules exist.
 > - **Expecting policy order to matter.** The plugin merges all selecting policies, so only the content counts.

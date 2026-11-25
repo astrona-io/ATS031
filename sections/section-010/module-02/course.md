@@ -1,23 +1,33 @@
 # Build Default-Deny Baselines For Namespaces
 
-A namespace without a NetworkPolicy accepts every connection to and from every pod in it. A baseline is the first NetworkPolicy you put in a namespace: it selects all pods and allows nothing, so every connection must be allowed by a later policy. The Certified Kubernetes Security Specialist (CKS) exam asks for this order again and again: deny first, allow second.
+A namespace without a NetworkPolicy accepts every connection to and from every pod in it. A NetworkPolicy is a Kubernetes object that selects pods and lists the connections those pods may receive (ingress) or make (egress). Until one exists, nothing is blocked.
 
-A NetworkPolicy is a Kubernetes object that selects pods and lists the connections those pods may receive (ingress) or make (egress). The network plugin, here Calico, enforces it on each node. This module builds the three baselines (deny ingress, deny egress, deny both), shows what each one breaks, and adds allow rules on top in a safe order.
+A baseline is the first NetworkPolicy you put in a namespace. It selects all pods and allows nothing, so every connection needs an allowance from a later policy. The Certified Kubernetes Security Specialist (CKS) exam asks for this order again and again: deny first, allow second.
 
-## Learning objectives
+The policy itself does not filter traffic. The network plugin of the cluster, here Calico, reads the policy and enforces it on each node. In this module you build the three baselines (deny ingress, deny egress, deny both), see what each one breaks, and add allow rules on top in a safe order.
 
-After this module you can:
+## What you will learn
 
-- Write default-deny ingress, default-deny egress and combined policies with an empty `podSelector`.
-- Predict the effect of each baseline on a running workload before you apply it.
-- Apply a baseline to several namespaces and add allow rules on top in a safe order.
-- Explain why policies are additive and why the core NetworkPolicy API has no deny rule.
+After this module, you can:
+
+- write default-deny ingress, default-deny egress and combined policies with an empty `podSelector`;
+- predict the effect of each baseline on a running workload before you apply it;
+- apply a baseline to several namespaces and add allow rules on top in a safe order;
+- explain why policies are additive and why the core NetworkPolicy API has no deny rule.
+
+## How the module is laid out
+
+You start with **Why A Baseline Comes First**, which shows the open cluster with real requests and explains what isolation changes. **Deny All Ingress** then stops all incoming connections in one namespace. **Deny All Egress And Its Side Effects** stops outgoing connections and shows why DNS breaks first.
+
+**Combine Baselines With Allow Rules** puts a baseline for both directions in place and opens one path on top of it. **Baselines Across Many Namespaces** closes the module and rolls the same baseline out to several namespaces from one file.
 
 ## Before you start
 
-You need pods, namespaces, labels, Services and the commands `kubectl apply`, `kubectl get` and `kubectl exec`. You also need to know that a pod which no policy selects accepts all traffic. The module has five parts. The first explains why the baseline comes first. The second denies ingress. The third denies egress and shows why DNS breaks. The fourth combines baselines with allow rules. The fifth rolls a baseline out to many namespaces.
+You should know pods, namespaces, labels and Services. You should also be able to use `kubectl apply`, `kubectl get` and `kubectl exec`. Finally, you should know one rule: a pod that no policy selects accepts all traffic.
 
-Your playground is a `kind` cluster running Kubernetes v1.35 with the Calico network plugin, which enforces NetworkPolicy. No NetworkPolicy exists yet. Each of the three namespaces runs the same two workloads:
+## Your playground
+
+Your playground is a `kind` cluster that runs Kubernetes v1.35 with the Calico network plugin. Calico enforces NetworkPolicy, so every policy you write has a real effect. No NetworkPolicy exists yet. Each of the three namespaces runs the same workloads:
 
 | Namespace | Pod or Service | What it is |
 | --- | --- | --- |
@@ -25,6 +35,6 @@ Your playground is a `kind` cluster running Kubernetes v1.35 with the Calico net
 | `starfleet`, `outpost`, `dock` | `probe` Service | Port 80, forwards to port 8080 of the `probe` pods |
 | `starfleet`, `outpost`, `dock` | `shuttle` pod, label `app: shuttle` | A client pod with `wget` |
 
-`kubectl` already points at the playground cluster. Launch your playground now and keep it running while you read:
+`kubectl` already points at the playground cluster. Start your playground now and keep it running while you read:
 
 <!-- astrona:playground -->

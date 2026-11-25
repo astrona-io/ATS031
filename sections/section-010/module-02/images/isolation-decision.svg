@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 0 720 384" width="720" height="384" role="img" aria-labelledby="title desc">
+  <title id="title">How a connection is decided</title>
+  <desc id="desc">A connection arrives at a pod. If no policy selects the pod for this direction, the connection is allowed. If a policy selects it, the connection is allowed only when a selecting policy allows it. Otherwise the network plugin drops it.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <!-- Lines first, so the boxes sit on top. -->
+  <path class="line" d="M270 68 V106" marker-end="url(#arrow)"/>
+  <path class="line" d="M470 132 H558" marker-end="url(#arrow)"/>
+  <path class="line" d="M270 156 V218" marker-end="url(#arrow)"/>
+  <path class="line" d="M470 244 H640 V158" marker-end="url(#arrow)"/>
+  <path class="line" d="M270 268 V318" marker-end="url(#arrow)"/>
+
+  <text class="label" x="514" y="124" text-anchor="middle">no</text>
+  <text class="label" x="282" y="192">yes</text>
+  <text class="label" x="556" y="236" text-anchor="middle">yes</text>
+  <text class="label" x="282" y="298">no</text>
+
+  <rect class="box" x="120" y="24" width="300" height="44" rx="8"/>
+  <text class="strong" x="270" y="51" text-anchor="middle">A connection arrives at a pod</text>
+
+  <rect class="ask" x="70" y="108" width="400" height="48" rx="8"/>
+  <text x="270" y="137" text-anchor="middle">Does a policy select the pod for this direction?</text>
+
+  <rect class="ask" x="70" y="220" width="400" height="48" rx="8"/>
+  <text x="270" y="249" text-anchor="middle">Does any selecting policy allow it?</text>
+
+  <rect class="ok" x="560" y="108" width="160" height="48" rx="8"/>
+  <text class="strong" x="640" y="137" text-anchor="middle">Allowed</text>
+
+  <rect class="drop" x="120" y="320" width="300" height="44" rx="8"/>
+  <text class="strong" x="270" y="347" text-anchor="middle">Dropped by the network plugin</text>
+</svg>
