@@ -4,13 +4,20 @@ exam_objectives:
 ---
 # Allow One Peer With An Ingress Policy
 
-The `probe` pods answer every caller today. The goal in this part is that only the `shuttle` pod in the same namespace can reach them, and the `drifter` pod in another namespace cannot. To get there you select the destination pods, name the allowed source and the port, and then test both the allowed and the denied path.
+Right now, the `probe` pods answer every caller. On this page, you change that. Only the `shuttle` pod in the same namespace may reach them, and the `drifter` pod in the `outpost` namespace may not.
+
+You get there in three steps. You select the pods to protect, you name the one source and port that may connect, and then you test both the allowed and the blocked path.
 
 ## The policy
 
-An ingress policy has two selectors with different jobs. `spec.podSelector` chooses the pods the policy protects (the destination). Each entry in `spec.ingress[].from` chooses who may connect (the sources). The `ports` list limits which destination ports the sources may use.
+An ingress policy controls incoming traffic, and it uses two selectors with different jobs:
 
-The policy below protects the pods labelled `app: probe` and allows TCP port 8080 from pods labelled `app: shuttle`. The `from` entry has a `podSelector` and no `namespaceSelector`. Without a `namespaceSelector`, a `podSelector` in a peer matches only pods in the namespace of the policy itself.
+- `spec.podSelector` picks the pods the policy protects. These are the destination of the traffic.
+- Each entry in `spec.ingress[].from` picks who may connect. These are the sources.
+
+A third field, `ports`, limits which destination ports the sources may use.
+
+The policy below protects the pods labelled `app: probe`. It allows TCP port 8080, and only from pods labelled `app: shuttle`. The `from` entry has a `podSelector` but no `namespaceSelector`. In that case, the `podSelector` only matches pods in the same namespace as the policy.
 
 <!-- astrona:playground:renew -->
 
@@ -51,13 +58,18 @@ kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
 kubectl -n outpost exec drifter -- wget -q -T 3 -O- http://probe.starfleet/
 ```
 
-The `drifter` request times out instead of being refused. A refused connection means a listener answered with a reset. A timeout means the network plugin dropped the packets without a reply. When you test a denial, a timeout is the evidence that a policy did the work. A refusal points to a closed port instead.
+Look closely at how the `drifter` request fails. It times out; it is not refused. The difference matters:
+
+- A **refused** connection means a pod answered with a reset, because nothing listens on that port.
+- A **timeout** means the network plugin dropped the packets, so no reply ever came back.
+
+So when you test a block, a timeout is your proof that the policy did the work. A refusal points to a closed port instead.
 
 ![Diagram: the probe-shuttle policy lets the shuttle pod reach the probe pods on TCP port 8080 and drops the request from the drifter pod in outpost](images/ingress-probe-shuttle.svg)
 
 The drawing shows the result. The `probe-shuttle` policy lets the `shuttle` pod in on TCP port 8080, and it drops the request from the `drifter` pod in the `outpost` namespace.
 
-Read the policy back with `describe`, which prints the selected pods and the allowed sources in a short form:
+To read the policy back in a short form, use `describe`. It prints the pods the policy selects and the sources it allows:
 
 ```sh
 kubectl -n starfleet describe networkpolicy probe-shuttle
@@ -65,9 +77,11 @@ kubectl -n starfleet describe networkpolicy probe-shuttle
 
 ## Peers: one entry or two
 
-Each item in the `from` list is a peer. A peer is one of `podSelector`, `namespaceSelector`, a combination of both in the same item, or `ipBlock`. Items in the list are alternatives: a connection is allowed when it matches any item. The ports list in the same rule applies to every peer in that rule.
+The policy works, but its `from` list hides a trap that catches many people. To see it, you first need to know what the list holds.
 
-Suppose the allowed caller must be the `shuttle` pod in the `starfleet` namespace and nothing else. Both conditions belong to one item:
+Each item in the `from` list is called a peer. A peer is a `podSelector`, a `namespaceSelector`, both of them together in one item, or an `ipBlock`. The items are alternatives: a connection is allowed when it matches any one of them. The `ports` list of the rule applies to every peer in that rule.
+
+Now suppose the allowed caller must be the `shuttle` pod in the `starfleet` namespace, and nothing else. Both conditions belong in one item:
 
 ```yaml
   ingress:
@@ -80,7 +94,9 @@ Suppose the allowed caller must be the `shuttle` pod in the `starfleet` namespac
           app: shuttle
 ```
 
-This reads "a pod labelled `app: shuttle` in a namespace named `starfleet`". Now see what happens when the dash moves, so that the same two selectors become two items:
+This reads as "a pod labelled `app: shuttle`, in the namespace named `starfleet`".
+
+Now move one dash, so that the same two selectors become two items:
 
 ```yaml
   ingress:
@@ -93,23 +109,30 @@ This reads "a pod labelled `app: shuttle` in a namespace named `starfleet`". Now
           app: shuttle
 ```
 
-This reads "any pod in the `starfleet` namespace, or any pod labelled `app: shuttle` in the policy namespace". The first item admits every pod in `starfleet`, so the policy is far wider than intended. One missing indentation level changes the meaning, which makes this the most common mistake in written policies and in exam tasks.
+This reads as "any pod in the `starfleet` namespace, or any pod labelled `app: shuttle` in the policy's namespace". The first item alone lets in every pod in `starfleet`, so the policy is much wider than you meant. A single dash changes the meaning. That is why this is the most common mistake, both in real policies and in exam tasks.
 
 ![Diagram: selectors in one peer item combine with AND, separate peer items combine with OR](images/peer-one-item-or-two.svg)
 
-The diagram shows that fields inside one item combine with AND, while separate items combine with OR.
+The diagram shows the rule: fields inside one item combine with AND, and separate items combine with OR.
 
 ## Other selector forms
 
-An empty `podSelector: {}` selects all pods, in the policy namespace when it is the top-level selector. An empty `namespaceSelector: {}` in a peer selects all namespaces. A rule with `from` omitted or an empty rule `- {}` allows every source. A policy with `policyTypes: [Ingress]` and no `ingress` section allows no source at all. These forms look similar and mean opposite things, so read the exact fields.
+Some selectors look almost the same but mean the opposite. Read the exact fields every time:
 
-A source can also be an address range. `ipBlock` takes a `cidr` and an optional `except` list. Use it for addresses outside the cluster, not for pods, because pod IP addresses change.
+- An empty `podSelector: {}` at the top of a policy selects all pods in the policy's namespace.
+- An empty `namespaceSelector: {}` in a peer selects all namespaces.
+- A rule without `from`, or an empty rule `- {}`, allows every source.
+- A policy with `policyTypes: [Ingress]` and no `ingress` section allows no source at all.
+
+A source can also be a range of IP addresses. The `ipBlock` peer takes a `cidr` and an optional `except` list. Use it for addresses outside the cluster, not for pods, because pod IP addresses change.
 
 ## Trust in labels
 
-A `namespaceSelector` trusts namespace labels, and a `podSelector` trusts pod labels. Anyone who can label a namespace or create a pod with the right label in an allowed namespace gets the access. The automatic `kubernetes.io/metadata.name` label is safer for namespaces because the cluster sets it and users cannot change it to another name.
+Every selector trusts labels, so it is worth asking who can set them. A `namespaceSelector` trusts namespace labels, and a `podSelector` trusts pod labels. Anyone who can add a label to a namespace, or create a pod with the right label in an allowed namespace, gets the access.
 
-You now have a working ingress policy that you tested from an allowed and a denied peer. The `shuttle` pod still has unrestricted egress, so a compromised `shuttle` could contact anything. The next question is how to limit what a client may send.
+For namespaces, the automatic `kubernetes.io/metadata.name` label is the safer choice. The cluster sets it to the namespace name, and users cannot change it to another name.
+
+You now have a working ingress policy, tested from an allowed and a blocked caller. But the `shuttle` pod can still send traffic anywhere. If an attacker took over `shuttle`, they could contact any pod. The open question is how to limit what a client may send.
 
 ## Common pitfalls
 

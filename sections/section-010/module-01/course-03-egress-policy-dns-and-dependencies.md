@@ -4,11 +4,13 @@ exam_objectives:
 ---
 # Restrict Egress And Allow DNS
 
-An ingress policy protects a destination. It does not stop a compromised client from sending requests to anything it can reach. An egress policy limits what a selected pod may send. It is stricter work to write, because an isolated client also loses things it silently relied on, above all name resolution. This part builds an egress policy for the `shuttle` pod that keeps DNS and one application dependency and blocks every other destination.
+An ingress policy protects a destination. It does not stop a client from sending requests to anything it can reach. If an attacker takes over a client pod, that pod can still contact every other pod.
+
+An egress policy closes this gap: it limits what a selected pod may send. It takes more care to write than an ingress policy. Once a client is isolated, it also loses things it quietly relied on, above all name resolution (DNS). On this page, you build an egress policy for the `shuttle` pod. It keeps DNS and one application dependency, and it blocks every other destination.
 
 ## A second listener to prove the block
 
-A good test needs a destination that is healthy but must stay blocked. If the test target is broken, a failed request proves nothing. Create a second web server in `starfleet`, labelled `app: blocked-server`, that listens on port 8080 like `probe`.
+To prove a block, you need a destination that works but must stay blocked. If the test target is broken, a failed request proves nothing. So first, create a second web server in `starfleet`. It is labelled `app: blocked-server` and listens on port 8080, like `probe`.
 
 <!-- astrona:playground:renew -->
 
@@ -48,11 +50,17 @@ BLOCKED_IP=$(kubectl -n starfleet get pod blocked-server -o jsonpath='{.status.p
 kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- "http://$BLOCKED_IP:8080/"
 ```
 
+The request works today. After the egress policy, the same request must fail, and that failure will be your proof.
+
 ## What the egress policy must contain
 
-For `shuttle` the policy needs two allowances. Name resolution is the first one. A pod resolves `probe` by sending a DNS query to the cluster DNS service, which `CoreDNS` serves from pods labelled `k8s-app: kube-dns` in the `kube-system` namespace. DNS uses UDP port 53, and TCP port 53 for large answers, so both protocols belong in the rule. The second allowance is the application connection to the `probe` pods on TCP port 8080.
+The `shuttle` pod needs two allowances.
 
-If the DNS rule is missing, the application connection is never attempted. Every name lookup fails first, and the client reports a resolution problem, not a connection problem. This is why DNS is the first rule to check when an isolated client suddenly cannot reach anything by name.
+The first is name resolution. To find the address of `probe`, the pod sends a DNS query to the cluster DNS service. CoreDNS, the cluster DNS server, answers it from pods labelled `k8s-app: kube-dns` in the `kube-system` namespace. DNS uses UDP port 53, and TCP port 53 for large answers, so the rule needs both protocols.
+
+The second allowance is the application connection itself: the `probe` pods on TCP port 8080.
+
+Do not skip the DNS rule. Without it, the client never even tries the application connection, because every name lookup fails first. The client then reports a name resolution problem, not a connection problem. So when an isolated client suddenly cannot reach anything by name, DNS is the first rule to check.
 
 Save this as `networkpolicy-shuttle-egress.yaml`:
 
@@ -90,7 +98,7 @@ spec:
       port: 8080
 ```
 
-The DNS rule has the `namespaceSelector` and the `podSelector` in the same item, so they combine with AND: only the DNS pods in `kube-system`, not every pod in that namespace. The second rule has only a `podSelector`, so it matches `probe` pods in the policy's own namespace.
+Look at the two rules before you apply the file. In the DNS rule, the `namespaceSelector` and the `podSelector` sit in the same item, so they combine with AND. The rule allows only the DNS pods in `kube-system`, not every pod in that namespace. The second rule has only a `podSelector`, so it matches `probe` pods in the policy's own namespace.
 
 Apply it:
 
@@ -106,23 +114,27 @@ kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
 kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- "http://$BLOCKED_IP:8080/"
 ```
 
-The `BLOCKED_IP` variable must still be set in your shell from the earlier step; run the `BLOCKED_IP=` line again if you opened a new shell.
+The last command needs the `BLOCKED_IP` variable from the earlier step. If you opened a new shell, run the `BLOCKED_IP=` line again first.
 
 ## Why the port is 8080 and not 80
 
-The `shuttle` pod sends its request to the Service on port 80. Before the egress filter on the node sees the packet, the Service address has already been replaced by a `probe` pod address and port 8080. The egress rule is checked against that pod address and port. A rule that allows port 80 would not match, and the request would time out even though the application is healthy.
+The policy allows port 8080, but the `shuttle` pod sends its request to the Service on port 80. Both are correct, and the reason is the order in which the node handles the packet.
+
+First, the node replaces the Service address with the address of one `probe` pod and port 8080. Only then does the egress filter see the packet. So the egress rule is checked against the pod address and port 8080. A rule that allowed port 80 would not match, and the request would time out even though the application is healthy.
 
 ![Diagram: the shuttle pod reaches CoreDNS and a probe pod, and its request to blocked-server is dropped](images/egress-paths-shuttle.svg)
 
-The solid arrows are the two allowed paths. The dashed red arrow is dropped because no egress rule names `blocked-server`.
+The green arrows are the two allowed paths. The dashed red arrow is dropped because no egress rule names `blocked-server`.
 
 ## Egress to other namespaces and to the outside
 
-To reach a pod in another namespace, the egress peer needs a `namespaceSelector`, and often a `podSelector` in the same item. To reach addresses outside the cluster, use `ipBlock` with a `cidr`. Keep in mind that pod destinations are compared after Service translation, but `ipBlock` rules for external addresses are compared with the real destination address.
+The same rules extend to destinations outside the namespace. To reach a pod in another namespace, the egress peer needs a `namespaceSelector`, often with a `podSelector` in the same item. To reach addresses outside the cluster, use an `ipBlock` with a `cidr`.
 
-Egress policies do not apply to the pod's own loopback traffic. They also do not stop the node from reaching the pod for health checks in most plugins, and the details of that depend on the plugin.
+There is one difference to keep in mind. Pod destinations are compared after the Service address was replaced. Rules with an `ipBlock` for outside addresses are compared with the real destination address.
 
-You now have an egress policy that gives a client name resolution and one dependency and blocks a healthy listener. The remaining problem is what to do when a connection fails and you must find out which policy, selector or label is responsible.
+Egress policies also have limits. They do not apply to traffic a pod sends to itself on its loopback address. In most plugins, they also do not stop the node from reaching the pod for health checks, and the details depend on the plugin.
+
+You now have an egress policy that gives a client name resolution and one dependency, and that blocks a healthy listener. The open question is what to do when a connection fails, and how to find the policy, selector or label that causes it.
 
 ## Common pitfalls
 
