@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 330" width="840" height="330" role="img" aria-labelledby="title desc">
+  <title id="title">Metadata coverage after the fix</title>
+  <desc id="desc">Each of the namespaces starfleet, outpost and dock has the block-metadata policy, and starfleet also has allow-metadata-agent. Requests to 169.254.169.254: the agent pod gets 200, the shuttle pod gets 000, and the temporary meta-check pod gets 000 in all three namespaces.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="30" y="20" width="270" height="290" rx="10"/>
+  <text class="label" x="46" y="42">namespace <tspan class="code">starfleet</tspan></text>
+  <rect class="frame" x="316" y="20" width="240" height="290" rx="10"/>
+  <text class="label" x="332" y="42">namespace <tspan class="code">outpost</tspan></text>
+  <rect class="frame" x="572" y="20" width="240" height="290" rx="10"/>
+  <text class="label" x="588" y="42">namespace <tspan class="code">dock</tspan></text>
+
+  <rect class="policy" x="50" y="58" width="230" height="38" rx="8"/>
+  <text x="165" y="82" text-anchor="middle" class="code">block-metadata</text>
+  <rect class="policy" x="50" y="104" width="230" height="38" rx="8"/>
+  <text x="165" y="128" text-anchor="middle" class="code">allow-metadata-agent</text>
+  <rect class="policy" x="336" y="58" width="200" height="38" rx="8"/>
+  <text x="436" y="82" text-anchor="middle" class="code">block-metadata</text>
+  <rect class="policy" x="592" y="58" width="200" height="38" rx="8"/>
+  <text x="692" y="82" text-anchor="middle" class="code">block-metadata</text>
+
+  <text class="label" x="46" y="172">requests to <tspan class="code">169.254.169.254</tspan></text>
+
+  <rect class="ok" x="50" y="184" width="230" height="36" rx="8"/>
+  <text x="165" y="207" text-anchor="middle"><tspan class="code">agent</tspan>: <tspan class="good strong">200</tspan></text>
+  <rect class="drop" x="50" y="228" width="230" height="36" rx="8"/>
+  <text x="165" y="251" text-anchor="middle"><tspan class="code">shuttle</tspan>: <tspan class="bad strong">000</tspan></text>
+  <rect class="drop" x="50" y="272" width="230" height="30" rx="8"/>
+  <text x="165" y="292" text-anchor="middle"><tspan class="code">meta-check</tspan>: <tspan class="bad strong">000</tspan></text>
+
+  <rect class="drop" x="336" y="272" width="200" height="30" rx="8"/>
+  <text x="436" y="292" text-anchor="middle"><tspan class="code">meta-check</tspan>: <tspan class="bad strong">000</tspan></text>
+  <rect class="drop" x="592" y="272" width="200" height="30" rx="8"/>
+  <text x="692" y="292" text-anchor="middle"><tspan class="code">meta-check</tspan>: <tspan class="bad strong">000</tspan></text>
+</svg>

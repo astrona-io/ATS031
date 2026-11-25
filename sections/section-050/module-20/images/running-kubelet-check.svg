@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 270" width="840" height="270" role="img" aria-labelledby="title desc">
+  <title id="title">Check the running kubelet against its release</title>
+  <desc id="desc">The kubelet process leads through /proc/pid/exe to the running binary, and sha256sum computes the digest of its bytes. kubelet --version reports Kubernetes v1.35.0, which selects the published digest in current/kubelet.sha256. The two digests are compared, and the result is /proc/.../exe: OK.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+  <path class="line" d="M200 58 H238" marker-end="url(#arrow)"/>
+  <path class="line" d="M420 58 H458" marker-end="url(#arrow)"/>
+  <path class="line" d="M200 218 H238" marker-end="url(#arrow)"/>
+  <path class="line" d="M610 58 H730 V114" marker-end="url(#arrow)"/>
+  <path class="line" d="M610 218 H730 V166" marker-end="url(#arrow)"/>
+  <path class="okline" d="M650 140 H612" marker-end="url(#arrowok)"/>
+  <rect class="box" x="30" y="30" width="170" height="56" rx="8"/>
+  <text x="115" y="63" text-anchor="middle"><tspan class="code">kubelet</tspan> process</text>
+  <rect class="box" x="240" y="30" width="180" height="56" rx="8"/>
+  <text class="code" x="330" y="54" text-anchor="middle">/proc/&lt;pid&gt;/exe</text>
+  <text x="330" y="74" text-anchor="middle">running binary</text>
+  <rect class="box" x="460" y="30" width="150" height="56" rx="8"/>
+  <text class="code" x="535" y="54" text-anchor="middle">sha256sum</text>
+  <text x="535" y="74" text-anchor="middle">digest of the bytes</text>
+  <rect class="box" x="30" y="190" width="170" height="56" rx="8"/>
+  <text class="code" x="115" y="214" text-anchor="middle">kubelet --version</text>
+  <text class="code" x="115" y="234" text-anchor="middle">Kubernetes v1.35.0</text>
+  <rect class="box" x="240" y="190" width="370" height="56" rx="8"/>
+  <text x="425" y="214" text-anchor="middle">Published digest for that version</text>
+  <text class="code" x="425" y="234" text-anchor="middle">current/kubelet.sha256</text>
+  <rect class="ask" x="650" y="116" width="160" height="48" rx="8"/>
+  <text class="strong" x="730" y="145" text-anchor="middle">Compare</text>
+  <rect class="ok" x="420" y="116" width="190" height="48" rx="8"/>
+  <text class="code" x="515" y="145" text-anchor="middle">/proc/.../exe: OK</text>
+</svg>

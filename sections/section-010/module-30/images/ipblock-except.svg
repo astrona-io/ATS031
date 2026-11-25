@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 320" width="840" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">An ipBlock range with one address removed</title>
+  <desc id="desc">The telemetry-ipblock policy allows the range 0.0.0.0/0 on TCP port 9000 and removes the address of the shuttle pod in outpost with except. The request from the shuttle pod in starfleet reaches the telemetry pod. The request from the shuttle pod in outpost is dropped.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="policy" x="290" y="30" width="320" height="260" rx="10"/>
+  <path class="okline" d="M220 88 L656 140" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M220 228 H326" marker-end="url(#arrowbad)"/>
+  <text class="label good" x="450" y="148" text-anchor="middle">inside the cidr: allowed</text>
+  <text class="label bad" x="262" y="218" text-anchor="middle">dropped</text>
+  <rect class="box" x="20" y="60" width="200" height="56" rx="8"/>
+  <text x="120" y="82" text-anchor="middle"><tspan class="code">shuttle</tspan> in <tspan class="code">starfleet</tspan></text>
+  <text class="label" x="120" y="104" text-anchor="middle">allowed address</text>
+  <rect class="box" x="20" y="200" width="200" height="56" rx="8"/>
+  <text x="120" y="222" text-anchor="middle"><tspan class="code">shuttle</tspan> in <tspan class="code">outpost</tspan></text>
+  <text class="label" x="120" y="244" text-anchor="middle">address in except</text>
+  <text x="450" y="58" text-anchor="middle"><tspan class="code">ipBlock</tspan> with <tspan class="code">cidr: 0.0.0.0/0</tspan></text>
+  <rect class="drop" x="330" y="190" width="240" height="76" rx="8"/>
+  <text class="code" x="450" y="222" text-anchor="middle">except:</text>
+  <text class="code" x="450" y="244" text-anchor="middle">&lt;OUTPOST_SHUTTLE_IP&gt;/32</text>
+  <rect class="ok" x="660" y="110" width="160" height="72" rx="8"/>
+  <text class="code" x="740" y="140" text-anchor="middle">telemetry</text>
+  <text x="740" y="162" text-anchor="middle">TCP port 9000</text>
+</svg>

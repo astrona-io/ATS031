@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 250" width="840" height="250" role="img" aria-labelledby="title desc">
+  <title id="title">Where each broken Ingress fails</title>
+  <desc id="desc">The checks run in order: IngressClass served, Secret exists in the same namespace, key matches certificate, host and SAN right. case-four fails the class check with nginx, case-one fails the Secret check because one-tls does not exist, case-two fails the key check because the key comes from the spare pair, and case-three fails the host check because of the typo tset.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="okline" d="M190 85 H228" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M400 85 H438" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M610 85 H648" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M105 110 V168" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="113" y="145" text-anchor="start">no</text>
+  <path class="dashed" d="M315 110 V168" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="323" y="145" text-anchor="start">no</text>
+  <path class="dashed" d="M525 110 V168" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="533" y="145" text-anchor="start">no</text>
+  <path class="dashed" d="M735 110 V168" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="743" y="145" text-anchor="start">no</text>
+  <rect class="ask" x="20" y="60" width="170" height="50" rx="8"/>
+  <text x="105.0" y="80" text-anchor="middle">IngressClass</text>
+  <text x="105.0" y="100" text-anchor="middle">served?</text>
+  <rect class="drop" x="20" y="170" width="170" height="60" rx="8"/>
+  <text class="code" x="105.0" y="195" text-anchor="middle">case-four</text>
+  <text x="105.0" y="215" text-anchor="middle">class nginx</text>
+  <rect class="ask" x="230" y="60" width="170" height="50" rx="8"/>
+  <text x="315.0" y="80" text-anchor="middle">Secret exists,</text>
+  <text x="315.0" y="100" text-anchor="middle">same namespace?</text>
+  <rect class="drop" x="230" y="170" width="170" height="60" rx="8"/>
+  <text class="code" x="315.0" y="195" text-anchor="middle">case-one</text>
+  <text x="315.0" y="215" text-anchor="middle">names one-tls</text>
+  <rect class="ask" x="440" y="60" width="170" height="50" rx="8"/>
+  <text x="525.0" y="80" text-anchor="middle">key matches</text>
+  <text x="525.0" y="100" text-anchor="middle">certificate?</text>
+  <rect class="drop" x="440" y="170" width="170" height="60" rx="8"/>
+  <text class="code" x="525.0" y="195" text-anchor="middle">case-two</text>
+  <text x="525.0" y="215" text-anchor="middle">key of spare pair</text>
+  <rect class="ask" x="650" y="60" width="170" height="50" rx="8"/>
+  <text x="735.0" y="80" text-anchor="middle">host and SAN</text>
+  <text x="735.0" y="100" text-anchor="middle">right?</text>
+  <rect class="drop" x="650" y="170" width="170" height="60" rx="8"/>
+  <text class="code" x="735.0" y="195" text-anchor="middle">case-three</text>
+  <text x="735.0" y="215" text-anchor="middle">host typo tset</text>
+  <text class="label" x="20" y="36" text-anchor="start">checks in order, yes moves right</text>
+</svg>

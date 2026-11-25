@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 400" width="840" height="400" role="img" aria-labelledby="title desc">
+  <title id="title">Digest from the same host compared with a signed manifest</title>
+  <desc id="desc">Top: the binary and its digest come from the same host. An attacker who controls the host replaces both, and the digest check passes on the tampered file. Bottom: the digest list is signed with the publisher private key. The attacker can change the list but cannot make a valid signature, so the signature check fails.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+
+  <line class="sep" x1="20" y1="200" x2="820" y2="200"/>
+  <text class="strong" x="20" y="30">Digest from the same host</text>
+  <rect class="frame" x="20" y="45" width="300" height="130" rx="10"/>
+  <text class="label" x="36" y="68">Download host, taken over</text>
+  <path class="dashed" d="M320 90 H508" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M320 140 H508" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="414" y="80" text-anchor="middle">tampered file</text>
+  <text class="label bad" x="414" y="130" text-anchor="middle">matching digest</text>
+  <rect class="drop" x="40" y="75" width="260" height="34" rx="6"/>
+  <text x="170" y="97" text-anchor="middle"><tspan class="code">kubectl</tspan>, replaced</text>
+  <rect class="drop" x="40" y="123" width="260" height="34" rx="6"/>
+  <text x="170" y="145" text-anchor="middle"><tspan class="code">kubectl.sha256</tspan>, replaced</text>
+  <rect class="drop" x="510" y="90" width="300" height="50" rx="8"/>
+  <text x="660" y="112" text-anchor="middle">Digest check passes</text>
+  <text class="label bad" x="660" y="130" text-anchor="middle">on the tampered file</text>
+
+  <text class="strong" x="20" y="230">Signed digest list</text>
+  <rect class="frame" x="20" y="245" width="300" height="130" rx="10"/>
+  <text class="label" x="36" y="268">Download host, taken over</text>
+  <path class="line" d="M320 290 H508" marker-end="url(#arrow)"/>
+  <path class="line" d="M320 340 H508" marker-end="url(#arrow)"/>
+  <text class="label" x="414" y="280" text-anchor="middle">changed list</text>
+  <text class="label" x="414" y="330" text-anchor="middle">old signature</text>
+  <rect class="drop" x="40" y="275" width="260" height="34" rx="6"/>
+  <text x="170" y="297" text-anchor="middle"><tspan class="code">checksums.txt</tspan>, changed</text>
+  <rect class="box" x="40" y="323" width="260" height="34" rx="6"/>
+  <text x="170" y="345" text-anchor="middle"><tspan class="code">checksums.sig</tspan>, needs private key</text>
+  <rect class="ok" x="510" y="290" width="300" height="50" rx="8"/>
+  <text x="660" y="312" text-anchor="middle">Signature check fails</text>
+  <text class="label good" x="660" y="330" text-anchor="middle">the forgery is rejected</text>
+</svg>

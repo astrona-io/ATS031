@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 380" width="840" height="380" role="img" aria-labelledby="title desc">
+  <title id="title">Two questions before you change anything for a FAIL</title>
+  <desc id="desc">For a FAIL result, first ask whether the audit is valid on this cluster. If not, record that the check is not applicable and why, for example 1.1.12 on a kubeadm node. If it is valid, ask whether the risk is real. If yes, fix it and verify, for example 4.1.1 and 4.1.9 with chmod 600. If no, record an accepted exception.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M170 64 V98" marker-end="url(#arrow)"/>
+  <path class="line" d="M300 124 H518" marker-end="url(#arrow)"/>
+  <path class="line" d="M170 148 V198" marker-end="url(#arrow)"/>
+  <path class="line" d="M300 224 H518" marker-end="url(#arrow)"/>
+  <path class="line" d="M170 248 V298" marker-end="url(#arrow)"/>
+
+  <text class="label" x="410" y="116" text-anchor="middle">no</text>
+  <text class="label" x="182" y="178">yes</text>
+  <text class="label" x="410" y="216" text-anchor="middle">no</text>
+  <text class="label" x="182" y="278">yes</text>
+
+  <rect class="drop" x="40" y="20" width="260" height="44" rx="8"/>
+  <text class="strong" x="170" y="47" text-anchor="middle"><tspan class="code">FAIL</tspan> result</text>
+
+  <rect class="ask" x="40" y="100" width="260" height="48" rx="8"/>
+  <text x="170" y="129" text-anchor="middle">Is the audit valid here?</text>
+
+  <rect class="ask" x="40" y="200" width="260" height="48" rx="8"/>
+  <text x="170" y="229" text-anchor="middle">Is the risk real?</text>
+
+  <rect class="ok" x="40" y="300" width="260" height="58" rx="8"/>
+  <text class="strong" x="170" y="324" text-anchor="middle">Fix and verify</text>
+  <text class="code" x="170" y="345" text-anchor="middle">4.1.1, 4.1.9: chmod 600</text>
+
+  <rect class="box" x="520" y="96" width="290" height="58" rx="8"/>
+  <text class="strong" x="665" y="120" text-anchor="middle">Record: not applicable, and why</text>
+  <text class="code" x="665" y="141" text-anchor="middle">1.1.12 on a kubeadm node</text>
+
+  <rect class="box" x="520" y="200" width="290" height="48" rx="8"/>
+  <text class="strong" x="665" y="229" text-anchor="middle">Record an accepted exception</text>
+</svg>

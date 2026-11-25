@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 310" width="860" height="310" role="img" aria-labelledby="title desc">
+  <title id="title">How the mtls option reaches one route</title>
+  <desc id="desc">The ConfigMap client-ca is mounted in the Traefik pod at /etc/traefik/client-ca. The ConfigMap traefik-dynamic loads the TLS option mtls, whose caFiles points at that folder. The annotation mtls@file on the Ingress probe attaches the option to the router for probe.example.test only; other routes keep the default option.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M260 72 H338" marker-end="url(#arrow)"/>
+  <path class="line" d="M260 170 H338" marker-end="url(#arrow)"/>
+  <path class="line" d="M460 94 V138" marker-end="url(#arrow)"/>
+  <path class="okline" d="M260 262 H648" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M580 170 H735 V230" marker-end="url(#arrowok)"/>
+  <rect class="frame" x="320" y="20" width="280" height="200" rx="10"/>
+  <text class="label" x="332" y="40">traefik pod</text>
+  <text class="label" x="289" y="62" text-anchor="middle">mounted</text>
+  <text class="label" x="289" y="160" text-anchor="middle">loaded</text>
+  <text class="label" x="470" y="122" text-anchor="start">caFiles</text>
+  <text class="label good" x="450" y="254" text-anchor="middle">annotation attaches mtls</text>
+  <text class="label good" x="745" y="210" text-anchor="start">option mtls</text>
+  <rect class="box" x="30" y="42" width="230" height="60" rx="8"/>
+  <text x="145.0" y="67" text-anchor="middle">ConfigMap</text>
+  <text class="code" x="145.0" y="87" text-anchor="middle">client-ca</text>
+  <rect class="box" x="30" y="140" width="230" height="60" rx="8"/>
+  <text x="145.0" y="165" text-anchor="middle">ConfigMap</text>
+  <text class="code" x="145.0" y="185" text-anchor="middle">traefik-dynamic</text>
+  <rect class="box" x="30" y="232" width="230" height="60" rx="8"/>
+  <text x="145.0" y="257" text-anchor="middle">Ingress probe</text>
+  <text class="code" x="145.0" y="277" text-anchor="middle">mtls@file</text>
+  <rect class="box" x="340" y="50" width="240" height="44" rx="8"/>
+  <text class="code" x="460.0" y="77" text-anchor="middle">/etc/traefik/client-ca</text>
+  <rect class="ask" x="340" y="140" width="240" height="60" rx="8"/>
+  <text class="strong" x="460.0" y="165" text-anchor="middle">TLS option mtls</text>
+  <text class="code" x="460.0" y="185" text-anchor="middle">RequireAndVerifyClientCert</text>
+  <rect class="ok" x="650" y="232" width="180" height="60" rx="8"/>
+  <text x="740.0" y="257" text-anchor="middle">router for</text>
+  <text class="code" x="740.0" y="277" text-anchor="middle">probe.example.test</text>
+  <rect class="box" x="650" y="50" width="180" height="60" rx="8"/>
+  <text x="740.0" y="75" text-anchor="middle">other routes</text>
+  <text x="740.0" y="95" text-anchor="middle">option default</text>
+</svg>

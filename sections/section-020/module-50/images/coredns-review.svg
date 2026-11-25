@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 270" width="860" height="270" role="img" aria-labelledby="title desc">
+  <title id="title">The parts of cluster DNS to review</title>
+  <desc id="desc">The shuttle pod sends a DNS query to the kube-dns Service, which forwards it to the coredns pods in kube-system. The kubernetes plugin answers cluster.local names, and the forward plugin sends other names to the servers in the node's /etc/resolv.conf. The coredns pods read the Corefile from the ConfigMap coredns and apply changes through the reload plugin, and RBAC decides who may update that ConfigMap.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+  <rect class="frame" x="200" y="20" width="440" height="230" rx="10"/>
+  <text class="label" x="216" y="42">Namespace <tspan class="code">kube-system</tspan></text>
+
+  <path class="line" d="M170 188 H223" marker-end="url(#arrow)"/>
+  <path class="line" d="M375 188 H438" marker-end="url(#arrow)"/>
+  <path class="line" d="M375 88 H438" marker-end="url(#arrow)"/>
+  <path class="line" d="M525 116 V158" marker-end="url(#arrow)"/>
+  <path class="line" d="M610 176 L668 128" marker-end="url(#arrow)"/>
+  <path class="line" d="M610 202 L668 228" marker-end="url(#arrow)"/>
+
+  <text class="label" x="197" y="178" text-anchor="middle">query</text>
+  <text class="label" x="406" y="78" text-anchor="middle">update</text>
+  <text class="label" x="535" y="142">reload</text>
+
+  <rect class="box" x="20" y="160" width="150" height="56" rx="8"/>
+  <text x="95" y="183" text-anchor="middle"><tspan class="code">shuttle</tspan> pod</text>
+  <text class="code" x="95" y="204" text-anchor="middle">starfleet</text>
+
+  <rect class="ask" x="225" y="60" width="150" height="56" rx="8"/>
+  <text x="300" y="83" text-anchor="middle">RBAC</text>
+  <text x="300" y="104" text-anchor="middle">who may change it</text>
+
+  <rect class="policy" x="440" y="60" width="170" height="56" rx="8"/>
+  <text x="525" y="83" text-anchor="middle">ConfigMap <tspan class="code">coredns</tspan></text>
+  <text x="525" y="104" text-anchor="middle">holds the Corefile</text>
+
+  <rect class="box" x="225" y="160" width="150" height="56" rx="8"/>
+  <text x="300" y="183" text-anchor="middle">Service</text>
+  <text class="code" x="300" y="204" text-anchor="middle">kube-dns</text>
+
+  <rect class="ok" x="440" y="160" width="170" height="56" rx="8"/>
+  <text x="525" y="183" text-anchor="middle"><tspan class="code">coredns</tspan> pods</text>
+  <text x="525" y="204" text-anchor="middle">port 53</text>
+
+  <rect class="box" x="670" y="100" width="170" height="56" rx="8"/>
+  <text x="755" y="123" text-anchor="middle"><tspan class="code">kubernetes</tspan> plugin</text>
+  <text class="code" x="755" y="144" text-anchor="middle">cluster.local</text>
+
+  <rect class="box" x="670" y="200" width="170" height="56" rx="8"/>
+  <text x="755" y="223" text-anchor="middle"><tspan class="code">forward</tspan> plugin</text>
+  <text class="code" x="755" y="244" text-anchor="middle">/etc/resolv.conf</text>
+</svg>

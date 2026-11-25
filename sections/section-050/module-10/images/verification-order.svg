@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 370" width="840" height="370" role="img" aria-labelledby="title desc">
+  <title id="title">The order of verification for a platform binary</title>
+  <desc id="desc">Six steps in order: select version and platform, get the binary and signed evidence, verify the signature with the expected key or identity, compare the digest with the trusted manifest, copy to a protected location and verify again, and record the digest, source and date.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+  <path class="line" d="M420 60 V78" marker-end="url(#arrow)"/>
+  <rect class="box" x="200" y="20" width="440" height="40" rx="8"/>
+  <text class="label" x="222" y="45">1</text>
+  <text x="420" y="45" text-anchor="middle">Select version and platform</text>
+  <path class="line" d="M420 120 V138" marker-end="url(#arrow)"/>
+  <rect class="box" x="200" y="80" width="440" height="40" rx="8"/>
+  <text class="label" x="222" y="105">2</text>
+  <text x="420" y="105" text-anchor="middle">Get binary and signed evidence</text>
+  <path class="line" d="M420 180 V198" marker-end="url(#arrow)"/>
+  <rect class="ask" x="200" y="140" width="440" height="40" rx="8"/>
+  <text class="label" x="222" y="165">3</text>
+  <text x="420" y="165" text-anchor="middle">Verify signature with expected key or identity</text>
+  <path class="line" d="M420 240 V258" marker-end="url(#arrow)"/>
+  <rect class="ask" x="200" y="200" width="440" height="40" rx="8"/>
+  <text class="label" x="222" y="225">4</text>
+  <text x="420" y="225" text-anchor="middle">Compare digest with trusted manifest</text>
+  <path class="line" d="M420 300 V318" marker-end="url(#arrow)"/>
+  <rect class="box" x="200" y="260" width="440" height="40" rx="8"/>
+  <text class="label" x="222" y="285">5</text>
+  <text x="420" y="285" text-anchor="middle">Copy to protected location, verify again</text>
+  <rect class="ok" x="200" y="320" width="440" height="40" rx="8"/>
+  <text class="label" x="222" y="345">6</text>
+  <text x="420" y="345" text-anchor="middle">Record digest, source and date</text>
+</svg>

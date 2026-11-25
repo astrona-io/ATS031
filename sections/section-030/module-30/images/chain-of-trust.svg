@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 380" width="840" height="380" role="img" aria-labelledby="title desc">
+  <title id="title">Chain of trust and the three checks of a client</title>
+  <desc id="desc">The CA certificate signs the server certificate. Traefik presents the server certificate to the client. The client holds the CA certificate in its trust store and runs three checks: the chain leads to a trusted CA, the name is in the SAN, and the dates include the current time.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M150 96 V196" marker-end="url(#arrow)"/>
+  <text class="label" x="162" y="150">signs</text>
+  <path class="line" d="M260 68 H548" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <text class="label" x="404" y="58" text-anchor="middle">a copy sits in the trust store</text>
+  <path class="okline" d="M300 226 H528" marker-end="url(#arrowok)"/>
+  <text class="label good" x="414" y="214" text-anchor="middle">presents the server certificate</text>
+
+  <rect class="ok" x="40" y="40" width="220" height="56" rx="8"/>
+  <text x="150" y="65" text-anchor="middle" class="strong">CA certificate</text>
+  <text x="150" y="85" text-anchor="middle" class="label"><tspan class="code">CA:TRUE</tspan></text>
+
+  <rect class="frame" x="20" y="170" width="290" height="120" rx="10"/>
+  <text class="label" x="34" y="190">Traefik</text>
+  <rect class="box" x="40" y="200" width="220" height="56" rx="8"/>
+  <text x="150" y="225" text-anchor="middle" class="strong">server certificate</text>
+  <text x="150" y="245" text-anchor="middle" class="code">probe.example.test</text>
+
+  <rect class="frame" x="530" y="20" width="290" height="340" rx="10"/>
+  <text class="label" x="544" y="40">client</text>
+  <rect class="ok" x="550" y="50" width="250" height="40" rx="8"/>
+  <text x="675" y="75" text-anchor="middle">trust store: CA certificate</text>
+  <rect class="ask" x="550" y="130" width="250" height="56" rx="8"/>
+  <text x="566" y="155" class="strong">1 chain</text>
+  <text x="566" y="175">leads to a trusted CA</text>
+  <rect class="ask" x="550" y="200" width="250" height="56" rx="8"/>
+  <text x="566" y="225" class="strong">2 name</text>
+  <text x="566" y="245">the asked name is in the SAN</text>
+  <rect class="ask" x="550" y="270" width="250" height="56" rx="8"/>
+  <text x="566" y="295" class="strong">3 dates</text>
+  <text x="566" y="315">include the current time</text>
+</svg>

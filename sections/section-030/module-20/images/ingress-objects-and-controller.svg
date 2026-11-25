@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 330" width="840" height="330" role="img" aria-labelledby="title desc">
+  <title id="title">The Ingress stores rules, the controller routes</title>
+  <desc id="desc">The kube-apiserver stores the Ingress probe and the IngressClass traefik. The Traefik pod in the ingress-system namespace watches these objects and builds its routes. A client request goes to the Traefik pod, which forwards it to a probe pod in the starfleet namespace.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M340 150 H262" marker-end="url(#arrow)"/>
+  <text class="label" x="291" y="140" text-anchor="middle">watch</text>
+  <path class="okline" d="M520 150 H628" marker-end="url(#arrowok)"/>
+  <text class="label good" x="574" y="140" text-anchor="middle">request</text>
+  <path class="okline" d="M430 256 V182" marker-end="url(#arrowok)"/>
+
+  <rect class="frame" x="30" y="30" width="230" height="230" rx="10"/>
+  <text class="label" x="46" y="54"><tspan class="code">kube-apiserver</tspan> stores</text>
+  <rect class="box" x="50" y="76" width="190" height="66" rx="8"/>
+  <text x="145" y="102" text-anchor="middle">Ingress <tspan class="code">probe</tspan></text>
+  <text class="label" x="145" y="124" text-anchor="middle">host, path, backend</text>
+  <rect class="box" x="50" y="166" width="190" height="66" rx="8"/>
+  <text x="145" y="192" text-anchor="middle">IngressClass <tspan class="code">traefik</tspan></text>
+  <text class="label" x="145" y="214" text-anchor="middle">names the controller</text>
+
+  <rect class="frame" x="320" y="76" width="220" height="130" rx="10"/>
+  <text class="label code" x="334" y="98">ingress-system</text>
+  <rect class="ok" x="335" y="118" width="190" height="62" rx="8"/>
+  <text x="430" y="144" text-anchor="middle">Traefik pod</text>
+  <text class="label" x="430" y="165" text-anchor="middle">reads rules, routes requests</text>
+
+  <rect class="frame" x="610" y="76" width="200" height="130" rx="10"/>
+  <text class="label code" x="624" y="98">starfleet</text>
+  <rect class="box" x="630" y="118" width="160" height="62" rx="8"/>
+  <text x="710" y="154" text-anchor="middle"><tspan class="code">probe</tspan> pod</text>
+
+  <rect class="box" x="340" y="258" width="180" height="44" rx="8"/>
+  <text x="430" y="285" text-anchor="middle">client</text>
+</svg>

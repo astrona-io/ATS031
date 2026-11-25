@@ -44,16 +44,16 @@ modules:
     path: sections/section-010/00-introduction.md
   - type: reading
     title: Restrict Pod Traffic With NetworkPolicy
-    path: sections/section-010/module-01/course.md
+    path: sections/section-010/module-10/course-000.md
   - type: reading
     title: How NetworkPolicy Isolation Works
-    path: sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+    path: sections/section-010/module-10/course-010-isolation-and-evaluation-rules.md
   - type: reading
     title: Isolate One Pod For Egress Only — Task
-    path: sections/section-010/module-01/labs/lab-03/question.md
+    path: sections/section-010/module-10/labs/lab-03/question.md
   - type: lab
     title: Isolate One Pod For Egress Only
-    path: sections/section-010/module-01/labs/lab-03
+    path: sections/section-010/module-10/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-egress
@@ -65,16 +65,16 @@ modules:
     - networkpolicy-egress
   - type: reading
     title: Isolate One Pod For Egress Only — Solution
-    path: sections/section-010/module-01/labs/lab-03/solution.md
+    path: sections/section-010/module-10/labs/lab-03/solution.md
   - type: reading
     title: Allow One Peer With An Ingress Policy
-    path: sections/section-010/module-01/course-02-ingress-policy-allow-one-peer.md
+    path: sections/section-010/module-10/course-020-ingress-policy-allow-one-peer.md
   - type: reading
     title: Allow One Peer And Deny Another — Task
-    path: sections/section-010/module-01/labs/lab-01/question.md
+    path: sections/section-010/module-10/labs/lab-01/question.md
   - type: lab
     title: Allow One Peer And Deny Another
-    path: sections/section-010/module-01/labs/lab-01
+    path: sections/section-010/module-10/labs/lab-01
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-ingress
@@ -86,16 +86,16 @@ modules:
     - networkpolicy-ingress
   - type: reading
     title: Allow One Peer And Deny Another — Solution
-    path: sections/section-010/module-01/labs/lab-01/solution.md
+    path: sections/section-010/module-10/labs/lab-01/solution.md
   - type: reading
     title: Restrict Egress And Allow DNS
-    path: sections/section-010/module-01/course-03-egress-policy-dns-and-dependencies.md
+    path: sections/section-010/module-10/course-030-egress-policy-dns-and-dependencies.md
   - type: reading
     title: Allow DNS And One Application Dependency — Task
-    path: sections/section-010/module-01/labs/lab-02/question.md
+    path: sections/section-010/module-10/labs/lab-02/question.md
   - type: lab
     title: Allow DNS And One Application Dependency
-    path: sections/section-010/module-01/labs/lab-02
+    path: sections/section-010/module-10/labs/lab-02
     difficulty: intermediate
     estimated_duration: 12m
     topic: networkpolicy-egress
@@ -107,16 +107,16 @@ modules:
     - networkpolicy-egress
   - type: reading
     title: Allow DNS And One Application Dependency — Solution
-    path: sections/section-010/module-01/labs/lab-02/solution.md
+    path: sections/section-010/module-10/labs/lab-02/solution.md
   - type: reading
     title: Default Deny And Troubleshooting Policies
-    path: sections/section-010/module-01/course-04-default-deny-and-troubleshooting.md
+    path: sections/section-010/module-10/course-040-default-deny-and-troubleshooting.md
   - type: reading
     title: Find The Policy That Blocks A Request — Task
-    path: sections/section-010/module-01/labs/lab-04/question.md
+    path: sections/section-010/module-10/labs/lab-04/question.md
   - type: lab
     title: Find The Policy That Blocks A Request
-    path: sections/section-010/module-01/labs/lab-04
+    path: sections/section-010/module-10/labs/lab-04
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-troubleshooting
@@ -128,30 +128,30 @@ modules:
     - networkpolicy-troubleshooting
   - type: reading
     title: Find The Policy That Blocks A Request — Solution
-    path: sections/section-010/module-01/labs/lab-04/solution.md
+    path: sections/section-010/module-10/labs/lab-04/solution.md
   - type: reading
     title: Summary
-    path: sections/section-010/module-01/course-05-summary.md
+    path: sections/section-010/module-10/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Restrict Pod Traffic With NetworkPolicy'
-    path: sections/section-010/module-01/quiz.yaml
+    path: sections/section-010/module-10/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Build Default-Deny Baselines For Namespaces
-    path: sections/section-010/module-02/course.md
+    path: sections/section-010/module-20/course-000.md
   - type: reading
     title: Why A Baseline Comes First
-    path: sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+    path: sections/section-010/module-20/course-010-why-a-baseline-comes-first.md
   - type: reading
     title: Deny All Ingress
-    path: sections/section-010/module-02/course-02-deny-all-ingress.md
+    path: sections/section-010/module-20/course-020-deny-all-ingress.md
   - type: reading
     title: Deny All Ingress In One Namespace — Task
-    path: sections/section-010/module-02/labs/lab-02/question.md
+    path: sections/section-010/module-20/labs/lab-02/question.md
   - type: lab
     title: Deny All Ingress In One Namespace
-    path: sections/section-010/module-02/labs/lab-02
+    path: sections/section-010/module-20/labs/lab-02
     difficulty: intermediate
     estimated_duration: 8m
     topic: networkpolicy-default-deny
@@ -163,16 +163,16 @@ modules:
     - networkpolicy-default-deny
   - type: reading
     title: Deny All Ingress In One Namespace — Solution
-    path: sections/section-010/module-02/labs/lab-02/solution.md
+    path: sections/section-010/module-20/labs/lab-02/solution.md
   - type: reading
     title: Deny All Egress And Its Side Effects
-    path: sections/section-010/module-02/course-03-deny-all-egress-and-its-side-effects.md
+    path: sections/section-010/module-20/course-030-deny-all-egress-and-its-side-effects.md
   - type: reading
     title: Deny All Egress And Observe DNS Fail — Task
-    path: sections/section-010/module-02/labs/lab-03/question.md
+    path: sections/section-010/module-20/labs/lab-03/question.md
   - type: lab
     title: Deny All Egress And Observe DNS Fail
-    path: sections/section-010/module-02/labs/lab-03
+    path: sections/section-010/module-20/labs/lab-03
     difficulty: intermediate
     estimated_duration: 8m
     topic: networkpolicy-default-deny
@@ -184,16 +184,16 @@ modules:
     - networkpolicy-default-deny
   - type: reading
     title: Deny All Egress And Observe DNS Fail — Solution
-    path: sections/section-010/module-02/labs/lab-03/solution.md
+    path: sections/section-010/module-20/labs/lab-03/solution.md
   - type: reading
     title: Combine Baselines With Allow Rules
-    path: sections/section-010/module-02/course-04-combine-baselines-with-allow-rules.md
+    path: sections/section-010/module-20/course-040-combine-baselines-with-allow-rules.md
   - type: reading
     title: Apply A Default-Deny Baseline And Allow One Path — Task
-    path: sections/section-010/module-02/labs/lab-01/question.md
+    path: sections/section-010/module-20/labs/lab-01/question.md
   - type: lab
     title: Apply A Default-Deny Baseline And Allow One Path
-    path: sections/section-010/module-02/labs/lab-01
+    path: sections/section-010/module-20/labs/lab-01
     difficulty: intermediate
     estimated_duration: 12m
     topic: networkpolicy-default-deny
@@ -205,16 +205,16 @@ modules:
     - networkpolicy-default-deny
   - type: reading
     title: Apply A Default-Deny Baseline And Allow One Path — Solution
-    path: sections/section-010/module-02/labs/lab-01/solution.md
+    path: sections/section-010/module-20/labs/lab-01/solution.md
   - type: reading
     title: Baselines Across Many Namespaces
-    path: sections/section-010/module-02/course-05-baselines-across-many-namespaces.md
+    path: sections/section-010/module-20/course-050-baselines-across-many-namespaces.md
   - type: reading
     title: Apply One Baseline To Labelled Namespaces — Task
-    path: sections/section-010/module-02/labs/lab-05/question.md
+    path: sections/section-010/module-20/labs/lab-05/question.md
   - type: lab
     title: Apply One Baseline To Labelled Namespaces
-    path: sections/section-010/module-02/labs/lab-05
+    path: sections/section-010/module-20/labs/lab-05
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-default-deny
@@ -226,27 +226,27 @@ modules:
     - networkpolicy-default-deny
   - type: reading
     title: Apply One Baseline To Labelled Namespaces — Solution
-    path: sections/section-010/module-02/labs/lab-05/solution.md
+    path: sections/section-010/module-20/labs/lab-05/solution.md
   - type: reading
     title: Summary
-    path: sections/section-010/module-02/course-06-summary.md
+    path: sections/section-010/module-20/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Build Default-Deny Baselines For Namespaces'
-    path: sections/section-010/module-02/quiz.yaml
+    path: sections/section-010/module-20/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Select Peers And Ports Precisely
-    path: sections/section-010/module-03/course.md
+    path: sections/section-010/module-30/course-000.md
   - type: reading
     title: Selectors Recap And The Namespace Name Label
-    path: sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+    path: sections/section-010/module-30/course-010-selectors-recap-and-the-namespace-name-label.md
   - type: reading
     title: Admit A Group Of Namespaces By Label — Task
-    path: sections/section-010/module-03/labs/lab-03/question.md
+    path: sections/section-010/module-30/labs/lab-03/question.md
   - type: lab
     title: Admit A Group Of Namespaces By Label
-    path: sections/section-010/module-03/labs/lab-03
+    path: sections/section-010/module-30/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-peers
@@ -258,16 +258,16 @@ modules:
     - networkpolicy-peers
   - type: reading
     title: Admit A Group Of Namespaces By Label — Solution
-    path: sections/section-010/module-03/labs/lab-03/solution.md
+    path: sections/section-010/module-30/labs/lab-03/solution.md
   - type: reading
     title: Cross-Namespace Ingress
-    path: sections/section-010/module-03/course-02-cross-namespace-ingress.md
+    path: sections/section-010/module-30/course-020-cross-namespace-ingress.md
   - type: reading
     title: Allow One Pod From Another Namespace — Task
-    path: sections/section-010/module-03/labs/lab-01/question.md
+    path: sections/section-010/module-30/labs/lab-01/question.md
   - type: lab
     title: Allow One Pod From Another Namespace
-    path: sections/section-010/module-03/labs/lab-01
+    path: sections/section-010/module-30/labs/lab-01
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-peers
@@ -279,16 +279,16 @@ modules:
     - networkpolicy-peers
   - type: reading
     title: Allow One Pod From Another Namespace — Solution
-    path: sections/section-010/module-03/labs/lab-01/solution.md
+    path: sections/section-010/module-30/labs/lab-01/solution.md
   - type: reading
     title: One Entry Versus Two Entries
-    path: sections/section-010/module-03/course-03-one-entry-versus-two-entries.md
+    path: sections/section-010/module-30/course-030-one-entry-versus-two-entries.md
   - type: reading
     title: Repair A Two-Entry Peer Rule — Task
-    path: sections/section-010/module-03/labs/lab-02/question.md
+    path: sections/section-010/module-30/labs/lab-02/question.md
   - type: lab
     title: Repair A Two-Entry Peer Rule
-    path: sections/section-010/module-03/labs/lab-02
+    path: sections/section-010/module-30/labs/lab-02
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-peers
@@ -300,16 +300,16 @@ modules:
     - networkpolicy-peers
   - type: reading
     title: Repair A Two-Entry Peer Rule — Solution
-    path: sections/section-010/module-03/labs/lab-02/solution.md
+    path: sections/section-010/module-30/labs/lab-02/solution.md
   - type: reading
     title: ipBlock And Except
-    path: sections/section-010/module-03/course-04-ipblock-and-except.md
+    path: sections/section-010/module-30/course-040-ipblock-and-except.md
   - type: reading
     title: Allow A Pod Range With ipBlock And except — Task
-    path: sections/section-010/module-03/labs/lab-04/question.md
+    path: sections/section-010/module-30/labs/lab-04/question.md
   - type: lab
     title: Allow A Pod Range With ipBlock And except
-    path: sections/section-010/module-03/labs/lab-04
+    path: sections/section-010/module-30/labs/lab-04
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-peers
@@ -321,16 +321,16 @@ modules:
     - networkpolicy-peers
   - type: reading
     title: Allow A Pod Range With ipBlock And except — Solution
-    path: sections/section-010/module-03/labs/lab-04/solution.md
+    path: sections/section-010/module-30/labs/lab-04/solution.md
   - type: reading
     title: Ports, Protocols And endPort
-    path: sections/section-010/module-03/course-05-ports-protocols-and-endport.md
+    path: sections/section-010/module-30/course-050-ports-protocols-and-endport.md
   - type: reading
     title: Allow A TCP Port Range And A Named UDP Port — Task
-    path: sections/section-010/module-03/labs/lab-05/question.md
+    path: sections/section-010/module-30/labs/lab-05/question.md
   - type: lab
     title: Allow A TCP Port Range And A Named UDP Port
-    path: sections/section-010/module-03/labs/lab-05
+    path: sections/section-010/module-30/labs/lab-05
     difficulty: intermediate
     estimated_duration: 12m
     topic: networkpolicy-peers
@@ -342,16 +342,16 @@ modules:
     - networkpolicy-peers
   - type: reading
     title: Allow A TCP Port Range And A Named UDP Port — Solution
-    path: sections/section-010/module-03/labs/lab-05/solution.md
+    path: sections/section-010/module-30/labs/lab-05/solution.md
   - type: reading
     title: Policies On Services And Replicas
-    path: sections/section-010/module-03/course-06-policies-on-services-and-replicas.md
+    path: sections/section-010/module-30/course-060-policies-on-services-and-replicas.md
   - type: reading
     title: Repair A Policy That Names The Service Port And Add A Port Range — Task
-    path: sections/section-010/module-03/labs/lab-06/question.md
+    path: sections/section-010/module-30/labs/lab-06/question.md
   - type: lab
     title: Repair A Policy That Names The Service Port And Add A Port Range
-    path: sections/section-010/module-03/labs/lab-06
+    path: sections/section-010/module-30/labs/lab-06
     difficulty: intermediate
     estimated_duration: 12m
     topic: networkpolicy-troubleshooting
@@ -363,27 +363,27 @@ modules:
     - networkpolicy-troubleshooting
   - type: reading
     title: Repair A Policy That Names The Service Port And Add A Port Range — Solution
-    path: sections/section-010/module-03/labs/lab-06/solution.md
+    path: sections/section-010/module-30/labs/lab-06/solution.md
   - type: reading
     title: Summary
-    path: sections/section-010/module-03/course-07-summary.md
+    path: sections/section-010/module-30/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Select Peers And Ports Precisely'
-    path: sections/section-010/module-03/quiz.yaml
+    path: sections/section-010/module-30/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Policy For Real Cluster Traffic And Troubleshooting
-    path: sections/section-010/module-04/course.md
+    path: sections/section-010/module-40/course-000.md
   - type: reading
     title: DNS And CoreDNS Egress
-    path: sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+    path: sections/section-010/module-40/course-010-dns-and-coredns-egress.md
   - type: reading
     title: Allow Only DNS Egress Under A Baseline — Task
-    path: sections/section-010/module-04/labs/lab-02/question.md
+    path: sections/section-010/module-40/labs/lab-02/question.md
   - type: lab
     title: Allow Only DNS Egress Under A Baseline
-    path: sections/section-010/module-04/labs/lab-02
+    path: sections/section-010/module-40/labs/lab-02
     difficulty: intermediate
     estimated_duration: 8m
     topic: networkpolicy-egress
@@ -395,16 +395,16 @@ modules:
     - networkpolicy-egress
   - type: reading
     title: Allow Only DNS Egress Under A Baseline — Solution
-    path: sections/section-010/module-04/labs/lab-02/solution.md
+    path: sections/section-010/module-40/labs/lab-02/solution.md
   - type: reading
     title: Egress To The API Server And Other Dependencies
-    path: sections/section-010/module-04/course-02-egress-to-the-api-server-and-other-dependencies.md
+    path: sections/section-010/module-40/course-020-egress-to-the-api-server-and-other-dependencies.md
   - type: reading
     title: Allow API Server Egress For One Pod — Task
-    path: sections/section-010/module-04/labs/lab-03/question.md
+    path: sections/section-010/module-40/labs/lab-03/question.md
   - type: lab
     title: Allow API Server Egress For One Pod
-    path: sections/section-010/module-04/labs/lab-03
+    path: sections/section-010/module-40/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: networkpolicy-egress
@@ -416,19 +416,19 @@ modules:
     - networkpolicy-egress
   - type: reading
     title: Allow API Server Egress For One Pod — Solution
-    path: sections/section-010/module-04/labs/lab-03/solution.md
+    path: sections/section-010/module-40/labs/lab-03/solution.md
   - type: reading
     title: Probes, hostNetwork And Node Traffic
-    path: sections/section-010/module-04/course-03-probes-hostnetwork-and-node-traffic.md
+    path: sections/section-010/module-40/course-030-probes-hostnetwork-and-node-traffic.md
   - type: reading
     title: Test Matrix For A Policy Set
-    path: sections/section-010/module-04/course-04-test-matrix-for-a-policy-set.md
+    path: sections/section-010/module-40/course-040-test-matrix-for-a-policy-set.md
   - type: reading
     title: Record A Test Matrix For A Policy Set — Task
-    path: sections/section-010/module-04/labs/lab-04/question.md
+    path: sections/section-010/module-40/labs/lab-04/question.md
   - type: lab
     title: Record A Test Matrix For A Policy Set
-    path: sections/section-010/module-04/labs/lab-04
+    path: sections/section-010/module-40/labs/lab-04
     difficulty: intermediate
     estimated_duration: 12m
     topic: networkpolicy-troubleshooting
@@ -440,16 +440,16 @@ modules:
     - networkpolicy-troubleshooting
   - type: reading
     title: Record A Test Matrix For A Policy Set — Solution
-    path: sections/section-010/module-04/labs/lab-04/solution.md
+    path: sections/section-010/module-40/labs/lab-04/solution.md
   - type: reading
     title: Audit And Troubleshoot Policies
-    path: sections/section-010/module-04/course-05-audit-and-troubleshoot-policies.md
+    path: sections/section-010/module-40/course-050-audit-and-troubleshoot-policies.md
   - type: reading
     title: Repair A Broken Policy Set — Task
-    path: sections/section-010/module-04/labs/lab-01/question.md
+    path: sections/section-010/module-40/labs/lab-01/question.md
   - type: lab
     title: Repair A Broken Policy Set
-    path: sections/section-010/module-04/labs/lab-01
+    path: sections/section-010/module-40/labs/lab-01
     difficulty: advanced
     estimated_duration: 15m
     topic: networkpolicy-troubleshooting
@@ -461,13 +461,13 @@ modules:
     - networkpolicy-troubleshooting
   - type: reading
     title: Repair A Broken Policy Set — Solution
-    path: sections/section-010/module-04/labs/lab-01/solution.md
+    path: sections/section-010/module-40/labs/lab-01/solution.md
   - type: reading
     title: Summary
-    path: sections/section-010/module-04/course-06-summary.md
+    path: sections/section-010/module-40/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Policy For Real Cluster Traffic And Troubleshooting'
-    path: sections/section-010/module-04/quiz.yaml
+    path: sections/section-010/module-40/quiz.yaml
     question_count: 10
     pass_score: 70
 - id: module-020
@@ -480,19 +480,19 @@ modules:
   - type: reading
     title: Use CIS benchmark to review the security configuration of Kubernetes components
       (etcd, kubelet, kubedns, kubeapi)
-    path: sections/section-020/README.md
+    path: sections/section-020/00-introduction.md
   - type: reading
     title: Review Kubernetes Components With The CIS Benchmark
-    path: sections/section-020/module-01/course.md
+    path: sections/section-020/module-10/course-000.md
   - type: reading
     title: The Benchmark And Where The Settings Live
-    path: sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+    path: sections/section-020/module-10/course-010-benchmark-structure-and-file-layout.md
   - type: reading
     title: Restrict Control Plane Kubeconfig And Key Files — Task
-    path: sections/section-020/module-01/labs/lab-02/question.md
+    path: sections/section-020/module-10/labs/lab-02/question.md
   - type: lab
     title: Restrict Control Plane Kubeconfig And Key Files
-    path: sections/section-020/module-01/labs/lab-02
+    path: sections/section-020/module-10/labs/lab-02
     difficulty: beginner
     estimated_duration: 8m
     topic: control-plane-file-permissions
@@ -506,16 +506,16 @@ modules:
     - file-permissions
   - type: reading
     title: Restrict Control Plane Kubeconfig And Key Files — Solution
-    path: sections/section-020/module-01/labs/lab-02/solution.md
+    path: sections/section-020/module-10/labs/lab-02/solution.md
   - type: reading
     title: 'Read A Check: kube-bench And The Manual Audit'
-    path: sections/section-020/module-01/course-02-reading-checks-and-auditing-the-control-plane.md
+    path: sections/section-020/module-10/course-020-reading-checks-and-auditing-the-control-plane.md
   - type: reading
     title: Record A Manual Audit Of The API Server And etcd — Task
-    path: sections/section-020/module-01/labs/lab-03/question.md
+    path: sections/section-020/module-10/labs/lab-03/question.md
   - type: lab
     title: Record A Manual Audit Of The API Server And etcd
-    path: sections/section-020/module-01/labs/lab-03
+    path: sections/section-020/module-10/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: manual-control-plane-audit
@@ -529,16 +529,16 @@ modules:
     - manual-audit
   - type: reading
     title: Record A Manual Audit Of The API Server And etcd — Solution
-    path: sections/section-020/module-01/labs/lab-03/solution.md
+    path: sections/section-020/module-10/labs/lab-03/solution.md
   - type: reading
     title: 'Review The Kubelet: Effective Configuration And File Permissions'
-    path: sections/section-020/module-01/course-03-reviewing-the-kubelet.md
+    path: sections/section-020/module-10/course-030-reviewing-the-kubelet.md
   - type: reading
     title: Report The Effective Kubelet Settings — Task
-    path: sections/section-020/module-01/labs/lab-04/question.md
+    path: sections/section-020/module-10/labs/lab-04/question.md
   - type: lab
     title: Report The Effective Kubelet Settings
-    path: sections/section-020/module-01/labs/lab-04
+    path: sections/section-020/module-10/labs/lab-04
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-effective-configuration
@@ -552,16 +552,16 @@ modules:
     - kubelet
   - type: reading
     title: Report The Effective Kubelet Settings — Solution
-    path: sections/section-020/module-01/labs/lab-04/solution.md
+    path: sections/section-020/module-10/labs/lab-04/solution.md
   - type: reading
     title: Correct A Finding Safely And Record It
-    path: sections/section-020/module-01/course-04-correcting-a-finding-and-recording-it.md
+    path: sections/section-020/module-10/course-040-correcting-a-finding-and-recording-it.md
   - type: reading
     title: Correct The Scheduler Bind Address And Record It — Task
-    path: sections/section-020/module-01/labs/lab-01/question.md
+    path: sections/section-020/module-10/labs/lab-01/question.md
   - type: lab
     title: Correct The Scheduler Bind Address And Record It
-    path: sections/section-020/module-01/labs/lab-01
+    path: sections/section-020/module-10/labs/lab-01
     difficulty: intermediate
     estimated_duration: 10m
     topic: api-profiling
@@ -574,27 +574,27 @@ modules:
     - api-profiling
   - type: reading
     title: Correct The Scheduler Bind Address And Record It — Solution
-    path: sections/section-020/module-01/labs/lab-01/solution.md
+    path: sections/section-020/module-10/labs/lab-01/solution.md
   - type: reading
     title: Summary
-    path: sections/section-020/module-01/course-05-summary.md
+    path: sections/section-020/module-10/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Review Kubernetes Components With The CIS Benchmark'
-    path: sections/section-020/module-01/quiz.yaml
+    path: sections/section-020/module-10/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Run kube-bench And Read Its Output
-    path: sections/section-020/module-02/course.md
+    path: sections/section-020/module-20/course-000.md
   - type: reading
     title: What kube-bench Does Under The Hood
-    path: sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
+    path: sections/section-020/module-20/course-010-what-kube-bench-does-under-the-hood.md
   - type: reading
     title: Read A kube-bench Check Definition — Task
-    path: sections/section-020/module-02/labs/lab-02/question.md
+    path: sections/section-020/module-20/labs/lab-02/question.md
   - type: lab
     title: Read A kube-bench Check Definition
-    path: sections/section-020/module-02/labs/lab-02
+    path: sections/section-020/module-20/labs/lab-02
     difficulty: beginner
     estimated_duration: 8m
     topic: kube-bench-definitions
@@ -608,16 +608,16 @@ modules:
     - cis-benchmark
   - type: reading
     title: Read A kube-bench Check Definition — Solution
-    path: sections/section-020/module-02/labs/lab-02/solution.md
+    path: sections/section-020/module-20/labs/lab-02/solution.md
   - type: reading
     title: Run kube-bench On A kubeadm Node
-    path: sections/section-020/module-02/course-02-run-kube-bench-on-a-kubeadm-node.md
+    path: sections/section-020/module-20/course-020-run-kube-bench-on-a-kubeadm-node.md
   - type: reading
     title: Run The Node Checks With A kube-bench Job — Task
-    path: sections/section-020/module-02/labs/lab-03/question.md
+    path: sections/section-020/module-20/labs/lab-03/question.md
   - type: lab
     title: Run The Node Checks With A kube-bench Job
-    path: sections/section-020/module-02/labs/lab-03
+    path: sections/section-020/module-20/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: kube-bench-worker-job
@@ -631,16 +631,16 @@ modules:
     - cis-benchmark
   - type: reading
     title: Run The Node Checks With A kube-bench Job — Solution
-    path: sections/section-020/module-02/labs/lab-03/solution.md
+    path: sections/section-020/module-20/labs/lab-03/solution.md
   - type: reading
     title: Targets, Benchmarks And Versions
-    path: sections/section-020/module-02/course-03-targets-benchmarks-and-versions.md
+    path: sections/section-020/module-20/course-030-targets-benchmarks-and-versions.md
   - type: reading
     title: Run The etcd Checks With A Pinned Benchmark Edition — Task
-    path: sections/section-020/module-02/labs/lab-04/question.md
+    path: sections/section-020/module-20/labs/lab-04/question.md
   - type: lab
     title: Run The etcd Checks With A Pinned Benchmark Edition
-    path: sections/section-020/module-02/labs/lab-04
+    path: sections/section-020/module-20/labs/lab-04
     difficulty: intermediate
     estimated_duration: 10m
     topic: kube-bench-targets
@@ -653,16 +653,16 @@ modules:
     - etcd
   - type: reading
     title: Run The etcd Checks With A Pinned Benchmark Edition — Solution
-    path: sections/section-020/module-02/labs/lab-04/solution.md
+    path: sections/section-020/module-20/labs/lab-04/solution.md
   - type: reading
     title: Read A Result
-    path: sections/section-020/module-02/course-04-read-a-result.md
+    path: sections/section-020/module-20/course-040-read-a-result.md
   - type: reading
     title: Record The Totals Of A kube-bench Report — Task
-    path: sections/section-020/module-02/labs/lab-05/question.md
+    path: sections/section-020/module-20/labs/lab-05/question.md
   - type: lab
     title: Record The Totals Of A kube-bench Report
-    path: sections/section-020/module-02/labs/lab-05
+    path: sections/section-020/module-20/labs/lab-05
     difficulty: beginner
     estimated_duration: 10m
     topic: kube-bench-results
@@ -676,16 +676,16 @@ modules:
     - cis-benchmark
   - type: reading
     title: Record The Totals Of A kube-bench Report — Solution
-    path: sections/section-020/module-02/labs/lab-05/solution.md
+    path: sections/section-020/module-20/labs/lab-05/solution.md
   - type: reading
     title: Select Checks And Export Results
-    path: sections/section-020/module-02/course-05-select-checks-and-export-results.md
+    path: sections/section-020/module-20/course-050-select-checks-and-export-results.md
   - type: reading
     title: Save The Failing API Server Check Ids — Task
-    path: sections/section-020/module-02/labs/lab-01/question.md
+    path: sections/section-020/module-20/labs/lab-01/question.md
   - type: lab
     title: Save The Failing API Server Check Ids
-    path: sections/section-020/module-02/labs/lab-01
+    path: sections/section-020/module-20/labs/lab-01
     difficulty: intermediate
     estimated_duration: 12m
     topic: kube-bench-master
@@ -698,30 +698,30 @@ modules:
     - kube-bench
   - type: reading
     title: Save The Failing API Server Check Ids — Solution
-    path: sections/section-020/module-02/labs/lab-01/solution.md
+    path: sections/section-020/module-20/labs/lab-01/solution.md
   - type: reading
     title: Manual Checks And False Findings
-    path: sections/section-020/module-02/course-06-manual-checks-and-false-findings.md
+    path: sections/section-020/module-20/course-060-manual-checks-and-false-findings.md
   - type: reading
     title: Summary
-    path: sections/section-020/module-02/course-07-summary.md
+    path: sections/section-020/module-20/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Run kube-bench And Read Its Output'
-    path: sections/section-020/module-02/quiz.yaml
+    path: sections/section-020/module-20/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Harden The API Server And Control Plane Components
-    path: sections/section-020/module-03/course.md
+    path: sections/section-020/module-30/course-000.md
   - type: reading
     title: Static Pods And Safe Editing
-    path: sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+    path: sections/section-020/module-30/course-010-static-pods-and-safe-editing.md
   - type: reading
     title: Recover A Broken Controller Manager Static Pod — Task
-    path: sections/section-020/module-03/labs/lab-03/question.md
+    path: sections/section-020/module-30/labs/lab-03/question.md
   - type: lab
     title: Recover A Broken Controller Manager Static Pod
-    path: sections/section-020/module-03/labs/lab-03
+    path: sections/section-020/module-30/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: static-pod-recovery
@@ -735,16 +735,16 @@ modules:
     - kube-controller-manager
   - type: reading
     title: Recover A Broken Controller Manager Static Pod — Solution
-    path: sections/section-020/module-03/labs/lab-03/solution.md
+    path: sections/section-020/module-30/labs/lab-03/solution.md
   - type: reading
     title: Authentication And Authorization Flags
-    path: sections/section-020/module-03/course-02-authentication-and-authorization-flags.md
+    path: sections/section-020/module-30/course-020-authentication-and-authorization-flags.md
   - type: reading
     title: Restore API Server Authorization And Remove Anonymous Access — Task
-    path: sections/section-020/module-03/labs/lab-04/question.md
+    path: sections/section-020/module-30/labs/lab-04/question.md
   - type: lab
     title: Restore API Server Authorization And Remove Anonymous Access
-    path: sections/section-020/module-03/labs/lab-04
+    path: sections/section-020/module-30/labs/lab-04
     difficulty: intermediate
     estimated_duration: 12m
     topic: api-authorization
@@ -759,16 +759,16 @@ modules:
     - rbac
   - type: reading
     title: Restore API Server Authorization And Remove Anonymous Access — Solution
-    path: sections/section-020/module-03/labs/lab-04/solution.md
+    path: sections/section-020/module-30/labs/lab-04/solution.md
   - type: reading
     title: Admission Plugins
-    path: sections/section-020/module-03/course-03-admission-plugins.md
+    path: sections/section-020/module-30/course-030-admission-plugins.md
   - type: reading
     title: Enable NodeRestriction — Task
-    path: sections/section-020/module-03/labs/lab-05/question.md
+    path: sections/section-020/module-30/labs/lab-05/question.md
   - type: lab
     title: Enable NodeRestriction
-    path: sections/section-020/module-03/labs/lab-05
+    path: sections/section-020/module-30/labs/lab-05
     difficulty: intermediate
     estimated_duration: 10m
     topic: node-restriction
@@ -782,16 +782,16 @@ modules:
     - admission-control
   - type: reading
     title: Enable NodeRestriction — Solution
-    path: sections/section-020/module-03/labs/lab-05/solution.md
+    path: sections/section-020/module-30/labs/lab-05/solution.md
   - type: reading
     title: Audit Logging
-    path: sections/section-020/module-03/course-04-audit-logging.md
+    path: sections/section-020/module-30/course-040-audit-logging.md
   - type: reading
     title: Enable Audit Logging On The API Server — Task
-    path: sections/section-020/module-03/labs/lab-01/question.md
+    path: sections/section-020/module-30/labs/lab-01/question.md
   - type: lab
     title: Enable Audit Logging On The API Server
-    path: sections/section-020/module-03/labs/lab-01
+    path: sections/section-020/module-30/labs/lab-01
     difficulty: advanced
     estimated_duration: 15m
     topic: api-audit-logging
@@ -803,16 +803,16 @@ modules:
     - audit-logging
   - type: reading
     title: Enable Audit Logging On The API Server — Solution
-    path: sections/section-020/module-03/labs/lab-01/solution.md
+    path: sections/section-020/module-30/labs/lab-01/solution.md
   - type: reading
     title: Profiling, TLS And Service Account Flags
-    path: sections/section-020/module-03/course-05-profiling-tls-and-service-account-flags.md
+    path: sections/section-020/module-30/course-050-profiling-tls-and-service-account-flags.md
   - type: reading
     title: Disable Profiling And Raise The API Server TLS Minimum — Task
-    path: sections/section-020/module-03/labs/lab-02/question.md
+    path: sections/section-020/module-30/labs/lab-02/question.md
   - type: lab
     title: Disable Profiling And Raise The API Server TLS Minimum
-    path: sections/section-020/module-03/labs/lab-02
+    path: sections/section-020/module-30/labs/lab-02
     difficulty: intermediate
     estimated_duration: 10m
     topic: api-profiling-permissions
@@ -825,16 +825,16 @@ modules:
     - api-hardening
   - type: reading
     title: Disable Profiling And Raise The API Server TLS Minimum — Solution
-    path: sections/section-020/module-03/labs/lab-02/solution.md
+    path: sections/section-020/module-30/labs/lab-02/solution.md
   - type: reading
     title: Controller Manager, Scheduler And File Permissions
-    path: sections/section-020/module-03/course-06-controller-manager-scheduler-and-file-permissions.md
+    path: sections/section-020/module-30/course-060-controller-manager-scheduler-and-file-permissions.md
   - type: reading
     title: Harden The Controller Manager And Scheduler — Task
-    path: sections/section-020/module-03/labs/lab-06/question.md
+    path: sections/section-020/module-30/labs/lab-06/question.md
   - type: lab
     title: Harden The Controller Manager And Scheduler
-    path: sections/section-020/module-03/labs/lab-06
+    path: sections/section-020/module-30/labs/lab-06
     difficulty: intermediate
     estimated_duration: 12m
     topic: controller-manager-scheduler-hardening
@@ -849,27 +849,27 @@ modules:
     - file-permissions
   - type: reading
     title: Harden The Controller Manager And Scheduler — Solution
-    path: sections/section-020/module-03/labs/lab-06/solution.md
+    path: sections/section-020/module-30/labs/lab-06/solution.md
   - type: reading
     title: Summary
-    path: sections/section-020/module-03/course-07-summary.md
+    path: sections/section-020/module-30/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Harden The API Server And Control Plane Components'
-    path: sections/section-020/module-03/quiz.yaml
+    path: sections/section-020/module-30/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Review etcd Security Configuration
-    path: sections/section-020/module-04/course.md
+    path: sections/section-020/module-40/course-000.md
   - type: reading
     title: What Lives In etcd And Who Talks To It
-    path: sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+    path: sections/section-020/module-40/course-010-what-lives-in-etcd-and-who-talks-to-it.md
   - type: reading
     title: Record How The API Server Connects To etcd — Task
-    path: sections/section-020/module-04/labs/lab-02/question.md
+    path: sections/section-020/module-40/labs/lab-02/question.md
   - type: lab
     title: Record How The API Server Connects To etcd
-    path: sections/section-020/module-04/labs/lab-02
+    path: sections/section-020/module-40/labs/lab-02
     difficulty: beginner
     estimated_duration: 8m
     topic: etcd-clients
@@ -883,16 +883,16 @@ modules:
     - api-server
   - type: reading
     title: Record How The API Server Connects To etcd — Solution
-    path: sections/section-020/module-04/labs/lab-02/solution.md
+    path: sections/section-020/module-40/labs/lab-02/solution.md
   - type: reading
     title: Client And Peer TLS Flags
-    path: sections/section-020/module-04/course-02-client-and-peer-tls-flags.md
+    path: sections/section-020/module-40/course-020-client-and-peer-tls-flags.md
   - type: reading
     title: Require Client Certificates On etcd — Task
-    path: sections/section-020/module-04/labs/lab-03/question.md
+    path: sections/section-020/module-40/labs/lab-03/question.md
   - type: lab
     title: Require Client Certificates On etcd
-    path: sections/section-020/module-04/labs/lab-03
+    path: sections/section-020/module-40/labs/lab-03
     difficulty: intermediate
     estimated_duration: 12m
     topic: etcd-client-auth
@@ -906,16 +906,16 @@ modules:
     - tls
   - type: reading
     title: Require Client Certificates On etcd — Solution
-    path: sections/section-020/module-04/labs/lab-03/solution.md
+    path: sections/section-020/module-40/labs/lab-03/solution.md
   - type: reading
     title: Data Directory Ownership And Permissions
-    path: sections/section-020/module-04/course-03-data-directory-ownership-and-permissions.md
+    path: sections/section-020/module-40/course-030-data-directory-ownership-and-permissions.md
   - type: reading
     title: Restrict The etcd Data Directory — Task
-    path: sections/section-020/module-04/labs/lab-04/question.md
+    path: sections/section-020/module-40/labs/lab-04/question.md
   - type: lab
     title: Restrict The etcd Data Directory
-    path: sections/section-020/module-04/labs/lab-04
+    path: sections/section-020/module-40/labs/lab-04
     difficulty: beginner
     estimated_duration: 8m
     topic: etcd-data-directory
@@ -929,16 +929,16 @@ modules:
     - file-permissions
   - type: reading
     title: Restrict The etcd Data Directory — Solution
-    path: sections/section-020/module-04/labs/lab-04/solution.md
+    path: sections/section-020/module-40/labs/lab-04/solution.md
   - type: reading
     title: Query etcd With etcdctl
-    path: sections/section-020/module-04/course-04-query-etcd-with-etcdctl.md
+    path: sections/section-020/module-40/course-040-query-etcd-with-etcdctl.md
   - type: reading
     title: Find A Secret Directly In etcd — Task
-    path: sections/section-020/module-04/labs/lab-05/question.md
+    path: sections/section-020/module-40/labs/lab-05/question.md
   - type: lab
     title: Find A Secret Directly In etcd
-    path: sections/section-020/module-04/labs/lab-05
+    path: sections/section-020/module-40/labs/lab-05
     difficulty: intermediate
     estimated_duration: 10m
     topic: etcdctl-queries
@@ -953,16 +953,16 @@ modules:
     - secrets
   - type: reading
     title: Find A Secret Directly In etcd — Solution
-    path: sections/section-020/module-04/labs/lab-05/solution.md
+    path: sections/section-020/module-40/labs/lab-05/solution.md
   - type: reading
     title: Encryption At Rest Check
-    path: sections/section-020/module-04/course-05-encryption-at-rest-check.md
+    path: sections/section-020/module-40/course-050-encryption-at-rest-check.md
   - type: reading
     title: Enable Encryption At Rest For Secrets — Task
-    path: sections/section-020/module-04/labs/lab-01/question.md
+    path: sections/section-020/module-40/labs/lab-01/question.md
   - type: lab
     title: Enable Encryption At Rest For Secrets
-    path: sections/section-020/module-04/labs/lab-01
+    path: sections/section-020/module-40/labs/lab-01
     difficulty: advanced
     estimated_duration: 15m
     topic: etcd-encryption
@@ -976,27 +976,27 @@ modules:
     - encryption-at-rest
   - type: reading
     title: Enable Encryption At Rest For Secrets — Solution
-    path: sections/section-020/module-04/labs/lab-01/solution.md
+    path: sections/section-020/module-40/labs/lab-01/solution.md
   - type: reading
     title: Summary
-    path: sections/section-020/module-04/course-06-summary.md
+    path: sections/section-020/module-40/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Review etcd Security Configuration'
-    path: sections/section-020/module-04/quiz.yaml
+    path: sections/section-020/module-40/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Harden The kubelet And CoreDNS, Then Remediate End To End
-    path: sections/section-020/module-05/course.md
+    path: sections/section-020/module-50/course-000.md
   - type: reading
     title: Kubelet Configuration Sources
-    path: sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+    path: sections/section-020/module-50/course-010-kubelet-configuration-sources.md
   - type: reading
     title: Remove A Kubelet Flag That Overrides The Configuration File — Task
-    path: sections/section-020/module-05/labs/lab-03/question.md
+    path: sections/section-020/module-50/labs/lab-03/question.md
   - type: lab
     title: Remove A Kubelet Flag That Overrides The Configuration File
-    path: sections/section-020/module-05/labs/lab-03
+    path: sections/section-020/module-50/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-configuration-sources
@@ -1009,16 +1009,16 @@ modules:
     - kubelet
   - type: reading
     title: Remove A Kubelet Flag That Overrides The Configuration File — Solution
-    path: sections/section-020/module-05/labs/lab-03/solution.md
+    path: sections/section-020/module-50/labs/lab-03/solution.md
   - type: reading
     title: Kubelet Authentication And Authorization
-    path: sections/section-020/module-05/course-02-kubelet-authentication-and-authorization.md
+    path: sections/section-020/module-50/course-020-kubelet-authentication-and-authorization.md
   - type: reading
     title: Secure Kubelet Authentication And Authorization — Task
-    path: sections/section-020/module-05/labs/lab-01/question.md
+    path: sections/section-020/module-50/labs/lab-01/question.md
   - type: lab
     title: Secure Kubelet Authentication And Authorization
-    path: sections/section-020/module-05/labs/lab-01
+    path: sections/section-020/module-50/labs/lab-01
     difficulty: intermediate
     estimated_duration: 12m
     topic: kubelet-authentication
@@ -1033,16 +1033,16 @@ modules:
     - authorization
   - type: reading
     title: Secure Kubelet Authentication And Authorization — Solution
-    path: sections/section-020/module-05/labs/lab-01/solution.md
+    path: sections/section-020/module-50/labs/lab-01/solution.md
   - type: reading
     title: Read-Only Port, Ports And TLS Settings
-    path: sections/section-020/module-05/course-03-read-only-port-ports-and-tls-settings.md
+    path: sections/section-020/module-50/course-030-read-only-port-ports-and-tls-settings.md
   - type: reading
     title: Close The Kubelet Read-Only Port And Raise Its TLS Minimum — Task
-    path: sections/section-020/module-05/labs/lab-04/question.md
+    path: sections/section-020/module-50/labs/lab-04/question.md
   - type: lab
     title: Close The Kubelet Read-Only Port And Raise Its TLS Minimum
-    path: sections/section-020/module-05/labs/lab-04
+    path: sections/section-020/module-50/labs/lab-04
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-read-only-port
@@ -1056,16 +1056,16 @@ modules:
     - tls
   - type: reading
     title: Close The Kubelet Read-Only Port And Raise Its TLS Minimum — Solution
-    path: sections/section-020/module-05/labs/lab-04/solution.md
+    path: sections/section-020/module-50/labs/lab-04/solution.md
   - type: reading
     title: Other Kubelet Checks
-    path: sections/section-020/module-05/course-04-other-kubelet-checks.md
+    path: sections/section-020/module-50/course-040-other-kubelet-checks.md
   - type: reading
     title: Restrict The Kubelet Service Files And Turn On Certificate Rotation — Task
-    path: sections/section-020/module-05/labs/lab-05/question.md
+    path: sections/section-020/module-50/labs/lab-05/question.md
   - type: lab
     title: Restrict The Kubelet Service Files And Turn On Certificate Rotation
-    path: sections/section-020/module-05/labs/lab-05
+    path: sections/section-020/module-50/labs/lab-05
     difficulty: intermediate
     estimated_duration: 10m
     topic: kubelet-service-files
@@ -1079,16 +1079,16 @@ modules:
     - file-permissions
   - type: reading
     title: Restrict The Kubelet Service Files And Turn On Certificate Rotation — Solution
-    path: sections/section-020/module-05/labs/lab-05/solution.md
+    path: sections/section-020/module-50/labs/lab-05/solution.md
   - type: reading
     title: Review CoreDNS (kube-dns)
-    path: sections/section-020/module-05/course-05-review-coredns-kube-dns.md
+    path: sections/section-020/module-50/course-050-review-coredns-kube-dns.md
   - type: reading
     title: Remove Write Access To The CoreDNS Configuration — Task
-    path: sections/section-020/module-05/labs/lab-06/question.md
+    path: sections/section-020/module-50/labs/lab-06/question.md
   - type: lab
     title: Remove Write Access To The CoreDNS Configuration
-    path: sections/section-020/module-05/labs/lab-06
+    path: sections/section-020/module-50/labs/lab-06
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
@@ -1103,16 +1103,16 @@ modules:
     - rbac
   - type: reading
     title: Remove Write Access To The CoreDNS Configuration — Solution
-    path: sections/section-020/module-05/labs/lab-06/solution.md
+    path: sections/section-020/module-50/labs/lab-06/solution.md
   - type: reading
     title: Remediate Findings End To End
-    path: sections/section-020/module-05/course-06-remediate-findings-end-to-end.md
+    path: sections/section-020/module-50/course-060-remediate-findings-end-to-end.md
   - type: reading
     title: Remediate Five Kubelet Benchmark Findings — Task
-    path: sections/section-020/module-05/labs/lab-02/question.md
+    path: sections/section-020/module-50/labs/lab-02/question.md
   - type: lab
     title: Remediate Five Kubelet Benchmark Findings
-    path: sections/section-020/module-05/labs/lab-02
+    path: sections/section-020/module-50/labs/lab-02
     difficulty: intermediate
     estimated_duration: 12m
     topic: kubelet-hardening
@@ -1127,14 +1127,14 @@ modules:
     - tls
   - type: reading
     title: Remediate Five Kubelet Benchmark Findings — Solution
-    path: sections/section-020/module-05/labs/lab-02/solution.md
+    path: sections/section-020/module-50/labs/lab-02/solution.md
   - type: reading
     title: Summary
-    path: sections/section-020/module-05/course-07-summary.md
+    path: sections/section-020/module-50/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Harden The kubelet And CoreDNS, Then Remediate End To
       End'
-    path: sections/section-020/module-05/quiz.yaml
+    path: sections/section-020/module-50/quiz.yaml
     question_count: 10
     pass_score: 70
 - id: module-030
@@ -1144,19 +1144,19 @@ modules:
   content:
   - type: reading
     title: Properly set up Ingress with TLS
-    path: sections/section-030/README.md
+    path: sections/section-030/00-introduction.md
   - type: reading
     title: Set Up Ingress With TLS
-    path: sections/section-030/module-01/course.md
+    path: sections/section-030/module-10/course-000.md
   - type: reading
     title: 'Ingress Routing: Controller, Class, Host And Path'
-    path: sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+    path: sections/section-030/module-10/course-010-ingress-routing-controller-class-host-path.md
   - type: reading
     title: Fix An Ingress That Traefik Ignores — Task
-    path: sections/section-030/module-01/labs/lab-02/question.md
+    path: sections/section-030/module-10/labs/lab-02/question.md
   - type: lab
     title: Fix An Ingress That Traefik Ignores
-    path: sections/section-030/module-01/labs/lab-02
+    path: sections/section-030/module-10/labs/lab-02
     difficulty: beginner
     estimated_duration: 6m
     topic: ingress-routing
@@ -1170,16 +1170,16 @@ modules:
     - traefik
   - type: reading
     title: Fix An Ingress That Traefik Ignores — Solution
-    path: sections/section-030/module-01/labs/lab-02/solution.md
+    path: sections/section-030/module-10/labs/lab-02/solution.md
   - type: reading
     title: Certificates And The TLS Secret
-    path: sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+    path: sections/section-030/module-10/course-020-certificates-and-the-tls-secret.md
   - type: reading
     title: Create A TLS Secret From A Certificate And Key — Task
-    path: sections/section-030/module-01/labs/lab-03/question.md
+    path: sections/section-030/module-10/labs/lab-03/question.md
   - type: lab
     title: Create A TLS Secret From A Certificate And Key
-    path: sections/section-030/module-01/labs/lab-03
+    path: sections/section-030/module-10/labs/lab-03
     difficulty: beginner
     estimated_duration: 8m
     topic: ingress-tls
@@ -1192,16 +1192,16 @@ modules:
     - ingress-tls
   - type: reading
     title: Create A TLS Secret From A Certificate And Key — Solution
-    path: sections/section-030/module-01/labs/lab-03/solution.md
+    path: sections/section-030/module-10/labs/lab-03/solution.md
   - type: reading
     title: Configure An Ingress With TLS And Verify It
-    path: sections/section-030/module-01/course-03-configure-and-verify-a-tls-ingress.md
+    path: sections/section-030/module-10/course-030-configure-and-verify-a-tls-ingress.md
   - type: reading
     title: Verify TLS Termination And Server Identity — Task
-    path: sections/section-030/module-01/labs/lab-01/question.md
+    path: sections/section-030/module-10/labs/lab-01/question.md
   - type: lab
     title: Verify TLS Termination And Server Identity
-    path: sections/section-030/module-01/labs/lab-01
+    path: sections/section-030/module-10/labs/lab-01
     difficulty: intermediate
     estimated_duration: 6m
     topic: ingress-tls
@@ -1214,16 +1214,16 @@ modules:
     - ingress-tls
   - type: reading
     title: Verify TLS Termination And Server Identity — Solution
-    path: sections/section-030/module-01/labs/lab-01/solution.md
+    path: sections/section-030/module-10/labs/lab-01/solution.md
   - type: reading
     title: Several Hosts, Server Name Selection And Troubleshooting
-    path: sections/section-030/module-01/course-04-several-hosts-sni-and-troubleshooting.md
+    path: sections/section-030/module-10/course-040-several-hosts-sni-and-troubleshooting.md
   - type: reading
     title: Serve Two Hosts With Their Own Certificates — Task
-    path: sections/section-030/module-01/labs/lab-04/question.md
+    path: sections/section-030/module-10/labs/lab-04/question.md
   - type: lab
     title: Serve Two Hosts With Their Own Certificates
-    path: sections/section-030/module-01/labs/lab-04
+    path: sections/section-030/module-10/labs/lab-04
     difficulty: intermediate
     estimated_duration: 8m
     topic: ingress-tls
@@ -1236,30 +1236,30 @@ modules:
     - ingress-tls
   - type: reading
     title: Serve Two Hosts With Their Own Certificates — Solution
-    path: sections/section-030/module-01/labs/lab-04/solution.md
+    path: sections/section-030/module-10/labs/lab-04/solution.md
   - type: reading
     title: Summary
-    path: sections/section-030/module-01/course-05-summary.md
+    path: sections/section-030/module-10/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Set Up Ingress With TLS'
-    path: sections/section-030/module-01/quiz.yaml
+    path: sections/section-030/module-10/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Run Traefik On kind
-    path: sections/section-030/module-02/course.md
+    path: sections/section-030/module-20/course-000.md
   - type: reading
     title: Ingress Controller Architecture With Traefik
-    path: sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+    path: sections/section-030/module-20/course-010-ingress-controller-architecture-with-traefik.md
   - type: reading
     title: Read The Traefik Installation On kind
-    path: sections/section-030/module-02/course-02-read-the-traefik-installation-on-kind.md
+    path: sections/section-030/module-20/course-020-read-the-traefik-installation-on-kind.md
   - type: reading
     title: Repair The Traefik Installation — Task
-    path: sections/section-030/module-02/labs/lab-02/question.md
+    path: sections/section-030/module-20/labs/lab-02/question.md
   - type: lab
     title: Repair The Traefik Installation
-    path: sections/section-030/module-02/labs/lab-02
+    path: sections/section-030/module-20/labs/lab-02
     difficulty: intermediate
     estimated_duration: 10m
     topic: ingress-routing
@@ -1273,16 +1273,16 @@ modules:
     - traefik
   - type: reading
     title: Repair The Traefik Installation — Solution
-    path: sections/section-030/module-02/labs/lab-02/solution.md
+    path: sections/section-030/module-20/labs/lab-02/solution.md
   - type: reading
     title: First Ingress And Host Header Testing
-    path: sections/section-030/module-02/course-03-first-ingress-and-host-header-testing.md
+    path: sections/section-030/module-20/course-030-first-ingress-and-host-header-testing.md
   - type: reading
     title: Publish A Service By Host Name — Task
-    path: sections/section-030/module-02/labs/lab-03/question.md
+    path: sections/section-030/module-20/labs/lab-03/question.md
   - type: lab
     title: Publish A Service By Host Name
-    path: sections/section-030/module-02/labs/lab-03
+    path: sections/section-030/module-20/labs/lab-03
     difficulty: beginner
     estimated_duration: 6m
     topic: ingress-routing
@@ -1295,16 +1295,16 @@ modules:
     - traefik
   - type: reading
     title: Publish A Service By Host Name — Solution
-    path: sections/section-030/module-02/labs/lab-03/solution.md
+    path: sections/section-030/module-20/labs/lab-03/solution.md
   - type: reading
     title: Path Types And Priority
-    path: sections/section-030/module-02/course-04-path-types-and-priority.md
+    path: sections/section-030/module-20/course-040-path-types-and-priority.md
   - type: reading
     title: Match Exact And Prefix Paths — Task
-    path: sections/section-030/module-02/labs/lab-04/question.md
+    path: sections/section-030/module-20/labs/lab-04/question.md
   - type: lab
     title: Match Exact And Prefix Paths
-    path: sections/section-030/module-02/labs/lab-04
+    path: sections/section-030/module-20/labs/lab-04
     difficulty: intermediate
     estimated_duration: 8m
     topic: ingress-routing
@@ -1318,16 +1318,16 @@ modules:
     - traefik
   - type: reading
     title: Match Exact And Prefix Paths — Solution
-    path: sections/section-030/module-02/labs/lab-04/solution.md
+    path: sections/section-030/module-20/labs/lab-04/solution.md
   - type: reading
     title: Several Services And A Default Backend
-    path: sections/section-030/module-02/course-05-several-services-and-a-default-backend.md
+    path: sections/section-030/module-20/course-050-several-services-and-a-default-backend.md
   - type: reading
     title: Route Two Services From One Host — Task
-    path: sections/section-030/module-02/labs/lab-01/question.md
+    path: sections/section-030/module-20/labs/lab-01/question.md
   - type: lab
     title: Route Two Services From One Host
-    path: sections/section-030/module-02/labs/lab-01
+    path: sections/section-030/module-20/labs/lab-01
     difficulty: intermediate
     estimated_duration: 5m
     topic: ingress-routing
@@ -1341,16 +1341,16 @@ modules:
     - traefik
   - type: reading
     title: Route Two Services From One Host — Solution
-    path: sections/section-030/module-02/labs/lab-01/solution.md
+    path: sections/section-030/module-20/labs/lab-01/solution.md
   - type: reading
     title: Inspect The Running Controller
-    path: sections/section-030/module-02/course-06-inspect-the-running-controller.md
+    path: sections/section-030/module-20/course-060-inspect-the-running-controller.md
   - type: reading
     title: Find A Broken Route With The Traefik API — Task
-    path: sections/section-030/module-02/labs/lab-05/question.md
+    path: sections/section-030/module-20/labs/lab-05/question.md
   - type: lab
     title: Find A Broken Route With The Traefik API
-    path: sections/section-030/module-02/labs/lab-05
+    path: sections/section-030/module-20/labs/lab-05
     difficulty: intermediate
     estimated_duration: 10m
     topic: ingress-routing
@@ -1364,30 +1364,30 @@ modules:
     - traefik
   - type: reading
     title: Find A Broken Route With The Traefik API — Solution
-    path: sections/section-030/module-02/labs/lab-05/solution.md
+    path: sections/section-030/module-20/labs/lab-05/solution.md
   - type: reading
     title: Summary
-    path: sections/section-030/module-02/course-07-summary.md
+    path: sections/section-030/module-20/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Run Traefik On kind'
-    path: sections/section-030/module-02/quiz.yaml
+    path: sections/section-030/module-20/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Build TLS With openssl For Traefik
-    path: sections/section-030/module-03/course.md
+    path: sections/section-030/module-30/course-000.md
   - type: reading
     title: Certificate Fundamentals Needed For The Exam
-    path: sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+    path: sections/section-030/module-30/course-010-certificate-fundamentals-needed-for-the-exam.md
   - type: reading
     title: Self-Signed Certificate With openssl
-    path: sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+    path: sections/section-030/module-30/course-020-self-signed-certificate-with-openssl.md
   - type: reading
     title: Create A Self-Signed Certificate For Two Names — Task
-    path: sections/section-030/module-03/labs/lab-03/question.md
+    path: sections/section-030/module-30/labs/lab-03/question.md
   - type: lab
     title: Create A Self-Signed Certificate For Two Names
-    path: sections/section-030/module-03/labs/lab-03
+    path: sections/section-030/module-30/labs/lab-03
     difficulty: intermediate
     estimated_duration: 8m
     topic: ingress-tls
@@ -1401,16 +1401,16 @@ modules:
     - openssl
   - type: reading
     title: Create A Self-Signed Certificate For Two Names — Solution
-    path: sections/section-030/module-03/labs/lab-03/solution.md
+    path: sections/section-030/module-30/labs/lab-03/solution.md
   - type: reading
     title: Sign A Server Certificate With Your Own CA
-    path: sections/section-030/module-03/course-03-sign-a-server-certificate-with-your-own-ca.md
+    path: sections/section-030/module-30/course-030-sign-a-server-certificate-with-your-own-ca.md
   - type: reading
     title: Sign A Server Certificate With A Lab CA — Task
-    path: sections/section-030/module-03/labs/lab-04/question.md
+    path: sections/section-030/module-30/labs/lab-04/question.md
   - type: lab
     title: Sign A Server Certificate With A Lab CA
-    path: sections/section-030/module-03/labs/lab-04
+    path: sections/section-030/module-30/labs/lab-04
     difficulty: intermediate
     estimated_duration: 10m
     topic: ingress-tls
@@ -1425,16 +1425,16 @@ modules:
     - openssl
   - type: reading
     title: Sign A Server Certificate With A Lab CA — Solution
-    path: sections/section-030/module-03/labs/lab-04/solution.md
+    path: sections/section-030/module-30/labs/lab-04/solution.md
   - type: reading
     title: Create The TLS Secret
-    path: sections/section-030/module-03/course-04-create-the-tls-secret.md
+    path: sections/section-030/module-30/course-040-create-the-tls-secret.md
   - type: reading
     title: Repair A TLS Ingress With A Missing Secret — Task
-    path: sections/section-030/module-03/labs/lab-02/question.md
+    path: sections/section-030/module-30/labs/lab-02/question.md
   - type: lab
     title: Repair A TLS Ingress With A Missing Secret
-    path: sections/section-030/module-03/labs/lab-02
+    path: sections/section-030/module-30/labs/lab-02
     difficulty: intermediate
     estimated_duration: 6m
     topic: tls-troubleshooting
@@ -1448,16 +1448,16 @@ modules:
     - troubleshooting
   - type: reading
     title: Repair A TLS Ingress With A Missing Secret — Solution
-    path: sections/section-030/module-03/labs/lab-02/solution.md
+    path: sections/section-030/module-30/labs/lab-02/solution.md
   - type: reading
     title: Configure spec.tls And Verify
-    path: sections/section-030/module-03/course-05-configure-spec-tls-and-verify.md
+    path: sections/section-030/module-30/course-050-configure-spec-tls-and-verify.md
   - type: reading
     title: Publish Scout Over HTTPS With Your Own Certificate — Task
-    path: sections/section-030/module-03/labs/lab-01/question.md
+    path: sections/section-030/module-30/labs/lab-01/question.md
   - type: lab
     title: Publish Scout Over HTTPS With Your Own Certificate
-    path: sections/section-030/module-03/labs/lab-01
+    path: sections/section-030/module-30/labs/lab-01
     difficulty: intermediate
     estimated_duration: 8m
     topic: tls-certificates
@@ -1470,16 +1470,16 @@ modules:
     - openssl
   - type: reading
     title: Publish Scout Over HTTPS With Your Own Certificate — Solution
-    path: sections/section-030/module-03/labs/lab-01/solution.md
+    path: sections/section-030/module-30/labs/lab-01/solution.md
   - type: reading
     title: HTTPS Redirect, HSTS And The Default Certificate
-    path: sections/section-030/module-03/course-06-https-redirect-hsts-and-the-default-certificate.md
+    path: sections/section-030/module-30/course-060-https-redirect-hsts-and-the-default-certificate.md
   - type: reading
     title: Redirect HTTP To HTTPS And Add HSTS — Task
-    path: sections/section-030/module-03/labs/lab-05/question.md
+    path: sections/section-030/module-30/labs/lab-05/question.md
   - type: lab
     title: Redirect HTTP To HTTPS And Add HSTS
-    path: sections/section-030/module-03/labs/lab-05
+    path: sections/section-030/module-30/labs/lab-05
     difficulty: intermediate
     estimated_duration: 10m
     topic: ingress-tls
@@ -1493,27 +1493,27 @@ modules:
     - traefik
   - type: reading
     title: Redirect HTTP To HTTPS And Add HSTS — Solution
-    path: sections/section-030/module-03/labs/lab-05/solution.md
+    path: sections/section-030/module-30/labs/lab-05/solution.md
   - type: reading
     title: Summary
-    path: sections/section-030/module-03/course-07-summary.md
+    path: sections/section-030/module-30/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Build TLS With openssl For Traefik'
-    path: sections/section-030/module-03/quiz.yaml
+    path: sections/section-030/module-30/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Harden And Troubleshoot Traefik TLS
-    path: sections/section-030/module-04/course.md
+    path: sections/section-030/module-40/course-000.md
   - type: reading
     title: TLS Versions, Ciphers And Server Names
-    path: sections/section-030/module-04/course-01-tls-versions-ciphers-and-server-names.md
+    path: sections/section-030/module-40/course-010-tls-versions-ciphers-and-server-names.md
   - type: reading
     title: Require TLS 1.3 And Strict Server Names — Task
-    path: sections/section-030/module-04/labs/lab-01/question.md
+    path: sections/section-030/module-40/labs/lab-01/question.md
   - type: lab
     title: Require TLS 1.3 And Strict Server Names
-    path: sections/section-030/module-04/labs/lab-01
+    path: sections/section-030/module-40/labs/lab-01
     difficulty: advanced
     estimated_duration: 8m
     topic: tls-policy
@@ -1526,16 +1526,16 @@ modules:
     - tls-options
   - type: reading
     title: Require TLS 1.3 And Strict Server Names — Solution
-    path: sections/section-030/module-04/labs/lab-01/solution.md
+    path: sections/section-030/module-40/labs/lab-01/solution.md
   - type: reading
     title: Mutual TLS With Client Certificates
-    path: sections/section-030/module-04/course-02-mutual-tls-with-client-certificates.md
+    path: sections/section-030/module-40/course-020-mutual-tls-with-client-certificates.md
   - type: reading
     title: Require Client Certificates On One Route — Task
-    path: sections/section-030/module-04/labs/lab-03/question.md
+    path: sections/section-030/module-40/labs/lab-03/question.md
   - type: lab
     title: Require Client Certificates On One Route
-    path: sections/section-030/module-04/labs/lab-03
+    path: sections/section-030/module-40/labs/lab-03
     difficulty: advanced
     estimated_duration: 12m
     topic: ingress-tls
@@ -1549,16 +1549,16 @@ modules:
     - mtls
   - type: reading
     title: Require Client Certificates On One Route — Solution
-    path: sections/section-030/module-04/labs/lab-03/solution.md
+    path: sections/section-030/module-40/labs/lab-03/solution.md
   - type: reading
     title: Shrink The Controller Attack Surface
-    path: sections/section-030/module-04/course-03-shrink-the-controller-attack-surface.md
+    path: sections/section-030/module-40/course-030-shrink-the-controller-attack-surface.md
   - type: reading
     title: Close The Traefik API And Restrict Secret Reads — Task
-    path: sections/section-030/module-04/labs/lab-04/question.md
+    path: sections/section-030/module-40/labs/lab-04/question.md
   - type: lab
     title: Close The Traefik API And Restrict Secret Reads
-    path: sections/section-030/module-04/labs/lab-04
+    path: sections/section-030/module-40/labs/lab-04
     difficulty: advanced
     estimated_duration: 12m
     topic: ingress-tls
@@ -1573,16 +1573,16 @@ modules:
     - rbac
   - type: reading
     title: Close The Traefik API And Restrict Secret Reads — Solution
-    path: sections/section-030/module-04/labs/lab-04/solution.md
+    path: sections/section-030/module-40/labs/lab-04/solution.md
   - type: reading
     title: Rotate And Replace Certificates
-    path: sections/section-030/module-04/course-04-rotate-and-replace-certificates.md
+    path: sections/section-030/module-40/course-040-rotate-and-replace-certificates.md
   - type: reading
     title: Rotate An Expiring Certificate — Task
-    path: sections/section-030/module-04/labs/lab-05/question.md
+    path: sections/section-030/module-40/labs/lab-05/question.md
   - type: lab
     title: Rotate An Expiring Certificate
-    path: sections/section-030/module-04/labs/lab-05
+    path: sections/section-030/module-40/labs/lab-05
     difficulty: intermediate
     estimated_duration: 8m
     topic: ingress-tls
@@ -1596,16 +1596,16 @@ modules:
     - openssl
   - type: reading
     title: Rotate An Expiring Certificate — Solution
-    path: sections/section-030/module-04/labs/lab-05/solution.md
+    path: sections/section-030/module-40/labs/lab-05/solution.md
   - type: reading
     title: Troubleshoot TLS Ingress Failures
-    path: sections/section-030/module-04/course-05-troubleshoot-tls-ingress-failures.md
+    path: sections/section-030/module-40/course-050-troubleshoot-tls-ingress-failures.md
   - type: reading
     title: Repair Four Broken TLS Ingresses — Task
-    path: sections/section-030/module-04/labs/lab-02/question.md
+    path: sections/section-030/module-40/labs/lab-02/question.md
   - type: lab
     title: Repair Four Broken TLS Ingresses
-    path: sections/section-030/module-04/labs/lab-02
+    path: sections/section-030/module-40/labs/lab-02
     difficulty: advanced
     estimated_duration: 12m
     topic: tls-troubleshooting
@@ -1618,13 +1618,13 @@ modules:
     - troubleshooting
   - type: reading
     title: Repair Four Broken TLS Ingresses — Solution
-    path: sections/section-030/module-04/labs/lab-02/solution.md
+    path: sections/section-030/module-40/labs/lab-02/solution.md
   - type: reading
     title: Summary
-    path: sections/section-030/module-04/course-06-summary.md
+    path: sections/section-030/module-40/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Harden And Troubleshoot Traefik TLS'
-    path: sections/section-030/module-04/quiz.yaml
+    path: sections/section-030/module-40/quiz.yaml
     question_count: 10
     pass_score: 70
 - id: module-040
@@ -1634,22 +1634,22 @@ modules:
   content:
   - type: reading
     title: Protect node metadata and endpoints
-    path: sections/section-040/README.md
+    path: sections/section-040/00-introduction.md
   - type: reading
     title: Protect Node Metadata And Management Endpoints
-    path: sections/section-040/module-01/course.md
+    path: sections/section-040/module-10/course-000.md
   - type: reading
     title: Endpoints That Carry Authority
-    path: sections/section-040/module-01/course-01-endpoints-that-carry-authority.md
+    path: sections/section-040/module-10/course-010-endpoints-that-carry-authority.md
   - type: reading
     title: Network Paths To A Metadata-Style Endpoint
-    path: sections/section-040/module-01/course-02-network-paths-to-a-metadata-style-endpoint.md
+    path: sections/section-040/module-10/course-020-network-paths-to-a-metadata-style-endpoint.md
   - type: reading
     title: Bring A Host-Network Workload Back Under NetworkPolicy — Task
-    path: sections/section-040/module-01/labs/lab-01/question.md
+    path: sections/section-040/module-10/labs/lab-01/question.md
   - type: lab
     title: Bring A Host-Network Workload Back Under NetworkPolicy
-    path: sections/section-040/module-01/labs/lab-01
+    path: sections/section-040/module-10/labs/lab-01
     difficulty: intermediate
     estimated_duration: 7m
     topic: metadata-isolation
@@ -1662,16 +1662,16 @@ modules:
     - networkpolicy
   - type: reading
     title: Bring A Host-Network Workload Back Under NetworkPolicy — Solution
-    path: sections/section-040/module-01/labs/lab-01/solution.md
+    path: sections/section-040/module-10/labs/lab-01/solution.md
   - type: reading
     title: Restrict The Pod And Verify The Boundary
-    path: sections/section-040/module-01/course-03-restrict-the-pod-and-verify-the-boundary.md
+    path: sections/section-040/module-10/course-030-restrict-the-pod-and-verify-the-boundary.md
   - type: reading
     title: Restrict A Pod To An Egress Allow-List — Task
-    path: sections/section-040/module-01/labs/lab-02/question.md
+    path: sections/section-040/module-10/labs/lab-02/question.md
   - type: lab
     title: Restrict A Pod To An Egress Allow-List
-    path: sections/section-040/module-01/labs/lab-02
+    path: sections/section-040/module-10/labs/lab-02
     difficulty: intermediate
     estimated_duration: 8m
     topic: metadata-isolation
@@ -1684,33 +1684,33 @@ modules:
     - metadata-isolation
   - type: reading
     title: Restrict A Pod To An Egress Allow-List — Solution
-    path: sections/section-040/module-01/labs/lab-02/solution.md
+    path: sections/section-040/module-10/labs/lab-02/solution.md
   - type: reading
     title: Summary
-    path: sections/section-040/module-01/course-04-summary.md
+    path: sections/section-040/module-10/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Protect Node Metadata And Management Endpoints'
-    path: sections/section-040/module-01/quiz.yaml
+    path: sections/section-040/module-10/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Block The Cloud Metadata Endpoint
-    path: sections/section-040/module-02/course.md
+    path: sections/section-040/module-20/course-000.md
   - type: reading
     title: What The Metadata Service Hands Out
-    path: sections/section-040/module-02/course-01-what-the-metadata-service-hands-out.md
+    path: sections/section-040/module-20/course-010-what-the-metadata-service-hands-out.md
   - type: reading
     title: The Playground Metadata Server
-    path: sections/section-040/module-02/course-02-the-playground-metadata-server.md
+    path: sections/section-040/module-20/course-020-the-playground-metadata-server.md
   - type: reading
     title: Block With An ipBlock Except Rule
-    path: sections/section-040/module-02/course-03-block-with-an-ipblock-except-rule.md
+    path: sections/section-040/module-20/course-030-block-with-an-ipblock-except-rule.md
   - type: reading
     title: Block The Metadata Address For A Namespace — Task
-    path: sections/section-040/module-02/labs/lab-01/question.md
+    path: sections/section-040/module-20/labs/lab-01/question.md
   - type: lab
     title: Block The Metadata Address For A Namespace
-    path: sections/section-040/module-02/labs/lab-01
+    path: sections/section-040/module-20/labs/lab-01
     difficulty: intermediate
     estimated_duration: 6m
     topic: metadata-isolation
@@ -1723,16 +1723,16 @@ modules:
     - networkpolicy
   - type: reading
     title: Block The Metadata Address For A Namespace — Solution
-    path: sections/section-040/module-02/labs/lab-01/solution.md
+    path: sections/section-040/module-20/labs/lab-01/solution.md
   - type: reading
     title: Default Deny Plus A Selective Allow
-    path: sections/section-040/module-02/course-04-default-deny-plus-a-selective-allow.md
+    path: sections/section-040/module-20/course-040-default-deny-plus-a-selective-allow.md
   - type: reading
     title: Allow The Metadata Address For One Labelled Pod — Task
-    path: sections/section-040/module-02/labs/lab-02/question.md
+    path: sections/section-040/module-20/labs/lab-02/question.md
   - type: lab
     title: Allow The Metadata Address For One Labelled Pod
-    path: sections/section-040/module-02/labs/lab-02
+    path: sections/section-040/module-20/labs/lab-02
     difficulty: intermediate
     estimated_duration: 8m
     topic: metadata-isolation
@@ -1746,16 +1746,16 @@ modules:
     - networkpolicy
   - type: reading
     title: Allow The Metadata Address For One Labelled Pod — Solution
-    path: sections/section-040/module-02/labs/lab-02/solution.md
+    path: sections/section-040/module-20/labs/lab-02/solution.md
   - type: reading
     title: Policy Pitfalls For The Metadata Address
-    path: sections/section-040/module-02/course-05-policy-pitfalls-for-the-metadata-address.md
+    path: sections/section-040/module-20/course-050-policy-pitfalls-for-the-metadata-address.md
   - type: reading
     title: Repair Metadata Policies That Do Not Block — Task
-    path: sections/section-040/module-02/labs/lab-03/question.md
+    path: sections/section-040/module-20/labs/lab-03/question.md
   - type: lab
     title: Repair Metadata Policies That Do Not Block
-    path: sections/section-040/module-02/labs/lab-03
+    path: sections/section-040/module-20/labs/lab-03
     difficulty: intermediate
     estimated_duration: 10m
     topic: metadata-isolation
@@ -1769,16 +1769,16 @@ modules:
     - networkpolicy
   - type: reading
     title: Repair Metadata Policies That Do Not Block — Solution
-    path: sections/section-040/module-02/labs/lab-03/solution.md
+    path: sections/section-040/module-20/labs/lab-03/solution.md
   - type: reading
     title: Verify Coverage Across Namespaces
-    path: sections/section-040/module-02/course-06-verify-coverage-across-namespaces.md
+    path: sections/section-040/module-20/course-060-verify-coverage-across-namespaces.md
   - type: reading
     title: Close Metadata Gaps Across Namespaces — Task
-    path: sections/section-040/module-02/labs/lab-04/question.md
+    path: sections/section-040/module-20/labs/lab-04/question.md
   - type: lab
     title: Close Metadata Gaps Across Namespaces
-    path: sections/section-040/module-02/labs/lab-04
+    path: sections/section-040/module-20/labs/lab-04
     difficulty: intermediate
     estimated_duration: 12m
     topic: metadata-isolation
@@ -1791,27 +1791,27 @@ modules:
     - networkpolicy
   - type: reading
     title: Close Metadata Gaps Across Namespaces — Solution
-    path: sections/section-040/module-02/labs/lab-04/solution.md
+    path: sections/section-040/module-20/labs/lab-04/solution.md
   - type: reading
     title: Summary
-    path: sections/section-040/module-02/course-07-summary.md
+    path: sections/section-040/module-20/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Block The Cloud Metadata Endpoint'
-    path: sections/section-040/module-02/quiz.yaml
+    path: sections/section-040/module-20/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Protect Node Endpoints And The Runtime
-    path: sections/section-040/module-03/course.md
+    path: sections/section-040/module-30/course-000.md
   - type: reading
     title: The Kubelet API From A Pod
-    path: sections/section-040/module-03/course-01-the-kubelet-api-from-a-pod.md
+    path: sections/section-040/module-30/course-010-the-kubelet-api-from-a-pod.md
   - type: reading
     title: Close The Kubelet Read-Only Port — Task
-    path: sections/section-040/module-03/labs/lab-01/question.md
+    path: sections/section-040/module-30/labs/lab-01/question.md
   - type: lab
     title: Close The Kubelet Read-Only Port
-    path: sections/section-040/module-03/labs/lab-01
+    path: sections/section-040/module-30/labs/lab-01
     difficulty: intermediate
     estimated_duration: 8m
     topic: kubelet-ports
@@ -1823,16 +1823,16 @@ modules:
     - kubelet
   - type: reading
     title: Close The Kubelet Read-Only Port — Solution
-    path: sections/section-040/module-03/labs/lab-01/solution.md
+    path: sections/section-040/module-30/labs/lab-01/solution.md
   - type: reading
     title: Restrict Reachability To Node Ports
-    path: sections/section-040/module-03/course-02-restrict-reachability-to-node-ports.md
+    path: sections/section-040/module-30/course-020-restrict-reachability-to-node-ports.md
   - type: reading
     title: Block Pod Access To The Kubelet Ports — Task
-    path: sections/section-040/module-03/labs/lab-02/question.md
+    path: sections/section-040/module-30/labs/lab-02/question.md
   - type: lab
     title: Block Pod Access To The Kubelet Ports
-    path: sections/section-040/module-03/labs/lab-02
+    path: sections/section-040/module-30/labs/lab-02
     difficulty: intermediate
     estimated_duration: 8m
     topic: kubelet-ports
@@ -1846,16 +1846,16 @@ modules:
     - networkpolicy
   - type: reading
     title: Block Pod Access To The Kubelet Ports — Solution
-    path: sections/section-040/module-03/labs/lab-02/solution.md
+    path: sections/section-040/module-30/labs/lab-02/solution.md
   - type: reading
     title: Node Identity And NodeRestriction
-    path: sections/section-040/module-03/course-03-node-identity-and-noderestriction.md
+    path: sections/section-040/module-30/course-030-node-identity-and-noderestriction.md
   - type: reading
     title: Turn On NodeRestriction And Remove A Protected Node Label — Task
-    path: sections/section-040/module-03/labs/lab-05/question.md
+    path: sections/section-040/module-30/labs/lab-05/question.md
   - type: lab
     title: Turn On NodeRestriction And Remove A Protected Node Label
-    path: sections/section-040/module-03/labs/lab-05
+    path: sections/section-040/module-30/labs/lab-05
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
@@ -1863,16 +1863,16 @@ modules:
     - Turn on the NodeRestriction admission plugin and prove that a kubelet credential cannot write other nodes or protected labels.
   - type: reading
     title: Turn On NodeRestriction And Remove A Protected Node Label — Solution
-    path: sections/section-040/module-03/labs/lab-05/solution.md
+    path: sections/section-040/module-30/labs/lab-05/solution.md
   - type: reading
     title: Runtime Socket And hostPath Exposure
-    path: sections/section-040/module-03/course-04-runtime-socket-and-hostpath-exposure.md
+    path: sections/section-040/module-30/course-040-runtime-socket-and-hostpath-exposure.md
   - type: reading
     title: Remove A Runtime Socket Mount — Task
-    path: sections/section-040/module-03/labs/lab-03/question.md
+    path: sections/section-040/module-30/labs/lab-03/question.md
   - type: lab
     title: Remove A Runtime Socket Mount
-    path: sections/section-040/module-03/labs/lab-03
+    path: sections/section-040/module-30/labs/lab-03
     difficulty: intermediate
     estimated_duration: 8m
     topic: host-exposure
@@ -1886,16 +1886,16 @@ modules:
     - hostpath
   - type: reading
     title: Remove A Runtime Socket Mount — Solution
-    path: sections/section-040/module-03/labs/lab-03/solution.md
+    path: sections/section-040/module-30/labs/lab-03/solution.md
   - type: reading
     title: hostNetwork And Privileged Pods Bypass Policy
-    path: sections/section-040/module-03/course-05-hostnetwork-and-privileged-pods-bypass-policy.md
+    path: sections/section-040/module-30/course-050-hostnetwork-and-privileged-pods-bypass-policy.md
   - type: reading
     title: Find Host-Network Pods And Block New Ones — Task
-    path: sections/section-040/module-03/labs/lab-04/question.md
+    path: sections/section-040/module-30/labs/lab-04/question.md
   - type: lab
     title: Find Host-Network Pods And Block New Ones
-    path: sections/section-040/module-03/labs/lab-04
+    path: sections/section-040/module-30/labs/lab-04
     difficulty: intermediate
     estimated_duration: 8m
     topic: host-exposure
@@ -1909,16 +1909,16 @@ modules:
     - hostpath
   - type: reading
     title: Find Host-Network Pods And Block New Ones — Solution
-    path: sections/section-040/module-03/labs/lab-04/solution.md
+    path: sections/section-040/module-30/labs/lab-04/solution.md
   - type: reading
     title: Controls Outside The Cluster
-    path: sections/section-040/module-03/course-06-controls-outside-the-cluster.md
+    path: sections/section-040/module-30/course-060-controls-outside-the-cluster.md
   - type: reading
     title: Summary
-    path: sections/section-040/module-03/course-07-summary.md
+    path: sections/section-040/module-30/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Protect Node Endpoints And The Runtime'
-    path: sections/section-040/module-03/quiz.yaml
+    path: sections/section-040/module-30/quiz.yaml
     question_count: 10
     pass_score: 70
 - id: module-050
@@ -1929,22 +1929,22 @@ modules:
   content:
   - type: reading
     title: Verify platform binaries before deploying
-    path: sections/section-050/README.md
+    path: sections/section-050/00-introduction.md
   - type: reading
     title: Verify Platform Binaries Before Deploying
-    path: sections/section-050/module-01/course.md
+    path: sections/section-050/module-10/course-000.md
   - type: reading
     title: Integrity, Authenticity And The Exact Artifact
-    path: sections/section-050/module-01/course-01-integrity-authenticity-and-the-exact-artifact.md
+    path: sections/section-050/module-10/course-010-integrity-authenticity-and-the-exact-artifact.md
   - type: reading
     title: Digests At Work And The Limits Of A Checksum
-    path: sections/section-050/module-01/course-02-digests-at-work-and-the-limits-of-a-checksum.md
+    path: sections/section-050/module-10/course-020-digests-at-work-and-the-limits-of-a-checksum.md
   - type: reading
     title: Find The Files That Fail A Checksum Manifest — Task
-    path: sections/section-050/module-01/labs/lab-01/question.md
+    path: sections/section-050/module-10/labs/lab-01/question.md
   - type: lab
     title: Find The Files That Fail A Checksum Manifest
-    path: sections/section-050/module-01/labs/lab-01
+    path: sections/section-050/module-10/labs/lab-01
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 8m
@@ -1957,16 +1957,16 @@ modules:
     - artifact-authenticity
   - type: reading
     title: Find The Files That Fail A Checksum Manifest — Solution
-    path: sections/section-050/module-01/labs/lab-01/solution.md
+    path: sections/section-050/module-10/labs/lab-01/solution.md
   - type: reading
     title: Verify A Signed Manifest And Record The Result
-    path: sections/section-050/module-01/course-03-verify-a-signed-manifest-and-record-the-result.md
+    path: sections/section-050/module-10/course-030-verify-a-signed-manifest-and-record-the-result.md
   - type: reading
     title: Verify A Signed Checksum Manifest — Task
-    path: sections/section-050/module-01/labs/lab-02/question.md
+    path: sections/section-050/module-10/labs/lab-02/question.md
   - type: lab
     title: Verify A Signed Checksum Manifest
-    path: sections/section-050/module-01/labs/lab-02
+    path: sections/section-050/module-10/labs/lab-02
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
@@ -1979,16 +1979,16 @@ modules:
     - artifact-authenticity
   - type: reading
     title: Verify A Signed Checksum Manifest — Solution
-    path: sections/section-050/module-01/labs/lab-02/solution.md
+    path: sections/section-050/module-10/labs/lab-02/solution.md
   - type: reading
     title: Keep The Binding Through Delivery, And Identity-Based Signatures
-    path: sections/section-050/module-01/course-04-keep-the-binding-through-delivery.md
+    path: sections/section-050/module-10/course-040-keep-the-binding-through-delivery.md
   - type: reading
     title: Install A Verified Binary Into A Protected Directory — Task
-    path: sections/section-050/module-01/labs/lab-03/question.md
+    path: sections/section-050/module-10/labs/lab-03/question.md
   - type: lab
     title: Install A Verified Binary Into A Protected Directory
-    path: sections/section-050/module-01/labs/lab-03
+    path: sections/section-050/module-10/labs/lab-03
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
@@ -2001,27 +2001,27 @@ modules:
     - artifact-authenticity
   - type: reading
     title: Install A Verified Binary Into A Protected Directory — Solution
-    path: sections/section-050/module-01/labs/lab-03/solution.md
+    path: sections/section-050/module-10/labs/lab-03/solution.md
   - type: reading
     title: Summary
-    path: sections/section-050/module-01/course-05-summary.md
+    path: sections/section-050/module-10/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Verify Platform Binaries Before Deploying'
-    path: sections/section-050/module-01/quiz.yaml
+    path: sections/section-050/module-10/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Verify Kubernetes Release Binaries Hands-On
-    path: sections/section-050/module-02/course.md
+    path: sections/section-050/module-20/course-000.md
   - type: reading
     title: Kubernetes Release Artifacts
-    path: sections/section-050/module-02/course-01-kubernetes-release-artifacts.md
+    path: sections/section-050/module-20/course-010-kubernetes-release-artifacts.md
   - type: reading
     title: Pick The Release Files For A Node — Task
-    path: sections/section-050/module-02/labs/lab-01/question.md
+    path: sections/section-050/module-20/labs/lab-01/question.md
   - type: lab
     title: Pick The Release Files For A Node
-    path: sections/section-050/module-02/labs/lab-01
+    path: sections/section-050/module-20/labs/lab-01
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 6m
@@ -2034,16 +2034,16 @@ modules:
     - release-binary-verification
   - type: reading
     title: Pick The Release Files For A Node — Solution
-    path: sections/section-050/module-02/labs/lab-01/solution.md
+    path: sections/section-050/module-20/labs/lab-01/solution.md
   - type: reading
     title: sha256sum And The Check Format
-    path: sections/section-050/module-02/course-02-sha256sum-and-the-check-format.md
+    path: sections/section-050/module-20/course-020-sha256sum-and-the-check-format.md
   - type: reading
     title: Verify Downloads With sha256sum --check — Task
-    path: sections/section-050/module-02/labs/lab-02/question.md
+    path: sections/section-050/module-20/labs/lab-02/question.md
   - type: lab
     title: Verify Downloads With sha256sum --check
-    path: sections/section-050/module-02/labs/lab-02
+    path: sections/section-050/module-20/labs/lab-02
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 8m
@@ -2056,16 +2056,16 @@ modules:
     - release-binary-verification
   - type: reading
     title: Verify Downloads With sha256sum --check — Solution
-    path: sections/section-050/module-02/labs/lab-02/solution.md
+    path: sections/section-050/module-20/labs/lab-02/solution.md
   - type: reading
     title: Detect A Tampered Or Wrong Binary
-    path: sections/section-050/module-02/course-03-detect-a-tampered-or-wrong-binary.md
+    path: sections/section-050/module-20/course-030-detect-a-tampered-or-wrong-binary.md
   - type: reading
     title: Find The Binary That Fails Verification — Task
-    path: sections/section-050/module-02/labs/lab-03/question.md
+    path: sections/section-050/module-20/labs/lab-03/question.md
   - type: lab
     title: Find The Binary That Fails Verification
-    path: sections/section-050/module-02/labs/lab-03
+    path: sections/section-050/module-20/labs/lab-03
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 6m
@@ -2078,16 +2078,16 @@ modules:
     - release-binary-verification
   - type: reading
     title: Find The Binary That Fails Verification — Solution
-    path: sections/section-050/module-02/labs/lab-03/solution.md
+    path: sections/section-050/module-20/labs/lab-03/solution.md
   - type: reading
     title: Read The Version Of A Binary
-    path: sections/section-050/module-02/course-04-read-the-version-of-a-binary.md
+    path: sections/section-050/module-20/course-040-read-the-version-of-a-binary.md
   - type: reading
     title: Classify Why Each Download Fails — Task
-    path: sections/section-050/module-02/labs/lab-04/question.md
+    path: sections/section-050/module-20/labs/lab-04/question.md
   - type: lab
     title: Classify Why Each Download Fails
-    path: sections/section-050/module-02/labs/lab-04
+    path: sections/section-050/module-20/labs/lab-04
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
@@ -2100,16 +2100,16 @@ modules:
     - release-binary-verification
   - type: reading
     title: Classify Why Each Download Fails — Solution
-    path: sections/section-050/module-02/labs/lab-04/solution.md
+    path: sections/section-050/module-20/labs/lab-04/solution.md
   - type: reading
     title: Verify What Runs On A Node
-    path: sections/section-050/module-02/course-05-verify-what-runs-on-a-node.md
+    path: sections/section-050/module-20/course-050-verify-what-runs-on-a-node.md
   - type: reading
     title: Verify The Running kubelet Against A Release Checksum — Task
-    path: sections/section-050/module-02/labs/lab-05/question.md
+    path: sections/section-050/module-20/labs/lab-05/question.md
   - type: lab
     title: Verify The Running kubelet Against A Release Checksum
-    path: sections/section-050/module-02/labs/lab-05
+    path: sections/section-050/module-20/labs/lab-05
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
@@ -2122,27 +2122,27 @@ modules:
     - release-binary-verification
   - type: reading
     title: Verify The Running kubelet Against A Release Checksum — Solution
-    path: sections/section-050/module-02/labs/lab-05/solution.md
+    path: sections/section-050/module-20/labs/lab-05/solution.md
   - type: reading
     title: Summary
-    path: sections/section-050/module-02/course-06-summary.md
+    path: sections/section-050/module-20/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Verify Kubernetes Release Binaries Hands-On'
-    path: sections/section-050/module-02/quiz.yaml
+    path: sections/section-050/module-20/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: reading
     title: Verify Packages, Images And Signatures
-    path: sections/section-050/module-03/course.md
+    path: sections/section-050/module-30/course-000.md
   - type: reading
     title: GPG Signed Repositories
-    path: sections/section-050/module-03/course-01-gpg-signed-repositories.md
+    path: sections/section-050/module-30/course-010-gpg-signed-repositories.md
   - type: reading
     title: Verify Detached GPG Signatures With gpgv — Task
-    path: sections/section-050/module-03/labs/lab-01/question.md
+    path: sections/section-050/module-30/labs/lab-01/question.md
   - type: lab
     title: Verify Detached GPG Signatures With gpgv
-    path: sections/section-050/module-03/labs/lab-01
+    path: sections/section-050/module-30/labs/lab-01
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 10m
@@ -2155,16 +2155,16 @@ modules:
     - signature-verification
   - type: reading
     title: Verify Detached GPG Signatures With gpgv — Solution
-    path: sections/section-050/module-03/labs/lab-01/solution.md
+    path: sections/section-050/module-30/labs/lab-01/solution.md
   - type: reading
     title: Package Verification On A Node
-    path: sections/section-050/module-03/course-02-package-verification-on-a-node.md
+    path: sections/section-050/module-30/course-020-package-verification-on-a-node.md
   - type: reading
     title: Verify A Signed apt Repository And An Installed Package — Task
-    path: sections/section-050/module-03/labs/lab-02/question.md
+    path: sections/section-050/module-30/labs/lab-02/question.md
   - type: lab
     title: Verify A Signed apt Repository And An Installed Package
-    path: sections/section-050/module-03/labs/lab-02
+    path: sections/section-050/module-30/labs/lab-02
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
@@ -2177,16 +2177,16 @@ modules:
     - signature-verification
   - type: reading
     title: Verify A Signed apt Repository And An Installed Package — Solution
-    path: sections/section-050/module-03/labs/lab-02/solution.md
+    path: sections/section-050/module-30/labs/lab-02/solution.md
   - type: reading
     title: cosign With A Local Key Pair
-    path: sections/section-050/module-03/course-03-cosign-with-a-local-key-pair.md
+    path: sections/section-050/module-30/course-030-cosign-with-a-local-key-pair.md
   - type: reading
     title: Verify And Create Blob Signatures With cosign — Task
-    path: sections/section-050/module-03/labs/lab-03/question.md
+    path: sections/section-050/module-30/labs/lab-03/question.md
   - type: lab
     title: Verify And Create Blob Signatures With cosign
-    path: sections/section-050/module-03/labs/lab-03
+    path: sections/section-050/module-30/labs/lab-03
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
@@ -2199,19 +2199,19 @@ modules:
     - signature-verification
   - type: reading
     title: Verify And Create Blob Signatures With cosign — Solution
-    path: sections/section-050/module-03/labs/lab-03/solution.md
+    path: sections/section-050/module-30/labs/lab-03/solution.md
   - type: reading
     title: Keyless Verification And Release Signatures
-    path: sections/section-050/module-03/course-04-keyless-verification-and-release-signatures.md
+    path: sections/section-050/module-30/course-040-keyless-verification-and-release-signatures.md
   - type: reading
     title: Image Digests And Pinning
-    path: sections/section-050/module-03/course-05-image-digests-and-pinning.md
+    path: sections/section-050/module-30/course-050-image-digests-and-pinning.md
   - type: reading
     title: Pin An Image By Digest And Prove It Runs — Task
-    path: sections/section-050/module-03/labs/lab-04/question.md
+    path: sections/section-050/module-30/labs/lab-04/question.md
   - type: lab
     title: Pin An Image By Digest And Prove It Runs
-    path: sections/section-050/module-03/labs/lab-04
+    path: sections/section-050/module-30/labs/lab-04
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 8m
@@ -2224,16 +2224,16 @@ modules:
     - image-digest-pinning
   - type: reading
     title: Pin An Image By Digest And Prove It Runs — Solution
-    path: sections/section-050/module-03/labs/lab-04/solution.md
+    path: sections/section-050/module-30/labs/lab-04/solution.md
   - type: reading
     title: SBOMs And Admission-Time Verification
-    path: sections/section-050/module-03/course-06-sboms-and-admission-time-verification.md
+    path: sections/section-050/module-30/course-060-sboms-and-admission-time-verification.md
   - type: reading
     title: Require Digest-Pinned Images At Admission — Task
-    path: sections/section-050/module-03/labs/lab-05/question.md
+    path: sections/section-050/module-30/labs/lab-05/question.md
   - type: lab
     title: Require Digest-Pinned Images At Admission
-    path: sections/section-050/module-03/labs/lab-05
+    path: sections/section-050/module-30/labs/lab-05
     examScope: cluster
     difficulty: intermediate
     estimated_duration: 12m
@@ -2246,13 +2246,13 @@ modules:
     - image-digest-pinning
   - type: reading
     title: Require Digest-Pinned Images At Admission — Solution
-    path: sections/section-050/module-03/labs/lab-05/solution.md
+    path: sections/section-050/module-30/labs/lab-05/solution.md
   - type: reading
     title: Summary
-    path: sections/section-050/module-03/course-07-summary.md
+    path: sections/section-050/module-30/course-100-summary.md
   - type: quiz
     title: 'Knowledge Check: Verify Packages, Images And Signatures'
-    path: sections/section-050/module-03/quiz.yaml
+    path: sections/section-050/module-30/quiz.yaml
     question_count: 10
     pass_score: 70
   - type: quiz

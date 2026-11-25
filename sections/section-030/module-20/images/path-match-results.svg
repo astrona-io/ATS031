@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 320" width="840" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">Which rule answers each path on paths.local</title>
+  <desc id="desc">Prefix rule / answers app=probe for /, /other, /exact/ and /exact/more. Prefix rule /api answers app=scout for /api and /api/v1. Exact rule /exact answers app=scout for /exact only. For /apiary the specification says app=probe; a controller that uses a plain text prefix answers app=scout, so test it.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M150 86 V108"/>
+  <path class="line" d="M420 86 V108"/>
+  <path class="line" d="M690 86 V108"/>
+  <rect class="ask" x="30" y="30" width="240" height="56" rx="8"/>
+  <text x="150" y="54" text-anchor="middle"><tspan class="code">Prefix</tspan> rule <tspan class="code">/</tspan></text>
+  <text class="label" x="150" y="74" text-anchor="middle">answers: <tspan class="code">app=probe</tspan></text>
+  <rect class="frame" x="30" y="108" width="240" height="190" rx="10"/>
+  <rect class="ok" x="50" y="120" width="200" height="34" rx="8"/>
+  <text class="code" x="150" y="142" text-anchor="middle">/</text>
+  <rect class="ok" x="50" y="164" width="200" height="34" rx="8"/>
+  <text class="code" x="150" y="186" text-anchor="middle">/other</text>
+  <rect class="ok" x="50" y="208" width="200" height="34" rx="8"/>
+  <text class="code" x="150" y="230" text-anchor="middle">/exact/</text>
+  <rect class="ok" x="50" y="252" width="200" height="34" rx="8"/>
+  <text class="code" x="150" y="274" text-anchor="middle">/exact/more</text>
+  <rect class="ask" x="300" y="30" width="240" height="56" rx="8"/>
+  <text x="420" y="54" text-anchor="middle"><tspan class="code">Prefix</tspan> rule <tspan class="code">/api</tspan></text>
+  <text class="label" x="420" y="74" text-anchor="middle">answers: <tspan class="code">app=scout</tspan></text>
+  <rect class="frame" x="300" y="108" width="240" height="102" rx="10"/>
+  <rect class="ok" x="320" y="120" width="200" height="34" rx="8"/>
+  <text class="code" x="420" y="142" text-anchor="middle">/api</text>
+  <rect class="ok" x="320" y="164" width="200" height="34" rx="8"/>
+  <text class="code" x="420" y="186" text-anchor="middle">/api/v1</text>
+  <rect class="ask" x="570" y="30" width="240" height="56" rx="8"/>
+  <text x="690" y="54" text-anchor="middle"><tspan class="code">Exact</tspan> rule <tspan class="code">/exact</tspan></text>
+  <text class="label" x="690" y="74" text-anchor="middle">answers: <tspan class="code">app=scout</tspan></text>
+  <rect class="frame" x="570" y="108" width="240" height="58" rx="10"/>
+  <rect class="ok" x="590" y="120" width="200" height="34" rx="8"/>
+  <text class="code" x="690" y="142" text-anchor="middle">/exact</text>
+  <rect class="policy" x="300" y="230" width="510" height="64" rx="8"/>
+  <text x="320" y="256"><tspan class="code">/apiary</tspan>: the specification says <tspan class="code">app=probe</tspan>.</text>
+  <text class="label" x="320" y="279">A controller that uses a plain text prefix answers <tspan class="code">app=scout</tspan>. Test it.</text>
+</svg>

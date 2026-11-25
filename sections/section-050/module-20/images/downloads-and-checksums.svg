@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 305" width="840" height="305" role="img" aria-labelledby="title desc">
+  <title id="title">The five downloads and their checksum files</title>
+  <desc id="desc">kubectl has genuine v1.35.0 bytes and the matching checksum file, so it passes. kubeadm has changed bytes. kubelet has genuine bytes with the v1.34.0 checksum file. The kubectl copy named for the other architecture holds the other-architecture file with the checksum for this architecture. kubectl-claimed-v1.34.0 holds genuine v1.35.0 bytes with the v1.34.0 checksum file. These four fail.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+  <text class="label" x="30" y="36" text-anchor="start">Download</text>
+  <text class="label" x="250" y="36" text-anchor="start">What the bytes are</text>
+  <text class="label" x="480" y="36" text-anchor="start">Checksum file that came with it</text>
+  <text class="label" x="710" y="36" text-anchor="start">Result</text>
+  <line class="sep" x1="30" y1="50" x2="810" y2="50"/>
+  <line class="sep" x1="30" y1="101" x2="810" y2="101"/>
+  <line class="sep" x1="30" y1="151" x2="810" y2="151"/>
+  <line class="sep" x1="30" y1="201" x2="810" y2="201"/>
+  <line class="sep" x1="30" y1="251" x2="810" y2="251"/>
+  <text class="code" x="30" y="81" text-anchor="start">kubectl</text>
+  <text x="250" y="81" text-anchor="start">genuine v1.35.0 bytes</text>
+  <text x="480" y="81" text-anchor="start">v1.35.0, this architecture</text>
+  <rect class="ok" x="710" y="60" width="100" height="32" rx="8"/>
+  <text class="strong good" x="760" y="81" text-anchor="middle">OK</text>
+  <text class="code" x="30" y="131" text-anchor="start">kubeadm</text>
+  <text class="bad" x="250" y="131" text-anchor="start">v1.35.0 bytes, changed</text>
+  <text x="480" y="131" text-anchor="start">v1.35.0, this architecture</text>
+  <rect class="drop" x="710" y="110" width="100" height="32" rx="8"/>
+  <text class="strong bad" x="760" y="131" text-anchor="middle">FAILED</text>
+  <text class="code" x="30" y="181" text-anchor="start">kubelet</text>
+  <text x="250" y="181" text-anchor="start">genuine v1.35.0 bytes</text>
+  <text class="bad" x="480" y="181" text-anchor="start">v1.34.0, this architecture</text>
+  <rect class="drop" x="710" y="160" width="100" height="32" rx="8"/>
+  <text class="strong bad" x="760" y="181" text-anchor="middle">FAILED</text>
+  <text class="code" x="30" y="231" text-anchor="start">kubectl-&lt;other arch&gt;</text>
+  <text class="bad" x="250" y="231" text-anchor="start">v1.35.0, other architecture</text>
+  <text x="480" y="231" text-anchor="start">v1.35.0, this architecture</text>
+  <rect class="drop" x="710" y="210" width="100" height="32" rx="8"/>
+  <text class="strong bad" x="760" y="231" text-anchor="middle">FAILED</text>
+  <text class="code" x="30" y="281" text-anchor="start">kubectl-claimed-v1.34.0</text>
+  <text x="250" y="281" text-anchor="start">genuine v1.35.0 bytes</text>
+  <text class="bad" x="480" y="281" text-anchor="start">v1.34.0, this architecture</text>
+  <rect class="drop" x="710" y="260" width="100" height="32" rx="8"/>
+  <text class="strong bad" x="760" y="281" text-anchor="middle">FAILED</text>
+</svg>

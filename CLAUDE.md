@@ -37,12 +37,19 @@ Strict guidelines:
   has a task, a step-by-step solution and a short intro. Keep each file to its
   job. Do not add "Prerequisite: ... Next: ..." navigation lines to pages;
   the landing page and the course outline already give the order.
+- **Name files in steps of ten.** The folder view shows the reading order.
+  A section starts with `00-introduction.md`. Modules are `module-10`,
+  `module-20`, `module-30`. In a module, the landing page is `course-000.md`,
+  the parts are `course-010-<slug>.md`, `course-020-<slug>.md`, and the
+  summary is always `course-100-summary.md`. Lab folders and lab names keep
+  their own numbers, and question `id`s never change.
 - **Keep each part short.** One idea per part, about 5 to 8 minutes of
   reading and at most about 8 command blocks, so a learner can finish it with
   the playground in one sitting of about 15 minutes. Split at a natural seam
   where each half ends with something the learner has seen work. Never split
-  only to hit a number. When you split, renumber the files, fix every "Part N"
-  reference in the module and `astrona.yaml`.
+  only to hit a number. When you split, give the new part a free step-ten
+  number (or renumber the parts), fix every "Part N" reference in the module
+  and `astrona.yaml`.
 - **Read like a book, not like a web page.** Each part reads as a chapter of
   a technical book. Open with a short paragraph on the problem it solves and
   why it matters. Link each paragraph to the next with a transition sentence.
@@ -54,7 +61,7 @@ Strict guidelines:
   one or two sentences on what to run and why, the command, the real output,
   then a sentence or two on what it shows.
 - **The module ends with a summary.** The last page of every module is
-  `course-0N-summary.md` with the title `# Summary`: a few short prose
+  `course-100-summary.md` with the title `# Summary`: a few short prose
   paragraphs on what the reader learned, organised by idea, optionally with
   one short list of key facts. It names no parts, modules, sections or
   chapters, and has no links, lab table, quiz or commands. Its last line is
@@ -112,9 +119,14 @@ Strict guidelines:
   old, run it again"), background facts, optional extra steps, and plain
   information. Never a command snippet, never two in a row, and most pages
   need zero or one tip. Each part ends with a
-  `## Common pitfalls` `> [!WARNING]` block for that part only. Use a Mermaid
-  diagram for a flow, an order or a state change, keep it under about 12
-  boxes, and follow it with one sentence that says what it shows.
+  `## Common pitfalls` `> [!WARNING]` block for that part only. Draw a
+  picture wherever it explains a flow, an order, a state change or who does
+  what better than text. Prefer a hand-drawn SVG in the module's `images/`
+  folder (shown with `![Diagram: what it shows](images/<name>.svg)`): light
+  box fills with dark text so it reads on light and dark pages, green for
+  allowed, red dashed for dropped, real names in monospace, a `<title>` and
+  `<desc>`. Mermaid is still fine for a quick flow. Keep either under about
+  12 boxes, and follow it with one sentence that says what it shows.
 - **Labs come right after the part they practise.** Do not collect all
   graded labs at the end of a module. In `astrona.yaml`, put each lab (its
   `question.md` reading and the `lab` entry) right after the reading part it
@@ -272,7 +284,7 @@ self-contained-page and Mermaid rules apply throughout.
 ### Reusable question data
 
 Write original single-choice questions as YAML question banks. Each module has
-one `sections/section-0N0/module-0N/quiz.yaml` with 5–15 questions, and the course
+one `sections/section-0N0/module-N0/quiz.yaml` with 5–15 questions, and the course
 ends with `sections/final-domain-quiz.yaml`. Use the versioned contract in
 `scripts/ci/question-bank.schema.json`: stable IDs, one correct option, per-option
 feedback, a measurable learning objective and source reading paths for author

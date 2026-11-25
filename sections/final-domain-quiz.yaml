@@ -16,7 +16,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain which component enforces a NetworkPolicy.
   source_readings:
-  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  - sections/section-010/module-10/course-010-isolation-and-evaluation-rules.md
   prompt: You apply a NetworkPolicy and `kubectl apply` reports `created`, but traffic that the policy should block still flows. The cluster uses a network plugin that does not implement NetworkPolicy. What explains this?
   options:
   - id: a
@@ -35,7 +35,7 @@ questions:
   difficulty: beginner
   learning_objective: State the default behaviour of pods that no policy selects.
   source_readings:
-  - sections/section-010/module-01/course-01-isolation-and-evaluation-rules.md
+  - sections/section-010/module-10/course-010-isolation-and-evaluation-rules.md
   prompt: In a namespace with no NetworkPolicy, a pod in another namespace sends a request to a pod in that namespace. What happens?
   options:
   - id: a
@@ -54,7 +54,7 @@ questions:
   difficulty: beginner
   learning_objective: State what a default-deny baseline policy selects.
   source_readings:
-  - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+  - sections/section-010/module-20/course-010-why-a-baseline-comes-first.md
   prompt: Which `podSelector` makes a NetworkPolicy select every pod in its own namespace?
   options:
   - id: a
@@ -73,7 +73,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain why a baseline is applied before allow rules.
   source_readings:
-  - sections/section-010/module-02/course-01-why-a-baseline-comes-first.md
+  - sections/section-010/module-20/course-010-why-a-baseline-comes-first.md
   prompt: A namespace has an allow policy for the `probe` pods but no baseline. A `drifter` pod in the same namespace requests a `shuttle` pod, which no policy selects. What happens?
   options:
   - id: a
@@ -92,7 +92,7 @@ questions:
   difficulty: beginner
   learning_objective: Select a namespace by name with the automatic label.
   source_readings:
-  - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+  - sections/section-010/module-30/course-010-selectors-recap-and-the-namespace-name-label.md
   prompt: Which label does Kubernetes set on every namespace so that a `namespaceSelector` can select it by name?
   options:
   - id: a
@@ -111,7 +111,7 @@ questions:
   difficulty: beginner
   learning_objective: State where a podSelector without a namespaceSelector looks.
   source_readings:
-  - sections/section-010/module-03/course-01-selectors-recap-and-the-namespace-name-label.md
+  - sections/section-010/module-30/course-010-selectors-recap-and-the-namespace-name-label.md
   prompt: 'A peer entry has only `podSelector: {matchLabels: {app: shuttle}}`. In which namespace does it select pods?'
   options:
   - id: a
@@ -130,7 +130,7 @@ questions:
   difficulty: beginner
   learning_objective: Allow DNS to CoreDNS.
   source_readings:
-  - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+  - sections/section-010/module-40/course-010-dns-and-coredns-egress.md
   prompt: Which peer and ports allow a pod under an egress baseline to resolve names?
   options:
   - id: a
@@ -149,7 +149,7 @@ questions:
   difficulty: intermediate
   learning_objective: Read the symptom of missing DNS.
   source_readings:
-  - sections/section-010/module-04/course-01-dns-and-coredns-egress.md
+  - sections/section-010/module-40/course-010-dns-and-coredns-egress.md
   prompt: A namespace has a default-deny egress baseline. A pod has a correct egress rule to the `probe` pods, but `nslookup probe` times out. What is missing?
   options:
   - id: a
@@ -168,7 +168,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain how the CIS benchmark is organised.
   source_readings:
-  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  - sections/section-020/module-10/course-010-benchmark-structure-and-file-layout.md
   prompt: Which benchmark section covers the settings of the kubelet on worker nodes?
   options:
   - id: a
@@ -187,7 +187,7 @@ questions:
   difficulty: beginner
   learning_objective: Find the manifests of control plane components on a kubeadm node.
   source_readings:
-  - sections/section-020/module-01/course-01-benchmark-structure-and-file-layout.md
+  - sections/section-020/module-10/course-010-benchmark-structure-and-file-layout.md
   prompt: On a kubeadm control plane node, where does the kubelet read the manifests that start `kube-apiserver` and `etcd`?
   options:
   - id: a
@@ -206,7 +206,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain where kube-bench gets the rules of the benchmark.
   source_readings:
-  - sections/section-020/module-02/course-01-what-kube-bench-does-under-the-hood.md
+  - sections/section-020/module-20/course-010-what-kube-bench-does-under-the-hood.md
   prompt: Where does `kube-bench` get the audit command and the expected value of each check?
   options:
   - id: a
@@ -228,7 +228,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain why the kube-bench Job needs host access.
   source_readings:
-  - sections/section-020/module-02/course-02-run-kube-bench-on-a-kubeadm-node.md
+  - sections/section-020/module-20/course-020-run-kube-bench-on-a-kubeadm-node.md
   prompt: A `kube-bench` pod runs without `hostPID` and without host mounts. What goes wrong?
   options:
   - id: a
@@ -250,7 +250,7 @@ questions:
   difficulty: beginner
   learning_objective: Edit a static pod manifest without leaving stray files.
   source_readings:
-  - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+  - sections/section-020/module-30/course-010-static-pods-and-safe-editing.md
   prompt: Where should a backup of `kube-apiserver.yaml` be kept before an edit?
   options:
   - id: a
@@ -272,7 +272,7 @@ questions:
   difficulty: intermediate
   learning_objective: Find the cause of a failed control plane component when the API is down.
   source_readings:
-  - sections/section-020/module-03/course-01-static-pods-and-safe-editing.md
+  - sections/section-020/module-30/course-010-static-pods-and-safe-editing.md
   prompt: After an edit, the API server does not start and `kubectl` cannot connect. Which command on the node shows why?
   options:
   - id: a
@@ -294,7 +294,7 @@ questions:
   difficulty: beginner
   learning_objective: Name the only intended client of etcd.
   source_readings:
-  - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+  - sections/section-020/module-40/course-010-what-lives-in-etcd-and-who-talks-to-it.md
   prompt: Which component should be the only client of the etcd client port 2379 during normal operation?
   options:
   - id: a
@@ -313,7 +313,7 @@ questions:
   difficulty: beginner
   learning_objective: Tell the etcd client port from the peer port.
   source_readings:
-  - sections/section-020/module-04/course-01-what-lives-in-etcd-and-who-talks-to-it.md
+  - sections/section-020/module-40/course-010-what-lives-in-etcd-and-who-talks-to-it.md
   prompt: Which port do etcd members use to replicate data to each other?
   options:
   - id: a
@@ -332,7 +332,7 @@ questions:
   difficulty: beginner
   learning_objective: Tell which kubelet source wins.
   source_readings:
-  - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+  - sections/section-020/module-50/course-010-kubelet-configuration-sources.md
   prompt: A kubelet flag and a field in config.yaml set the same option to different values. Which value does the kubelet use?
   options:
   - id: a
@@ -351,7 +351,7 @@ questions:
   difficulty: beginner
   learning_objective: Read the effective kubelet configuration.
   source_readings:
-  - sections/section-020/module-05/course-01-kubelet-configuration-sources.md
+  - sections/section-020/module-50/course-010-kubelet-configuration-sources.md
   prompt: Which request shows the configuration a kubelet really runs with?
   options:
   - id: a
@@ -370,7 +370,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain what an Ingress object does.
   source_readings:
-  - sections/section-030/module-01/course-01-ingress-routing-controller-class-host-path.md
+  - sections/section-030/module-10/course-010-ingress-routing-controller-class-host-path.md
   prompt: What does an Ingress object do on its own, with no Ingress controller installed?
   options:
   - id: a
@@ -389,7 +389,7 @@ questions:
   difficulty: beginner
   learning_objective: Choose the type of a TLS Secret.
   source_readings:
-  - sections/section-030/module-01/course-02-certificates-and-the-tls-secret.md
+  - sections/section-030/module-10/course-020-certificates-and-the-tls-secret.md
   prompt: Which Secret type and keys does an Ingress need for a certificate?
   options:
   - id: a
@@ -408,7 +408,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain how Traefik turns an Ingress into a route.
   source_readings:
-  - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+  - sections/section-030/module-20/course-010-ingress-controller-architecture-with-traefik.md
   prompt: Which part of Traefik matches the host and path of a request on an entrypoint?
   options:
   - id: a
@@ -427,7 +427,7 @@ questions:
   difficulty: beginner
   learning_objective: Describe what happens to an Ingress whose class no controller serves.
   source_readings:
-  - sections/section-030/module-02/course-01-ingress-controller-architecture-with-traefik.md
+  - sections/section-030/module-20/course-010-ingress-controller-architecture-with-traefik.md
   prompt: 'An Ingress names `ingressClassName: nginx` but only Traefik runs. What happens?'
   options:
   - id: a
@@ -446,7 +446,7 @@ questions:
   difficulty: beginner
   learning_objective: Name what a client checks in a certificate.
   source_readings:
-  - sections/section-030/module-03/course-01-certificate-fundamentals-needed-for-the-exam.md
+  - sections/section-030/module-30/course-010-certificate-fundamentals-needed-for-the-exam.md
   prompt: Which field must contain the host name for modern clients?
   options:
   - id: a
@@ -465,7 +465,7 @@ questions:
   difficulty: beginner
   learning_objective: Explain trust in a self-signed certificate.
   source_readings:
-  - sections/section-030/module-03/course-02-self-signed-certificate-with-openssl.md
+  - sections/section-030/module-30/course-020-self-signed-certificate-with-openssl.md
   prompt: Why does `curl` reject a new self-signed certificate by default?
   options:
   - id: a

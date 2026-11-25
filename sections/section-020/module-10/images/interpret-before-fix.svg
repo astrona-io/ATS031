@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 320" width="840" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">Interpret a result before you fix it</title>
+  <desc id="desc">A FAIL or WARN result leads to reading the audit and the test of the check, then to reading the real value on the node. Then you decide whether it is a real risk on this cluster. If yes, you change the setting and verify the value and the cluster. If no, you record an exception.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M230 66 H286" marker-end="url(#arrow)"/>
+  <path class="line" d="M530 66 H586" marker-end="url(#arrow)"/>
+  <path class="line" d="M700 90 V120 H420 V138" marker-end="url(#arrow)"/>
+  <path class="okline" d="M520 176 H586" marker-end="url(#arrowok)"/>
+  <path class="line" d="M320 176 H262" marker-end="url(#arrow)"/>
+  <path class="okline" d="M700 200 V246" marker-end="url(#arrowok)"/>
+  <text class="label good" x="553" y="166" text-anchor="middle">yes</text>
+  <text class="label" x="291" y="166" text-anchor="middle">no</text>
+
+  <rect class="ask" x="30" y="42" width="200" height="48" rx="8"/>
+  <text x="130" y="71" text-anchor="middle">Result: <tspan class="code">FAIL</tspan> or <tspan class="code">WARN</tspan></text>
+  <rect class="box" x="290" y="42" width="240" height="48" rx="8"/>
+  <text x="410" y="71" text-anchor="middle">Read the audit and the test</text>
+  <rect class="box" x="590" y="42" width="220" height="48" rx="8"/>
+  <text x="700" y="71" text-anchor="middle">Read the real value on the node</text>
+
+  <path class="ask" d="M420 140 L520 176 L420 212 L320 176 Z"/>
+  <text x="420" y="181" text-anchor="middle">Real risk here?</text>
+
+  <rect class="ok" x="590" y="152" width="220" height="48" rx="8"/>
+  <text x="700" y="181" text-anchor="middle">Change the setting</text>
+  <rect class="box" x="40" y="152" width="220" height="48" rx="8"/>
+  <text x="150" y="181" text-anchor="middle">Record an exception</text>
+  <rect class="ok" x="570" y="248" width="260" height="48" rx="8"/>
+  <text x="700" y="277" text-anchor="middle">Verify the value and the cluster</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 340" width="840" height="340" role="img" aria-labelledby="title desc">
+  <title id="title">Egress paths of the shuttle pod</title>
+  <desc id="desc">The shuttle pod sends a DNS query on UDP or TCP port 53 to a CoreDNS pod, which is allowed. It sends a request to the probe Service on port 80; the node rewrites it to a probe pod IP address and port 8080, which is allowed. A request to blocked-server on its pod IP address and port 8080 has no egress rule and is dropped.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .good { fill: #2f855a; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .head { fill: #7b8494; }
+    .headbad { fill: #c53030; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="head" d="M0 0 L10 5 L0 10 z"/>
+    </marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="headbad" d="M0 0 L10 5 L0 10 z"/>
+    </marker>
+  </defs>
+
+  <path class="okline" d="M110 150 V52 H638" marker-end="url(#arrowok)"/>
+  <path class="line" d="M190 172 H328" marker-end="url(#arrow)"/>
+  <path class="okline" d="M490 172 H638" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M110 194 V292 H638" marker-end="url(#arrowbad)"/>
+
+  <text class="label good" x="374" y="44" text-anchor="middle">DNS query, UDP or TCP port 53</text>
+  <text class="label code" x="260" y="164" text-anchor="middle">http://probe:80</text>
+  <text class="label good" x="565" y="146" text-anchor="middle">rewritten to</text>
+  <text class="label good" x="565" y="164" text-anchor="middle">pod IP, port 8080</text>
+  <text class="label bad" x="374" y="284" text-anchor="middle">pod IP, port 8080: no egress rule</text>
+
+  <rect class="box" x="30" y="150" width="160" height="44" rx="8"/>
+  <text class="strong code" x="110" y="177" text-anchor="middle">shuttle</text>
+
+  <rect class="ok" x="640" y="30" width="170" height="44" rx="8"/>
+  <text x="725" y="57" text-anchor="middle">CoreDNS pod</text>
+
+  <rect class="box" x="330" y="150" width="160" height="44" rx="8"/>
+  <text x="410" y="177" text-anchor="middle">Service <tspan class="code">probe</tspan></text>
+
+  <rect class="ok" x="640" y="150" width="170" height="44" rx="8"/>
+  <text x="725" y="177" text-anchor="middle"><tspan class="code">probe</tspan> pod</text>
+
+  <rect class="drop" x="640" y="270" width="170" height="44" rx="8"/>
+  <text class="code" x="725" y="297" text-anchor="middle">blocked-server</text>
+</svg>

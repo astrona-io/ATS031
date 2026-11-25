@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 310" width="840" height="310" role="img" aria-labelledby="title desc">
+  <title id="title">How the provider order works</title>
+  <desc id="desc">On a write, the first provider, aescbc with key1, encrypts the new Secret dock-code, and etcd stores it with the prefix k8s:enc:aescbc:v1:key1. On a read of the old plain value of launch-code, aescbc finds no prefix and is skipped, then identity reads the plain value, and the API server gets the value.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <line class="sep" x1="30" y1="150" x2="810" y2="150"/>
+
+  <text class="strong" x="30" y="38">Write: the first provider encrypts every new write</text>
+  <path class="okline" d="M200 92 H238" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M410 92 H448" marker-end="url(#arrowok)"/>
+  <rect class="box" x="30" y="64" width="170" height="56" rx="8"/>
+  <text x="115" y="88" text-anchor="middle">new Secret</text>
+  <text class="code" x="115" y="108" text-anchor="middle">dock-code</text>
+  <rect class="ok" x="240" y="64" width="170" height="56" rx="8"/>
+  <text x="325" y="88" text-anchor="middle">provider 1</text>
+  <text x="325" y="108" text-anchor="middle"><tspan class="code">aescbc</tspan>, <tspan class="code">key1</tspan></text>
+  <rect class="ok" x="450" y="64" width="360" height="56" rx="8"/>
+  <text x="630" y="88" text-anchor="middle">stored in etcd as</text>
+  <text x="630" y="108" text-anchor="middle"><tspan class="code">k8s:enc:aescbc:v1:key1</tspan> + ciphertext</text>
+
+  <text class="strong" x="30" y="188">Read: try each provider in order until one can decode the value</text>
+  <path class="line" d="M200 242 H238" marker-end="url(#arrow)"/>
+  <path class="line" d="M410 242 H448" marker-end="url(#arrow)"/>
+  <path class="okline" d="M620 242 H658" marker-end="url(#arrowok)"/>
+  <text class="label" x="429" y="288" text-anchor="middle">try next</text>
+  <rect class="box" x="30" y="214" width="170" height="56" rx="8"/>
+  <text x="115" y="238" text-anchor="middle">old plain value</text>
+  <text class="code" x="115" y="258" text-anchor="middle">launch-code</text>
+  <rect class="drop" x="240" y="214" width="170" height="56" rx="8"/>
+  <text x="325" y="238" text-anchor="middle">provider 1 <tspan class="code">aescbc</tspan></text>
+  <text x="325" y="258" text-anchor="middle">no prefix, skip</text>
+  <rect class="ok" x="450" y="214" width="170" height="56" rx="8"/>
+  <text x="535" y="238" text-anchor="middle">provider 2</text>
+  <text class="code" x="535" y="258" text-anchor="middle">identity</text>
+  <rect class="box" x="660" y="214" width="150" height="56" rx="8"/>
+  <text x="735" y="238" text-anchor="middle">API server</text>
+  <text x="735" y="258" text-anchor="middle">gets the value</text>
+</svg>

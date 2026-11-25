@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 290" width="840" height="290" role="img" aria-labelledby="title desc">
+  <title id="title">A tag moves, a digest names content</title>
+  <desc id="desc">The tag busybox:1.37.0 points to an index today, and the registry owner can move it to other content. The index has its own digest and points to one manifest per platform, and each platform manifest has a different digest.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M210 112 H298" marker-end="url(#arrow)"/>
+  <text class="label" x="254" y="104" text-anchor="middle">today</text>
+  <path class="dashed" d="M120 134 V250 H298" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="132" y="200">the owner can</text>
+  <text class="label bad" x="132" y="216">move the tag</text>
+  <path class="okline" d="M520 100 H560 V62 H598" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M520 124 H560 V162 H598" marker-end="url(#arrowok)"/>
+
+  <rect class="ask" x="30" y="90" width="180" height="44" rx="8"/>
+  <text x="120" y="117" text-anchor="middle" class="code">busybox:1.37.0</text>
+  <text class="label" x="30" y="76">tag: a movable label</text>
+
+  <rect class="ok" x="300" y="80" width="220" height="64" rx="8"/>
+  <text x="410" y="106" text-anchor="middle">index</text>
+  <text x="410" y="128" text-anchor="middle" class="code">sha256:&lt;index&gt;</text>
+
+  <rect class="ok" x="600" y="34" width="220" height="56" rx="8"/>
+  <text x="710" y="57" text-anchor="middle">manifest, one platform</text>
+  <text x="710" y="78" text-anchor="middle" class="code">sha256:&lt;platform-a&gt;</text>
+  <rect class="ok" x="600" y="134" width="220" height="56" rx="8"/>
+  <text x="710" y="157" text-anchor="middle">manifest, other platform</text>
+  <text x="710" y="178" text-anchor="middle" class="code">sha256:&lt;platform-b&gt;</text>
+
+  <rect class="drop" x="300" y="228" width="220" height="44" rx="8"/>
+  <text x="410" y="255" text-anchor="middle">other content</text>
+  <text x="560" y="246">A digest always names the same</text>
+  <text x="560" y="266">content. Each level has its own.</text>
+</svg>

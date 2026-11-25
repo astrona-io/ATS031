@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 320" width="840" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">One failed check, four causes</title>
+  <desc id="desc">A failed check leads to a search of the release tree for the digest of the file. If the digest matches no file, the bytes were changed and the file is rejected. If it matches another architecture or another version, the right file is fetched. If it matches the same file with another checksum file, the checksum file is stale and is fetched again.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+  <path class="line" d="M420 68 V98" marker-end="url(#arrow)"/>
+  <path class="line" d="M420 144 V170"/>
+  <path class="line" d="M120 170 H720"/>
+  <path class="line" d="M120 170 V208" marker-end="url(#arrow)"/>
+  <path class="line" d="M320 170 V208" marker-end="url(#arrow)"/>
+  <path class="line" d="M520 170 V208" marker-end="url(#arrow)"/>
+  <path class="line" d="M720 170 V208" marker-end="url(#arrow)"/>
+  <rect class="drop" x="320" y="24" width="200" height="44" rx="8"/>
+  <text class="strong" x="420" y="51" text-anchor="middle">Check FAILED</text>
+  <rect class="ask" x="240" y="100" width="360" height="44" rx="8"/>
+  <text x="420" y="127" text-anchor="middle">Search the release tree for the digest</text>
+  <rect class="drop" x="28" y="210" width="184" height="86" rx="8"/>
+  <text class="label" x="120" y="234" text-anchor="middle">matches no file</text>
+  <text class="strong" x="120" y="258" text-anchor="middle">Bytes changed</text>
+  <text x="120" y="280" text-anchor="middle">reject, do not run</text>
+  <rect class="box" x="228" y="210" width="184" height="86" rx="8"/>
+  <text class="label" x="320" y="234" text-anchor="middle">matches other architecture</text>
+  <text class="strong" x="320" y="258" text-anchor="middle">Wrong platform</text>
+  <text x="320" y="280" text-anchor="middle">fetch the right file</text>
+  <rect class="box" x="428" y="210" width="184" height="86" rx="8"/>
+  <text class="label" x="520" y="234" text-anchor="middle">matches other version</text>
+  <text class="strong" x="520" y="258" text-anchor="middle">Wrong version</text>
+  <text x="520" y="280" text-anchor="middle">fetch the right file</text>
+  <rect class="box" x="628" y="210" width="184" height="86" rx="8"/>
+  <text class="label" x="720" y="234" text-anchor="middle">same file, other checksum</text>
+  <text class="strong" x="720" y="258" text-anchor="middle">Stale checksum file</text>
+  <text x="720" y="280" text-anchor="middle">fetch it again</text>
+</svg>

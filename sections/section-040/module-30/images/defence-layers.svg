@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 390" width="840" height="390" role="img" aria-labelledby="title desc">
+  <title id="title">Layers of defence for node endpoints</title>
+  <desc id="desc">Five layers, each with its own job. Admission control keeps dangerous pods out. NetworkPolicy blocks the paths of the pods that are allowed. Provider settings reduce what the metadata service returns. Workload identity makes the node role less valuable. Node and network firewalls limit who can reach the node ports.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="ask" x="30" y="30" width="250" height="46" rx="8"/>
+  <text class="strong" x="155" y="58" text-anchor="middle">Admission control</text>
+  <text x="310" y="58">Keeps dangerous pods out: host network, host path, privileged.</text>
+  <line class="sep" x1="30" y1="89" x2="810" y2="89"/>
+  <rect class="ask" x="30" y="102" width="250" height="46" rx="8"/>
+  <text class="strong" x="155" y="130" text-anchor="middle">NetworkPolicy</text>
+  <text x="310" y="130">Blocks the paths of the pods that are allowed.</text>
+  <line class="sep" x1="30" y1="161" x2="810" y2="161"/>
+  <rect class="ask" x="30" y="174" width="250" height="46" rx="8"/>
+  <text class="strong" x="155" y="202" text-anchor="middle">Provider settings</text>
+  <text x="310" y="202">Reduce what the metadata service returns.</text>
+  <line class="sep" x1="30" y1="233" x2="810" y2="233"/>
+  <rect class="ask" x="30" y="246" width="250" height="46" rx="8"/>
+  <text class="strong" x="155" y="274" text-anchor="middle">Workload identity</text>
+  <text x="310" y="274">Makes the node role less valuable.</text>
+  <line class="sep" x1="30" y1="305" x2="810" y2="305"/>
+  <rect class="ask" x="30" y="318" width="250" height="46" rx="8"/>
+  <text class="strong" x="155" y="346" text-anchor="middle">Node and network firewalls</text>
+  <text x="310" y="346">Limit who can reach the node ports.</text>
+</svg>

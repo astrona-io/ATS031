@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 300" width="840" height="300" role="img" aria-labelledby="title desc">
+  <title id="title">Redirect from HTTP to HTTPS</title>
+  <desc id="desc">The client sends an HTTP request to the web entrypoint on port 8000. Traefik answers with a redirect to https. The client then sends an HTTPS request to the websecure entrypoint on port 8443, where the TLS router and its certificate answer.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M190 70 H458" marker-end="url(#arrow)"/>
+  <text class="label" x="315" y="60" text-anchor="middle">1 HTTP request</text>
+  <path class="line" d="M460 100 H192" marker-end="url(#arrow)"/>
+  <text class="label" x="315" y="122" text-anchor="middle">2 redirect to <tspan class="code">https://</tspan></text>
+  <path class="okline" d="M190 220 H458" marker-end="url(#arrowok)"/>
+  <text class="label good" x="315" y="210" text-anchor="middle">3 HTTPS request</text>
+  <path class="okline" d="M660 220 H688" marker-end="url(#arrowok)"/>
+
+  <rect class="box" x="30" y="50" width="160" height="200" rx="10"/>
+  <text x="110" y="155" text-anchor="middle" class="strong">client</text>
+
+  <rect class="frame" x="440" y="20" width="230" height="260" rx="10"/>
+  <text class="label" x="454" y="40">Traefik</text>
+  <rect class="ask" x="460" y="52" width="190" height="64" rx="8"/>
+  <text x="555" y="78" text-anchor="middle">entrypoint <tspan class="code">web</tspan></text>
+  <text class="code" x="555" y="100" text-anchor="middle">:8000</text>
+  <rect class="ok" x="460" y="188" width="190" height="64" rx="8"/>
+  <text x="555" y="214" text-anchor="middle">entrypoint <tspan class="code">websecure</tspan></text>
+  <text class="code" x="555" y="236" text-anchor="middle">:8443</text>
+
+  <rect class="ok" x="690" y="188" width="130" height="64" rx="8"/>
+  <text x="755" y="214" text-anchor="middle">TLS router</text>
+  <text x="755" y="236" text-anchor="middle">and certificate</text>
+</svg>
