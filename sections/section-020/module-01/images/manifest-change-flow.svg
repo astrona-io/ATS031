@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 320" width="840" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">Change the API server manifest through copies</title>
+  <desc id="desc">The live kube-apiserver.yaml in /etc/kubernetes/manifests is copied to a backup and a working copy in /root, which the kubelet does not watch. sed adds --profiling=false to the working copy, and grep checks it. Only then is the working copy copied back into the manifests directory, and the kubelet restarts the API server from it.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="20" y="14" width="300" height="292" rx="10"/>
+  <text class="code" x="36" y="38">/etc/kubernetes/manifests</text>
+  <text class="label" x="36" y="58">watched by the kubelet</text>
+  <rect class="frame" x="420" y="14" width="400" height="292" rx="10"/>
+  <text class="code" x="436" y="38">/root</text>
+  <text class="label" x="490" y="38">not watched</text>
+
+  <path class="line" d="M290 140 L446 86" marker-end="url(#arrow)"/>
+  <path class="line" d="M290 156 L446 156" marker-end="url(#arrow)"/>
+  <path class="line" d="M620 188 V218" marker-end="url(#arrow)"/>
+  <path class="okline" d="M446 250 L292 176" marker-end="url(#arrowok)"/>
+  <path class="line" d="M170 186 V226" marker-end="url(#arrow)"/>
+  <text class="label" x="368" y="104" text-anchor="middle">cp</text>
+  <text class="label" x="368" y="148" text-anchor="middle">cp</text>
+  <text class="label good" x="384" y="244" text-anchor="middle">cp back</text>
+
+  <rect class="box" x="50" y="130" width="240" height="56" rx="8"/>
+  <text class="code" x="170" y="163" text-anchor="middle">kube-apiserver.yaml</text>
+  <rect class="box" x="40" y="228" width="260" height="56" rx="8"/>
+  <text x="170" y="252" text-anchor="middle">kubelet restarts the</text>
+  <text x="170" y="272" text-anchor="middle">API server from the file</text>
+
+  <rect class="box" x="448" y="62" width="344" height="48" rx="8"/>
+  <text class="code" x="464" y="84">kube-apiserver.yaml.bak</text>
+  <text class="label" x="464" y="102">backup: the way back</text>
+  <rect class="box" x="448" y="132" width="344" height="56" rx="8"/>
+  <text class="code" x="464" y="155">kube-apiserver.yaml.new</text>
+  <text class="label" x="464" y="177">sed adds <tspan class="code">--profiling=false</tspan></text>
+  <rect class="ask" x="448" y="220" width="344" height="56" rx="8"/>
+  <text x="464" y="244"><tspan class="code">grep</tspan> shows the flag</text>
+  <text class="label" x="464" y="265">right after <tspan class="code">- kube-apiserver</tspan>?</text>
+</svg>

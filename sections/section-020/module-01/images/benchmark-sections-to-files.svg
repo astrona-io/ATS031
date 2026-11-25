@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 340" width="840" height="340" role="img" aria-labelledby="title desc">
+  <title id="title">Where each benchmark section leads on a kubeadm node</title>
+  <desc id="desc">The CIS benchmark sections 1.1 to 1.4 point to the static pod manifests in /etc/kubernetes/manifests, section 2 to the etcd data directory /var/lib/etcd, section 4 to the kubelet file /var/lib/kubelet/config.yaml, all on the node. Section 5 points to policy objects such as RBAC roles and network policies in the API.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="530" y="14" width="300" height="236" rx="10"/>
+  <text class="label" x="546" y="36">kubeadm node</text>
+
+  <path class="line" d="M180 170 L248 65" marker-end="url(#arrow)"/>
+  <path class="line" d="M180 170 L248 135" marker-end="url(#arrow)"/>
+  <path class="line" d="M180 170 L248 205" marker-end="url(#arrow)"/>
+  <path class="line" d="M180 170 L248 293" marker-end="url(#arrow)"/>
+  <path class="line" d="M480 65 H546" marker-end="url(#arrow)"/>
+  <path class="line" d="M480 135 H546" marker-end="url(#arrow)"/>
+  <path class="line" d="M480 205 H546" marker-end="url(#arrow)"/>
+  <path class="line" d="M480 293 H546" marker-end="url(#arrow)"/>
+
+  <rect class="ask" x="30" y="145" width="150" height="50" rx="8"/>
+  <text class="strong" x="105" y="175" text-anchor="middle">CIS Benchmark</text>
+
+  <rect class="box" x="250" y="44" width="230" height="42" rx="8"/>
+  <text x="365" y="70" text-anchor="middle">1.1 to 1.4: control plane</text>
+  <rect class="box" x="250" y="114" width="230" height="42" rx="8"/>
+  <text x="365" y="140" text-anchor="middle">2: etcd</text>
+  <rect class="box" x="250" y="184" width="230" height="42" rx="8"/>
+  <text x="365" y="210" text-anchor="middle">4: worker node and kubelet</text>
+  <rect class="box" x="250" y="272" width="230" height="42" rx="8"/>
+  <text x="365" y="298" text-anchor="middle">5: policies</text>
+
+  <rect class="box" x="548" y="44" width="266" height="42" rx="8"/>
+  <text class="code" x="681" y="70" text-anchor="middle">/etc/kubernetes/manifests</text>
+  <rect class="box" x="548" y="114" width="266" height="42" rx="8"/>
+  <text class="code" x="681" y="140" text-anchor="middle">/var/lib/etcd</text>
+  <rect class="box" x="548" y="184" width="266" height="42" rx="8"/>
+  <text class="code" x="681" y="210" text-anchor="middle">/var/lib/kubelet/config.yaml</text>
+  <rect class="box" x="548" y="272" width="266" height="42" rx="8"/>
+  <text x="681" y="298" text-anchor="middle">RBAC and policy objects in the API</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 250" width="840" height="250" role="img" aria-labelledby="title desc">
+  <title id="title">The parts of kube-bench check 1.2.15</title>
+  <desc id="desc">Check 1.2.15 has an identifier, an audit that reads the arguments of the running API server, a test that looks for --profiling=false, and a result. The audit finds no profiling flag, so the default value true applies and the result is FAIL. The remediation says to set --profiling=false in /etc/kubernetes/manifests/kube-apiserver.yaml.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M190 80 H236" marker-end="url(#arrow)"/>
+  <path class="line" d="M400 80 H446" marker-end="url(#arrow)"/>
+  <path class="dashed" d="M610 80 H656" marker-end="url(#arrowbad)"/>
+  <path class="line" d="M740 112 V158" marker-end="url(#arrow)"/>
+
+  <text class="label" x="30" y="34">identifier</text>
+  <rect class="box" x="30" y="48" width="160" height="64" rx="8"/>
+  <text class="code" x="110" y="85" text-anchor="middle">1.2.15</text>
+
+  <text class="label" x="240" y="34">audit</text>
+  <rect class="box" x="240" y="48" width="160" height="64" rx="8"/>
+  <text x="320" y="75" text-anchor="middle">read the arguments</text>
+  <text x="320" y="96" text-anchor="middle">of the API server</text>
+
+  <text class="label" x="450" y="34">test</text>
+  <rect class="ask" x="450" y="48" width="160" height="64" rx="8"/>
+  <text class="code" x="530" y="75" text-anchor="middle">--profiling=false</text>
+  <text x="530" y="97" text-anchor="middle">present?</text>
+
+  <text class="label" x="660" y="34">result</text>
+  <rect class="drop" x="660" y="48" width="160" height="64" rx="8"/>
+  <text class="strong bad" x="740" y="75" text-anchor="middle">FAIL</text>
+  <text x="740" y="97" text-anchor="middle">no flag: default true</text>
+
+  <text class="label" x="420" y="150">remediation</text>
+  <rect class="box" x="420" y="162" width="400" height="56" rx="8"/>
+  <text x="436" y="186">Set <tspan class="code">--profiling=false</tspan> in</text>
+  <text class="code" x="436" y="207">/etc/kubernetes/manifests/kube-apiserver.yaml</text>
+</svg>
