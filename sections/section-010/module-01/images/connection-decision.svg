@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 448" width="840" height="448" role="img" aria-labelledby="title desc">
+  <title id="title">How one connection is decided</title>
+  <desc id="desc">Pod A connects to pod B. If pod A is isolated for egress, an egress rule must allow B on that port, or the connection is dropped. Then, if pod B is isolated for ingress, an ingress rule must allow A on that port, or the connection is dropped. A side that is not isolated allows the connection.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .head { fill: #7b8494; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="head" d="M0 0 L10 5 L0 10 z"/>
+    </marker>
+  </defs>
+
+  <!-- Lines first, so the boxes sit on top. -->
+  <path class="line" d="M260 68 V106" marker-end="url(#arrow)"/>
+  <path class="line" d="M260 156 V246" marker-end="url(#arrow)"/>
+  <path class="line" d="M400 132 H458" marker-end="url(#arrow)"/>
+  <path class="line" d="M540 156 V202 H260"/>
+  <path class="line" d="M780 132 H810 V402 H782" marker-end="url(#arrow)"/>
+  <path class="line" d="M400 272 H458" marker-end="url(#arrow)"/>
+  <path class="line" d="M260 296 V378" marker-end="url(#arrow)"/>
+  <path class="line" d="M540 296 V402 H402" marker-end="url(#arrow)"/>
+  <path class="line" d="M700 296 V378" marker-end="url(#arrow)"/>
+
+  <text class="label" x="272" y="184">no</text>
+  <text class="label" x="430" y="124" text-anchor="middle">yes</text>
+  <text class="label" x="552" y="184">yes</text>
+  <text class="label" x="822" y="270">no</text>
+  <text class="label" x="430" y="264" text-anchor="middle">yes</text>
+  <text class="label" x="272" y="344">no</text>
+  <text class="label" x="528" y="352" text-anchor="end">yes</text>
+  <text class="label" x="712" y="344">no</text>
+
+  <rect class="box" x="120" y="24" width="280" height="44" rx="8"/>
+  <text class="strong" x="260" y="51" text-anchor="middle">Pod A connects to pod B</text>
+
+  <rect class="ask" x="120" y="108" width="280" height="48" rx="8"/>
+  <text x="260" y="137" text-anchor="middle">Is pod A isolated for egress?</text>
+
+  <rect class="ask" x="460" y="108" width="320" height="48" rx="8"/>
+  <text x="620" y="137" text-anchor="middle">Does an egress rule allow B on that port?</text>
+
+  <rect class="ask" x="120" y="248" width="280" height="48" rx="8"/>
+  <text x="260" y="277" text-anchor="middle">Is pod B isolated for ingress?</text>
+
+  <rect class="ask" x="460" y="248" width="320" height="48" rx="8"/>
+  <text x="620" y="277" text-anchor="middle">Does an ingress rule allow A on that port?</text>
+
+  <rect class="ok" x="120" y="380" width="280" height="44" rx="8"/>
+  <text class="strong" x="260" y="407" text-anchor="middle">Allowed</text>
+
+  <rect class="drop" x="620" y="380" width="160" height="44" rx="8"/>
+  <text class="strong" x="700" y="407" text-anchor="middle">Dropped</text>
+</svg>

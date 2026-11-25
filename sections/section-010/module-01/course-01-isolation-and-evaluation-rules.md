@@ -65,18 +65,7 @@ The field `spec.policyTypes` sets which directions a policy isolates. If you lea
 
 Every connection has two sides, and both must allow it. When pod A connects to pod B, the egress side of A must allow the connection, and the ingress side of B must allow it too. A side that is not isolated allows everything.
 
-```mermaid
-flowchart TB
-    S["Connection from pod A to pod B"] --> E{"A isolated for egress?"}
-    E -->|"no"| I{"B isolated for ingress?"}
-    E -->|"yes"| EA{"Egress rule allows B and port?"}
-    EA -->|"no"| D["Dropped"]
-    EA -->|"yes"| I
-    I -->|"no"| OK["Allowed"]
-    I -->|"yes"| IA{"Ingress rule allows A and port?"}
-    IA -->|"yes"| OK
-    IA -->|"no"| D
-```
+![Flowchart: a connection from pod A to pod B passes only if every isolated side has a rule that allows it](images/connection-decision.svg)
 
 The diagram shows that a connection needs an allowance on every isolated side, and that a side without isolation lets everything through. You do not need a rule for the replies. The plugin tracks each allowed connection and lets its reply packets back in.
 
