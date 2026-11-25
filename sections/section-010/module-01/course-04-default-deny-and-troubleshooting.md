@@ -42,6 +42,10 @@ kubectl -n starfleet exec shuttle -- wget -q -T 3 -O- http://probe/
 
 The request to `probe` still works, because `shuttle-egress` allows it and `probe-shuttle` allows the same connection on the destination side. The union of all policies, not the newest policy, decides.
 
+![Diagram: default-deny-all isolates every pod in starfleet, while shuttle-egress and probe-shuttle still allow DNS and the request to probe](images/default-deny-with-allowances.svg)
+
+The drawing shows the namespace after the default-deny policy. Only the connections that another policy allows still pass: the DNS lookup and the request from `shuttle` to `probe`. Everything else, such as the request to `blocked-server` or from `drifter`, is dropped.
+
 ## Reading a blocked request step by step
 
 When a request fails, do not guess. Follow the same order each time.
@@ -61,6 +65,10 @@ kubectl get namespaces --show-labels
 ```
 
 Fourth, decide for each side whether it is isolated and whether a rule allows the connection, checking the source egress first and then the destination ingress. Fifth, read the failure type. A timeout means a packet filter dropped it. A refusal means the destination answered and no process listens on that port. A resolution error means the DNS step failed before any connection.
+
+![Diagram: a timeout is a packet filter drop, a refused connection is a reset from a closed port, and a resolution error is a failed DNS lookup](images/three-failure-types.svg)
+
+The drawing shows where each failure happens. Only a timeout points to a NetworkPolicy.
 
 ## Proving the cause by removing it
 

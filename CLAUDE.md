@@ -112,9 +112,14 @@ Strict guidelines:
   old, run it again"), background facts, optional extra steps, and plain
   information. Never a command snippet, never two in a row, and most pages
   need zero or one tip. Each part ends with a
-  `## Common pitfalls` `> [!WARNING]` block for that part only. Use a Mermaid
-  diagram for a flow, an order or a state change, keep it under about 12
-  boxes, and follow it with one sentence that says what it shows.
+  `## Common pitfalls` `> [!WARNING]` block for that part only. Draw a
+  picture wherever it explains a flow, an order, a state change or who does
+  what better than text. Prefer a hand-drawn SVG in the module's `images/`
+  folder (shown with `![Diagram: what it shows](images/<name>.svg)`): light
+  box fills with dark text so it reads on light and dark pages, green for
+  allowed, red dashed for dropped, real names in monospace, a `<title>` and
+  `<desc>`. Mermaid is still fine for a quick flow. Keep either under about
+  12 boxes, and follow it with one sentence that says what it shows.
 - **Labs come right after the part they practise.** Do not collect all
   graded labs at the end of a module. In `astrona.yaml`, put each lab (its
   `question.md` reading and the `lab` entry) right after the reading part it

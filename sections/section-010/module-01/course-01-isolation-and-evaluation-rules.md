@@ -37,6 +37,10 @@ To change this, you create a NetworkPolicy. But it is important to know which pa
 
 The API server checks that the policy is valid and stores it in etcd. That is all it does: it does not filter any traffic. The network plugin does the real work. It runs an agent on every node, which for Calico is the `calico-node` pod. The agent watches NetworkPolicy objects and turns them into packet filtering rules for the pods on its node. When a packet is dropped, the plugin drops it.
 
+![Diagram: kube-apiserver stores the NetworkPolicy in etcd, and the calico-node agent on each node programs packet filter rules](images/api-server-and-network-plugin.svg)
+
+The drawing shows the split. The API server only stores the policy, and the `calico-node` agent on each node turns it into packet filter rules for the pods on that node.
+
 Not every network plugin supports NetworkPolicy. The simple `flannel` plugin, for example, does not. On such a cluster, `kubectl apply` still succeeds, but traffic keeps flowing as before. So the first thing to check is which plugin runs in the cluster:
 
 ```sh

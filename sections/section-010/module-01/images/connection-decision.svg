@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 448" width="840" height="448" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="100 0 740 448" width="740" height="448" role="img" aria-labelledby="title desc">
   <title id="title">How one connection is decided</title>
   <desc id="desc">Pod A connects to pod B. If pod A is isolated for egress, an egress rule must allow B on that port, or the connection is dropped. Then, if pod B is isolated for ingress, an ingress rule must allow A on that port, or the connection is dropped. A side that is not isolated allows the connection.</desc>
   <style>

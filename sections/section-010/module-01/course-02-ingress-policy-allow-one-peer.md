@@ -53,6 +53,10 @@ kubectl -n outpost exec drifter -- wget -q -T 3 -O- http://probe.starfleet/
 
 The `drifter` request times out instead of being refused. A refused connection means a listener answered with a reset. A timeout means the network plugin dropped the packets without a reply. When you test a denial, a timeout is the evidence that a policy did the work. A refusal points to a closed port instead.
 
+![Diagram: the probe-shuttle policy lets the shuttle pod reach the probe pods on TCP port 8080 and drops the request from the drifter pod in outpost](images/ingress-probe-shuttle.svg)
+
+The drawing shows the result. The `probe-shuttle` policy lets the `shuttle` pod in on TCP port 8080, and it drops the request from the `drifter` pod in the `outpost` namespace.
+
 Read the policy back with `describe`, which prints the selected pods and the allowed sources in a short form:
 
 ```sh
