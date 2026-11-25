@@ -1,16 +1,25 @@
 # ipBlock And Except
 
-Some peers are not pods in the cluster. A database in a virtual network, a partner service or a corporate office has an IP address range, not a label. The `ipBlock` peer matches a source or destination by Classless Inter-Domain Routing (CIDR) range, which writes an address range as a base address and a prefix length such as `203.0.113.0/24`. This part explains `ipBlock` with its `except` list and demonstrates the mechanics with two pods.
+Some peers are not pods in the cluster. A database in a virtual network, a partner service or a company office has an IP address range, not a label. So a label selector cannot match it.
+
+The `ipBlock` peer matches a source or destination by its address. It uses a Classless Inter-Domain Routing (CIDR) range. A CIDR range writes a group of addresses as a base address and a prefix length, such as `203.0.113.0/24`. On this page, you learn the `ipBlock` fields and its `except` list, and you see how they work with two pods.
 
 ## The fields
 
-An `ipBlock` has a required `cidr` and an optional `except` list. The `except` entries must lie inside the `cidr`, and they remove addresses from the match. An `ipBlock` is its own peer type. It cannot share one entry with `podSelector` or `namespaceSelector`.
+An `ipBlock` has two fields:
 
-The Kubernetes documentation says to use `ipBlock` for addresses outside the cluster, because pod IP addresses are short-lived and change when a pod is replaced. Use it for pods only to understand the mechanics, as you do here.
+- `cidr` is required. It is the address range that the peer matches.
+- `except` is optional. It lists smaller ranges that are removed from the match. Each `except` entry must lie inside the `cidr`.
 
-## Mechanics with two pods
+An `ipBlock` is its own peer type. It cannot share one entry with a `podSelector` or a `namespaceSelector`.
 
-The example uses the address range `0.0.0.0/0`, which matches every IPv4 address, with the address of one pod removed. Two clients then differ only by their address. Start with no policy in `dock` and collect the addresses of two `shuttle` pods and of the `telemetry` pod:
+The Kubernetes documentation says to use `ipBlock` for addresses outside the cluster. Pod IP addresses are short-lived, and they change when a pod is replaced. On this page you use it for pods only to see how the matching works.
+
+## How the matching works with two pods
+
+The example uses the range `0.0.0.0/0`, which matches every IPv4 address. One pod address is then removed with `except`. So two clients differ only by their address.
+
+Start with no policy in `dock`. Then store the addresses of two `shuttle` pods and of the `telemetry` pod in shell variables:
 
 <!-- astrona:playground:renew -->
 
@@ -22,7 +31,9 @@ TELEMETRY_IP=$(kubectl -n dock get pod telemetry -o jsonpath='{.status.podIP}')
 echo "$STARFLEET_SHUTTLE_IP $OUTPOST_SHUTTLE_IP $TELEMETRY_IP"
 ```
 
-The last command prints three different pod addresses. Save this as `networkpolicy-telemetry-ipblock.yaml`, and replace `<OUTPOST_SHUTTLE_IP>` with the value of `echo $OUTPOST_SHUTTLE_IP`, keeping the `/32` suffix that selects exactly one address:
+The last command prints three different pod addresses. Next you write the policy. Replace `<OUTPOST_SHUTTLE_IP>` with the value of `echo $OUTPOST_SHUTTLE_IP`, and keep the `/32` suffix. A `/32` prefix selects exactly one address.
+
+Save this as `networkpolicy-telemetry-ipblock.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -53,36 +64,46 @@ Apply it:
 kubectl apply -f networkpolicy-telemetry-ipblock.yaml
 ```
 
-Then check the result with `nc`, the netcat tool in the `busybox` image. The `telemetry` pod answers every connection on TCP port 9000 with one line of text. The request from `starfleet` should print that line. The request from `outpost` should print nothing and end after the three second limit, because its address is on the `except` list.
+Then check the result with `nc`, the netcat tool in the `busybox` image. The `telemetry` pod answers every connection on TCP port 9000 with one line of text.
+
+The request from `starfleet` should print that line. The request from `outpost` should print nothing and end after the limit of three seconds, because its address is on the `except` list.
 
 ```sh
 kubectl -n starfleet exec shuttle -- nc -w 3 "$TELEMETRY_IP" 9000
 kubectl -n outpost exec shuttle -- nc -w 3 "$TELEMETRY_IP" 9000
 ```
 
-The exact exit status of `nc` depends on its version, so judge the result by the text it prints. The network plugin matched the source address of each packet against the CIDR and the `except` entry. It made no use of labels at all.
+The exact exit status of `nc` depends on its version, so judge the result by the text it prints. The network plugin compared the source address of each packet with the `cidr` and the `except` entry. It did not use labels at all.
+
+![Diagram: the ipBlock range 0.0.0.0/0 admits the shuttle pod in starfleet to the telemetry pod on TCP port 9000, and the except entry for the outpost shuttle address drops its request](images/ipblock-except.svg)
+
+The drawing shows the range with one address removed. The plugin checks only the source address: inside the `cidr` and not in `except` means allowed.
 
 ## Pod IP addresses versus Service IP addresses
 
-An `ipBlock` is compared with the real source or destination address of the packet. For traffic to a Service, the node rewrites the Service cluster IP address to a pod address before the policy rule is checked in most plugins, including Calico. A rule for a Service cluster IP address therefore does not match, and you must allow the pod addresses or select the pods by label.
+An `ipBlock` is compared with the real source or destination address of the packet. That address is not always the one the client used.
 
-For traffic from outside the cluster, the source address may also change on the way in, for example when a load balancer or a node masks it. An `ipBlock` for client addresses then sees the masked address. Check the behaviour of your plugin and cloud before you rely on it, and test with a real request.
+For traffic to a Service, the node first rewrites the Service cluster IP address to the address of one pod. In most plugins, including Calico, this happens before the policy rule is checked. So a rule for a Service cluster IP address does not match. Instead, allow the pod addresses or select the pods by label.
+
+Traffic from outside the cluster has a similar problem. Its source address may change on the way in, for example when a load balancer or a node masks it. An `ipBlock` for client addresses then sees the masked address. Check the behaviour of your plugin and cloud before you rely on it, and test with a real request.
 
 ## Node and pod ranges in kind
 
-In a `kind` cluster the nodes are containers with addresses from a container network, and pods get addresses from a separate pod range. You can read the node addresses and the pod addresses with `kubectl get nodes -o wide` and `kubectl get pods -o wide`. An `ipBlock` for the pod range admits every pod, so it is as wide as a `namespaceSelector: {}`.
+A `kind` cluster has two separate address ranges. The nodes are containers and get addresses from a container network. The pods get addresses from a separate pod range.
+
+You can read the node addresses with `kubectl get nodes -o wide` and the pod addresses with `kubectl get pods -o wide`. An `ipBlock` for the whole pod range admits every pod, so it is as wide as `namespaceSelector: {}`. The commands below show the node addresses and then remove the policy:
 
 ```sh
 kubectl get nodes -o wide
 kubectl -n dock delete networkpolicy telemetry-ipblock
 ```
 
-You can now allow an address range and carve out one address, and you know the limits of the form. Ports are the second half of every rule, and the next part covers their forms.
+You can now allow an address range and remove one address from it, and you know the limits of this form. A peer says who may connect. The open question is which ports and protocols that peer may use.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Putting `ipBlock` and a selector in one entry.** They are separate peer types; use separate entries.
+> - **Putting `ipBlock` and a selector in one entry.** They are separate peer types. Use separate entries.
 > - **An `except` entry outside the `cidr`.** The API server rejects it.
-> - **Using `ipBlock` for pods.** Pod addresses change when pods restart.
-> - **Writing a rule for a Service IP address.** The plugin evaluates the pod address after translation.
+> - **Using `ipBlock` for pods.** Pod addresses change when pods are replaced.
+> - **Writing a rule for a Service IP address.** The plugin checks the pod address after the translation.

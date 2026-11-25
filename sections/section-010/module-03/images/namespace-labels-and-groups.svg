@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 310" width="840" height="310" role="img" aria-labelledby="title desc">
+  <title id="title">Namespace name label and group label</title>
+  <desc id="desc">Each of starfleet, outpost and dock has its own kubernetes.io/metadata.name label with its name as the value, and each runs a shuttle pod with the same label app: shuttle. The added label team: fleet groups starfleet and outpost, and dock has team: logistics.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="policy" x="20" y="20" width="530" height="50" rx="8"/>
+  <rect class="policy" x="560" y="20" width="260" height="50" rx="8"/>
+  <rect class="frame" x="20" y="100" width="260" height="200" rx="10"/>
+  <rect class="frame" x="290" y="100" width="260" height="200" rx="10"/>
+  <rect class="frame" x="560" y="100" width="260" height="200" rx="10"/>
+  <path class="line" d="M150 70 V98" marker-end="url(#arrow)"/>
+  <path class="line" d="M420 70 V98" marker-end="url(#arrow)"/>
+  <path class="line" d="M690 70 V98" marker-end="url(#arrow)"/>
+  <text x="285" y="50" text-anchor="middle"><tspan class="code">team: fleet</tspan> groups two namespaces</text>
+  <text x="690" y="50" text-anchor="middle"><tspan class="code">team: logistics</tspan></text>
+  <text class="label" x="36" y="122">namespace starfleet</text>
+  <rect class="ok" x="35" y="134" width="230" height="54" rx="8"/>
+  <text class="code" x="150" y="155" text-anchor="middle"><tspan style="font-size:12px">kubernetes.io/metadata.name:</tspan></text>
+  <text class="code" x="150" y="177" text-anchor="middle">starfleet</text>
+  <text class="code" x="150" y="212" text-anchor="middle">team: fleet</text>
+  <rect class="box" x="60" y="226" width="180" height="58" rx="8"/>
+  <text class="code" x="150" y="249" text-anchor="middle">shuttle</text>
+  <text class="code" x="150" y="271" text-anchor="middle">app: shuttle</text>
+  <text class="label" x="306" y="122">namespace outpost</text>
+  <rect class="ok" x="305" y="134" width="230" height="54" rx="8"/>
+  <text class="code" x="420" y="155" text-anchor="middle"><tspan style="font-size:12px">kubernetes.io/metadata.name:</tspan></text>
+  <text class="code" x="420" y="177" text-anchor="middle">outpost</text>
+  <text class="code" x="420" y="212" text-anchor="middle">team: fleet</text>
+  <rect class="box" x="330" y="226" width="180" height="58" rx="8"/>
+  <text class="code" x="420" y="249" text-anchor="middle">shuttle</text>
+  <text class="code" x="420" y="271" text-anchor="middle">app: shuttle</text>
+  <text class="label" x="576" y="122">namespace dock</text>
+  <rect class="ok" x="575" y="134" width="230" height="54" rx="8"/>
+  <text class="code" x="690" y="155" text-anchor="middle"><tspan style="font-size:12px">kubernetes.io/metadata.name:</tspan></text>
+  <text class="code" x="690" y="177" text-anchor="middle">dock</text>
+  <text class="code" x="690" y="212" text-anchor="middle">team: logistics</text>
+  <rect class="box" x="600" y="226" width="180" height="58" rx="8"/>
+  <text class="code" x="690" y="249" text-anchor="middle">shuttle</text>
+  <text class="code" x="690" y="271" text-anchor="middle">app: shuttle</text>
+</svg>

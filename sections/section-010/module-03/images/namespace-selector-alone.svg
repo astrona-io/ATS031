@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 320" width="840" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">A namespaceSelector alone admits the whole namespace</title>
+  <desc id="desc">The probe-from-outpost policy in starfleet has only a namespaceSelector for outpost. Both the shuttle and the drifter pod in outpost reach the probe pods on TCP port 8080. The requests from the shuttle pod in dock and the shuttle pod in starfleet time out.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="20" y="20" width="250" height="150" rx="10"/>
+  <rect class="frame" x="20" y="200" width="250" height="100" rx="10"/>
+  <rect class="frame" x="520" y="20" width="300" height="280" rx="10"/>
+  <rect class="policy" x="540" y="56" width="260" height="138" rx="8"/>
+  <path class="okline" d="M250 80 L558 128" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M250 130 L558 150" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M250 260 L536 178" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M670 236 V196" marker-end="url(#arrowbad)"/>
+  <text class="label good" x="282" y="190">admitted: every pod in outpost</text>
+  <text class="label bad" x="400" y="252">timeout</text>
+  <text class="label bad" x="680" y="222">timeout</text>
+  <text class="label" x="36" y="44">namespace outpost</text>
+  <rect class="box" x="40" y="58" width="210" height="44" rx="8"/>
+  <text class="code" x="145" y="85" text-anchor="middle">shuttle</text>
+  <rect class="box" x="40" y="110" width="210" height="44" rx="8"/>
+  <text class="code" x="145" y="137" text-anchor="middle">drifter</text>
+  <text class="label" x="36" y="224">namespace dock</text>
+  <rect class="box" x="40" y="238" width="210" height="44" rx="8"/>
+  <text class="code" x="145" y="265" text-anchor="middle">shuttle</text>
+  <text class="label" x="536" y="44">namespace starfleet</text>
+  <text class="code" x="670" y="80" text-anchor="middle">probe-from-outpost</text>
+  <rect class="ok" x="560" y="104" width="220" height="70" rx="8"/>
+  <text x="670" y="133" text-anchor="middle"><tspan class="code">probe</tspan> pods</text>
+  <text x="670" y="155" text-anchor="middle">TCP port 8080</text>
+  <rect class="box" x="580" y="238" width="180" height="44" rx="8"/>
+  <text class="code" x="670" y="265" text-anchor="middle">shuttle</text>
+</svg>
