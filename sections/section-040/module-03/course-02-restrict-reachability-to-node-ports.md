@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Restrict Reachability To Node Ports
 
 A pod almost never needs to talk to a kubelet. A NetworkPolicy can close that path with the same form that blocks the metadata address: allow everything except the addresses of the nodes. This part builds that policy for the `dock` namespace, explains the port-based alternative, and states what a pod policy can and cannot protect on a node.

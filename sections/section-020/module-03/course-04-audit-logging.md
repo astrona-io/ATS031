@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Audit Logging
 
 After an incident, the first question is who sent which request and when. By default the API server keeps no such record. Audit logging writes one event for each request, according to a policy that you provide. The benchmark checks that the policy file and the log path are set, and that the log has a retention limit. This part explains the policy format, the flags, the volume mounts that make it work in a static pod, and how to read an event.

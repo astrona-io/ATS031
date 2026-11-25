@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Configure spec.tls And Verify
 
 A Secret does nothing until an Ingress names it, and an Ingress that names it can still serve the wrong certificate. The only proof is a client that verifies the certificate. This part adds the `tls` section to an Ingress for `probe.example.test`, then tests with `curl` and `openssl s_client`, once with the correct host name and once with a wrong one.

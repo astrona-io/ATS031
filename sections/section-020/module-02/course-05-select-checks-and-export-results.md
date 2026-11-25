@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Select Checks And Export Results
 
 A full run takes time and prints far more than you need while you fix one setting. During a fix you want to run a single check again and see only its result. At the end of a review you want a file that a script or a colleague can read. This part shows how to select checks, how to export JSON, and how to keep a baseline for a before and after comparison.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Allow One Peer With An Ingress Policy
 
 Right now, the `probe` pods answer every caller. On this page, you change that. Only the `shuttle` pod in the same namespace may reach them, and the `drifter` pod in the `outpost` namespace may not.

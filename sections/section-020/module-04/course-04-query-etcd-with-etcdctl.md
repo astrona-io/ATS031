@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Query etcd With etcdctl
 
 Flags and file modes tell you how etcd is configured. A direct query tells you what an attacker would get. `etcdctl` is the command-line client for etcd. In this part you connect with a valid client certificate, list keys, read a Secret and see that the value is plain text. The result explains why the next part encrypts Secrets even when TLS and file permissions are correct.

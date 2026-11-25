@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Test Matrix For A Policy Set
 
 A policy set is correct when every path that should work does work, and every path that should fail does fail. Testing one request proves one cell of that table. This part builds the table for the `starfleet` application, runs it with bounded requests, and uses the result to see which paths of the broken set still fail.

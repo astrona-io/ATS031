@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Configure An Ingress With TLS And Verify It
 
 A route with a certificate is only secure when the client verifies the certificate. Many examples hide a failure by switching verification off, which keeps the encryption but removes the proof of identity. This part attaches the `probe-tls` Secret to an Ingress, then tests from the client side with verification on, once for the correct name and once for a wrong name.

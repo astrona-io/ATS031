@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Run kube-bench On A kubeadm Node
 
 On a node where you have a shell, you can run `kube-bench` as a binary. That is the usual way in the exam: you log in to a node and run the program as root. In a cluster you can also run it as a Kubernetes Job, which is an object that runs a pod until it finishes. A Job can be scheduled on a chosen node and leaves its output in the pod log. This part runs the binary on the kubeadm node of the playground, then runs the same audit as a Job, and compares the two results.

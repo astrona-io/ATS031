@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Shrink The Controller Attack Surface
 
 The Ingress controller sits on the edge of the cluster, takes input from the internet and holds credentials for the Kubernetes API. If it is compromised, an attacker gets its permissions. This part lists what a Traefik installation can reach and expose, and shows the commands that find each item.

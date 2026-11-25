@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Harden The API Server And Control Plane Components
 
 Most failing checks of a Center for Internet Security (CIS) Kubernetes Benchmark run belong to the control plane. The API server is the front door of the cluster. It decides who may connect, what each user may do and which requests are recorded. The controller manager and the scheduler run beside it, and their manifests and settings have checks of their own.

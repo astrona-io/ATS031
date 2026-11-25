@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Summary
 
 An Ingress holds routing rules. An IngressClass names the controller, and the Ingress controller, here Traefik, reads the Ingress objects of its class and routes the requests. A rule matches by host and path: `Exact` matches one path, `Prefix` matches whole path elements, and the longest match wins. The backend names the Service port, not the container port. A request that matches no rule gets a `404` from the controller.

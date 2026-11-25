@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Deny All Ingress
 
 The most common baseline stops all incoming connections to every pod in a namespace. It protects servers, because nothing can reach them until an allow rule opens a path. This part writes that policy, applies it to `outpost`, and proves its effect with requests from two directions.

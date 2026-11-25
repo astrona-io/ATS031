@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Review Kubernetes Components With The CIS Benchmark
 
 A Kubernetes cluster has many security settings that are not safe by default: the API server flags, the etcd data store, the kubelet on every node, and the permissions of the files that hold them. The Center for Internet Security (CIS) Kubernetes Benchmark is a published list of recommended settings for these components. You review a cluster by comparing its real settings with that list, and you fix what the list marks as a risk.

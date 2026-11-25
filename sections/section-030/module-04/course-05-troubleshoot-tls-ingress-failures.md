@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Troubleshoot TLS Ingress Failures
 
 A client that cannot connect gives you one line: a certificate error, a reset or a 404. The cause can be in the Secret, the Ingress, the class or the controller. This part gives a fixed order of checks and applies it to four broken Ingresses, `case-one` to `case-four`, that were prepared in the playground.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Egress To The API Server And Other Dependencies
 
 Some pods call the Kubernetes API server, for example controllers, operators and monitoring agents. Some call services outside the cluster. Under an egress baseline both need a rule, and neither can be written with a label selector. This part shows how to find the address that a policy must allow for the API server, reads the rule that the playground already uses, and explains the `ipBlock` form for external services.

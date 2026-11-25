@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Review etcd Security Configuration
 
 etcd is the key-value database where the Kubernetes API server stores every object of the cluster: pods, Deployments, RBAC rules and Secrets. Anyone who can read etcd can read every Secret, and anyone who can write to etcd can change the whole cluster without going through authentication, authorization or admission control. For this reason the Center for Internet Security (CIS) Kubernetes Benchmark gives etcd its own section.

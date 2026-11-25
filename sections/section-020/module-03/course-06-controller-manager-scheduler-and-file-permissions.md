@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Controller Manager, Scheduler And File Permissions
 
 The API server is not the only control plane component with checks. The controller manager runs the control loops that keep the cluster in its desired state, and the scheduler assigns pods to nodes. Both have a few settings in the benchmark. The files that hold the manifests and certificates of all components also have checks, and they are often the quickest failures to fix. This part covers the component flags and the file permissions, and ends with how to apply the changes.

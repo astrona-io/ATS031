@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Summary
 
 The CIS Kubernetes Benchmark is a numbered list of recommendations for the control plane, etcd, worker nodes and policies. Each recommendation has a profile level and is automated or manual, and the numbers change between editions, so a review names the edition and finds a check by the setting it names. A review also depends on who owns the component: on a managed service you cannot read the control plane settings and must not report them as passed.

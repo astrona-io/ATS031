@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Policy For Real Cluster Traffic And Troubleshooting
 
 A policy that allows only the application connection breaks the application. Real workloads also need name resolution, access to the Kubernetes API server and health checks from the node. A NetworkPolicy is a Kubernetes object that selects pods and lists the connections they may receive or make, and the network plugin enforces it. This module covers the traffic that every real cluster needs, the traffic that policy cannot see, and a fixed method to test, audit and repair a policy set.

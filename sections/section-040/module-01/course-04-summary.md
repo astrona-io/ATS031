@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Summary
 
 A node offers endpoints that Kubernetes RBAC does not govern. The cloud metadata service returns information about the instance and often credentials of the node identity. The kubelet API on port 10250 can list pods, read logs and run commands, and is protected by its own authentication and authorization settings. The container runtime socket gives control of every container to whoever can write to it. A node identity and a workload identity are separate, so cutting a ServiceAccount's permissions does not cut what the node can do.

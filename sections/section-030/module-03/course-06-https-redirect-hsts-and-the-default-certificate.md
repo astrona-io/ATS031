@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # HTTPS Redirect, HSTS And The Default Certificate
 
 A route with a good certificate is only part of a safe HTTPS setup. Clients that ask for an unknown host still get a certificate, clients that use plain HTTP are not sent to HTTPS by themselves, and browsers do not know that they should always use HTTPS. This part shows what Traefik serves for an unknown name, redirects HTTP to HTTPS on the entrypoint, and adds an HSTS header to one route.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # ipBlock And Except
 
 Some peers are not pods in the cluster. A database in a virtual network, a partner service or a corporate office has an IP address range, not a label. The `ipBlock` peer matches a source or destination by Classless Inter-Domain Routing (CIDR) range, which writes an address range as a base address and a prefix length such as `203.0.113.0/24`. This part explains `ipBlock` with its `except` list and demonstrates the mechanics with two pods.

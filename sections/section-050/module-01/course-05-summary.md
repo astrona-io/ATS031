@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Summary
 
 Verification answers separate questions. Integrity asks whether the bytes match an expected digest. Authenticity asks whether the expected publisher produced them. Suitability, meaning vulnerabilities and compatibility, is a different review and is not covered by either. A checksum from the same place as the file proves only that the download was intact, because an attacker who controls both can supply a matching pair.

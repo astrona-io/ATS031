@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Runtime Socket And hostPath Exposure
 
 The container runtime on a node, containerd in this cluster, listens on a Unix socket. A Unix socket is a file that programs use to talk to a local service. Whoever can open the socket can ask the runtime to create, inspect and stop containers on the node. This part shows how a pod gets the socket, finds every pod that has it, and explains how to stop it.

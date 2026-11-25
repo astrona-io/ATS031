@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Sign A Server Certificate With Your Own CA
 
 A self-signed certificate must be trusted one by one. When several servers need certificates, it is easier to create one certificate authority, trust that one certificate in the client, and let it sign every server certificate. This is also how a company CA works, only with more controls. This part creates a CA, creates a certificate request for `probe.example.test`, signs it with the CA and verifies the chain.

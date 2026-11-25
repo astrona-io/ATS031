@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Restrict The Pod And Verify The Boundary
 
 This part closes the path from `shuttle` to the stand-in endpoint with an egress allow-list, then proves three things with requests: the target still works, the restricted pod cannot reach it, and the dependencies the restricted pod needs still work. It ends with the provider-specific protections that a NetworkPolicy cannot replace.

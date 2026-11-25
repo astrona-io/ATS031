@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Harden The kubelet And CoreDNS, Then Remediate End To End
 
 The kubelet is the agent that runs on every node. It starts the containers of the pods on its node, and it serves an HTTPS interface that can list pods, read logs and run commands inside containers. If that interface accepts unauthenticated or unauthorized requests, an attacker who reaches the node network controls every pod on the node. The Center for Internet Security (CIS) Kubernetes Benchmark checks the kubelet on every node for this reason.

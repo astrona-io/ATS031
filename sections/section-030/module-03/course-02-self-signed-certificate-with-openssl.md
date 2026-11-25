@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Self-Signed Certificate With openssl
 
 The fastest way to get a certificate for a test is to create one that signs itself. One `openssl` command makes the key and the certificate together, and the exam often asks for exactly this. This part builds the command option by option, creates a certificate for `scout.example.test`, and then reads the result to prove that the name, the dates and the SAN are what you intended.

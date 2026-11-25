@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # sha256sum And The Check Format
 
 The command that the exam expects is short, and it fails in quiet ways when its input has the wrong shape. This part verifies a binary with `sha256sum --check`, explains the line format that the tool reads, and shows what the exit status tells a script.

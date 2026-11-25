@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Read The Version Of A Binary
 
 The name of a file is a claim, and so is the version that the program prints about itself. This part reads the version, the source commit, the build date and the platform from `kubectl`, `kubeadm` and `kubelet`, compares them with what a file says it is, and explains why a version number is not a verification.

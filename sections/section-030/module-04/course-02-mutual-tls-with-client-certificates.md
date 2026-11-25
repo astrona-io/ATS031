@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Mutual TLS With Client Certificates
 
 In normal TLS only the server proves its identity. In mutual TLS (mTLS) the client also presents a certificate, and the server checks it against a CA it trusts. A route that requires client certificates stops every caller that does not hold one, before any request reaches the application. This part builds a CA, issues a client certificate, adds a TLS option that requires it and tests a request with and without the certificate.

@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # What kube-bench Does Under The Hood
 
 A report that says `FAIL` is only useful if you know where the word came from. When a result looks wrong, the only way to judge it is to know what the tool read and what it compared. This part opens `kube-bench` and shows its three inputs: the processes on the node, the files on the node, and its own definition files for each benchmark edition.

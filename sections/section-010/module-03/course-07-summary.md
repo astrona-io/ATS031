@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Summary
 
 A policy has three kinds of selector, and each one reads a different object. `spec.podSelector` chooses the protected pods. A `podSelector` in a peer chooses pods, and without a `namespaceSelector` it stays in the namespace of the policy. A `namespaceSelector` chooses namespaces by their labels. The label `kubernetes.io/metadata.name`, set by the API server on every namespace, is the reliable way to select one namespace by name, and no `name` label exists by default.

@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Read A Result
 
 A report of several hundred lines is useless if you read it from the top without a plan. A reviewer reads the counts first, then the failures, then the remediation of the failures that matter. This part shows the layout of the text report and the order in which to read it, using a report of the control plane checks from the playground node.

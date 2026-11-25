@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Correct A Finding Safely And Record It
 
 A finding is only closed when the setting has changed, the component runs with the new value, and the cluster still works. Changing the API server is the risky case: it is the component that every `kubectl` command talks to, and a mistake in its manifest leaves you without a working API. This part corrects the `--profiling` finding in the API server static pod manifest, waits for the new instance, verifies the result, and records the decision.

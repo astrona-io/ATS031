@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Review CoreDNS (kube-dns)
 
 Every pod resolves Service names through the cluster DNS (Domain Name System) service. If an attacker changes its configuration, the attacker can send pods to the wrong address, and a flaw in the DNS server affects every namespace. The exam objective names `kubedns`, the original cluster DNS component. Current clusters, including clusters built with kubeadm, run CoreDNS instead, and the Service in front of it keeps the name `kube-dns`. This part reviews the CoreDNS Deployment, its Corefile and who may change them.

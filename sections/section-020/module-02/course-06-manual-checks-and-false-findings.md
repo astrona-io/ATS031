@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Manual Checks And False Findings
 
 An automated report ends with counts, and a manager may read only the counts. A reviewer must know what those counts leave out. This part explains what `WARN` and `INFO` mean in practice, why a `PASS` can still hide a risk, why some `FAIL` results are not real findings on a kubeadm node, and how to separate score from risk. It has no commands, because the reasoning applies to the logs you already have.

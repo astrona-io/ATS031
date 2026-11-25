@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Summary
 
 On a kubeadm cluster, the API server, the controller manager, the scheduler and etcd are static pods that the kubelet starts from files in `/etc/kubernetes/manifests`. A change to a component is a change to its file. The safe method is to copy the manifest with `cp -p` to a work directory outside the watched directory, edit the copy, move it back in one step, wait for the component, and read the arguments of the running pod. Backups stay outside the manifests directory. When the API server does not start, `crictl ps -a` and `crictl logs` on the node show the cause, because `kubectl` needs the API server.

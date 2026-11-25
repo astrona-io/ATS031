@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Ports, Protocols And endPort
 
 A peer says who may connect. The `ports` list says to which port and over which protocol. A rule with a correct peer and a wrong port blocks the application, and a rule without a `ports` list opens every port. This part writes the port forms (single port, protocol, port range with `endPort`, named port) for the `telemetry` pod in `dock`, which listens on TCP and UDP.

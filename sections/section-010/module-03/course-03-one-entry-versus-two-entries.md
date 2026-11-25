@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # One Entry Versus Two Entries
 
 Two policies can contain the same two selectors and mean opposite things. The difference is one dash and two spaces of indentation. This is the most common error in written policies and in exam tasks, and Kubernetes accepts both forms without a warning. This part applies both forms to the same `probe` pods and shows with requests what each one allows.

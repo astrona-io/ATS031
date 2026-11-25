@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # First Ingress And Host Header Testing
 
 A rule only proves itself when a request takes the route. Your machine cannot reach the cluster network directly and the host names in the rules are not in DNS, so you need a way to send a request to Traefik and to choose the host name yourself. This part creates the first Ingress and tests it from your machine with a port forward and a `Host` header, then tests the case where no rule matches.

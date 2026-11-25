@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Select Peers And Ports Precisely
 
 Most mistakes in NetworkPolicy tasks are selector mistakes. A policy that selects the wrong peer either blocks a path the application needs or opens a path an attacker can use. A peer is an entry in the `from` or `to` list of a rule that says which pods, namespaces or IP address ranges the rule applies to. This module covers every peer form and every port form, with a request test for each.

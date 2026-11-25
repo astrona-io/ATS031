@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Path Types And Priority
 
 One host often serves several paths, and a request can match more than one rule. The result then depends on the path type and on which rule the controller prefers. A wrong choice sends requests to the wrong Service or hides a Service completely. This part explains the path types of the Ingress API, shows how Traefik chooses between overlapping rules, and tests the boundary cases with real requests.

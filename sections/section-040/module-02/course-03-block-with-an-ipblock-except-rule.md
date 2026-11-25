@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Block With An ipBlock Except Rule
 
 The fastest way to close the metadata address for a whole namespace is one NetworkPolicy that allows all egress except that address. This part explains how the rule works, applies it to the `dock` namespace, and proves three things: the address is blocked, other egress still works, and the policy covers pods that did not exist when it was written.

@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Run kube-bench And Read Its Output
 
 The Center for Internet Security (CIS) Kubernetes Benchmark is a long list of recommended settings. Nobody checks hundreds of settings by hand during a review or an exam. `kube-bench` is an open source program that runs the audit commands of the benchmark on a node and prints one result for each recommendation. This module teaches you to run it, to read what it prints, to run only the checks you need, and to judge how far a result can be trusted.

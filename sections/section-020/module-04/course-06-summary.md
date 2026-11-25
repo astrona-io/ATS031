@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Summary
 
 etcd stores every object of the cluster, including all Secrets, under keys that start with `/registry`. The API server is the only component that should connect to it, over the client port `2379`. etcd members replicate over the peer port `2380`. kubeadm gives etcd its own certificate authority in `/etc/kubernetes/pki/etcd`, and the API server connects with a client certificate that this authority signed.

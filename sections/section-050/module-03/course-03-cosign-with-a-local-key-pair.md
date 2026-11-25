@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # cosign With A Local Key Pair
 
 GPG signs repository files. For single files and container images, many projects use cosign, a command line tool of the Sigstore project that signs and verifies blobs (any file) and images. This part verifies a signed file with a local public key, shows a forged file failing, and creates a new key pair of your own to see the full signing round trip.

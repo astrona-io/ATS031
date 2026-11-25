@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Endpoints That Carry Authority
 
 Before you restrict access you need to know what is worth protecting. Three kinds of endpoint on or near a node issue authority that Kubernetes RBAC does not control. This part describes each one, explains the difference between a node identity and a workload identity, and shows how to inspect the kubelet and the host paths that pods use.

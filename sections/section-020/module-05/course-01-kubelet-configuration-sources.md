@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Kubelet Configuration Sources
 
 A reviewer who reads one file and reports a pass can be wrong, because the kubelet takes its settings from more than one place. Before you change a kubelet setting, you must know which source wins, how to read the effective value, and how to change the setting and restart the kubelet without leaving the node broken. This part builds that routine, and the later parts reuse it.

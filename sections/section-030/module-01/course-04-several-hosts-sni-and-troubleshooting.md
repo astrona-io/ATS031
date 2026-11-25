@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Several Hosts, Server Name Selection And Troubleshooting
 
 One Traefik instance usually serves many host names, and each name needs its own certificate. The controller has to choose the certificate before it has read a single HTTP header, because the TLS handshake comes first. This part explains how the client's requested name selects the certificate, shows what a client receives when the Secret is missing, and gives a checklist for failures.

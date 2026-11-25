@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Node Identity And NodeRestriction
 
 A kubelet talks to the API server with its own credential. If an attacker steals that credential, the damage depends on what a node may do. Kubernetes limits a node with two features, the node authorizer and the `NodeRestriction` admission plugin. This part explains both, shows how to confirm they are on, and tests what a node identity is allowed to read.

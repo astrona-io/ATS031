@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Verify A Signed Manifest And Record The Result
 
 The signature on `checksums.txt` ties the manifest to a key. If you hold the right public key from a channel you trust, a valid signature shows that the key holder produced exactly this manifest, and the digests in it can be trusted. This part verifies the signature, shows that it rejects the forged manifest from the previous part, checks the binary against the authenticated manifest, and records the result in the cluster.

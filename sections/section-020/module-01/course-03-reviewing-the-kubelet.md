@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Review The Kubelet: Effective Configuration And File Permissions
 
 The kubelet is the agent on every node. It starts the containers, and it also runs an HTTPS server on port 10250 that can list pods, read logs and run commands inside containers. A kubelet that accepts anonymous or unauthorised requests gives an attacker control over every pod on the node. The benchmark checks this in section 4. This part shows where the kubelet gets its settings, how to read the settings it really uses, and how to fix a file permission finding.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Policies On Services And Replicas
 
 Clients call Services, but policies select pods. Pods come and go during rollouts and their labels can change. This part explains what the network plugin sees when a request goes through a Service, and shows that a policy follows labels and not pod identity, so it reacts when labels change and when pods are replaced.

@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Other Kubelet Checks
 
 Besides authentication and ports, the benchmark checks a handful of kubelet settings about kernel behaviour, firewall rules, event recording and idle connections, and it checks the permissions of the kubelet files. Each of these checks has a different risk when you apply it. Some are safe, one stops the kubelet if the kernel is not prepared, and some depend on how you run the node. This part explains each one and applies them in a safe order.

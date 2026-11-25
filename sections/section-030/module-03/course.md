@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Build TLS With openssl For Traefik
 
 The typical exam task for TLS on an Ingress has the same shape each time: create a private key and a certificate with `openssl`, store them in a Kubernetes TLS Secret, add a `tls` section to the Ingress, and prove with a client that the right certificate is served. Each step has a small mistake that makes the whole chain fail, and the failure usually shows as a generic certificate error on the client.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Summary
 
 A certificate proves the identity of a server. It must contain the host name in the Subject Alternative Name, it must be inside its validity dates, and the client must trust the CA that signed it. A self-signed certificate is its own CA, so a client must be given that file to trust it. A CA-signed certificate lets clients trust one CA file for every certificate the CA signs.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Cross-Namespace Ingress
 
 A `podSelector` in a peer matches only pods in the namespace of the policy. To allow a pod in another namespace, the peer needs a `namespaceSelector`. This part protects the `probe` pods in `starfleet` and compares what happens with a `namespaceSelector` alone, and with a `podSelector` alone.

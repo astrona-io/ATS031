@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # The Playground Metadata Server
 
 A block is only convincing if you have first seen the thing it blocks. This part inspects the fake metadata server that the playground runs, explains how a request from a pod travels to it, and records the baseline: with no policy, every client pod can read the fake credentials. Everything the server returns is fake and marked as fake. It exists so that the network path, which is real, can be tested safely.

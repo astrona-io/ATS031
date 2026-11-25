@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Verify Packages, Images And Signatures
 
 A checksum shows that a file did not change. A signature shows which key, or which identity, vouched for it. Cluster software arrives as operating system packages, as standalone binaries and as container images, and each channel has its own signing tools. This module covers the tools you meet on the way: GPG (the GNU Privacy Guard) for package repositories, cosign for files and images, and image digests for pinning what runs.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Protect Node Metadata And Management Endpoints
 
 A cluster node is more than a place where pods run. It is a machine with its own services: a kubelet that manages the pods, a container runtime with a control socket, and, on a cloud provider, a metadata service that hands out information and credentials to anything on the machine that asks. These endpoints are not part of the Kubernetes API, so Kubernetes RBAC does not govern them. A pod that can reach one of them may obtain more authority than its ServiceAccount ever granted.

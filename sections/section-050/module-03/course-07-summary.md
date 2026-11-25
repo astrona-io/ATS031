@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Summary
 
 A checksum shows that a file did not change, and a signature shows which key or identity vouched for it. A signed repository applies this in a chain: one signature on the Release file covers the package index, and the index covers each package through digests. `gpg --verify` with a named keyring returns a good signature for the original bytes and a bad signature for a file that changed afterwards. The warning that a key is not certified is not a failure, and the key itself remains the trust decision.

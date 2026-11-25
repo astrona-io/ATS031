@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # What Lives In etcd And Who Talks To It
 
 Before you judge the settings of etcd, you need to know what it holds and which components are allowed to reach it. Every later check follows from two facts: etcd contains the full state of the cluster, and only one component should ever be a client of it. This part shows the data, the ports, the certificates and the connection between the API server and etcd.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Rotate And Replace Certificates
 
 Every certificate expires. A certificate that expires on a route makes every client fail at once, and a leaked key needs a replacement before the end date. Rotation means issuing a new certificate and key, updating the Secret and proving that the new certificate is the one on the wire. This part reads the dates and serial of the current certificate, replaces it and checks the result.

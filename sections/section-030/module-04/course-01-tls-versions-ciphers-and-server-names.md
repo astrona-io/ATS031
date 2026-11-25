@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # TLS Versions, Ciphers And Server Names
 
 The certificate says who the server is. The TLS policy says how the connection is protected. Old protocol versions and weak ciphers can be broken, so a controller should refuse them. Traefik keeps the policy in TLS options, which are not part of the Ingress object. This part sets a minimum version and strict server name matching, and proves the result from the client side.

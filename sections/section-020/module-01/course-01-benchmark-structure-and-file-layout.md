@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # The Benchmark And Where The Settings Live
 
 A benchmark recommendation names a setting, but a reviewer must know where that setting is stored. On a cluster built by `kubeadm`, the settings are spread over a few directories on each node. This part explains how the CIS benchmark is organised, and then walks through the node to find the manifests, the configuration files and the certificates it refers to.

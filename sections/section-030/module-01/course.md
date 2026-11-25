@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Set Up Ingress With TLS
 
 An Ingress is a Kubernetes object that routes HTTP and HTTPS requests from outside the cluster to Services inside it, using the host name and the URL path of the request. Without TLS, every request and response crosses the network in clear text, and a client cannot know whether it talks to the intended server. Transport Layer Security (TLS) encrypts the connection and lets the client verify the identity of the server with a certificate.

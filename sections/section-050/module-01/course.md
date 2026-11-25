@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Verify Platform Binaries Before Deploying
 
 Every Kubernetes node runs binaries that you downloaded from somewhere: `kubelet`, `kubeadm`, `kubectl`, the container runtime. Each of them runs with high privilege. If one is replaced on its way to the node, by a compromised mirror, an intercepted download or a poisoned build pipeline, the attacker gets that privilege. Verification is the step that makes sure the bytes you are about to run are the bytes the publisher released.

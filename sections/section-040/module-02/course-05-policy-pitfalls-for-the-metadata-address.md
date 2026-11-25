@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Policy Pitfalls For The Metadata Address
 
 A NetworkPolicy that looks right can still leave the metadata address open. Most failures come from five patterns, and the exam rewards the learner who spots them quickly. This part walks through each pattern, runs the ones that are safe to run, and shows the one case where no pod policy helps at all.

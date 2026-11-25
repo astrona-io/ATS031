@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # hostNetwork And Privileged Pods Bypass Policy
 
 NetworkPolicy works on the network interface of a pod. A pod that does not have its own interface, or that can reach into the node, escapes that control. This part shows the effect with a policy that has no effect on a host network pod, finds such pods, and lists the controls that apply at the namespace level.

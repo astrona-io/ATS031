@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Ingress Routing: Controller, Class, Host And Path
 
 A Service of type `ClusterIP` is reachable only inside the cluster. To publish many web applications on one address, the cluster needs a component that reads the host name and the path of each HTTP request and chooses the Service. This part explains which component does what, how a rule matches a request, and then you route a request through Traefik without TLS first.

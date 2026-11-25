@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Network Paths To A Metadata-Style Endpoint
 
 A NetworkPolicy can only restrict traffic that passes through the pod network. To use it well you need a clear picture of which paths exist and what they carry. This part sets up a stand-in for the metadata service, shows that, before any policy exists, both the pod you will restrict and a pod in another namespace can reach it, and explains which paths a NetworkPolicy never sees.

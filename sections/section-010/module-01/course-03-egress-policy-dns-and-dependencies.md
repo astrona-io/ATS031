@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Restrict Egress And Allow DNS
 
 An ingress policy protects a destination. It does not stop a client from sending requests to anything it can reach. If an attacker takes over a client pod, that pod can still contact every other pod.

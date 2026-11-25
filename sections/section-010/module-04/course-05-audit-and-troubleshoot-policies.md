@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Audit And Troubleshoot Policies
 
 When a request fails or succeeds unexpectedly, guessing wastes time. A fixed method finds the cause in a few commands: list the policies, read what each one selects, compare selectors with real labels, check the policy types, and confirm that the plugin enforces policy. This part lists the policies of the `starfleet` namespace, finds the faults that still break the `probe` step of `scout`, and repairs them.

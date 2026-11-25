@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Package Verification On A Node
 
 A signature check happens at install time. Later, a file that a package installed can be changed on disk. This part explains how the package manager compares installed files with the package metadata, runs that check on a playground node, and shows which files the check cannot see.

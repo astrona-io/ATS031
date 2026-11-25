@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Protect Node Endpoints And The Runtime
 
 Besides the metadata address, a node exposes the kubelet application programming interface (API) on port 10250, sometimes a read-only port 10255, and the socket of the container runtime. A pod can reach the first two over the network, and it can reach the third if a volume gives it the file. Each of them can leak data or give control of the node. Kubernetes RBAC covers none of them in the usual way.

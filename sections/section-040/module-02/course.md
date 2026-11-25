@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Block The Cloud Metadata Endpoint
 
 Every major cloud provider runs an instance metadata service (IMDS) on the link-local address `169.254.169.254`. A process on the virtual machine, and by default every pod on it, can ask that address for facts about the machine and for temporary cloud credentials. Stopping pods from reaching this address is a common task in the Certified Kubernetes Security Specialist exam, and it takes a few lines of NetworkPolicy once you know which form to use.

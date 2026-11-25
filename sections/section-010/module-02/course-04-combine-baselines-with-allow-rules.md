@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Combine Baselines With Allow Rules
 
 A baseline alone makes a namespace unusable. The useful result is a namespace that denies everything except the paths the application needs. This part applies one combined baseline to `outpost`, then adds three allow policies on top and explains why the order of the steps matters.

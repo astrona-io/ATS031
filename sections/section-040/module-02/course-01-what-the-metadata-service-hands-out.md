@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # What The Metadata Service Hands Out
 
 Before you block an address you should know what sits behind it. The instance metadata service (IMDS) is an HTTP server that the cloud provider runs for each virtual machine. This part describes what it returns, why that matters for a cluster, and how the provider-specific versions differ. It has no commands, because the playground has no cloud provider. The next part builds a stand-in that you can query.

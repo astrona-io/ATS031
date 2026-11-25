@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Run Traefik On kind
 
 An Ingress controller is the program that turns Ingress rules into running routes. When it is missing, misconfigured or not matched to the Ingress by class, no request is routed, and the Kubernetes API gives no error. A security specialist must be able to read how a controller is installed, send test requests to it and read its logs, because every later step with TLS depends on a controller that works.

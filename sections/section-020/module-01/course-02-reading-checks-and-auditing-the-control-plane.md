@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Read A Check: kube-bench And The Manual Audit
 
 A benchmark report lists dozens of results, and some of them are wrong for the cluster being reviewed. A reviewer who only reads the colour of a result cannot tell which. This part shows what `kube-bench` runs for each check, how to read its result, and how to repeat the audit by hand for the API server and etcd so that you see the value the component really uses.

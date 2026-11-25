@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Remediate Findings End To End
 
 On the exam and in real work, a single fix is rarely the task. You get a list of failing checks on a node, and you must close each one without breaking the node, and you must show that they are closed. The method is always the same loop: audit, back up, change one setting, restart, audit again and compare. This part runs the loop for a mixed list of findings on the kubelet of the playground node, and states what the evidence proves.

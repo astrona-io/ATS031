@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Controls Outside The Cluster
 
 A NetworkPolicy covers the traffic of ordinary pods and nothing more. The node, the cloud account and the physical network have their own controls, and a complete design uses them together. This part is reading only, because the playground runs on `kind` and has no cloud provider, no instance roles and no security groups. It describes what each control does and where it applies.

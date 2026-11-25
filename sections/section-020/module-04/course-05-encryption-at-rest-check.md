@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Encryption At Rest Check
 
 By default the API server writes Secrets to etcd as plain text. Encryption at rest changes this: the API server encrypts the value before it writes and decrypts it when it reads. A stolen backup or disk copy then holds ciphertext, not credentials. The benchmark recommends it for Secrets. This part explains the configuration, enables it on the API server, and proves with etcd that it works.

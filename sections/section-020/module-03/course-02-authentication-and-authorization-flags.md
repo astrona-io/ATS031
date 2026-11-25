@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Authentication And Authorization Flags
 
 Every request to the API server goes through three steps: authentication decides who the caller is, authorization decides what the caller may do, and admission can change or reject the request. The first two steps are set by flags on the API server. A weak value in either one can give an unknown caller access to the cluster. This part covers the flags that the benchmark checks, shows how to read them, and shows how to test the result with a request from an anonymous user.

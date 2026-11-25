@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Certificate Fundamentals Needed For The Exam
 
 Every TLS error on a client comes from one of a small number of checks. If you know what a certificate contains and which field a client reads for which check, you can read the error and find the fix without trial and error. This part explains the fields of a certificate, the idea of a chain of trust and the reason why the common name is not enough. It has no commands, so you can read it before you start the hands-on work.

@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Profiling, TLS And Service Account Flags
 
 Some API server settings are not about who may connect, but about what the server exposes and how it protects its connections and tokens. The benchmark groups several of them: profiling, the minimum TLS version, and the flags that control service account tokens. This part explains each setting, shows how to test profiling before and after the change, and finishes with the flags that you check but usually leave alone.

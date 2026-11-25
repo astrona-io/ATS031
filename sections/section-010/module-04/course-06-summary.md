@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Summary
 
 Real workloads need more than the application connection. Name resolution comes first. CoreDNS runs as pods labelled `k8s-app: kube-dns` in the `kube-system` namespace, and an egress rule must allow UDP and TCP port 53 to them, selecting the namespace by its automatic name label and the pods by label in the same peer entry. Without this rule an isolated pod fails every lookup before it opens any connection.

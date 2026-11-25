@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Summary
 
 Release binaries are published at addresses built from the version, the operating system and the CPU architecture. Each binary has a checksum file next to it, and the file holds only the digest. A file in the wrong directory, from another architecture or another version, produces a digest that does not match even though nothing was attacked.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Summary
 
 Traefik keeps the TLS policy in TLS options, loaded from a dynamic configuration file in a ConfigMap. The `default` option applies to every TLS router. `minVersion: VersionTLS13` removes old protocols, `cipherSuites` limits TLS 1.2 ciphers and `sniStrict` refuses unknown server names. Restart the Deployment to load a changed ConfigMap, and prove the policy with `openssl s_client -tls1_2` and `-tls1_3`.

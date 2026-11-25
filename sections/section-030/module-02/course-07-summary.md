@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Summary
 
 An Ingress stores routing rules, an IngressClass names the controller, and the controller does the routing. Traefik watches the Kubernetes API through its Ingress provider and builds routers from the rules. A router matches the host and the path of a request on an entrypoint, and a Traefik service sends the request to the pod addresses of the Kubernetes Service. An Ingress whose class no controller serves is accepted and ignored.

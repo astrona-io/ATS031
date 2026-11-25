@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Digests At Work And The Limits Of A Checksum
 
 A digest is simple to compute and easy to misuse. This part computes digests in the playground, shows that a tampered binary is detected, and then shows the limit: a checksum file that an attacker wrote matches the attacker's binary just as well.

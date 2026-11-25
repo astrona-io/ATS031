@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Summary
 
 A node offers more than the metadata address. The kubelet serves an API on port 10250 that lists pods, reads logs and runs commands, and it can serve a read-only port 10255 with no authentication. From a pod, 401 on the main port means anonymous access is off, 403 means the caller lacks permission, and 200 with data means the request was accepted. The read-only port answers without a credential, so a pod with no Kubernetes permissions can read the pod specifications of its node when that port is on.

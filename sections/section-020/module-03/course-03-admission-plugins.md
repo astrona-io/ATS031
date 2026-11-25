@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Admission Plugins
 
 A request that passes authentication and authorization can still be unsafe. Admission plugins are code inside the API server that runs after authorization and before the object is stored. They can change a request or reject it. The benchmark checks that some plugins are on, some are off, and none of the required ones are disabled. This part explains two plugins that the benchmark names, shows how the API server decides which plugins run, and how to verify the result.

@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Static Pods And Safe Editing
 
 When a benchmark check fails on the API server, the fix is a change to a file on the control plane node. A wrong change can stop the component that you need to repair the cluster. This part shows how the kubelet runs control plane components from files, how to edit such a file in a way that limits the damage, and how to find the cause and recover when the component does not start.

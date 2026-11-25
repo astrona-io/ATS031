@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Deny All Egress And Its Side Effects
 
 An egress baseline stops every pod in a namespace from opening outgoing connections. It limits what an attacker can do from a compromised pod, for example reach a database, an internal service or the internet. It is also the baseline that breaks things first, because every pod relies on outgoing connections that the application code never mentions. This part applies it to `dock`, shows the failure, and explains which component produced it.

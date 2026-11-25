@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Keyless Verification And Release Signatures
 
 A long lived private key must be stored, protected and rotated. Keyless signing removes it. This part explains how keyless signing works, what a verifier must state, and how the Kubernetes project publishes signature files next to its release artifacts. It is reading only, because the flow needs network access to public services that the playground does not have.

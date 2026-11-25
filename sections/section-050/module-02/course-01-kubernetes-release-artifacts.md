@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Kubernetes Release Artifacts
 
 Before you can verify a file you must know which file it is and where its checksum lives. The Kubernetes project publishes release binaries at predictable addresses, so a script, or you, can build the address from three facts: the version, the operating system and the CPU architecture. This part explains the layout, shows the same layout in the playground mirror, and names the files that belong together.

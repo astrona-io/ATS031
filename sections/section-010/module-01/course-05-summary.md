@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Summary
 
 A NetworkPolicy selects a group of pods and lists the connections they may receive (ingress) or make (egress). The API server only stores the policy. The network plugin on each node enforces it. So on a cluster whose plugin ignores NetworkPolicy, the API server accepts every policy, and none of them blocks anything.

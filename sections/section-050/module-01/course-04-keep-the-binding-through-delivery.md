@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Keep The Binding Through Delivery, And Identity-Based Signatures
 
 A correct check is wasted if a different file is installed afterwards. This part covers how to keep the verified bytes bound to what runs, then looks at signatures that are tied to an identity rather than to a long-lived key, which is how many current releases are signed.

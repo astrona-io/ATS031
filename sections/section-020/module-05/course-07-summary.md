@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Summary
 
 The kubelet takes its settings from the configuration file `/var/lib/kubelet/config.yaml`, from command-line flags and from compiled defaults. A flag overrides the same field in the file. The `configz` endpoint, reached through the API server, shows the merged result, so a review reads it and does not rely on the file alone. The kubelet does not check its file before it starts, so a safe edit has a backup, one change at a time, a check of the file, a restart and a check of the effective value. A duplicate key or a typo stops the kubelet.

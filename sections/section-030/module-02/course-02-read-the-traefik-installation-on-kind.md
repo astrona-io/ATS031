@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Read The Traefik Installation On kind
 
 On a real cluster you often meet a controller that someone else installed. To trust it, test it or fix it, you must be able to read its installation: which objects exist, which arguments it runs with, which ports it opens and which permissions it has. This part reads the Traefik installation of the playground object by object and connects each setting to its effect.

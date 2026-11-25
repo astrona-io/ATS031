@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Create The TLS Secret
 
 Traefik does not read certificate files. It reads a Kubernetes Secret that holds the certificate and the key, in a fixed format. A wrong key name, a wrong type, a mismatched pair or a Secret in the wrong namespace all produce the same symptom on the client, so each of these must be checked before the Ingress is touched. This part creates the Secret from the files and runs those checks.

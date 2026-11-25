@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Summary
 
 `kube-bench` runs the audit commands of a benchmark edition on one node and prints a result for each recommendation. The rules are definition files, not program code. Each check has an identifier, an audit command, a test that compares the output with an expected value, and a remediation text. Because the audits read the processes and files of the node, the tool must run where they are. On a node where you have a shell, you run the binary as root with `sudo`. In a cluster you can run a Job with the host process namespace, host directory mounts, and a node selector and toleration for the control plane; such a Job sees only the directories it mounts.

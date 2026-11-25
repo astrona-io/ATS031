@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Image Digests And Pinning
 
 A container image reference such as `busybox:1.37.0` names a tag, and a tag is a label that the registry owner can move to different content. A digest names the content itself. This part reads the digest of an image on a node, compares it with what a running pod reports, and shows how a manifest pins an image by digest.

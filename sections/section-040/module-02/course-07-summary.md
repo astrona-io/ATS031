@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Summary
 
 The cloud metadata service is an HTTP server on the link-local address `169.254.169.254`. It answers any request from the machine, including requests from pods, with facts about the instance, user data and temporary credentials for the cloud role of the node. Kubernetes RBAC does not govern this role, so a pod with no Kubernetes permissions can still act as the node toward the cloud provider. The second version of the Amazon Web Services (AWS) service, the header requirements of Google Cloud and Microsoft Azure, and the token hop limit make simple attacks harder, but they do not replace a network rule.

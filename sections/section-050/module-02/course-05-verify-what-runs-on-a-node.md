@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Verify What Runs On A Node
 
 A node that was verified at installation time can change later. A file in `/usr/bin` can be replaced after the check, and the process that runs may use a different file from the one on disk. This part finds the `kubelet` process, resolves the binary it runs, and checks that binary against the digest published for its version.

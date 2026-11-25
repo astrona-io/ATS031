@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Default Deny Plus A Selective Allow
 
 Some pods have a real reason to read the metadata service. A cloud agent that manages volumes or load balancers, for example, may need the node's role. The safe design blocks the address for every pod and opens it for the few pods that need it. This part shows how NetworkPolicy builds that design from rules that add up, applies it in the `dock` namespace, and explains why the label that opens the path must be protected.

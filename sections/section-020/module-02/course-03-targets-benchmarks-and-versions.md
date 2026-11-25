@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Targets, Benchmarks And Versions
 
 Running the tool is easy. Running it against the right set of checks is the part that decides if the report means anything. Two choices control this: the target, which says which part of the benchmark to run, and the benchmark edition, which says which version of the rules to use. This part explains both, and what to do when the automatic choice does not fit the cluster.

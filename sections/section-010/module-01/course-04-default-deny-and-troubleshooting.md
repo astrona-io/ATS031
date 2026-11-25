@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Default Deny And Troubleshooting Policies
 
 So far, each policy protected one named application. A secure namespace works the other way around. It first denies all traffic, and then it adds one allowance for each real need.

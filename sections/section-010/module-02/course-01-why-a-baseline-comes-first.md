@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Why A Baseline Comes First
 
 Kubernetes starts open: any pod can send a request to any other pod, in any namespace. That is convenient for development and dangerous in production, because one compromised pod can scan every workload in the cluster. This part shows the open state with real requests, explains what a baseline changes, and describes the task pattern the exam uses.

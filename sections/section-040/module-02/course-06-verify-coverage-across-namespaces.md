@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Verify Coverage Across Namespaces
 
 A cluster has many namespaces, and a policy covers one. The task is finished only when every namespace that runs workloads is blocked, so this part builds a loop that sends the metadata request from a temporary pod in each namespace, then lists which namespaces have an egress policy and which do not. It ends with the check that proves the one allowed pod still works.

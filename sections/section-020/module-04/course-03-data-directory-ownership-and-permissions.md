@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Data Directory Ownership And Permissions
 
 TLS protects etcd on the network. The files on the disk need protection too. etcd writes its data to a directory on the node, and a user who can read that directory can copy the database without ever contacting etcd. The copy contains every Secret. This part checks the permissions and ownership of the etcd data directory and fixes a finding.

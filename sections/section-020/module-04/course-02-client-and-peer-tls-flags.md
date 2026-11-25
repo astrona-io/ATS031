@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Client And Peer TLS Flags
 
 etcd protects its two ports with Transport Layer Security (TLS), which encrypts traffic and proves who each side is with certificates. Encryption alone is not enough. If etcd accepts any client that completes the handshake, an attacker on the node network can read the database. The etcd section of the benchmark therefore checks a small set of flags. This part reads them in the real manifest and proves with a request what they do.

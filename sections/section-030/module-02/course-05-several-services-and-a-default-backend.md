@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Several Services And A Default Backend
 
 A real cluster publishes many Services on one address. An Ingress can send each path or each host to a different Service, and it can name one Service that answers every request no other rule matches. This part builds both, shows how the two ways to split traffic differ, and explains what a client sees for an unknown host or path.

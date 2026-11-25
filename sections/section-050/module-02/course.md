@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Verify Kubernetes Release Binaries Hands-On
 
 A node runs `kubelet`, an operator runs `kubectl` and `kubeadm`, and each of them arrives as a file that someone published. The exam asks a practical question about these files: given a downloaded binary and a published checksum, is the binary the one the project released, and if not, what is wrong with it? This module drills that question with the commands you would use, against a staged copy of the Kubernetes release layout.

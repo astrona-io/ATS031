@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Read-Only Port, Ports And TLS Settings
 
 Closing the authenticated API is not enough if a second listener answers without authentication. The kubelet has a read-only HTTP port that does exactly this. This part finds that port, shows what it exposes, closes it, and then reviews the Transport Layer Security (TLS) and certificate rotation settings of the main kubelet port.

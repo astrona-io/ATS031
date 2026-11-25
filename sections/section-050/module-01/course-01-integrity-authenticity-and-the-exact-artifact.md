@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Integrity, Authenticity And The Exact Artifact
 
 A download that finishes without error says nothing about whether the file is the right one. Verification asks three separate questions. This part defines them, explains why the third one is the hard one, and describes how to choose the artifact so that the answers refer to the file you will really run.

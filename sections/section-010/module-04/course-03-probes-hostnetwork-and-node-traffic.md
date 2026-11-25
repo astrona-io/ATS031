@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Probes, hostNetwork And Node Traffic
 
 A policy set can look complete and still leave traffic outside its reach. Some connections come from the node itself, and some pods share the network of the node and have no pod address of their own. This part shows what a NetworkPolicy applies to and what it does not, with the kubelet health probes and a `hostNetwork` pod as the two cases.

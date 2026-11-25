@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Build Default-Deny Baselines For Namespaces
 
 A namespace without a NetworkPolicy accepts every connection to and from every pod in it. A baseline is the first NetworkPolicy you put in a namespace: it selects all pods and allows nothing, so every connection must be allowed by a later policy. The Certified Kubernetes Security Specialist (CKS) exam asks for this order again and again: deny first, allow second.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # The Kubelet API From A Pod
 
 The kubelet is the agent on every node that starts and watches the pods. It also serves an API, and the pod network can reach it. This part sends requests to the kubelet from an ordinary client pod, explains what the three common answers mean, and shows why an open read-only port is a finding even when the main port is secure.

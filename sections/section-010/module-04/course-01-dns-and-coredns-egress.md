@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # DNS And CoreDNS Egress
 
 Almost every connection starts with a name lookup. When a namespace denies egress, the lookup is the first thing that stops, and every service that a pod calls by name appears to be down. This part shows the symptom on the `scout` pod, finds the DNS service, and writes the egress rule that restores resolution.

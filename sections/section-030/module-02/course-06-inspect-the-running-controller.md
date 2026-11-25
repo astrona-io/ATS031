@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Inspect The Running Controller
 
 When a route does not work, the Ingress object shows only what you asked for. The controller shows what it did with it. Traefik records this in three places: its log, its access log and its API. This part sends a few requests and then reads each of the three, so that you can say which router handled a request and why another did not.

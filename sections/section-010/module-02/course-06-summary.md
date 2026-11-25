@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Summary
 
 A Kubernetes cluster is open by default. A pod that no NetworkPolicy selects accepts every connection and makes every connection. A default-deny baseline closes this: its empty `podSelector` selects all pods of the namespace, its `policyTypes` names the direction, and it has no rules, so nothing is allowed. The core NetworkPolicy API has no deny rule, so isolation plus allow rules is the only model.

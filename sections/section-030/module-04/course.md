@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Harden And Troubleshoot Traefik TLS
 
 A TLS Ingress that works is not yet a safe one. The controller may still accept old protocol versions, serve a certificate for any name, hold a read permission on every Secret in the cluster and expose an API without a password. When something breaks, the symptom a client sees is often the same for very different causes. A security specialist has to set the TLS policy, require client certificates where needed, reduce what the controller can reach, replace certificates before they expire, and trace a failure to its cause.

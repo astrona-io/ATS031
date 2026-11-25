@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # GPG Signed Repositories
 
 Package managers install software from repositories, and a repository is only as trustworthy as the key that signs it. This part explains how a signed repository protects each package, then verifies a detached signature and a repository Release file with `gpg` in the playground, including a file that changed after signing.

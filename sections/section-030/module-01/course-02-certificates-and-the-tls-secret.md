@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Certificates And The TLS Secret
 
 When a browser or `curl` opens an HTTPS connection, the server sends a certificate. The client accepts the connection only if the certificate passes several checks. If you build an Ingress without knowing these checks, you cannot tell why a client rejects it. This part explains what a certificate contains and what the client verifies, and then you inspect a certificate, create a new one and store it in a Kubernetes TLS Secret.

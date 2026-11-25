@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # SBOMs And Admission-Time Verification
 
 Knowing which image runs is one question. Knowing what is inside it, and stopping an unverified image from starting, are two more. This part describes the software bill of materials and the checks a cluster can make when an object is created. Signature checks at admission need a policy engine that the playground does not install, but the API server can check the image reference itself, and you will build such a check in the playground.

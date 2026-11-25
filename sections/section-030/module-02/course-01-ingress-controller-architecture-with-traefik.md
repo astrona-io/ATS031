@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
 # Ingress Controller Architecture With Traefik
 
 A Service of type `ClusterIP` is reachable only inside the cluster, and a Service of type `NodePort` or `LoadBalancer` publishes one application per port or address. To publish many web applications on one address, the cluster needs a component that reads the host name and path of every HTTP request and chooses the Service. This part explains how Traefik does that and which component does each step. It has no commands, so you can read it before you start the hands-on work.

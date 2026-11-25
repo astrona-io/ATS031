@@ -1,8 +1,3 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
 # Kubelet Authentication And Authorization
 
 The kubelet serves an HTTPS API on port `10250`. Through this API a caller can list the pods of the node, read container logs and execute commands in containers. Two settings decide who may do this: authentication, which proves who the caller is, and authorization, which decides what that caller may do. When both are weak, any host that can open a connection to the node controls the pods on it. This part shows the exposure in the playground and fixes it.

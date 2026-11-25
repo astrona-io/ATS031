@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
 # Detect A Tampered Or Wrong Binary
 
 A `FAILED` result has several possible causes, and they need different responses. The bytes may have been changed, the file may be for another architecture or version, or the checksum file may belong to another release. This part checks four suspicious downloads, then finds out for each one what its bytes really are.

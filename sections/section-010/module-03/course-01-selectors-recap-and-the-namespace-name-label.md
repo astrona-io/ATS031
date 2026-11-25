@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Selectors Recap And The Namespace Name Label
 
 Every peer in a policy rests on a label selector, and a selector that does not match what you think it matches is the most common cause of a failed task. This part recaps how label selectors work, shows which labels a namespace has by default, and adds your own namespace labels so that you can see the difference between them.

@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Baselines Across Many Namespaces
 
 A cluster has many namespaces, and a baseline in only one of them leaves the others open. NetworkPolicy is a namespaced object, so there is no single object that covers all namespaces. This part applies the same baseline to several namespaces with a label and a short shell loop, and previews each change with `kubectl diff` before it is applied.
