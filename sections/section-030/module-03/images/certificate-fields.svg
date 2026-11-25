@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 360" width="840" height="360" role="img" aria-labelledby="title desc">
+  <title id="title">What a certificate contains</title>
+  <desc id="desc">A certificate in PEM format is public and holds the subject with the common name, the issuer, the validity dates notBefore and notAfter, the Subject Alternative Name, the key usage and extended key usage, and the basic constraints. The private key is a separate secret file that stays on the server.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M510 180 H588" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <text class="label" x="549" y="168" text-anchor="middle">one</text>
+  <text class="label" x="549" y="200" text-anchor="middle">key pair</text>
+
+  <rect class="ok" x="30" y="30" width="480" height="300" rx="10"/>
+  <text class="strong" x="50" y="58">Certificate (X.509, PEM file, public)</text>
+  <text class="code" x="50" y="80">-----BEGIN CERTIFICATE-----</text>
+  <rect class="box" x="50" y="94" width="440" height="30" rx="6"/>
+  <text x="62" y="114"><tspan class="strong">subject:</tspan> who it is for, includes the CN</text>
+  <rect class="box" x="50" y="130" width="440" height="30" rx="6"/>
+  <text x="62" y="150"><tspan class="strong">issuer:</tspan> who signed it</text>
+  <rect class="box" x="50" y="166" width="440" height="30" rx="6"/>
+  <text x="62" y="186"><tspan class="strong">validity:</tspan> <tspan class="code">notBefore</tspan> and <tspan class="code">notAfter</tspan></text>
+  <rect class="ask" x="50" y="202" width="440" height="30" rx="6"/>
+  <text x="62" y="222"><tspan class="strong">SAN:</tspan> <tspan class="code">DNS:scout.example.test</tspan></text>
+  <rect class="box" x="50" y="238" width="440" height="30" rx="6"/>
+  <text x="62" y="258"><tspan class="strong">key usage, extended key usage:</tspan> <tspan class="code">serverAuth</tspan></text>
+  <rect class="box" x="50" y="274" width="440" height="30" rx="6"/>
+  <text x="62" y="294"><tspan class="strong">basic constraints:</tspan> <tspan class="code">CA:TRUE</tspan> or not</text>
+  <text class="code" x="50" y="322">-----END CERTIFICATE-----</text>
+
+  <rect class="box" x="592" y="120" width="220" height="120" rx="10"/>
+  <text class="strong" x="702" y="150" text-anchor="middle">Private key</text>
+  <text x="702" y="174" text-anchor="middle">separate file, secret</text>
+  <text x="702" y="196" text-anchor="middle">stays on the server</text>
+  <text x="702" y="218" text-anchor="middle">and in the Secret</text>
+</svg>

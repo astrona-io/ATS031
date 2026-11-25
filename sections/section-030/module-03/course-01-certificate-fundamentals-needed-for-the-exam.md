@@ -1,12 +1,20 @@
 # Certificate Fundamentals Needed For The Exam
 
-Every TLS error on a client comes from one of a small number of checks. If you know what a certificate contains and which field a client reads for which check, you can read the error and find the fix without trial and error. This part explains the fields of a certificate, the idea of a chain of trust and the reason why the common name is not enough. It has no commands, so you can read it before you start the hands-on work.
+Every TLS error on a client comes from one of a small number of checks. TLS (Transport Layer Security) is the protocol that encrypts a connection and lets the client check who the server is. If you know what a certificate contains, and which field the client reads for which check, you can read the error and find the fix without trial and error.
+
+This page explains the fields of a certificate, the chain of trust, and why the common name is not enough. It has no commands, so you can read it before you start the hands-on work.
 
 ## What is inside a certificate
 
-A **certificate** is a signed document that links a public key to a name. The format is X.509. A certificate is usually stored as a text file in PEM format, which is base64 data between the lines `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`. The matching **private key** is a separate file. The server uses the private key to prove that it owns the certificate. Anyone who holds the private key can impersonate the server, so the key is a secret and the certificate is public.
+A **certificate** is a signed document that links a public key to a name. Its format is called X.509. A certificate is usually stored as a text file in PEM format. PEM is base64 text between the lines `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`.
 
-The fields you must know are these:
+The matching **private key** is a separate file. The server uses the private key to prove that it owns the certificate. Anyone who holds the private key can pretend to be the server. So the key is a secret, and the certificate is public.
+
+![Diagram: a certificate holds the subject, issuer, validity dates, Subject Alternative Name, key usage and basic constraints, and the private key is a separate secret file](images/certificate-fields.svg)
+
+The drawing shows the public certificate with its main fields next to the secret private key that stays on the server.
+
+These are the fields you must know:
 
 - The **subject** says who the certificate is for. Its common name (CN) is one part of it.
 - The **issuer** says who signed the certificate.
@@ -17,26 +25,41 @@ The fields you must know are these:
 
 ## Why the common name is not enough
 
-Older clients compared the host name with the CN. Current clients read the SAN list and ignore the CN when a SAN exists. Browsers and current versions of Go reject a certificate that has a CN only, while some OpenSSL-based clients still accept it. A CN-only certificate can therefore pass one test and fail in the next client. A certificate for `scout.example.test` therefore needs `DNS:scout.example.test` in the SAN. A wildcard name such as `*.example.test` matches exactly one label, so it covers `scout.example.test` but not `a.b.example.test` and not `example.test`.
+Two of these fields hold a name: the CN in the subject and the SAN. They are easy to mix up, and the difference decides whether a client accepts the certificate.
+
+Older clients compared the host name with the CN. Current clients read the SAN list, and they ignore the CN when a SAN exists. Browsers and current versions of Go reject a certificate that has a CN only. Some OpenSSL-based clients still accept it. So a CN-only certificate can pass one test and fail in the next client.
+
+A certificate for `scout.example.test` therefore needs `DNS:scout.example.test` in the SAN. A wildcard name such as `*.example.test` matches exactly one label. A label is one part of a name between two dots. So the wildcard covers `scout.example.test`, but not `a.b.example.test` and not `example.test`.
+
+![Diagram: the wildcard name *.example.test matches scout.example.test, but not a.b.example.test and not example.test](images/wildcard-one-label.svg)
+
+The drawing shows that the `*` stands for exactly one label: one name matches, and the names with two labels or no label in that place do not.
 
 ## Chain of trust
 
-A **certificate authority (CA)** is a party that signs certificates. A CA has its own key and its own certificate. A client keeps a list of CA certificates that it trusts, the trust store. A server certificate is trusted when the client can follow signatures from it to a certificate in the trust store. This path is the **chain**. A **self-signed** certificate is signed with its own key, so its subject and issuer are the same. A client trusts it only if you place that exact certificate in the client's trust store.
+A name in the SAN is only useful if the client believes the certificate is genuine. That belief comes from a signature by someone the client already trusts.
 
-```mermaid
-flowchart TB
-    CA["CA certificate (trusted by the client)"] -->|"signs"| SC["Server certificate"]
-    SC -->|"presented by"| S["Traefik"]
-    CL["Client"] -->|"1 chain 2 name 3 dates"| SC
-```
+A **certificate authority (CA)** is a party that signs certificates. A CA has its own key and its own certificate. A client keeps a list of CA certificates that it trusts, called the **trust store**. The client trusts a server certificate when it can follow signatures from that certificate to a certificate in its trust store. This path is the **chain**.
 
-The diagram shows that the server presents its own certificate, and the client checks it against the CA certificate that it already trusts.
+A **self-signed** certificate is signed with its own key, so its subject and its issuer are the same. A client trusts it only if you place that exact certificate in the trust store of the client.
+
+![Diagram: the CA certificate in the trust store of the client signs the server certificate, Traefik presents the server certificate, and the client checks the chain, the name and the dates](images/chain-of-trust.svg)
+
+The drawing shows that Traefik presents its own server certificate, and the client checks it against the CA certificate that it already trusts.
 
 ## The three checks of a client
 
-A client verifies three independent things. The **chain** must lead to a trusted CA. The **name** it asked for must be in the SAN. The **dates** must include the current time. Any single failure ends the connection. This is why a certificate that is trusted but issued for another name is still rejected, and why an expired certificate fails with an otherwise correct setup.
+The drawing also names the three checks. A client verifies three separate things:
 
-You also need the names of the usual files. A key file ends in `.key`, a certificate in `.crt` or `.pem`, and a certificate signing request (CSR) in `.csr`. A CSR is a request that contains a public key and the requested name. A CA signs it and returns a certificate. The next parts create each of these files with `openssl`.
+- The **chain** must lead to a trusted CA.
+- The **name** the client asked for must be in the SAN.
+- The **dates** must include the current time.
+
+Any single failure ends the connection. This is why a certificate that is trusted but issued for another name is still rejected. It is also why an expired certificate fails, even when everything else is correct.
+
+You also need the names of the usual files. A key file ends in `.key`, and a certificate ends in `.crt` or `.pem`. A certificate signing request (CSR) ends in `.csr`. A CSR is a request that contains a public key and the requested name. A CA signs it and returns a certificate.
+
+You now know what a certificate contains, why the host name must be in the SAN, and which three checks the client runs. The open question is how to create these files yourself with `openssl`, so that they pass all three checks.
 
 ## Common pitfalls
 
