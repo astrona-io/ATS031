@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 390" width="840" height="390" role="img" aria-labelledby="title desc">
+  <title id="title">A host network pod skips the pod rules</title>
+  <desc id="desc">On the node, a normal pod sends traffic through its own pod interface, where the Calico pod rules apply NetworkPolicy. A pod with hostNetwork true has no pod interface, so its traffic goes onto the node network without the pod rules. Pod Security admission is the control that acts on such a pod: it rejects it when it is created.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+  <rect class="frame" x="30" y="30" width="780" height="340" rx="10"/>
+  <text class="label" x="46" y="54">Node</text>
+
+  <path class="okline" d="M230 108 H328" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M530 108 H618" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M230 238 H618" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M330 325 H145 V268" marker-end="url(#arrowbad)"/>
+  <text class="label good" x="279" y="98" text-anchor="middle">traffic</text>
+  <text class="label good" x="574" y="98" text-anchor="middle">if allowed</text>
+  <text class="label bad" x="424" y="228" text-anchor="middle">skips the pod rules</text>
+  <text class="label bad" x="238" y="315" text-anchor="middle">rejects at creation</text>
+
+  <rect class="box" x="60" y="80" width="170" height="56" rx="8"/>
+  <text x="145" y="104" text-anchor="middle">normal pod</text>
+  <text class="label" x="145" y="124" text-anchor="middle">own pod interface</text>
+
+  <rect class="policy" x="330" y="80" width="200" height="56" rx="8"/>
+  <text x="430" y="104" text-anchor="middle">Calico pod rules</text>
+  <text class="label" x="430" y="124" text-anchor="middle">NetworkPolicy applies</text>
+
+  <rect class="ok" x="620" y="80" width="170" height="56" rx="8"/>
+  <text x="705" y="113" text-anchor="middle">pod network</text>
+
+  <rect class="box" x="60" y="210" width="170" height="56" rx="8"/>
+  <text class="code" x="145" y="234" text-anchor="middle">hostNetwork: true</text>
+  <text class="label" x="145" y="254" text-anchor="middle">no pod interface</text>
+
+  <rect class="drop" x="620" y="210" width="170" height="56" rx="8"/>
+  <text x="705" y="243" text-anchor="middle">node network</text>
+
+  <rect class="ask" x="330" y="300" width="220" height="50" rx="8"/>
+  <text x="440" y="330" text-anchor="middle">Pod Security admission</text>
+
+</svg>

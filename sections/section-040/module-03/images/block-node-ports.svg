@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 430" width="860" height="430" role="img" aria-labelledby="title desc">
+  <title id="title">The block-node-ports policy in the dock namespace</title>
+  <desc id="desc">The block-node-ports NetworkPolicy selects all pods in dock. Requests from the tender pod to the control plane node and to the kubelet ports of the worker node are dropped. The request from tender to the probe Service answers 200. The shuttle pod in starfleet has no policy and still gets 200 from port 10255 of the worker.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+  <rect class="frame" x="30" y="30" width="480" height="230" rx="10"/>
+  <text class="label" x="46" y="54">Namespace <tspan class="code">dock</tspan></text>
+  <rect class="frame" x="30" y="300" width="480" height="110" rx="10"/>
+  <text class="label" x="46" y="324">Namespace <tspan class="code">starfleet</tspan>, no NetworkPolicy</text>
+
+  <rect class="policy" x="50" y="70" width="220" height="175" rx="10"/>
+  <text class="label" x="160" y="92" text-anchor="middle">NetworkPolicy</text>
+  <text class="label code" x="160" y="110" text-anchor="middle">block-node-ports</text>
+
+  <path class="dashed" d="M250 150 H420 V65 H598" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M250 172 H470 V222 H598" marker-end="url(#arrowbad)"/>
+  <path class="okline" d="M160 190 V215 H288" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M250 365 H560 V252 H598" marker-end="url(#arrowok)"/>
+  <text class="label bad" x="510" y="57" text-anchor="middle">dropped</text>
+  <text class="label bad" x="534" y="214" text-anchor="middle">dropped</text>
+  <text class="label good" x="215" y="234" text-anchor="middle">200</text>
+  <text class="label good" x="405" y="357" text-anchor="middle">200 from port 10255</text>
+
+
+  <rect class="box" x="70" y="140" width="180" height="50" rx="8"/>
+  <text x="160" y="170" text-anchor="middle"><tspan class="code">tender</tspan> pod</text>
+
+  <rect class="ok" x="290" y="190" width="150" height="50" rx="8"/>
+  <text x="365" y="220" text-anchor="middle"><tspan class="code">probe</tspan> Service</text>
+
+  <rect class="box" x="70" y="340" width="180" height="50" rx="8"/>
+  <text x="160" y="370" text-anchor="middle"><tspan class="code">shuttle</tspan> pod</text>
+
+  <rect class="box" x="600" y="40" width="230" height="50" rx="8"/>
+  <text x="715" y="70" text-anchor="middle">control plane node</text>
+
+  <rect class="box" x="600" y="196" width="230" height="64" rx="8"/>
+  <text x="715" y="222" text-anchor="middle">worker node</text>
+  <text class="code" x="715" y="244" text-anchor="middle">10250, 10255</text>
+
+</svg>
