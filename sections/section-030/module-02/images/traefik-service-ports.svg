@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 290" width="840" height="290" role="img" aria-labelledby="title desc">
+  <title id="title">Service ports and container ports of Traefik</title>
+  <desc id="desc">The traefik Service forwards port 80 to container port 8000 named web, the HTTP entrypoint. It forwards port 443 to container port 8443 named websecure, the HTTPS entrypoint. It forwards port 8080 to container port 8080 named dashboard, the API and dashboard.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M230 90 H418" marker-end="url(#arrow)"/>
+  <path class="line" d="M230 160 H418" marker-end="url(#arrow)"/>
+  <path class="line" d="M230 230 H418" marker-end="url(#arrow)"/>
+  <text class="label" x="324" y="80" text-anchor="middle">targetPort: web</text>
+  <text class="label" x="324" y="150" text-anchor="middle">targetPort: websecure</text>
+  <text class="label" x="324" y="220" text-anchor="middle">targetPort: dashboard</text>
+
+  <rect class="frame" x="30" y="24" width="220" height="246" rx="10"/>
+  <text class="label" x="46" y="48">Service <tspan class="code">traefik</tspan></text>
+  <rect class="box" x="50" y="66" width="180" height="48" rx="8"/>
+  <text x="140" y="95" text-anchor="middle">port <tspan class="code">80</tspan></text>
+  <rect class="box" x="50" y="136" width="180" height="48" rx="8"/>
+  <text x="140" y="165" text-anchor="middle">port <tspan class="code">443</tspan></text>
+  <rect class="box" x="50" y="206" width="180" height="48" rx="8"/>
+  <text x="140" y="235" text-anchor="middle">port <tspan class="code">8080</tspan></text>
+
+  <rect class="frame" x="400" y="24" width="410" height="246" rx="10"/>
+  <text class="label" x="416" y="48">Traefik container</text>
+  <rect class="ok" x="420" y="66" width="170" height="48" rx="8"/>
+  <text x="505" y="95" text-anchor="middle"><tspan class="code">8000</tspan> <tspan class="code">web</tspan></text>
+  <rect class="ok" x="420" y="136" width="170" height="48" rx="8"/>
+  <text x="505" y="165" text-anchor="middle"><tspan class="code">8443</tspan> <tspan class="code">websecure</tspan></text>
+  <rect class="drop" x="420" y="206" width="170" height="48" rx="8"/>
+  <text x="505" y="235" text-anchor="middle"><tspan class="code">8080</tspan> <tspan class="code">dashboard</tspan></text>
+  <text x="610" y="95">HTTP entrypoint</text>
+  <text x="610" y="165">HTTPS entrypoint</text>
+  <text x="610" y="227">API and dashboard,</text>
+  <text class="label bad" x="610" y="246">no authentication</text>
+</svg>

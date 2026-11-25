@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 300" width="840" height="300" role="img" aria-labelledby="title desc">
+  <title id="title">Where the evidence for a route lives</title>
+  <desc id="desc">Traefik holds the normal log and the access log, read with kubectl logs, and the API lists of routers and services on port 8080. The Kubernetes API holds the Ingress objects and the EndpointSlices with the pod addresses.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="30" y="24" width="480" height="250" rx="10"/>
+  <text class="label" x="46" y="48">Traefik: what the controller did</text>
+  <rect class="box" x="50" y="66" width="210" height="80" rx="8"/>
+  <text x="155" y="94" text-anchor="middle">normal log</text>
+  <text class="label" x="155" y="116" text-anchor="middle">providers, errors</text>
+  <text class="label code" x="155" y="134" text-anchor="middle">kubectl logs</text>
+  <rect class="box" x="280" y="66" width="210" height="80" rx="8"/>
+  <text x="385" y="94" text-anchor="middle">access log</text>
+  <text class="label" x="385" y="116" text-anchor="middle">one line per request</text>
+  <text class="label code" x="385" y="134" text-anchor="middle">kubectl logs</text>
+  <rect class="ask" x="50" y="166" width="440" height="88" rx="8"/>
+  <text x="270" y="192" text-anchor="middle">API and dashboard, port <tspan class="code">8080</tspan></text>
+  <text class="label code" x="270" y="214" text-anchor="middle">/api/http/routers   /api/http/services</text>
+  <text class="label code" x="270" y="236" text-anchor="middle">/dashboard/</text>
+
+  <rect class="frame" x="540" y="24" width="270" height="250" rx="10"/>
+  <text class="label" x="556" y="48">Kubernetes API: the objects</text>
+  <rect class="box" x="560" y="66" width="230" height="80" rx="8"/>
+  <text x="675" y="94" text-anchor="middle">Ingress objects</text>
+  <text class="label" x="675" y="116" text-anchor="middle">class, hosts, ports</text>
+  <text class="label code" x="675" y="134" text-anchor="middle">kubectl get ingress</text>
+  <rect class="box" x="560" y="166" width="230" height="88" rx="8"/>
+  <text x="675" y="194" text-anchor="middle">EndpointSlices</text>
+  <text class="label" x="675" y="216" text-anchor="middle">pod addresses per Service</text>
+  <text class="label" x="675" y="236" text-anchor="middle">none means <tspan class="code">503</tspan></text>
+</svg>

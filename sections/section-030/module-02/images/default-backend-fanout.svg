@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 320" width="840" height="320" role="img" aria-labelledby="title desc">
+  <title id="title">Fan-out with a default backend</title>
+  <desc id="desc">Traefik sends a request for bridge.local with the path /probe to the probe Service and the path /scout to the scout Service. Every request that matches no rule, such as bridge.local /unknown or the host elsewhere.local, goes to the default backend, the scout Service.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="okline" d="M210 160 H300 V58 H558" marker-end="url(#arrowok)"/>
+  <path class="okline" d="M300 160 H558" marker-end="url(#arrowok)"/>
+  <path class="line" d="M300 160 V258 H558" marker-end="url(#arrow)"/>
+  <text class="label good code" x="430" y="48" text-anchor="middle">bridge.local /probe</text>
+  <text class="label good code" x="430" y="150" text-anchor="middle">bridge.local /scout</text>
+  <text class="label" x="430" y="248" text-anchor="middle">no rule matches</text>
+  <text class="label code" x="430" y="280" text-anchor="middle">/unknown, elsewhere.local</text>
+
+  <rect class="box" x="30" y="128" width="180" height="64" rx="8"/>
+  <text x="120" y="155" text-anchor="middle">request</text>
+  <text class="label" x="120" y="176" text-anchor="middle">at Traefik</text>
+
+  <rect class="ok" x="560" y="30" width="250" height="56" rx="8"/>
+  <text x="685" y="63" text-anchor="middle">Service <tspan class="code">probe</tspan></text>
+  <rect class="ok" x="560" y="132" width="250" height="56" rx="8"/>
+  <text x="685" y="165" text-anchor="middle">Service <tspan class="code">scout</tspan></text>
+  <rect class="ask" x="560" y="230" width="250" height="56" rx="8"/>
+  <text x="685" y="254" text-anchor="middle">default backend</text>
+  <text class="label" x="685" y="274" text-anchor="middle">Service <tspan class="code">scout</tspan>, lowest priority</text>
+</svg>

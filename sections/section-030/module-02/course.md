@@ -1,32 +1,48 @@
 # Run Traefik On kind
 
-An Ingress controller is the program that turns Ingress rules into running routes. When it is missing, misconfigured or not matched to the Ingress by class, no request is routed, and the Kubernetes API gives no error. A security specialist must be able to read how a controller is installed, send test requests to it and read its logs, because every later step with TLS depends on a controller that works.
+An Ingress controller is the program that turns Ingress rules into working routes for web requests. When the controller is missing, set up wrong, or not linked to the Ingress by its class, no request is routed. The Kubernetes API still gives no error, so the problem is easy to miss.
 
-This module uses Traefik, the same controller as the rest of this section. It explains how Traefik is built, reads the objects that make up its installation on a `kind` cluster, and routes plain HTTP by host and path. Exam environments may use another controller, but the Ingress API is the same, so the rules you write here work with any controller that serves the class you name.
+A security specialist must be able to read how a controller is installed, send test requests to it and read its logs. Every later step with TLS (Transport Layer Security, the encryption behind HTTPS) depends on a controller that works.
 
-## Learning objectives
+This module uses Traefik. Exam environments may use another controller. The Ingress API is the same for all of them, so the rules you write here work with any controller that serves the class you name.
 
-After this module you can:
+## What you will learn
 
-- Describe how Traefik turns an Ingress into a router, a service and a pod address, and which part does each step.
-- Read the Traefik Deployment, Service, IngressClass and RBAC objects and explain what each one does.
-- Create an Ingress with `ingressClassName: traefik` and test it with `curl` and a `Host` header.
-- Use the `Prefix` and `Exact` path types, route several Services from one host, and set a default backend.
-- Read the Traefik logs, the access log and the API to see which route handled a request.
+After this module, you can:
+
+- describe how Traefik turns an Ingress into a router, a service and a pod address, and say which part does each step;
+- read the Traefik Deployment, Service, IngressClass and RBAC (role-based access control) objects and explain what each one does;
+- create an Ingress with `ingressClassName: traefik` and test it with `curl` and a `Host` header;
+- use the `Prefix` and `Exact` path types, route several Services from one host, and set a default backend;
+- read the Traefik log, the access log and the API to see which route handled a request.
+
+## How the module is laid out
+
+You start with **Ingress Controller Architecture With Traefik**, which explains the objects, the Traefik words and the path of one request. It has no commands. **Read The Traefik Installation On kind** then reads the installed objects one by one. **First Ingress And Host Header Testing** creates the first route and tests it from your machine.
+
+**Path Types And Priority** shows how Traefik chooses between rules that overlap. **Several Services And A Default Backend** publishes two Services on one host and catches every request that no rule matches. **Inspect The Running Controller** closes the module by reading the evidence that Traefik itself records.
+
+A graded lab follows each part that has commands, so you can practise the skill right away.
 
 ## Before you start
 
-You need Kubernetes basics: Deployments, Services and `kubectl`. You also need `curl` on your own machine. The module has six parts: controller architecture, the installation on `kind`, a first Ingress, path types and priority, several Services with a default backend, and inspection of the running controller. A graded lab follows every part except the first, which explains the architecture.
+You should know the Kubernetes basics: Deployments, Services and `kubectl`. You also need `curl` on your own machine.
 
-Your playground is a `kind` cluster running Kubernetes v1.35 with Traefik already installed. It has these objects:
+## Your playground
+
+Your playground is a `kind` cluster that runs Kubernetes v1.35 with Traefik already installed. The cluster already has these objects:
 
 | Namespace | Object | What it is |
 | --- | --- | --- |
-| `starfleet` | `probe` and `scout` Deployments and Services | Web servers on pod port 8080, Service port 80; each answers with its own `app` name |
-| `starfleet` | `shuttle` pod | A `busybox` pod for requests from inside the cluster |
-| `ingress-system` | `traefik` Deployment and Service | The Ingress controller; Service port 80 for HTTP, 443 for HTTPS, 8080 for the API and dashboard |
+| `starfleet` | `probe` Deployment and Service, label `app: probe` | A small web server on pod port 8080, Service port 80; it answers with `app=probe`, the pod name, the path and the host |
+| `starfleet` | `scout` Deployment and Service, label `app: scout` | The same web server, it answers with `app=scout` |
+| `starfleet` | `web-code` ConfigMap | The Python code that both web servers run |
+| `starfleet` | `shuttle` pod, label `app: shuttle` | A `busybox` pod for requests from inside the cluster |
+| `outpost` | (no workloads) | A spare namespace |
+| `ingress-system` | `traefik` Deployment, Service and ServiceAccount | The Ingress controller; Service port 80 for HTTP, 443 for HTTPS, 8080 for the API and dashboard |
+| (cluster-wide) | `traefik` ClusterRole and ClusterRoleBinding | The read permissions of the `traefik` ServiceAccount |
 | (cluster-wide) | `traefik` IngressClass | Tells Ingress objects which controller handles them |
 
-`kubectl` already points at the playground cluster. Launch your playground now and keep it running while you read:
+`kubectl` already points at the playground cluster. Start your playground now and keep it running while you read:
 
 <!-- astrona:playground -->

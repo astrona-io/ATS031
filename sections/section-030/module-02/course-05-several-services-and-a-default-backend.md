@@ -1,12 +1,19 @@
 # Several Services And A Default Backend
 
-A real cluster publishes many Services on one address. An Ingress can send each path or each host to a different Service, and it can name one Service that answers every request no other rule matches. This part builds both, shows how the two ways to split traffic differ, and explains what a client sees for an unknown host or path.
+A real cluster publishes many Services on one address. An Ingress can send each path or each host to a different Service. It can also name one Service that answers every request that no other rule matches.
+
+On this page, you build both. You also see how the two ways to split traffic differ, and what a client gets for an unknown host or path.
 
 ## Fan-out by path and by host
 
-A **fan-out** is one host with several paths, each path going to its own Service. A **name-based virtual host** setup is several hosts, each with its own rules. Both are written in `spec.rules`. For a fan-out, one rule has several `paths`. For separate hosts, `rules` has several entries with different `host` values. A rule without a `host` matches every host and is the usual way to catch requests for names you did not list.
+The Ingress API has two ways to split traffic between Services, and you write both in `spec.rules`:
 
-The field `spec.defaultBackend` names a Service that receives every request no rule matches. Traefik supports it as a catch-all router with the lowest priority. Only one Ingress of a class should define a default backend, because two definitions compete and the result is not predictable.
+- A **fan-out** is one host with several paths, and each path goes to its own Service. For a fan-out, one rule has several `paths`.
+- A **name-based virtual host** setup is several hosts, each with its own rules. For this setup, `rules` has several entries with different `host` values.
+
+A rule without a `host` matches every host. It is the usual way to catch requests for names you did not list.
+
+The field `spec.defaultBackend` names a Service that receives every request that no rule matches. Traefik supports it as a catch-all router with the lowest priority. Only one Ingress of a class should define a default backend. Two definitions compete, and you cannot predict which one wins.
 
 <!-- astrona:playground:renew -->
 
@@ -68,22 +75,19 @@ curl -s -H 'Host: bridge.local' http://127.0.0.1:8080/unknown
 curl -s -H 'Host: elsewhere.local' http://127.0.0.1:8080/
 ```
 
-The first request returns `app=probe` and the second returns `app=scout`. The third and the fourth also return `app=scout`, because the default backend answers every request that matches no rule, including requests for a host that no rule names. Without the `defaultBackend` field, the third and fourth requests would return the Traefik `404 page not found`.
+The first request returns `app=probe`, and the second returns `app=scout`. The third and the fourth also return `app=scout`. The default backend answers every request that matches no rule, and that includes requests for a host that no rule names. Without the `defaultBackend` field, the third and the fourth requests would return the Traefik `404 page not found`.
 
-```mermaid
-flowchart TB
-    R["Request"] -->|"bridge.local /probe"| P["Service: probe"]
-    R -->|"bridge.local /scout"| S["Service: scout"]
-    R -->|"no rule matches"| D["Default backend: scout"]
-```
+![Diagram: requests to bridge.local /probe go to the probe Service, bridge.local /scout goes to the scout Service, and every request that matches no rule, such as bridge.local /unknown or elsewhere.local, goes to the default backend scout](images/default-backend-fanout.svg)
 
-The diagram shows that the two rules take their requests first, and the default backend takes the rest.
+The drawing shows that the two rules take their requests first. The default backend takes all the rest.
 
 ## When a backend is missing
 
-If a rule names a Service that does not exist, the API server still accepts the Ingress. Traefik cannot build the backend and returns an error status for that route, and it logs the reason. If the Service exists but has no ready pod, the route exists and the request fails with `503`. Read the Service and its EndpointSlices before you blame the Ingress.
+A route can also fail on the backend side, after a rule has matched. If a rule names a Service that does not exist, the API server still accepts the Ingress. Traefik cannot build the backend, so it returns an error status for that route and logs the reason.
 
-You can now publish several Services and decide what unmatched requests receive. The graded task on the next page asks you to build a similar route set yourself. The last part of this module reads the controller's own evidence.
+If the Service exists but has no ready pod, the route exists, and the request fails with `503`. So read the Service and its EndpointSlices before you blame the Ingress.
+
+You can now publish several Services from one host and decide what unmatched requests receive. The graded task on the next page asks you to build a similar set of routes yourself. The open question is how to see what Traefik itself did with each request.
 
 ## Common pitfalls
 
