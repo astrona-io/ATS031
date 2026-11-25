@@ -1,0 +1,68 @@
+{
+  "context": "kind-astro-ats-031-lab-010-02-01",
+  "cluster": "astro-ats-031-lab-010-02-01",
+  "namespace": "outpost-031-010-02-01",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "forge",
+      "namespace": "outpost-031-010-02-01",
+      "expected": {
+        "metadata": {
+          "name": "forge",
+          "namespace": "outpost-031-010-02-01",
+          "labels": {
+            "app": "forge"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "smith",
+      "namespace": "outpost-031-010-02-01",
+      "expected": {
+        "metadata": {
+          "name": "smith",
+          "namespace": "outpost-031-010-02-01",
+          "labels": {
+            "app": "smith"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "idler",
+      "namespace": "outpost-031-010-02-01",
+      "expected": {
+        "metadata": {
+          "name": "idler",
+          "namespace": "outpost-031-010-02-01",
+          "labels": {
+            "app": "idler"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "visitor",
+      "namespace": "dock-031-010-02-01",
+      "expected": {
+        "metadata": {
+          "name": "visitor",
+          "namespace": "dock-031-010-02-01",
+          "labels": {
+            "app": "visitor"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

@@ -1,0 +1,90 @@
+{
+  "context": "kind-astro-ats-031-lab-010-01-01",
+  "cluster": "astro-ats-031-lab-010-01-01",
+  "namespace": "starfleet-031-010-01-01",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "hub",
+      "namespace": "starfleet-031-010-01-01",
+      "expected": {
+        "metadata": {
+          "name": "hub",
+          "namespace": "starfleet-031-010-01-01"
+        },
+        "spec": {
+          "replicas": 2,
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "hub"
+              }
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "pod",
+      "name": "tender",
+      "namespace": "starfleet-031-010-01-01",
+      "expected": {
+        "metadata": {
+          "name": "tender",
+          "namespace": "starfleet-031-010-01-01",
+          "labels": {
+            "app": "tender"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "idler",
+      "namespace": "starfleet-031-010-01-01",
+      "expected": {
+        "metadata": {
+          "name": "idler",
+          "namespace": "starfleet-031-010-01-01",
+          "labels": {
+            "app": "idler"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "mirror",
+      "namespace": "starfleet-031-010-01-01",
+      "expected": {
+        "metadata": {
+          "name": "mirror",
+          "namespace": "starfleet-031-010-01-01",
+          "labels": {
+            "app": "mirror"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "stranger",
+      "namespace": "outpost-031-010-01-01",
+      "expected": {
+        "metadata": {
+          "name": "stranger",
+          "namespace": "outpost-031-010-01-01",
+          "labels": {
+            "app": "stranger"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

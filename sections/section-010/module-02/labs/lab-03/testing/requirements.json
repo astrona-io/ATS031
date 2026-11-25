@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-02-03",
+  "cluster": "astro-ats-031-lab-010-02-03",
+  "namespace": "dock-031-010-02-03",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "hauler",
+      "namespace": "dock-031-010-02-03",
+      "expected": {
+        "metadata": {
+          "name": "hauler",
+          "namespace": "dock-031-010-02-03",
+          "labels": {
+            "app": "hauler"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "winch",
+      "namespace": "dock-031-010-02-03",
+      "expected": {
+        "metadata": {
+          "name": "winch",
+          "namespace": "dock-031-010-02-03",
+          "labels": {
+            "app": "winch"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "pilot",
+      "namespace": "outpost-031-010-02-03",
+      "expected": {
+        "metadata": {
+          "name": "pilot",
+          "namespace": "outpost-031-010-02-03",
+          "labels": {
+            "app": "pilot"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

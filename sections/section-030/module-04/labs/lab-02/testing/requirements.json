@@ -1,0 +1,107 @@
+{
+  "context": "kind-astro-ats-031-lab-030-04-02",
+  "cluster": "astro-ats-031-lab-030-04-02",
+  "namespace": "starfleet-031-030-04-02",
+  "resources": [
+    {
+      "kind": "ingress",
+      "name": "alpha",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "alpha",
+          "namespace": "starfleet-031-030-04-02"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "ingress",
+      "name": "bravo",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "bravo",
+          "namespace": "starfleet-031-030-04-02"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "ingress",
+      "name": "charlie",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "charlie",
+          "namespace": "starfleet-031-030-04-02"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      }
+    },
+    {
+      "kind": "ingress",
+      "name": "delta",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "delta",
+          "namespace": "starfleet-031-030-04-02"
+        },
+        "spec": {
+          "ingressClassName": "traefik"
+        }
+      },
+      "outcome": "delta-ingress"
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-04-02"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-04-02"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

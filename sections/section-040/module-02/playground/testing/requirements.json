@@ -1,0 +1,40 @@
+{
+  "context": "kind-astro-ats-031-playground-040-02",
+  "checks": [
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "shuttle reaches the fake metadata server"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/agent",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "agent reaches the fake metadata server"
+    },
+    {
+      "type": "http",
+      "from": "outpost/drifter",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "drifter reaches the fake metadata server"
+    },
+    {
+      "type": "http",
+      "from": "dock/tender",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "tender reaches the fake metadata server"
+    },
+    {
+      "type": "http",
+      "from": "metadata-stub/control",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "control reaches the fake metadata server"
+    }
+  ]
+}

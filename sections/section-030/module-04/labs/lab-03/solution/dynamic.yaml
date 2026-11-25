@@ -1,0 +1,10 @@
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+    mtls:
+      minVersion: VersionTLS12
+      clientAuth:
+        clientAuthType: RequireAndVerifyClientCert
+        caFiles:
+        - /etc/traefik/client-ca/client-ca.crt

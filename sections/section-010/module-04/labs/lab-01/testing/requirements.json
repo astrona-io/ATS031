@@ -1,0 +1,53 @@
+{
+  "context": "kind-astro-ats-031-lab-010-04-01",
+  "cluster": "astro-ats-031-lab-010-04-01",
+  "namespace": "starfleet-031-010-04-01",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "pathfinder",
+      "namespace": "starfleet-031-010-04-01",
+      "expected": {
+        "metadata": {
+          "name": "pathfinder",
+          "namespace": "starfleet-031-010-04-01",
+          "labels": {
+            "app": "pathfinder"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "datastore",
+      "namespace": "starfleet-031-010-04-01",
+      "expected": {
+        "metadata": {
+          "name": "datastore",
+          "namespace": "starfleet-031-010-04-01",
+          "labels": {
+            "app": "datastore"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "stranger",
+      "namespace": "starfleet-031-010-04-01",
+      "expected": {
+        "metadata": {
+          "name": "stranger",
+          "namespace": "starfleet-031-010-04-01",
+          "labels": {
+            "app": "stranger"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

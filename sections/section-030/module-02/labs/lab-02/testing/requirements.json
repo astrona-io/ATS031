@@ -1,0 +1,84 @@
+{
+  "context": "kind-astro-ats-031-lab-030-02-02",
+  "cluster": "astro-ats-031-lab-030-02-02",
+  "namespace": "starfleet-031-030-02-02",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-02-02"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-02-02"
+        },
+        "spec": {
+          "selector": {
+            "app": "probe"
+          }
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "cargo",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "cargo",
+          "namespace": "starfleet-031-030-02-02"
+        },
+        "spec": {
+          "replicas": 1,
+          "selector": {
+            "matchLabels": {
+              "app": "cargo"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "service",
+      "name": "cargo",
+      "expected": {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+          "name": "cargo",
+          "namespace": "starfleet-031-030-02-02"
+        },
+        "spec": {
+          "selector": {
+            "app": "cargo"
+          }
+        }
+      }
+    }
+  ],
+  "behavior": []
+}

@@ -1,0 +1,83 @@
+{
+  "context": "kind-astro-ats-031-lab-010-03-02",
+  "cluster": "astro-ats-031-lab-010-03-02",
+  "namespace": "dock-031-010-03-02",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "assay",
+      "namespace": "dock-031-010-03-02",
+      "expected": {
+        "metadata": {
+          "name": "assay",
+          "namespace": "dock-031-010-03-02",
+          "labels": {
+            "app": "assay"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "sampler",
+      "namespace": "dock-031-010-03-02",
+      "expected": {
+        "metadata": {
+          "name": "sampler",
+          "namespace": "dock-031-010-03-02",
+          "labels": {
+            "app": "sampler"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "sampler",
+      "namespace": "starfleet-031-010-03-02",
+      "expected": {
+        "metadata": {
+          "name": "sampler",
+          "namespace": "starfleet-031-010-03-02",
+          "labels": {
+            "app": "sampler"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "idler",
+      "namespace": "starfleet-031-010-03-02",
+      "expected": {
+        "metadata": {
+          "name": "idler",
+          "namespace": "starfleet-031-010-03-02",
+          "labels": {
+            "app": "idler"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "sampler",
+      "namespace": "outpost-031-010-03-02",
+      "expected": {
+        "metadata": {
+          "name": "sampler",
+          "namespace": "outpost-031-010-03-02",
+          "labels": {
+            "app": "sampler"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

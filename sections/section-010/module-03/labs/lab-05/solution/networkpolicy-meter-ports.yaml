@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: meter-ports
+  namespace: starfleet-031-010-03-05
+spec:
+  podSelector:
+    matchLabels:
+      app: meter
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: outpost-031-010-03-05
+      podSelector:
+        matchLabels:
+          app: surveyor
+    ports:
+    - protocol: TCP
+      port: 7000
+      endPort: 7002
+    - protocol: UDP
+      port: tick

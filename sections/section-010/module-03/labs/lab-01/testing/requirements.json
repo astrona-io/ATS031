@@ -1,0 +1,83 @@
+{
+  "context": "kind-astro-ats-031-lab-010-03-01",
+  "cluster": "astro-ats-031-lab-010-03-01",
+  "namespace": "starfleet-031-010-03-01",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "registry",
+      "namespace": "starfleet-031-010-03-01",
+      "expected": {
+        "metadata": {
+          "name": "registry",
+          "namespace": "starfleet-031-010-03-01",
+          "labels": {
+            "app": "registry"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "courier",
+      "namespace": "starfleet-031-010-03-01",
+      "expected": {
+        "metadata": {
+          "name": "courier",
+          "namespace": "starfleet-031-010-03-01",
+          "labels": {
+            "app": "courier"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "courier",
+      "namespace": "outpost-031-010-03-01",
+      "expected": {
+        "metadata": {
+          "name": "courier",
+          "namespace": "outpost-031-010-03-01",
+          "labels": {
+            "app": "courier"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "idler",
+      "namespace": "outpost-031-010-03-01",
+      "expected": {
+        "metadata": {
+          "name": "idler",
+          "namespace": "outpost-031-010-03-01",
+          "labels": {
+            "app": "idler"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "courier",
+      "namespace": "dock-031-010-03-01",
+      "expected": {
+        "metadata": {
+          "name": "courier",
+          "namespace": "dock-031-010-03-01",
+          "labels": {
+            "app": "courier"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

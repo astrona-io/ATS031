@@ -1,0 +1,52 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-031-lab-020-04-05
+  docs:
+    prerequisites: docs/prerequisites.md
+    examQuestion: question.md
+    caseStudy: docs/case-study.md
+    guide: solution.md
+runtime:
+  # Section 020 works on node files, static pods and the kubelet, so the lab
+  # runs a real one-node kubeadm cluster in a VM instead of kind node containers.
+  type: qemu
+  qemu:
+  - image:
+      type: oci
+      source: ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks
+    cpus: 2
+    memoryMB: 4096
+    diskSizeGB: 25
+    display: false
+bootstrap:
+  init:
+  - name: seed-private-environment
+    type: file
+    source: vm/install.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: vm/verify-start.sh
+  - name: reference-result
+    type: file
+    source: vm/apply-solution.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: vm/wait-solved.sh
+validation:
+  scripts:
+  - name: secret-located
+    description: ConfigMap etcd-query records the namespace and the full etcd key of the Secret relay-token
+    type: file
+    source: vm/validate-secret-located.sh
+    points: 1
+  - name: member-recorded
+    description: ConfigMap etcd-query records the name of the etcd member
+    type: file
+    source: vm/validate-member-recorded.sh
+    points: 1

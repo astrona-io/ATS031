@@ -1,0 +1,75 @@
+{
+  "context": "kind-astro-ats-031-lab-010-01-02",
+  "cluster": "astro-ats-031-lab-010-01-02",
+  "namespace": "starfleet-031-010-01-02",
+  "resources": [
+    {
+      "kind": "deployment",
+      "name": "archive",
+      "namespace": "starfleet-031-010-01-02",
+      "expected": {
+        "metadata": {
+          "name": "archive",
+          "namespace": "starfleet-031-010-01-02"
+        },
+        "spec": {
+          "replicas": 2,
+          "template": {
+            "metadata": {
+              "labels": {
+                "app": "archive"
+              }
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    },
+    {
+      "kind": "pod",
+      "name": "scanner",
+      "namespace": "starfleet-031-010-01-02",
+      "expected": {
+        "metadata": {
+          "name": "scanner",
+          "namespace": "starfleet-031-010-01-02",
+          "labels": {
+            "app": "scanner"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "decoy",
+      "namespace": "starfleet-031-010-01-02",
+      "expected": {
+        "metadata": {
+          "name": "decoy",
+          "namespace": "starfleet-031-010-01-02",
+          "labels": {
+            "app": "decoy"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "idler",
+      "namespace": "starfleet-031-010-01-02",
+      "expected": {
+        "metadata": {
+          "name": "idler",
+          "namespace": "starfleet-031-010-01-02",
+          "labels": {
+            "app": "idler"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

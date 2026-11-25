@@ -1,0 +1,24 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-031-playground-020-02
+  docs:
+    guide: docs/overview.md
+# A real kubeadm node, so kube-bench reads the real kubelet, etcd and API
+# server files and processes instead of a kind node container.
+runtime:
+  type: qemu
+  qemu:
+  - image:
+      type: oci
+      source: ghcr.io/astrona-io/ubuntu-qcow2-image:24.04-cks
+    cpus: 2
+    memoryMB: 4096
+    diskSizeGB: 25
+    display: false
+bootstrap:
+  init:
+  - name: seed-private-environment
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false

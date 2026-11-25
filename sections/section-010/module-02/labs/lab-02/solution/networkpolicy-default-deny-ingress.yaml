@@ -1,0 +1,9 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: dock-031-010-02-02
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress

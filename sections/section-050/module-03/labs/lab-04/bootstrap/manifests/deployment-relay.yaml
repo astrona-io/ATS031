@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: relay
+  namespace: starfleet-031-050-03-04
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: relay
+  template:
+    metadata:
+      labels:
+        app: relay
+    spec:
+      containers:
+      - name: relay
+        image: docker.io/library/python:3.13-alpine
+        imagePullPolicy: IfNotPresent
+        command: ["python", "-m", "http.server", "8080"]
+        ports:
+        - containerPort: 8080

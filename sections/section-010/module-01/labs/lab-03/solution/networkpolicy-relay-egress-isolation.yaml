@@ -1,0 +1,11 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: relay-egress-isolation
+  namespace: starfleet-031-010-01-03
+spec:
+  podSelector:
+    matchLabels:
+      app: relay
+  policyTypes:
+  - Egress

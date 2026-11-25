@@ -1,0 +1,44 @@
+apiVersion: astrona.io/v1
+metadata:
+  name: ats-031-lab-050-03-01
+  docs:
+    examQuestion: question.md
+    guide: solution.md
+runtime:
+  type: kind
+  kind:
+    image: kindest/node:v1.35.0@sha256:452d707d4862f52530247495d180205e029056831160e22870e37e3f6c1ac31f
+    nodes:
+      workers: 1
+bootstrap:
+  init:
+  - name: seed-private-environment
+    type: file
+    source: bootstrap/setup.sh
+teardown:
+  keepCluster: false
+testing:
+  init:
+  - name: verify-start
+    description: Verify the starting state and reject the unfinished lab
+    type: file
+    source: testing/verify-start.sh
+  - name: reference-result
+    type: file
+    source: solution/apply.sh
+  - name: wait-solved
+    description: Wait until the reference solution settles and every outcome passes
+    type: file
+    source: testing/wait-solved.sh
+validation:
+  scripts:
+  - name: rejected-files
+    description: signature-review names every document without a good signature from the publisher key
+    type: file
+    source: validation/validate-rejected-files.sh
+    points: 2
+  - name: publisher-fingerprint
+    description: signature-review records the fingerprint of the publisher key
+    type: file
+    source: validation/validate-publisher-fingerprint.sh
+    points: 1

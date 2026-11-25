@@ -1,0 +1,36 @@
+# The starting coverage. starfleet blocks every pod, including the agent that
+# needs the address. outpost blocks only the pod labelled app=drifter. dock has
+# no policy at all.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-metadata
+  namespace: starfleet-031-040-02-04
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 169.254.169.254/32
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-metadata
+  namespace: outpost-031-040-02-04
+spec:
+  podSelector:
+    matchLabels:
+      app: drifter
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 169.254.169.254/32

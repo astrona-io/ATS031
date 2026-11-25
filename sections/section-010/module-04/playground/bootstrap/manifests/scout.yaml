@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: scout
+  namespace: starfleet
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: starfleet
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: scout-pod-reader
+  namespace: starfleet
+subjects:
+- kind: ServiceAccount
+  name: scout
+  namespace: starfleet
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scout-code
+  namespace: starfleet
+data:
+  check.py: |
+    import os
+    import socket
+    import ssl
+    import struct
+    import urllib.request
+
+    def dns():
+        server = [line.split()[1] for line in open("/etc/resolv.conf") if line.startswith("nameserver")][0]
+        query = struct.pack(">HHHHHH", 4660, 256, 1, 0, 0, 0)
+        for label in "kubernetes.default.svc.cluster.local".split("."):
+            query += bytes([len(label)]) + label.encode()
+        query += b"\x00" + struct.pack(">HH", 1, 1)
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender:
+            sender.settimeout(3)
+            sender.sendto(query, (server, 53))
+            answer = sender.recv(512)
+        assert len(answer) > 12 and answer[3] & 15 == 0
+
+    def probe():
+        url = "http://%s:%s/" % (os.environ["PROBE_SERVICE_HOST"], os.environ["PROBE_SERVICE_PORT"])
+        body = urllib.request.urlopen(url, timeout=3).read().decode()
+        assert "version=" in body
+
+    def api():
+        directory = "/var/run/secrets/kubernetes.io/serviceaccount"
+        token = open(directory + "/token").read()
+        context = ssl.create_default_context(cafile=directory + "/ca.crt")
+        url = "https://%s:%s/api/v1/namespaces/starfleet/pods" % (os.environ["KUBERNETES_SERVICE_HOST"], os.environ["KUBERNETES_SERVICE_PORT"])
+        request = urllib.request.Request(url, headers={"Authorization": "Bearer " + token})
+        urllib.request.urlopen(request, timeout=3, context=context).read()
+
+    results = []
+    for name, step in (("dns", dns), ("probe", probe), ("api", api),):
+        try:
+            step()
+            results.append(name + "=ok")
+        except Exception:
+            results.append(name + "=fail")
+    print(" ".join(results))
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: scout
+  namespace: starfleet
+  labels:
+    app: scout
+spec:
+  serviceAccountName: scout
+  containers:
+  - name: scout
+    image: docker.io/library/python:3.13-alpine
+    command:
+    - sh
+    - -c
+    - sleep 3600
+    volumeMounts:
+    - name: app
+      mountPath: /app
+      readOnly: true
+  volumes:
+  - name: app
+    configMap:
+      name: scout-code
+  restartPolicy: Never

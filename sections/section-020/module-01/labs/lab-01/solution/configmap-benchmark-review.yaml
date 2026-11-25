@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: benchmark-review
+  namespace: starfleet-031-020-01-01
+data:
+  component: kube-scheduler
+  check: "1.4.2"
+  setting: bind-address
+  result: corrected

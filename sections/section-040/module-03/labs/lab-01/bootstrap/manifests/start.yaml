@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dock-031-040-03-01
+---
+# A client pod with curl, used to test the kubelet ports from the pod network.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: inspector
+  namespace: dock-031-040-03-01
+  labels:
+    app: inspector
+spec:
+  containers:
+  - name: client
+    image: docker.io/curlimages/curl:8.11.1
+    command:
+    - sleep
+    - '7200'

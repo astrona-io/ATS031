@@ -1,0 +1,68 @@
+{
+  "context": "kind-astro-ats-031-lab-010-03-03",
+  "cluster": "astro-ats-031-lab-010-03-03",
+  "namespace": "starfleet-031-010-03-03",
+  "resources": [
+    {
+      "kind": "pod",
+      "name": "archive",
+      "namespace": "starfleet-031-010-03-03",
+      "expected": {
+        "metadata": {
+          "name": "archive",
+          "namespace": "starfleet-031-010-03-03",
+          "labels": {
+            "app": "archive"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "mapper",
+      "namespace": "survey-031-010-03-03",
+      "expected": {
+        "metadata": {
+          "name": "mapper",
+          "namespace": "survey-031-010-03-03",
+          "labels": {
+            "app": "mapper"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "mapper",
+      "namespace": "salvage-031-010-03-03",
+      "expected": {
+        "metadata": {
+          "name": "mapper",
+          "namespace": "salvage-031-010-03-03",
+          "labels": {
+            "app": "mapper"
+          }
+        }
+      },
+      "state": "pod"
+    },
+    {
+      "kind": "pod",
+      "name": "mapper",
+      "namespace": "outpost-031-010-03-03",
+      "expected": {
+        "metadata": {
+          "name": "mapper",
+          "namespace": "outpost-031-010-03-03",
+          "labels": {
+            "app": "mapper"
+          }
+        }
+      },
+      "state": "pod"
+    }
+  ],
+  "behavior": []
+}

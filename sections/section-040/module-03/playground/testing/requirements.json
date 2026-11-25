@@ -1,0 +1,36 @@
+{
+  "context": "kind-astro-ats-031-playground-040-03",
+  "checks": [
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "expect": "200",
+      "label": "shuttle reaches the fake metadata server"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "http://{worker_ip}:10255/pods",
+      "expect": "200",
+      "label": "read-only port is open"
+    },
+    {
+      "type": "http",
+      "from": "starfleet/shuttle",
+      "url": "https://{worker_ip}:10250/pods",
+      "expect": "401",
+      "label": "secure port refuses anonymous requests"
+    },
+    {
+      "type": "pods_exist",
+      "pods": [
+        "outpost/runtime-peek",
+        "starfleet/cri-helper",
+        "outpost/log-reader",
+        "dock/net-tool"
+      ],
+      "label": "exposure pods run"
+    }
+  ]
+}

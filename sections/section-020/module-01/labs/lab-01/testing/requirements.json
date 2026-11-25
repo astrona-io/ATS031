@@ -1,0 +1,74 @@
+{
+  "context": "kubernetes-admin@astro-ats-031-lab-020-01-01",
+  "cluster": "astro-ats-031-lab-020-01-01",
+  "runtime": "qemu",
+  "namespace": "starfleet-031-020-01-01",
+  "resources": [
+    {
+      "kind": "configmap",
+      "name": "benchmark-review",
+      "namespace": "starfleet-031-020-01-01",
+      "outcome": "benchmark-review-record",
+      "expected": {
+        "data": {
+          "component": "kube-scheduler",
+          "check": "1.4.2",
+          "setting": "bind-address",
+          "result": "corrected"
+        }
+      }
+    },
+    {
+      "kind": "deployment",
+      "name": "probe",
+      "namespace": "starfleet-031-020-01-01",
+      "expected": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-020-01-01"
+        },
+        "spec": {
+          "replicas": 2,
+          "selector": {
+            "matchLabels": {
+              "app": "probe",
+              "release": "probe"
+            }
+          }
+        }
+      },
+      "state": "deployment"
+    }
+  ],
+  "behavior": [
+    {
+      "args": [
+        "kubectl",
+        "get",
+        "--raw=/readyz"
+      ],
+      "equals": "ok"
+    },
+    {
+      "args": [
+        "kubectl",
+        "-n",
+        "starfleet-031-020-01-01",
+        "exec",
+        "shuttle",
+        "--",
+        "wget",
+        "-q",
+        "-T",
+        "3",
+        "-O-",
+        "http://probe/"
+      ],
+      "contains": [
+        "version=v1"
+      ]
+    }
+  ]
+}
