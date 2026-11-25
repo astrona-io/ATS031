@@ -41,7 +41,7 @@ modules:
   content:
   - type: reading
     title: Use Network security policies to restrict cluster level access
-    path: sections/section-010/README.md
+    path: sections/section-010/00-introduction.md
   - type: reading
     title: Restrict Pod Traffic With NetworkPolicy
     path: sections/section-010/module-01/course.md
