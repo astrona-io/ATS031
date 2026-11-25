@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 380" width="860" height="380" role="img" aria-labelledby="title desc">
+  <title id="title">How identity-based signing works</title>
+  <desc id="desc">The signer proves its identity to an issuer and gets a short-lived certificate that names the identity. The signer signs the file and writes a record to the public transparency log. You run cosign verify-blob with the signature, the certificate, the expected identity and the expected issuer, and cosign prints Verified OK only when all of them match.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+
+  <rect class="frame" x="20" y="20" width="400" height="340" rx="10"/>
+  <text class="label" x="36" y="44">Signing side</text>
+  <rect class="frame" x="480" y="20" width="360" height="340" rx="10"/>
+  <text class="label" x="496" y="44">Your side</text>
+  <path class="line" d="M150 105 H268" marker-end="url(#arrow)"/>
+  <text class="label" x="209" y="97" text-anchor="middle">1. prove identity</text>
+  <path class="line" d="M270 125 H152" marker-end="url(#arrow)"/>
+  <text class="label" x="209" y="143" text-anchor="middle">2. certificate</text>
+  <path class="line" d="M90 130 V198" marker-end="url(#arrow)"/>
+  <text class="label" x="100" y="172">3. sign</text>
+  <path class="line" d="M160 225 H268" marker-end="url(#arrow)"/>
+  <text class="label" x="214" y="217" text-anchor="middle">4. record</text>
+  <path class="line" d="M160 245 H230 V300 H470 V215 H508" marker-end="url(#arrow)"/>
+  <text class="label" x="350" y="292" text-anchor="middle">published</text>
+  <path class="line" d="M660 160 V178" marker-end="url(#arrow)"/>
+  <path class="okline" d="M660 250 V278" marker-end="url(#arrowok)"/>
+  <rect class="box" x="30" y="80" width="120" height="50" rx="8"/>
+  <text x="90" y="110" text-anchor="middle">Signer</text>
+  <rect class="ask" x="270" y="80" width="130" height="50" rx="8"/>
+  <text x="335" y="110" text-anchor="middle">Issuer</text>
+  <rect class="box" x="30" y="200" width="130" height="56" rx="8"/>
+  <text class="code" x="95" y="224" text-anchor="middle">kubectl.sig</text>
+  <text class="code" x="95" y="244" text-anchor="middle">kubectl.cert</text>
+  <rect class="box" x="270" y="200" width="130" height="50" rx="8"/>
+  <text x="335" y="222" text-anchor="middle">transparency</text>
+  <text x="335" y="240" text-anchor="middle">log</text>
+  <rect class="ask" x="500" y="70" width="320" height="90" rx="8"/>
+  <text class="strong" x="660" y="95" text-anchor="middle">What you expect</text>
+  <text class="code" x="660" y="120" text-anchor="middle">--certificate-identity</text>
+  <text class="code" x="660" y="142" text-anchor="middle">--certificate-oidc-issuer</text>
+  <rect class="box" x="510" y="180" width="300" height="70" rx="8"/>
+  <text class="code" x="660" y="210" text-anchor="middle">cosign verify-blob</text>
+  <text class="label" x="660" y="232" text-anchor="middle">checks identity, issuer and bytes</text>
+  <rect class="ok" x="560" y="280" width="200" height="46" rx="8"/>
+  <text class="code" x="660" y="308" text-anchor="middle">Verified OK</text>
+</svg>

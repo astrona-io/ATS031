@@ -1,35 +1,55 @@
 # Verify Platform Binaries Before Deploying
 
-Every Kubernetes node runs binaries that you downloaded from somewhere: `kubelet`, `kubeadm`, `kubectl`, the container runtime. Each of them runs with high privilege. If one is replaced on its way to the node, by a compromised mirror, an intercepted download or a poisoned build pipeline, the attacker gets that privilege. Verification is the step that makes sure the bytes you are about to run are the bytes the publisher released.
+Every Kubernetes node runs binaries that you downloaded from somewhere: `kubelet`, `kubeadm`, `kubectl` and the container runtime. Each of them runs with high privilege. If someone replaces one of these files on its way to the node, the attacker gets that privilege. This can happen through a compromised mirror, an intercepted download or a poisoned build pipeline.
 
-This module teaches you the difference between a check that detects change and a check that proves who published the file, and gives you the commands for both: `sha256sum` for digests, `openssl` for a signature made with a key, and `cosign` for signatures made with an identity. You practise the first two in the playground against a staged fixture. The third is explained as reference, because the playground has no network path to the real Kubernetes release channel.
+Verification is the step that closes this gap. It makes sure that the bytes you are about to run are the same bytes that the publisher released. A publisher is the project or company that builds and releases the software.
 
-## Learning objectives
+There are two kinds of check. One kind detects that a file has changed. The other kind proves who published the file. This module gives you the commands for both: `sha256sum` for digests, `openssl` for a signature made with a key, and `cosign` for a signature made with an identity. You practise `sha256sum` and `openssl` in the playground on a staged set of test files. The `cosign` check is shown as reference only, because the playground has no network path to the real Kubernetes release servers.
 
-After this module you can:
+## What you will learn
 
-- Explain what a checksum proves, what it does not prove, and why the source of the expected digest decides its value.
-- Choose the exact artifact by version, operating system and architecture, and record its digest.
-- Verify a signature over a checksum manifest with a public key, and check the binary against the authenticated manifest.
-- Show that a forged checksum file matches a tampered binary, and that signature verification rejects the forgery.
-- Keep the verified bytes bound to what is deployed, and explain what verification does not cover.
+After this module, you can:
+
+- explain what a checksum proves, what it does not prove, and why the source of the expected digest decides how much it is worth;
+- choose the exact artifact by version, operating system and CPU architecture, and record its digest;
+- verify a signature over a checksum manifest with a public key, and then check the binary against that trusted manifest;
+- show that a forged checksum file matches a tampered binary, and that signature verification rejects the forged file;
+- keep the verified bytes tied to what you deploy, and explain what verification does not cover.
+
+## How the module is laid out
+
+You start with **Integrity, Authenticity And The Exact Artifact**, which explains the questions that verification answers and how to pick the right file. **Digests At Work And The Limits Of A Checksum** then computes digests in the playground and shows how a forged checksum file fools a bare check. **Verify A Signed Manifest And Record The Result** checks the signature on the manifest, rejects the forgery and stores the result in the cluster. **Keep The Binding Through Delivery, And Identity-Based Signatures** closes the module with how to protect the file after the check and how identity-based signatures work.
+
+A lab follows each hands-on part, so you can practise the skill right away.
 
 ## Before you start
 
-You need Linux command line basics and `kubectl`. The module has four parts. The first covers the questions that verification answers and how to pick the artifact. The second shows digests at work and the limits of a bare checksum. The third verifies a signed manifest and records the result. The fourth covers keeping the binding through delivery, and signatures made with an identity.
+You should know the basics of the Linux command line, such as listing files, reading a file and running a command in a container. You should also be able to use `kubectl get` and `kubectl create`.
 
-Your playground is a `kind` cluster running Kubernetes v1.35. The control plane node container holds a staged release in `/var/lib/training-release`:
+## Your playground
+
+Your playground is a `kind` cluster that runs Kubernetes v1.35, with one control plane node and one worker node. The cluster already runs these objects:
+
+| Namespace | Object | What it is |
+| --- | --- | --- |
+| `starfleet` | `probe-code` ConfigMap | Holds the Python code of the small web server |
+| `starfleet` | `probe` Deployment, two pods, labels `app: probe` and `release: probe` | A small web server that listens on port 8080 |
+| `starfleet` | `probe` Service | Port 80, forwards to port 8080 of the `probe` pods |
+| `starfleet` | `shuttle` pod, label `app: shuttle` | A client pod with `busybox` tools |
+| `outpost` | `drifter` pod, label `app: drifter` | A client pod with `busybox` tools, in another namespace |
+
+The files you verify do not live in the cluster. They sit in the container of the control plane node, in the directory `/var/lib/training-release`:
 
 | File | What it is |
 | --- | --- |
 | `kubectl` | The binary to deploy |
-| `kubectl-tampered` | A copy of the binary with extra bytes appended |
+| `kubectl-tampered` | A copy of the binary with extra bytes added at the end |
 | `checksums.txt` | A manifest with the SHA-256 digest of `kubectl` |
 | `checksums.sig` | A signature over `checksums.txt` |
 | `publisher.pub` | The public key that checks the signature |
 
-The key is a fixture made for this exercise. It stands in for a publisher key and is not the key of the real Kubernetes project.
+The key was made only for this exercise. It plays the role of a publisher key, and it is not the key of the real Kubernetes project.
 
-`kubectl` already points at the playground cluster. Launch your playground now and keep it running while you read:
+`kubectl` already points at the playground cluster. Start your playground now and keep it running while you read:
 
 <!-- astrona:playground -->

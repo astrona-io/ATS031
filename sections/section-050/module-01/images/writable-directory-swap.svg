@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 400" width="840" height="400" role="img" aria-labelledby="title desc">
+  <title id="title">Why the directory must be protected</title>
+  <desc id="desc">Top: the directory is writable by other users. Another user deletes the read-only verified kubectl and puts a different file in its place, so the node runs unverified bytes. Bottom: /opt/verified/bin is owned by root with mode 755, so the same attempt by another user is denied.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+
+
+  <line class="sep" x1="20" y1="200" x2="820" y2="200"/>
+  <text class="strong" x="20" y="30">Directory that other users can write to</text>
+  <path class="dashed" d="M190 105 H408" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="299" y="95" text-anchor="middle">delete and replace</text>
+  <path class="line" d="M650 105 H688" marker-end="url(#arrow)"/>
+  <rect class="box" x="20" y="80" width="170" height="50" rx="8"/>
+  <text x="105" y="110" text-anchor="middle">Another user</text>
+  <rect class="frame" x="410" y="50" width="240" height="110" rx="10"/>
+  <text class="label" x="426" y="72">writable directory</text>
+  <rect class="drop" x="430" y="84" width="200" height="56" rx="6"/>
+  <text class="code" x="530" y="108" text-anchor="middle">kubectl</text>
+  <text class="label bad" x="530" y="128" text-anchor="middle">read-only, but swapped</text>
+  <rect class="drop" x="690" y="80" width="130" height="50" rx="8"/>
+  <text x="755" y="102" text-anchor="middle">node runs</text>
+  <text x="755" y="120" text-anchor="middle">other bytes</text>
+
+  <text class="strong" x="20" y="230">Directory that only <tspan class="code">root</tspan> can write to</text>
+  <path class="dashed" d="M190 305 H310" marker-end="url(#arrowbad)"/>
+  <rect x="314" y="277" width="10" height="56" rx="2" fill="#c53030"/>
+  <text class="label bad" x="250" y="295" text-anchor="middle">denied</text>
+  <path class="okline" d="M650 305 H688" marker-end="url(#arrowok)"/>
+  <rect class="box" x="20" y="280" width="170" height="50" rx="8"/>
+  <text x="105" y="310" text-anchor="middle">Another user</text>
+  <rect class="frame" x="350" y="245" width="300" height="125" rx="10"/>
+  <text class="label code" x="366" y="267">/opt/verified/bin</text>
+  <text class="label code" x="634" y="267" text-anchor="end">root:root 755</text>
+  <rect class="ok" x="400" y="280" width="230" height="56" rx="6"/>
+  <text class="code" x="515" y="304" text-anchor="middle">kubectl</text>
+  <text class="label good" x="515" y="324" text-anchor="middle">verified bytes stay</text>
+  <rect class="ok" x="690" y="280" width="130" height="50" rx="8"/>
+  <text x="755" y="302" text-anchor="middle">node runs</text>
+  <text x="755" y="320" text-anchor="middle">verified bytes</text>
+</svg>
