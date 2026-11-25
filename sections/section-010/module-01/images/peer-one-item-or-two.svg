@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 360" width="840" height="360" role="img" aria-labelledby="title desc">
+  <title id="title">One peer item or two</title>
+  <desc id="desc">In the from list of an ingress rule, a namespaceSelector and a podSelector in one item combine with AND: a pod with the label, in that namespace. The same two selectors as two items combine with OR: any pod in that namespace, or a labelled pod in the policy namespace.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .head { fill: #7b8494; }
+    .headbad { fill: #c53030; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="head" d="M0 0 L10 5 L0 10 z"/>
+    </marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path class="headbad" d="M0 0 L10 5 L0 10 z"/>
+    </marker>
+  </defs>
+
+  <path class="line" d="M420 64 V92 H220 V118" marker-end="url(#arrow)"/>
+  <path class="line" d="M420 92 H620 V118" marker-end="url(#arrow)"/>
+  <path class="line" d="M220 184 V244" marker-end="url(#arrow)"/>
+  <path class="line" d="M620 184 V244" marker-end="url(#arrow)"/>
+
+  <text class="label" x="232" y="219">AND</text>
+  <text class="label" x="632" y="219">OR</text>
+
+  <rect class="box" x="300" y="20" width="240" height="44" rx="8"/>
+  <text class="strong" x="420" y="47" text-anchor="middle">Ingress rule: <tspan class="code">from</tspan></text>
+
+  <rect class="box" x="40" y="120" width="360" height="64" rx="8"/>
+  <text class="strong" x="220" y="145" text-anchor="middle">One item in the list</text>
+  <text class="code" x="220" y="168" text-anchor="middle">- namespaceSelector + podSelector</text>
+
+  <rect class="box" x="440" y="120" width="360" height="64" rx="8"/>
+  <text class="strong" x="620" y="145" text-anchor="middle">Two items in the list</text>
+  <text class="code" x="620" y="168" text-anchor="middle">- namespaceSelector  - podSelector</text>
+
+  <rect class="ok" x="40" y="246" width="360" height="64" rx="8"/>
+  <text x="220" y="272" text-anchor="middle">A pod with the label,</text>
+  <text x="220" y="294" text-anchor="middle">in that namespace</text>
+
+  <rect class="ask" x="440" y="246" width="360" height="64" rx="8"/>
+  <text x="620" y="272" text-anchor="middle">Any pod in that namespace, or a</text>
+  <text x="620" y="294" text-anchor="middle">labelled pod in the policy namespace</text>
+
+  <text class="label" x="220" y="338" text-anchor="middle">Narrow: only the intended caller</text>
+  <text class="label bad" x="620" y="338" text-anchor="middle">Wide: every pod in the namespace</text>
+</svg>

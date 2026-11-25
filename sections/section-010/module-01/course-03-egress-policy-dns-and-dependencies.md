@@ -112,15 +112,9 @@ The `BLOCKED_IP` variable must still be set in your shell from the earlier step;
 
 The `shuttle` pod sends its request to the Service on port 80. Before the egress filter on the node sees the packet, the Service address has already been replaced by a `probe` pod address and port 8080. The egress rule is checked against that pod address and port. A rule that allows port 80 would not match, and the request would time out even though the application is healthy.
 
-```mermaid
-flowchart TB
-    S["shuttle"] -->|"DNS query, UDP 53"| D["CoreDNS pod"]
-    S -->|"http://probe:80"| V["Service: probe"]
-    V -->|"rewritten to pod IP, port 8080"| P["probe pod"]
-    S -.->|"pod IP, port 8080: no rule"| B["blocked-server"]
-```
+![Diagram: the shuttle pod reaches CoreDNS and a probe pod, and its request to blocked-server is dropped](images/egress-paths-shuttle.svg)
 
-The solid arrows are the two allowed paths. The dotted arrow is dropped because no egress rule names `blocked-server`.
+The solid arrows are the two allowed paths. The dashed red arrow is dropped because no egress rule names `blocked-server`.
 
 ## Egress to other namespaces and to the outside
 

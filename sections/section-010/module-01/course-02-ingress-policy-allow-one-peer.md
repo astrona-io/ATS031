@@ -91,13 +91,7 @@ This reads "a pod labelled `app: shuttle` in a namespace named `starfleet`". Now
 
 This reads "any pod in the `starfleet` namespace, or any pod labelled `app: shuttle` in the policy namespace". The first item admits every pod in `starfleet`, so the policy is far wider than intended. One missing indentation level changes the meaning, which makes this the most common mistake in written policies and in exam tasks.
 
-```mermaid
-flowchart TB
-    R["ingress rule: from"] --> A["One item: namespaceSelector and podSelector"]
-    R --> B["Two items: namespaceSelector, podSelector"]
-    A -->|"AND"| AR["Pod with label in that namespace"]
-    B -->|"OR"| BR["Any pod in namespace or labelled pod in policy namespace"]
-```
+![Diagram: selectors in one peer item combine with AND, separate peer items combine with OR](images/peer-one-item-or-two.svg)
 
 The diagram shows that fields inside one item combine with AND, while separate items combine with OR.
 
