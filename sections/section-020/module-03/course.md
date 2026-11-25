@@ -1,30 +1,48 @@
 # Harden The API Server And Control Plane Components
 
-Most failing checks of a Center for Internet Security (CIS) Kubernetes Benchmark run belong to the control plane. The API server is the front door of the cluster. It decides who may connect, what each user may do and which requests are recorded. The controller manager and the scheduler run beside it, and their manifests and settings have checks of their own.
+The Center for Internet Security (CIS) Kubernetes Benchmark is a list of security checks for a cluster. When you run it, most of the failing checks belong to the control plane. The API server is the front door of the cluster. It decides who may connect, what each user may do and which requests are recorded. The controller manager and the scheduler run beside it, and their manifests and settings have checks of their own.
 
-On a kubeadm cluster the control plane components are static pods: pods that the kubelet starts from manifest files on the node, without the API server. You change a component by editing its manifest file. A mistake in that file can stop the API server, and then `kubectl` no longer works. This module teaches the safe way to edit, the flags the benchmark checks, and how to prove after each change that the component runs with the new value.
+On a kubeadm cluster, the control plane components are static pods. A static pod is a pod that the kubelet starts from a manifest file on the node, without the API server. You change a component by editing its manifest file. A mistake in that file can stop the API server, and then `kubectl` no longer works.
 
-## Learning objectives
+This module teaches the safe way to edit these files and the flags that the benchmark checks. It also shows how to prove after each change that the component runs with the new value.
 
-After this module you can:
+## What you will learn
 
-- Edit a static pod manifest through a copy, and recover when the component does not start.
-- Set and verify the authentication and authorization flags of the API server.
-- Explain the admission plugins `NodeRestriction` and `AlwaysPullImages` and verify which plugins run.
-- Enable audit logging with a policy file, the log flags and the volume mounts they need.
-- Set and verify the profiling, TLS and service account flags.
-- Apply the controller manager and scheduler settings and fix the permissions of manifests.
+After this module, you can:
+
+- edit a static pod manifest through a copy, and recover when the component does not start;
+- set and verify the authentication and authorization flags of the API server;
+- explain the admission plugins `NodeRestriction` and `AlwaysPullImages` and verify which plugins run;
+- turn on audit logging with a policy file, the log flags and the volume mounts they need;
+- set and verify the profiling, TLS and service account flags;
+- apply the controller manager and scheduler settings and fix the permissions of manifests.
+
+## How the module is laid out
+
+You start with **Static Pods And Safe Editing**, which shows how the kubelet runs the control plane from files and how to change those files without breaking the cluster. **Authentication And Authorization Flags** then sets who may reach the API server and what they may do. **Admission Plugins** explains the plugins that check each request before the API server stores it.
+
+**Audit Logging** adds a record of every request. **Profiling, TLS And Service Account Flags** reduces what the API server exposes and checks how it protects its connections and tokens. **Controller Manager, Scheduler And File Permissions** closes the module with the other two components and the file modes of the manifests.
 
 ## Before you start
 
-You need Kubernetes basics and the knowledge that a `kube-bench` run reports failing checks with a remediation text. The module has six parts. The first covers static pods and safe editing. The second covers authentication and authorization flags. The third covers admission plugins. The fourth covers audit logging. The fifth covers profiling, TLS and service account flags. The sixth covers the controller manager, the scheduler and file permissions.
+You should know the Kubernetes basics: pods, namespaces, Services and `kubectl`. You should also know that a `kube-bench` run reports failing checks, each with a remediation text that says how to fix it.
 
-Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-03` is the control plane and also runs your pods. The API server runs with some deliberately weak settings: profiling is at its default value and no audit policy is set. Three control plane manifests have mode `644`.
+## Your playground
 
-An audit policy file is staged on the node at `/opt/training/audit-policy.yaml`, but nothing uses it. A copy of every original manifest is in `/opt/training/backup`. The `starfleet` namespace holds the `probe` Deployment, the `probe` Service and the `shuttle` client pod.
+Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster. It was built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-03` is the control plane and also runs your pods.
 
-You open a shell on the node with `astrona ssh astro-ats-031-playground-020-03`. You log in as the `student` user, which can run commands as root with `sudo` and already has `kubectl` set up for the cluster.
+The API server runs with some weak settings on purpose: profiling is at its default value and no audit policy is set. Three control plane manifests have mode `644`. The node and the cluster hold these items:
 
-Launch your playground now and keep it running while you read:
+| Place | Item | What it is |
+| --- | --- | --- |
+| Node | `/opt/training/audit-policy.yaml` | An audit policy file that nothing uses yet |
+| Node | `/opt/training/backup` | A copy of every original control plane manifest |
+| `starfleet` namespace | `probe` Deployment and `probe` Service | A small web workload |
+| `starfleet` namespace | `shuttle` pod | A client pod |
+| `outpost` namespace | `drifter` pod | A client pod in another namespace |
+
+You open a shell on the node with `astrona ssh astro-ats-031-playground-020-03`. You log in as the `student` user. This user can run commands as root with `sudo` and already has `kubectl` set up for the cluster.
+
+Start your playground now and keep it running while you read:
 
 <!-- astrona:playground -->

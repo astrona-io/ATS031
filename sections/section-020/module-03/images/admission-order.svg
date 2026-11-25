@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 260" width="840" height="260" role="img" aria-labelledby="title desc">
+  <title id="title">Where admission runs in the API server</title>
+  <desc id="desc">After authorization, mutating admission can change the object, then validating admission can reject it. Only a request that passes both is stored in etcd. Either admission step can reject the request.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M180 82 H228" marker-end="url(#arrow)"/>
+  <path class="line" d="M400 82 H448" marker-end="url(#arrow)"/>
+  <path class="okline" d="M620 82 H668" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M315 104 V180 H448" marker-end="url(#arrowbad)"/>
+  <path class="dashed" d="M535 104 V178" marker-end="url(#arrowbad)"/>
+
+  <rect class="box" x="20" y="60" width="160" height="44" rx="8"/>
+  <text x="100" y="87" text-anchor="middle">request authorized</text>
+  <rect class="ask" x="230" y="60" width="170" height="44" rx="8"/>
+  <text x="315" y="87" text-anchor="middle">mutating admission</text>
+  <rect class="ask" x="450" y="60" width="170" height="44" rx="8"/>
+  <text x="535" y="87" text-anchor="middle">validating admission</text>
+  <rect class="ok" x="670" y="60" width="150" height="44" rx="8"/>
+  <text x="745" y="87" text-anchor="middle">stored in etcd</text>
+
+  <text class="label" x="315" y="40" text-anchor="middle">can change the object</text>
+  <text class="label" x="535" y="40" text-anchor="middle">can reject the request</text>
+
+  <rect class="drop" x="450" y="180" width="170" height="44" rx="8"/>
+  <text x="535" y="207" text-anchor="middle">request rejected</text>
+  <text class="label" x="640" y="200">nothing is stored</text>
+
+</svg>

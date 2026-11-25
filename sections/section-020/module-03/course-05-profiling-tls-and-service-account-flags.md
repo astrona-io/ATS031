@@ -1,10 +1,16 @@
 # Profiling, TLS And Service Account Flags
 
-Some API server settings are not about who may connect, but about what the server exposes and how it protects its connections and tokens. The benchmark groups several of them: profiling, the minimum TLS version, and the flags that control service account tokens. This part explains each setting, shows how to test profiling before and after the change, and finishes with the flags that you check but usually leave alone.
+Some API server settings are not about who may connect. They are about what the server exposes, and how it protects its connections and its tokens. The benchmark groups several of them: profiling, the lowest Transport Layer Security (TLS) version, and the flags that control service account tokens. TLS is the protocol that encrypts HTTPS connections. This page explains each setting, tests profiling before and after the change, and ends with the flags that you check but usually leave alone.
 
 ## Profiling
 
-Profiling is a debugging feature. When it is on, the API server serves performance data under the path `/debug/pprof`. The data shows internals of the process, and an authorized caller can use the profiling endpoints to put load on the server. The flag `--profiling` defaults to `true`, and the benchmark asks for `false`. Production does not need the endpoint, and developers can switch it on again when they need it.
+Profiling is a debugging feature. When it is on, the API server serves performance data under the path `/debug/pprof`. This data shows the internals of the process, and an authorized caller can use the profiling endpoints to put load on the server.
+
+The flag `--profiling` defaults to `true`, and the benchmark asks for `false`. Production clusters do not need the endpoint, and developers can turn it on again when they need it.
+
+![Diagram: with the default --profiling=true, kubectl get --raw /debug/pprof/ returns an HTML index of profile types, and with --profiling=false the same request fails with NotFound](images/profiling-before-after.svg)
+
+The drawing shows the test you run on this page: the same request before and after the change, and the two answers you should see.
 
 Test the endpoint before you change anything. Open a shell on the node with `astrona ssh astro-ats-031-playground-020-03`. The request goes through the API server as your administrator user:
 
@@ -24,7 +30,7 @@ With profiling on, the response is the start of an HTML index of profile types. 
 .profile-name{
 ```
 
-Now add the flag with the safe edit method: copy with `-p`, insert the flag after the line `- kube-apiserver`, check the copy, and move it into place. The `sed` command below inserts the line with the same indentation as the line it follows:
+Now add the flag with the safe edit method. Copy the manifest with `-p`, insert the flag after the line `- kube-apiserver`, check the copy, and move it into place. The `sed` command below inserts the new line with the same indentation as the line it follows:
 
 ```sh
 sudo mkdir -p /etc/kubernetes/edit
@@ -43,7 +49,7 @@ The output on the playground node, where the audit flags were already added:
 60:    name: kube-apiserver
 ```
 
-The flag is on the line right after `- kube-apiserver`. The last line number depends on the earlier edits of your manifest. Move the copy into place only when the flag is there, then wait until the mirror pod shows the new flag and the API server is ready:
+The flag is on the line right after `- kube-apiserver`. The last line number depends on the earlier edits of your manifest. Move the copy into place only when the flag is there. Then wait until the mirror pod shows the new flag and the API server is ready:
 
 ```sh
 sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -53,7 +59,7 @@ for attempt in $(seq 1 60); do
 done
 ```
 
-The loop prints `new flag visible and API server ready`. On the playground node this took 46 seconds. Verify in two ways. First, read the arguments of the new pod. Then repeat the request to the profiling path:
+The loop prints `new flag visible and API server ready`. On the playground node, this took 46 seconds. Verify the change in two ways. First, read the arguments of the new pod. Then repeat the request to the profiling path:
 
 ```sh
 kubectl -n kube-system get pod kube-apiserver-astro-ats-031-playground-020-03 -o jsonpath='{.spec.containers[0].command}' | tr ',' '\n' | grep profiling
@@ -67,19 +73,36 @@ The output on the playground node:
 Error from server (NotFound): the server could not find the requested resource
 ```
 
-The request now fails with a `NotFound` error, because the server no longer registers the path. That is the result you want. For up to a minute after the loop ends, `kubectl -n kube-system get pods` can still show the API server pod as `0/1`. The kubelet marks it ready only after its own startup and readiness probes pass, and the pod becomes `1/1` without further action.
+The request now fails with a `NotFound` error, because the API server no longer registers the path. That is the result you want.
+
+For up to a minute after the loop ends, `kubectl -n kube-system get pods` can still show the API server pod as `0/1`. The kubelet marks the pod ready only after its own startup and readiness probes pass. The pod then becomes `1/1` without any action from you.
 
 ## TLS
 
-The API server speaks HTTPS, and the flag `--tls-min-version` sets the lowest TLS version it accepts. Current Kubernetes versions already refuse versions below TLS 1.2 by default, but the benchmark asks you to set the value explicitly, for example `--tls-min-version=VersionTLS12`, so that the setting does not depend on a default. The flag `--tls-cipher-suites` limits the cipher suites to strong ones. Both flags are optional for a standard cluster, and a wrong cipher list can stop clients from connecting, so test with `kubectl` after a change.
+Profiling is about what the server shows. TLS is about how it protects its connections. The API server speaks HTTPS, and the flag `--tls-min-version` sets the lowest TLS version it accepts.
 
-Two more TLS flags are checked on the connections that the API server starts. `--client-ca-file` names the certificate authority used to verify client certificates. `--etcd-certfile`, `--etcd-keyfile` and `--etcd-cafile` set the client certificate and the authority for the connection to etcd, and the benchmark checks that they are set so that the etcd connection is authenticated.
+Current Kubernetes versions already refuse versions below TLS 1.2 by default. The benchmark still asks you to set the value explicitly, for example `--tls-min-version=VersionTLS12`, so that the setting does not depend on a default. The flag `--tls-cipher-suites` limits the cipher suites to strong ones. Both flags are optional for a standard cluster. A wrong cipher list can stop clients from connecting, so test with `kubectl` after a change.
+
+The benchmark also checks the connections that the API server itself starts or accepts with certificates:
+
+- `--client-ca-file` names the certificate authority that the API server uses to verify client certificates.
+- `--etcd-certfile`, `--etcd-keyfile` and `--etcd-cafile` set the client certificate, its key and the certificate authority for the connection to etcd. The benchmark checks that they are set, so that the etcd connection is authenticated.
 
 ## Service account flags
 
-Pods authenticate to the API server with service account tokens. The API server signs these tokens with a private key and verifies them with a public key. The flags involved are `--service-account-key-file`, which names the public key used to verify tokens, `--service-account-signing-key-file`, which names the private key used to sign them, and `--service-account-issuer`, which sets the issuer name inside the token.
+Pods authenticate to the API server with service account tokens. The API server signs these tokens with a private key and verifies them with a public key. Three flags are involved:
 
-The flag `--service-account-lookup` makes the API server check that the service account of a token still exists in etcd. Without it, a token of a deleted service account would stay valid until the token expires. The flag defaults to `true` in current versions, and the benchmark checks that it is not `false`. Read all these flags in one command:
+- `--service-account-key-file` names the public key that verifies tokens.
+- `--service-account-signing-key-file` names the private key that signs them.
+- `--service-account-issuer` sets the issuer name inside the token.
+
+The flag `--service-account-lookup` makes the API server check that the service account of a token still exists in etcd. Without it, a token of a deleted service account would stay valid until the token expires. The flag defaults to `true` in current versions, and the benchmark checks that it is not `false`.
+
+![Diagram: kube-apiserver signs a service account token with sa.key, a pod sends a request with the token, kube-apiserver verifies it with sa.pub and then checks that the service account still exists in etcd](images/service-account-tokens.svg)
+
+The drawing shows which flag acts at which moment: the signing key when the token is made, and the public key and the lookup when a pod uses the token.
+
+Read all these flags in one command:
 
 ```sh
 sudo grep -e 'service-account' -e 'tls-' -e 'client-ca-file' -e 'etcd-' /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -101,14 +124,16 @@ The output on the playground node:
     - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
 ```
 
-A kubeadm cluster sets the service account key flags, the client certificate authority and the etcd certificate flags. The `tls-` pattern matches only the certificate and key of the server. kubeadm does not set `--tls-min-version`, `--tls-cipher-suites` or `--service-account-lookup`. A check on a flag that is absent but has a secure default is a judgement call: the review states the default and decides if an explicit value is worth adding.
+A kubeadm cluster sets the service account key flags, the client certificate authority and the etcd certificate flags. The `tls-` pattern matches only the certificate and the key of the server. kubeadm does not set `--tls-min-version`, `--tls-cipher-suites` or `--service-account-lookup`.
 
-The flags of the API server are now covered. Two more components run beside it, and the files that hold all of them also have checks.
+A check on a flag that is absent but has a secure default is a judgement call. The review states the default and decides if an explicit value is worth adding.
+
+You have now covered the flags of the API server. The open question is the two components that run beside it, the controller manager and the scheduler, and the files that hold all of their settings.
 
 ## Common pitfalls
 
 > [!WARNING]
 > - **Testing too early.** The pod object shows the old arguments until the kubelet restarts the component. Wait for the readiness loop.
-> - **Setting `--tls-cipher-suites` without testing.** A bad list can lock out clients, including `kubectl`.
-> - **Inserting the flag at the wrong indentation.** A flag with other indentation than the list items makes the YAML invalid.
+> - **Setting `--tls-cipher-suites` without a test.** A bad list can lock out clients, including `kubectl`.
+> - **Inserting the flag at the wrong indentation.** A flag with a different indentation from the other list items makes the YAML invalid.
 > - **Calling an absent flag a failure without checking the default.** Some defaults already meet the benchmark.
