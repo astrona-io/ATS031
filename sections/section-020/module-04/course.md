@@ -1,27 +1,47 @@
 # Review etcd Security Configuration
 
-etcd is the key-value database where the Kubernetes API server stores every object of the cluster: pods, Deployments, RBAC rules and Secrets. Anyone who can read etcd can read every Secret, and anyone who can write to etcd can change the whole cluster without going through authentication, authorization or admission control. For this reason the Center for Internet Security (CIS) Kubernetes Benchmark gives etcd its own section.
+etcd is the key-value database where the Kubernetes API server stores every object of the cluster: pods, Deployments, RBAC rules and Secrets. Anyone who can read etcd can read every Secret. Anyone who can write to etcd can change the whole cluster without going through authentication, authorization or admission control.
 
-This module teaches you to read the etcd static pod manifest and judge its Transport Layer Security (TLS) flags, to check the permissions of the data directory, to query etcd with `etcdctl` and see what is stored, and to turn on encryption at rest for Secrets and prove that it works.
+For this reason, the Center for Internet Security (CIS) Kubernetes Benchmark gives etcd its own section. The benchmark is a list of checks that describes a secure configuration for each part of a cluster. In this module, you review etcd against these checks and fix what you find.
 
-## Learning objectives
+## What you will learn
 
-After this module you can:
+After this module, you can:
 
-- Read the etcd static pod manifest and name the flags that the benchmark checks for etcd.
-- Verify that `--client-cert-auth` and `--peer-client-cert-auth` are `true` and that `--auto-tls` and `--peer-auto-tls` are not enabled.
-- Set the permissions of the etcd data directory to mode `700` and explain the ownership recommendation.
-- Show that a client without a certificate cannot read etcd, and that a Secret is stored as plain text without an encryption configuration.
-- Enable encryption at rest with an `EncryptionConfiguration`, restart the API server safely and re-encrypt the existing Secrets.
+- read the etcd static pod manifest and name the flags that the benchmark checks for etcd;
+- verify that `--client-cert-auth` and `--peer-client-cert-auth` are `true`, and that `--auto-tls` and `--peer-auto-tls` are not enabled;
+- set the permissions of the etcd data directory to mode `700` and explain the ownership recommendation;
+- show that a client without a certificate cannot read etcd, and that a Secret is stored as plain text without an encryption configuration;
+- enable encryption at rest with an `EncryptionConfiguration`, restart the API server safely and re-encrypt the existing Secrets.
+
+## How the module is laid out
+
+You start with **What Lives In etcd And Who Talks To It**, which shows what etcd stores, which ports it opens and which component connects to it. **Client And Peer TLS Flags** then reads the Transport Layer Security (TLS) flags in the etcd manifest and proves with a request what they do. **Data Directory Ownership And Permissions** checks who can read the files where etcd keeps its data.
+
+**Query etcd With etcdctl** connects to etcd directly and shows what a client with a valid certificate can see. **Encryption At Rest Check** closes the module: you make the API server encrypt Secrets before it writes them to etcd, and you prove that it works.
+
+A lab follows each part, so you can practise the skill right away.
 
 ## Before you start
 
-You need Kubernetes basics: pods, namespaces, Secrets, static pods and `kubectl`. The module has five parts. The first explains what etcd stores and which components talk to it. The second reads the TLS flags. The third covers the data directory. The fourth queries etcd with `etcdctl`. The fifth enables encryption at rest.
+You should know the Kubernetes basics: pods, namespaces, Secrets, static pods and `kubectl`. A static pod is a pod that the kubelet starts from a file on the node, not from the API server.
 
-Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-04` is the control plane and also runs your pods. etcd runs on it as a static pod, a pod that the kubelet starts from a file in `/etc/kubernetes/manifests`. The `starfleet` namespace holds the `probe` Deployment, the `probe` Service, the `shuttle` client pod and a Secret named `launch-code`. The playground sets the permissions of the etcd data directory wider than the benchmark allows, on purpose. A copy of the original API server and etcd manifests is in `/opt/training/backup` on the node.
+## Your playground
 
-You work in a shell on the node. Open it with `astrona ssh astro-ats-031-playground-020-04`. You log in as the user `student`, which has `sudo` and a kubeconfig for the cluster, so `kubectl` already points at the cluster. Commands that read or change node files start with `sudo`.
+Your playground is one virtual machine (VM) that runs a single-node Kubernetes v1.35 cluster. The cluster was built with kubeadm, the standard tool that installs a cluster on a Linux machine. The node `astro-ats-031-playground-020-04` is the control plane, and it also runs your pods. etcd runs on it as a static pod, started from a file in `/etc/kubernetes/manifests`.
 
-Launch your playground now and keep it running while you read:
+| Place | Object | What it is |
+| --- | --- | --- |
+| `starfleet` namespace | `probe` Deployment | An example workload |
+| `starfleet` namespace | `probe` Service | The Service for the `probe` pods |
+| `starfleet` namespace | `shuttle` pod | A client pod |
+| `outpost` namespace | `drifter` pod | A client pod in another namespace |
+| `starfleet` namespace | `launch-code` Secret | The Secret you look for in etcd |
+| Node | `/var/lib/etcd` | The etcd data directory, set wider than the benchmark allows, on purpose |
+| Node | `/opt/training/backup` | A copy of the original API server and etcd manifests |
+
+You work in a shell on the node. Open it with `astrona ssh astro-ats-031-playground-020-04`. You log in as the user `student`, which has `sudo` and a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send, so `kubectl` already points at the cluster. Commands that read or change node files start with `sudo`.
+
+Start your playground now and keep it running while you read:
 
 <!-- astrona:playground -->

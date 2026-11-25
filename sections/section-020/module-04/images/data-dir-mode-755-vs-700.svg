@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 310" width="840" height="310" role="img" aria-labelledby="title desc">
+  <title id="title">etcd data directory with mode 755 and with mode 700</title>
+  <desc id="desc">With mode 755, root, which runs etcd, can read and write the directory, and any other user on the node can read it and copy the database. With mode 700, only the owner root can enter the directory, and any other user gets permission denied.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <line class="sep" x1="420" y1="30" x2="420" y2="320"/>
+
+  <text class="strong" x="30" y="44">Mode <tspan class="code">755</tspan> (the finding)</text>
+  <text class="label" x="30" y="66">owner <tspan class="code">rwx</tspan>, group <tspan class="code">r-x</tspan>, others <tspan class="code">r-x</tspan></text>
+  <path class="okline" d="M120 134 L190 208" marker-end="url(#arrowok)"/>
+  <path class="line" d="M320 134 L250 208" marker-end="url(#arrow)"/>
+  <text class="label good" x="112" y="180" text-anchor="end">read, write</text>
+  <text class="label bad" x="300" y="180">can read</text>
+  <text class="label bad" x="300" y="196">and copy</text>
+  <rect class="box" x="30" y="90" width="170" height="44" rx="8"/>
+  <text x="115" y="117" text-anchor="middle"><tspan class="code">root</tspan> (runs etcd)</text>
+  <rect class="box" x="240" y="90" width="160" height="44" rx="8"/>
+  <text x="320" y="117" text-anchor="middle">any other user</text>
+  <rect class="drop" x="110" y="210" width="220" height="70" rx="8"/>
+  <text class="code" x="220" y="240" text-anchor="middle">/var/lib/etcd</text>
+  <text x="220" y="262" text-anchor="middle">open to every local user</text>
+
+  <text class="strong" x="440" y="44">Mode <tspan class="code">700</tspan> (the benchmark)</text>
+  <text class="label" x="440" y="66">owner <tspan class="code">rwx</tspan>, group <tspan class="code">---</tspan>, others <tspan class="code">---</tspan></text>
+  <path class="okline" d="M530 134 L600 208" marker-end="url(#arrowok)"/>
+  <path class="dashed" d="M730 134 L660 208" marker-end="url(#arrowbad)"/>
+  <text class="label good" x="522" y="180" text-anchor="end">read, write</text>
+  <text class="label bad" x="710" y="180">permission</text>
+  <text class="label bad" x="710" y="196">denied</text>
+  <rect class="box" x="440" y="90" width="170" height="44" rx="8"/>
+  <text x="525" y="117" text-anchor="middle"><tspan class="code">root</tspan> (runs etcd)</text>
+  <rect class="box" x="650" y="90" width="160" height="44" rx="8"/>
+  <text x="730" y="117" text-anchor="middle">any other user</text>
+  <rect class="ok" x="520" y="210" width="220" height="70" rx="8"/>
+  <text class="code" x="630" y="240" text-anchor="middle">/var/lib/etcd</text>
+  <text x="630" y="262" text-anchor="middle">only the owner gets in</text>
+</svg>

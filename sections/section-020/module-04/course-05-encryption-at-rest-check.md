@@ -1,14 +1,27 @@
 # Encryption At Rest Check
 
-By default the API server writes Secrets to etcd as plain text. Encryption at rest changes this: the API server encrypts the value before it writes and decrypts it when it reads. A stolen backup or disk copy then holds ciphertext, not credentials. The benchmark recommends it for Secrets. This part explains the configuration, enables it on the API server, and proves with etcd that it works.
+By default, the API server writes Secrets to etcd as plain text. Encryption at rest changes this. The API server encrypts the value before it writes it to etcd, and decrypts it when it reads it back. A stolen backup or disk copy then holds ciphertext (encrypted data), not credentials.
+
+The Center for Internet Security (CIS) Kubernetes Benchmark, a list of checks for a secure cluster, recommends encryption at rest for Secrets. On this page, you learn how the configuration works, enable it on the API server, and prove with etcd that it works.
 
 ## How the API server encrypts
 
-The API server reads an `EncryptionConfiguration` file when it starts. The `--encryption-provider-config` flag gives the file path. The file lists the resources to encrypt, here `secrets`, and a list of providers in order.
+The API server reads an `EncryptionConfiguration` file when it starts. The `--encryption-provider-config` flag gives the path of this file. The file lists the resources to encrypt, here `secrets`, and a list of providers in order. A provider is one method to store the data, with or without encryption.
 
-Two rules decide the behavior. The first provider in the list encrypts every new write. When the API server reads a value, it tries each provider in order until one of them can decode it. A provider called `identity` stores data without encryption. If you put `identity` last, the API server can still read old plain text values, and the first provider encrypts all new writes.
+Two rules decide the behavior:
 
-The `aescbc` provider uses AES in CBC mode with a 32 byte key. Other providers are `aesgcm`, `secretbox` and a `kms` provider, where an external Key Management Service holds the key. The Kubernetes documentation prefers `secretbox` or the KMS provider over `aescbc` for new setups, and this course uses `aescbc` because the benchmark and the exam mention it. The key is the weak point of every local provider: it sits in a file on the control plane node, so protect that file with mode `600` and keep a copy of the key. If you lose the key, the encrypted Secrets cannot be read.
+- The first provider in the list encrypts every new write.
+- When the API server reads a value, it tries each provider in order until one of them can decode the value.
+
+A provider called `identity` stores data without encryption. If you put `identity` last, the API server can still read old plain text values, and the first provider encrypts all new writes.
+
+![Diagram: on a write, provider 1 aescbc with key1 encrypts the new Secret dock-code and etcd stores it with the prefix k8s:enc:aescbc:v1:key1; on a read of the old plain value of launch-code, aescbc is skipped, identity reads the value, and the API server gets it](images/encryption-provider-order.svg)
+
+The drawing shows both rules with the two Secrets of this page. A new write always goes through the first provider. An old plain value is still readable, because `identity` comes later in the list.
+
+The `aescbc` provider uses the Advanced Encryption Standard (AES) in cipher block chaining (CBC) mode with a 32 byte key. Other providers are `aesgcm`, `secretbox` and a `kms` provider, where an external Key Management Service (KMS) holds the key. The Kubernetes documentation prefers `secretbox` or the KMS provider over `aescbc` for new setups. This course uses `aescbc` because the benchmark and the exam mention it.
+
+The key is the weak point of every local provider. It sits in a file on the control plane node, so protect that file with mode `600` and keep a copy of the key. If you lose the key, nobody can read the encrypted Secrets.
 
 ## Save the configuration
 
@@ -21,7 +34,7 @@ astrona ssh astro-ats-031-playground-020-04
 head -c 32 /dev/urandom | base64
 ```
 
-The output is one line of 44 characters that ends with `=`. Copy the printed value. Save this as `encryption-config.yaml` in your home directory on the node and replace `<KEY>` with it. The node has the editors `nano` and `vi`.
+The output is one line of 44 characters that ends with `=`. Copy the printed value. Save this as `encryption-config.yaml` in your home directory on the node, and replace `<KEY>` with the value. The node has the editors `nano` and `vi`.
 
 ```yaml
 apiVersion: apiserver.config.k8s.io/v1
@@ -37,11 +50,11 @@ resources:
       - identity: {}
 ```
 
-The name `key1` is a label that the API server stores with each encrypted value, so a later key rotation can tell which key was used. Never store this file in a shared place, because it holds the key.
+The name `key1` is a label that the API server stores with each encrypted value. During a later key rotation, this label tells the API server which key encrypted a value. Never store this file in a shared place, because it holds the key.
 
 ## Place the file on the node
 
-The API server runs as a container, so it can read only paths that its pod mounts. Copy the file to a new directory `/etc/kubernetes/enc`, restrict its mode, and make a copy of the API server manifest in your home directory to edit. The manifest is readable only by `root`, so `sudo cat` reads it and the shell writes the copy as your own file:
+The API server runs as a container, so it can read only the paths that its pod mounts. The next commands copy the file to a new directory `/etc/kubernetes/enc` and restrict its mode. They also make a copy of the API server manifest in your home directory for you to edit. Only `root` can read the manifest, so `sudo cat` reads it, and the shell writes the copy as your own file:
 
 ```sh
 sudo mkdir -p /etc/kubernetes/enc
@@ -51,11 +64,19 @@ sudo ls -l /etc/kubernetes/enc
 sudo cat /etc/kubernetes/manifests/kube-apiserver.yaml > kube-apiserver.yaml
 ```
 
-The `ls` line shows `-rw------- 1 root root` for `encryption-config.yaml`, so only `root` can read the key. A copy of the original manifest is already in `/opt/training/backup` on the node. Keep any other backup outside `/etc/kubernetes/manifests`, because the kubelet starts a pod from every file in that directory. Hidden files are the exception: the kubelet ignores files whose names start with a dot, such as the empty `.kubelet-keep` file that the package put there.
+The `ls` line shows `-rw------- 1 root root` for `encryption-config.yaml`, so only `root` can read the key.
+
+A copy of the original manifest is already in `/opt/training/backup` on the node. Keep any other backup outside `/etc/kubernetes/manifests`, because the kubelet starts a pod from every file in that directory. Hidden files are the exception. The kubelet ignores files whose names start with a dot, such as the empty `.kubelet-keep` file that the package put there.
 
 ## Edit the API server manifest
 
-Open `kube-apiserver.yaml` in your home directory with `nano` or `vi` and make three additions. The flag goes under the container `command`, for example right after the line `- kube-apiserver`. The volume mount goes under the container `volumeMounts`. The volume goes under the pod `volumes`. Keep the indentation of the neighbouring lines.
+Open `kube-apiserver.yaml` in your home directory with `nano` or `vi`, and make three additions:
+
+- The flag goes under the container `command`, for example right after the line `- kube-apiserver`.
+- The volume mount goes under the container `volumeMounts`.
+- The volume goes under the pod `volumes`.
+
+Keep the indentation of the lines next to each addition.
 
 ```yaml
 # under spec.containers[0].command
@@ -73,7 +94,13 @@ Open `kube-apiserver.yaml` in your home directory with `nano` or `vi` and make t
     name: enc
 ```
 
-Install the edited file. The copy goes to `/root` first, `chmod` gives it the mode `600` of the original manifest, and `mv` places it in the manifests directory in one step, so the kubelet never reads a half written file. Then wait until the pod object of the new API server shows the flag and the API server reports that it is ready. The pod object can show the new flag a few seconds before the new API server is ready, so the loop checks both. `kubectl` fails while the API server restarts, so the loop ignores errors and tries again, at most 60 times:
+![Diagram: the file /etc/kubernetes/enc/encryption-config.yaml with mode 600 lies on the node, the hostPath volume enc brings the directory into the kube-apiserver pod, the container mounts it read-only at /etc/kubernetes/enc, and the --encryption-provider-config flag names the file](images/encryption-config-mount.svg)
+
+The drawing shows why all three additions are needed. The volume brings the node directory into the pod, the mount puts it inside the container, and only then can the flag point at a file the API server can open.
+
+Now install the edited file. The copy goes to `/root` first, `chmod` gives it the mode `600` of the original manifest, and `mv` places it in the manifests directory in one step. This way, the kubelet never reads a half-written file.
+
+Then wait until the pod object of the new API server shows the flag, and the API server reports that it is ready. The pod object can show the new flag a few seconds before the new API server is ready, so the loop checks both. `kubectl` fails while the API server restarts, so the loop ignores errors and tries again, at most 60 times:
 
 ```sh
 NODE=astro-ats-031-playground-020-04
@@ -86,11 +113,15 @@ for attempt in $(seq 1 60); do
 done
 ```
 
-The loop prints `new flag visible and API server ready`. On the playground node this took about 45 seconds; a restart of the API server can take between 40 and 70 seconds there. If the loop never prints the message, the API server did not start with the new file. The usual causes are an indentation mistake or a wrong path. Read the kubelet log with `sudo journalctl -u kubelet --no-pager -n 50`, or copy `/opt/training/backup/kube-apiserver.yaml` back into the manifests directory with `sudo cp`.
+The loop prints `new flag visible and API server ready`. On the playground node, this took about 45 seconds; a restart of the API server can take between 40 and 70 seconds there.
+
+If the loop never prints the message, the API server did not start with the new file. The usual causes are an indentation mistake or a wrong path. Read the kubelet log with `sudo journalctl -u kubelet --no-pager -n 50`, or copy `/opt/training/backup/kube-apiserver.yaml` back into the manifests directory with `sudo cp`.
 
 ## Prove it with etcd
 
-The existing Secret `launch-code` is still plain text, because the API server encrypts only on write. A new Secret is the first test. Create one and read its value from etcd. The `grep` prints the prefix that the encryption provider adds to every value it encrypts:
+A running API server with the new flag is not yet a proof. The existing Secret `launch-code` is still plain text, because the API server encrypts only on write. So the first test is a new Secret.
+
+Create one and read its value from etcd. The `grep` prints the prefix that the encryption provider adds to every value it encrypts:
 
 ```sh
 kubectl -n starfleet create secret generic dock-code --from-literal=code=warp-nine-dock
@@ -123,19 +154,29 @@ secret/dock-code replaced
 secret/launch-code replaced
 ```
 
-Run the etcd read for `launch-code` again, this time with `grep -a -o -e 'k8s:enc:aescbc:v1:key1' -e 'warp-nine-launch'`. It now prints only `k8s:enc:aescbc:v1:key1`: the value starts with the `aescbc` prefix, and the plain word is gone. The API still returns the original value, because the API server decrypts it. Only after this step do you have encryption at rest for the old data.
+Run the etcd read for `launch-code` again, this time with `grep -a -o -e 'k8s:enc:aescbc:v1:key1' -e 'warp-nine-launch'`. It now prints only `k8s:enc:aescbc:v1:key1`. The value starts with the `aescbc` prefix, and the plain word is gone.
 
-The common check for this setting is a flag in the pod and a ciphertext prefix in etcd. A flag without the prefix proves nothing, because the API server could be using the file in a way that does not cover `secrets`. kube-bench shows the same gap: its check `1.2.27` on the playground node passes as soon as the flag is set, and it does not read etcd.
+The API still returns the original value, because the API server decrypts it. Only after this step is the old data encrypted at rest too.
+
+The usual check for this setting looks for two things: the flag in the pod, and the ciphertext prefix in etcd. A flag without the prefix proves nothing, because the API server could use the file in a way that does not cover `secrets`. kube-bench, the tool that checks a node against the benchmark, shows the same gap. Its check `1.2.27` on the playground node passes as soon as the flag is set, and it does not read etcd.
 
 ## Limits
 
-Encryption at rest protects a copy of the etcd data. It does not protect the Secrets from someone who can read the key file on the control plane node, from an RBAC role that allows `get secrets`, or from a process in the API server. It also does not cover other resources unless you list them under `resources`. A new key later needs a rotation: add the new key first, restart, replace all Secrets, then remove the old key.
+Encryption at rest protects a copy of the etcd data. It does not protect the Secrets from:
+
+- someone who can read the key file on the control plane node;
+- a role-based access control (RBAC) role that allows `get secrets`;
+- a process in the API server.
+
+It also does not cover other resources, unless you list them under `resources`. A new key later needs a rotation: add the new key first, restart, replace all Secrets, then remove the old key.
+
+You can now turn on encryption at rest, roll it out to the existing Secrets, and prove the result in etcd instead of trusting the flag. The question that stays open is the key itself: who can read the key file, and how you rotate the key without losing access to old values.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Putting `identity` first.** The first provider encrypts new writes. With `identity` first nothing is encrypted, although the API server starts normally.
+> - **Putting `identity` first.** The first provider encrypts new writes. With `identity` first, nothing is encrypted, although the API server starts normally.
 > - **Skipping the volume mount.** The API server pod cannot read a file outside its mounts, and it fails to start with a missing file error.
 > - **Forgetting to re-encrypt.** Existing Secrets stay plain text until they are written again.
-> - **Removing the old key too early.** Remove it only after all Secrets are rewritten with the new one, or the API server cannot read the old values.
+> - **Removing the old key too early.** Remove it only after all Secrets are rewritten with the new key, or the API server cannot read the old values.
 > - **Losing the key.** There is no recovery. Keep a protected copy outside the cluster.

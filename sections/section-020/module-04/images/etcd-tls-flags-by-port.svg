@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 350" width="840" height="350" role="img" aria-labelledby="title desc">
+  <title id="title">The etcd TLS flags for each port</title>
+  <desc id="desc">Each flag for the client port 2379 has a peer version for port 2380: the certificate and key files, the trusted CA file, client certificate authentication set to true, and automatic TLS, which must not be true.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <rect class="frame" x="20" y="30" width="390" height="300" rx="10"/>
+  <text class="strong" x="40" y="58">Client port 2379</text>
+  <text class="label" x="40" y="78">clients such as <tspan class="code">kube-apiserver</tspan></text>
+  <rect class="frame" x="430" y="30" width="390" height="300" rx="10"/>
+  <text class="strong" x="450" y="58">Peer port 2380</text>
+  <text class="label" x="450" y="78">other etcd members</text>
+
+  <rect class="box" x="40" y="96" width="350" height="64" rx="8"/>
+  <text x="56" y="122"><tspan class="code">--cert-file</tspan> and <tspan class="code">--key-file</tspan></text>
+  <text x="56" y="144">certificate and key etcd presents</text>
+  <rect class="box" x="450" y="96" width="350" height="64" rx="8"/>
+  <text x="466" y="122"><tspan class="code">--peer-cert-file</tspan> and <tspan class="code">--peer-key-file</tspan></text>
+  <text x="466" y="144">certificate and key etcd presents</text>
+
+  <rect class="box" x="40" y="170" width="350" height="44" rx="8"/>
+  <text class="code" x="56" y="197">--trusted-ca-file</text>
+  <rect class="box" x="450" y="170" width="350" height="44" rx="8"/>
+  <text class="code" x="466" y="197">--peer-trusted-ca-file</text>
+
+  <rect class="ok" x="40" y="224" width="350" height="44" rx="8"/>
+  <text class="code" x="56" y="251">--client-cert-auth=true</text>
+  <rect class="ok" x="450" y="224" width="350" height="44" rx="8"/>
+  <text class="code" x="466" y="251">--peer-client-cert-auth=true</text>
+
+  <rect class="drop" x="40" y="278" width="350" height="40" rx="8"/>
+  <text x="56" y="303"><tspan class="code">--auto-tls</tspan> must not be <tspan class="code">true</tspan></text>
+  <rect class="drop" x="450" y="278" width="350" height="40" rx="8"/>
+  <text x="466" y="303"><tspan class="code">--peer-auto-tls</tspan> must not be <tspan class="code">true</tspan></text>
+</svg>
