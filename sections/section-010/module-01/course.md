@@ -1,7 +1,3 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
 # Restrict Pod Traffic With NetworkPolicy
 
 By default, every pod in a Kubernetes cluster can send a request to every other pod, in every namespace. A compromised pod can therefore scan and attack all other workloads. A NetworkPolicy is a Kubernetes object that selects pods and lists the network connections those pods may receive or make. All other connections to and from the selected pods are dropped.
