@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 290" width="840" height="290" role="img" aria-labelledby="title desc">
+  <title id="title">A policy engine decides at admission</title>
+  <desc id="desc">kubectl apply sends a request to the API server. The API server sends an admission request to the policy engine webhook, which fetches the signature from the registry and checks signature and digest, then answers allow or deny. An allowed object is stored in etcd; a denied one is rejected and never starts.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M190 62 H298" marker-end="url(#arrow)"/>
+  <text class="label" x="244" y="54" text-anchor="middle">request</text>
+  <path class="line" d="M520 84 V178" marker-end="url(#arrow)"/>
+  <text class="label" x="530" y="134">admission request</text>
+  <path class="okline" d="M440 178 V86" marker-end="url(#arrowok)"/>
+  <text class="label" x="430" y="134" text-anchor="end">allow or deny</text>
+  <path class="line" d="M600 202 H658" marker-end="url(#arrow)"/>
+  <text class="label" x="629" y="194" text-anchor="middle">fetch</text>
+  <path class="okline" d="M540 62 H658" marker-end="url(#arrowok)"/>
+  <text class="label good" x="599" y="54" text-anchor="middle">if allowed</text>
+  <path class="dashed" d="M320 84 V202 H232" marker-end="url(#arrowbad)"/>
+  <text class="label bad" x="276" y="194" text-anchor="middle">if denied</text>
+
+  <rect class="box" x="30" y="40" width="160" height="44" rx="8"/>
+  <text x="110" y="67" text-anchor="middle" class="code">kubectl apply</text>
+  <rect class="box" x="300" y="40" width="240" height="44" rx="8"/>
+  <text x="420" y="67" text-anchor="middle">API server</text>
+  <rect class="ask" x="360" y="180" width="240" height="44" rx="8"/>
+  <text x="480" y="207" text-anchor="middle">policy engine (webhook)</text>
+  <rect class="box" x="660" y="180" width="150" height="44" rx="8"/>
+  <text x="735" y="200" text-anchor="middle">registry</text>
+  <text x="735" y="216" text-anchor="middle" class="label">signature, digest</text>
+  <rect class="ok" x="660" y="40" width="150" height="44" rx="8"/>
+  <text x="735" y="67" text-anchor="middle">stored in etcd</text>
+  <rect class="drop" x="30" y="180" width="200" height="44" rx="8"/>
+  <text x="130" y="207" text-anchor="middle">rejected, never starts</text>
+  <text x="30" y="270">The decision comes before the API server stores the object.</text>
+</svg>
