@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 300" width="840" height="300" role="img" aria-labelledby="title desc">
+  <title id="title">Which object to inspect first</title>
+  <desc id="desc">The kind of client error points to the object to inspect first. A certificate error points to the Secret, the SAN and the dates. A 404 from the controller points to the host, the path and the IngressClass. A 502 or 503 points to the Service and its endpoints. A timeout points to the port forward and the network.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <text class="label" x="30" y="28">The client reports</text>
+  <text class="label" x="440" y="28">Inspect first</text>
+
+  <path class="line" d="M300 67 H438" marker-end="url(#arrow)"/>
+  <path class="line" d="M300 133 H438" marker-end="url(#arrow)"/>
+  <path class="line" d="M300 199 H438" marker-end="url(#arrow)"/>
+  <path class="line" d="M300 265 H438" marker-end="url(#arrow)"/>
+
+  <rect class="drop" x="30" y="44" width="270" height="46" rx="8"/>
+  <text x="165" y="72" text-anchor="middle">certificate error</text>
+  <rect class="drop" x="30" y="110" width="270" height="46" rx="8"/>
+  <text x="165" y="138" text-anchor="middle"><tspan class="code">404</tspan> from the controller</text>
+  <rect class="drop" x="30" y="176" width="270" height="46" rx="8"/>
+  <text x="165" y="204" text-anchor="middle"><tspan class="code">502</tspan> or <tspan class="code">503</tspan></text>
+  <rect class="drop" x="30" y="242" width="270" height="46" rx="8"/>
+  <text x="165" y="270" text-anchor="middle">timeout</text>
+
+  <rect class="box" x="440" y="44" width="370" height="46" rx="8"/>
+  <text x="625" y="72" text-anchor="middle">Secret, SAN, validity dates</text>
+  <rect class="box" x="440" y="110" width="370" height="46" rx="8"/>
+  <text x="625" y="138" text-anchor="middle">host, path, IngressClass</text>
+  <rect class="box" x="440" y="176" width="370" height="46" rx="8"/>
+  <text x="625" y="204" text-anchor="middle">Service and its endpoints</text>
+  <rect class="box" x="440" y="242" width="370" height="46" rx="8"/>
+  <text x="625" y="270" text-anchor="middle">port forward, network</text>
+</svg>
