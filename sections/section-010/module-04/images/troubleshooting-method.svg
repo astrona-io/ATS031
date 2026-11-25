@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 290" width="840" height="290" role="img" aria-labelledby="title desc">
+  <title id="title">Fixed method to troubleshoot a policy set</title>
+  <desc id="desc">Six steps in a loop: list and read the policies with get and describe, compare selectors with the real labels, check the direction in policyTypes, confirm that the Calico plugin runs, repair the fault by applying the fixed policy, then run the test matrix for the wanted and the blocked rows. If a row still fails, start again.</desc>
+  <style>
+    .box { fill: #f4f5f7; stroke: #5b6472; }
+    .ask { fill: #fff7e0; stroke: #b7791f; }
+    .ok { fill: #e3f5e8; stroke: #2f855a; }
+    .drop { fill: #fde8e8; stroke: #c53030; }
+    .box, .ask, .ok, .drop { stroke-width: 1.5; }
+    .frame { fill: none; stroke: #9aa5b4; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .policy { fill: #fff7e0; stroke: #b7791f; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; fill: #1f2933; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .label { font-size: 13px; font-weight: 600; fill: #7b8494; }
+    .good { fill: #2f855a; }
+    .bad { fill: #c53030; }
+    .strong { font-weight: 600; }
+    .line { fill: none; stroke: #7b8494; stroke-width: 1.5; }
+    .okline { fill: none; stroke: #2f855a; stroke-width: 1.75; }
+    .dashed { fill: none; stroke: #c53030; stroke-width: 1.5; stroke-dasharray: 6 5; }
+    .sep { stroke: #d5dae1; stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#7b8494" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#2f855a" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="arrowbad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path fill="#c53030" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <path class="line" d="M250 84 H308" marker-end="url(#arrow)"/>
+  <path class="line" d="M530 84 H588" marker-end="url(#arrow)"/>
+  <path class="line" d="M700 116 V188" marker-end="url(#arrow)"/>
+  <path class="line" d="M590 220 H532" marker-end="url(#arrow)"/>
+  <path class="line" d="M310 220 H252" marker-end="url(#arrow)"/>
+  <path class="line" d="M140 188 V118" marker-end="url(#arrow)"/>
+  <text class="label" x="152" y="158">a row still fails: start again</text>
+
+  <rect class="box" x="30" y="52" width="220" height="64" rx="8"/>
+  <text class="strong" x="140" y="78" text-anchor="middle">1. List and read</text>
+  <text class="code" x="140" y="100" text-anchor="middle">get, describe</text>
+  <rect class="box" x="310" y="52" width="220" height="64" rx="8"/>
+  <text class="strong" x="420" y="78" text-anchor="middle">2. Compare labels</text>
+  <text class="code" x="420" y="100" text-anchor="middle">--show-labels</text>
+  <rect class="box" x="590" y="52" width="220" height="64" rx="8"/>
+  <text class="strong" x="700" y="78" text-anchor="middle">3. Check direction</text>
+  <text class="code" x="700" y="100" text-anchor="middle">policyTypes</text>
+
+  <rect class="box" x="590" y="190" width="220" height="64" rx="8"/>
+  <text class="strong" x="700" y="216" text-anchor="middle">4. Confirm the plugin</text>
+  <text x="700" y="238" text-anchor="middle">Calico pods running</text>
+  <rect class="ok" x="310" y="190" width="220" height="64" rx="8"/>
+  <text class="strong" x="420" y="216" text-anchor="middle">5. Repair the fault</text>
+  <text x="420" y="238" text-anchor="middle">apply the fixed policy</text>
+  <rect class="ask" x="30" y="190" width="220" height="64" rx="8"/>
+  <text class="strong" x="140" y="216" text-anchor="middle">6. Run the test matrix</text>
+  <text x="140" y="238" text-anchor="middle">wanted and blocked rows</text>
+</svg>
