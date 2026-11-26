@@ -32,6 +32,16 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: failing-record
+    description: The ConfigMap failing-binary exists in the lab namespace with the key name
+    type: file
+    source: validation/validate-failing-record.sh
+    points: 1
+  - name: binary-name
+    description: The key name holds the bare file name of one of the seven staged binaries
+    type: file
+    source: validation/validate-binary-name.sh
+    points: 1
   - name: failing-binary
     description: failing-binary names the one download whose bytes differ from its published checksum
     type: file

@@ -46,7 +46,12 @@ validation:
     source: vm/validate-server-recorded.sh
     points: 1
   - name: credentials-recorded
-    description: ConfigMap etcd-connection records the client certificate, key and CA file that the API server uses for etcd
+    description: ConfigMap etcd-connection records the client certificate and key that the API server uses for etcd
     type: file
     source: vm/validate-credentials-recorded.sh
+    points: 1
+  - name: ca-recorded
+    description: ConfigMap etcd-connection records the CA file that the API server uses to check etcd
+    type: file
+    source: vm/validate-ca-recorded.sh
     points: 1

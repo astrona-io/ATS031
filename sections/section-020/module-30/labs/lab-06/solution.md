@@ -1,20 +1,8 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
-# Harden The Controller Manager And Scheduler Solution
+# Harden The Controller Manager And Scheduler — Solution
 
-Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
+You solve this lab by adding one flag to two static pod manifests and tightening the manifest modes. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-astrona ssh astro-ats-031-lab-020-03-06
-kubectl config current-context
-```
-
-The second command prints `kubernetes-admin@astro-ats-031-lab-020-03-06`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
-
-## Read the current state
+## Step 1: look at the starting state
 
 The controller manager and the scheduler have the same `--profiling` flag as the API server, with the same default `true`. Read the flags of both running processes and the modes of the manifests:
 
@@ -23,25 +11,30 @@ sudo ps -eo args | grep -e '^kube-controller-manager' -e '^kube-scheduler' | tr 
 sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
 ```
 
-The first command prints the two program names and no `--profiling` flag. The second shows mode `644` on two manifests.
+The first command prints the two program names and no `--profiling` flag. The second shows mode `644` on `kube-controller-manager.yaml` and `kube-scheduler.yaml`.
 
-## Disable profiling
+The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod, a pod that the kubelet runs from a file on the node. Edit each manifest as a copy in a work directory outside that folder, and move it back in one step, so that the kubelet never reads a half-written file.
 
-Each component has its own manifest, so edit each one the safe way. The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. Edit a copy in a work directory outside that folder, check the copy, and move it back in one step, so that the kubelet never reads a half-written file:
+## Step 2: disable controller manager profiling (check `controller-manager-profiling`)
 
 ```sh
 sudo mkdir -p /etc/kubernetes/edit
 sudo cp -p /etc/kubernetes/manifests/kube-controller-manager.yaml /etc/kubernetes/edit/kube-controller-manager.yaml
 sudo sed -i 's|^\( *\)- kube-controller-manager$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-controller-manager.yaml
 sudo mv /etc/kubernetes/edit/kube-controller-manager.yaml /etc/kubernetes/manifests/kube-controller-manager.yaml
+```
+
+The `sed` expression adds the new flag on the line after the program name, with the same indentation.
+
+## Step 3: disable scheduler profiling (check `scheduler-profiling`)
+
+```sh
 sudo cp -p /etc/kubernetes/manifests/kube-scheduler.yaml /etc/kubernetes/edit/kube-scheduler.yaml
 sudo sed -i 's|^\( *\)- kube-scheduler$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-scheduler.yaml
 sudo mv /etc/kubernetes/edit/kube-scheduler.yaml /etc/kubernetes/manifests/kube-scheduler.yaml
 ```
 
-The `sed` expression adds the new flag on the line after the program name, with the same indentation.
-
-## Restrict the manifests
+## Step 4: restrict the manifests (check `manifest-permissions`)
 
 `cp -p` kept the old mode, so the two moved files still have mode `644`. Set mode `600` on every manifest. A mode change does not restart a static pod:
 
@@ -50,18 +43,26 @@ sudo sh -c 'chmod 600 /etc/kubernetes/manifests/*.yaml'
 sudo sh -c "stat -c '%a %U:%G %n' /etc/kubernetes/manifests/*"
 ```
 
-## Verify the running processes
+Every line now starts with `600 root:root`.
 
-Wait about a minute for the kubelet to start the new pods. Then read the flags again and check the pods:
+## Step 5: test the running processes
+
+Wait for the kubelet to start the new pods, then read the flags again:
 
 ```sh
+kubectl -n kube-system wait --for=condition=Ready "pod/kube-controller-manager-$(hostname)" "pod/kube-scheduler-$(hostname)" --timeout=180s
 sudo ps -eo args | grep -e '^kube-controller-manager' -e '^kube-scheduler' | tr ' ' '\n' | grep -e '^kube-' -e '--profiling'
-kubectl -n kube-system get pods -l tier=control-plane
 ```
 
-Both programs now show `--profiling=false`, and every control plane pod is running.
+The `wait` command prints `condition met` for both pods, and both programs now show `--profiling=false`.
+
+## Step 6: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Editing a manifest in place with `sed -i` inside `/etc/kubernetes/manifests` can leave a temporary file that the kubelet reads. A manifest moved in from a copy keeps the copy mode, so check the mode after every edit. The controller manager and the scheduler have no `/readyz` path of the API server; check their pods.
+> The grader reads the running processes, not the manifests, and needs each pod ready. A flag in the file does nothing until the new pod runs.
+>
+> A manifest moved in from a copy keeps the copy mode, so check the mode after every edit. The grader checks every file in `/etc/kubernetes/manifests`, so a backup left there with mode `644` also fails.

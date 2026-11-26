@@ -84,5 +84,6 @@ if wants('apiserver-values'):
 if wants('etcd-values'):
     arguments = process_arguments(NODE, 'etcd')
     assert saved.get('etcd-client-cert-auth') == (flag_value(arguments, 'client-cert-auth') or 'false'), 'etcd-client-cert-auth differs from the running etcd'
+if wants('etcd-data-dir-mode'):
     mode = node_exec(NODE, 'stat', '-c', '%a', '/var/lib/etcd').stdout.strip()
     assert saved.get('etcd-data-dir-mode') == mode, 'etcd-data-dir-mode differs from the mode of /var/lib/etcd'

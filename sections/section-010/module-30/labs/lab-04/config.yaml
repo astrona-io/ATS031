@@ -41,8 +41,13 @@ validation:
     type: file
     source: validation/validate-range-admits-courier.sh
     points: 1
+  - name: rogue-except-entry
+    description: The ipBlock has one except entry that removes exactly the rogue pod address as a /32
+    type: file
+    source: validation/validate-rogue-except-entry.sh
+    points: 1
   - name: except-blocks-rogue
-    description: An except entry removes exactly the rogue pod address, so the rogue pod times out while the courier pod still gets a reply
+    description: The rogue pod times out to the ledger pod while the courier pod still gets a reply
     type: file
     source: validation/validate-except-blocks-rogue.sh
     points: 1

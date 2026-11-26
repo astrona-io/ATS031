@@ -39,10 +39,15 @@ testing:
 validation:
   scripts:
   - name: socket-removed
-    description: The image-scanner Deployment mounts no container runtime path and the running pod cannot see the containerd socket
+    description: The image-scanner Deployment template mounts no container runtime path
     type: file
     source: validation/validate-socket-removed.sh
-    points: 2
+    points: 1
+  - name: socket-hidden
+    description: The running image-scanner pod mounts no container runtime path and cannot see the containerd socket
+    type: file
+    source: validation/validate-socket-hidden.sh
+    points: 1
   - name: runs-as-non-root
     description: The image-scanner container sets runAsNonRoot and its process does not run as user id 0
     type: file

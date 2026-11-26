@@ -41,10 +41,15 @@ testing:
 validation:
   scripts:
   - name: api-profiling-disabled
-    description: kube-apiserver runs with --profiling=false and /debug/pprof/ returns 404
+    description: kube-apiserver runs with --profiling=false
     type: file
     source: vm/validate-api-profiling-disabled.sh
-    points: 2
+    points: 1
+  - name: pprof-not-found
+    description: A request to /debug/pprof/ with administrator credentials returns 404
+    type: file
+    source: vm/validate-pprof-not-found.sh
+    points: 1
   - name: tls-min-version
     description: kube-apiserver runs with --tls-min-version VersionTLS12 or VersionTLS13
     type: file

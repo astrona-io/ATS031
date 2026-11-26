@@ -45,8 +45,13 @@ validation:
     type: file
     source: vm/validate-data-dir-mode.sh
     points: 2
+  - name: data-dir-recorded
+    description: ConfigMap etcd-process records the data directory of the running etcd process
+    type: file
+    source: vm/validate-data-dir-recorded.sh
+    points: 1
   - name: process-user-recorded
-    description: ConfigMap etcd-process records the data directory and the user of the running etcd process
+    description: ConfigMap etcd-process records the user of the running etcd process
     type: file
     source: vm/validate-process-user-recorded.sh
     points: 1

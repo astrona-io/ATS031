@@ -41,8 +41,13 @@ validation:
     type: file
     source: validation/validate-registry-policy.sh
     points: 1
+  - name: outpost-courier-allowed
+    description: The courier pod in outpost reaches the registry pod on TCP 8080
+    type: file
+    source: validation/validate-outpost-courier-allowed.sh
+    points: 1
   - name: only-outpost-courier
-    description: Only the courier pod in outpost reaches the registry; the courier pods in starfleet and dock and the idler pod in outpost time out, and no other namespace has a policy
+    description: The courier pods in starfleet and dock and the idler pod in outpost time out to the registry, and no other policy exists
     type: file
     source: validation/validate-only-outpost-courier.sh
     points: 1

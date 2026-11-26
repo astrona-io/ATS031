@@ -76,6 +76,8 @@ assert_node_ready(WORKER)
 settings = configz(WORKER)
 if wants('read-only-port'):
     assert settings.get('readOnlyPort', 0) == 0, 'Set readOnlyPort to 0'
+if wants('read-only-port-closed'):
+    assert settings.get('readOnlyPort', 0) == 0, 'Set readOnlyPort to 0 before the port can close'
     request = command(['kubectl', '-n', NAMESPACE, 'exec', 'shuttle', '--', 'wget', '-q', '-T', '3', '-O-', 'http://' + worker_address() + ':10255/pods'], success=False)
     assert request.returncode != 0, 'The read-only port 10255 still answers'
 if wants('tls-min-version'):

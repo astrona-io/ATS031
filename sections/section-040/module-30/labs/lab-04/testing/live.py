@@ -105,5 +105,9 @@ if wants('admission-blocks-host-network'):
     assert level == 'baseline', 'The namespace %s must enforce the baseline Pod Security level, found %s' % (NAMESPACE, level)
     blocked = dry_run_pod('grader-host-network', True)
     assert blocked.returncode != 0 and 'hostNetwork' in (blocked.stderr + blocked.stdout), 'A new pod with hostNetwork: true must be rejected in %s' % NAMESPACE
+
+if wants('plain-pod-accepted'):
+    labels = get('namespace', NAMESPACE, namespace=None)['metadata'].get('labels', {})
+    assert labels.get('pod-security.kubernetes.io/enforce'), 'The namespace %s has no pod-security.kubernetes.io/enforce label' % NAMESPACE
     plain = dry_run_pod('grader-plain', False)
     assert plain.returncode == 0, 'An ordinary new pod must still be accepted in %s: %s' % (NAMESPACE, plain.stderr.strip()[:200])

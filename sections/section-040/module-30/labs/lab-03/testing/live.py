@@ -106,6 +106,8 @@ assert settings is not None and settings.returncode == 0 and 'registry.dock.inte
 
 if wants('socket-removed'):
     assert not runtime_host_paths(template), 'The Deployment template still mounts a container runtime path: %s' % runtime_host_paths(template)
+
+if wants('socket-hidden'):
     assert not runtime_host_paths(pod['spec']), 'The running pod still mounts a container runtime path; wait for the new pod'
     probe_socket = in_pod(pod_name, 'sh', '-c', 'test -e /host/run/containerd/containerd.sock || test -e /run/containerd/containerd.sock')
     assert probe_socket is not None and probe_socket.returncode != 0, 'The containerd socket is still visible inside the running scanner pod'

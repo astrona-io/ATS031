@@ -32,13 +32,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: checksum-causes
+    description: download-triage marks the batch that is ok and the batch with a stale checksum
+    type: file
+    source: validation/validate-checksum-causes.sh
+    points: 1
+  - name: failure-causes
+    description: download-triage marks the wrong-arch, wrong-version and tampered batches
+    type: file
+    source: validation/validate-failure-causes.sh
+    points: 1
   - name: rejected-download
     description: download-triage names the batch whose bytes match no published file
     type: file
     source: validation/validate-rejected-download.sh
     points: 1
-  - name: failure-causes
-    description: download-triage gives the correct cause for every batch
-    type: file
-    source: validation/validate-failure-causes.sh
-    points: 2

@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: beacon-tls-secret
-    description: TLS Secret beacon-tls holds a new certificate for beacon.example.test with its key
+    description: TLS Secret beacon-tls in starfleet-031-030-03-02 holds a certificate and its matching private key
     type: file
     source: validation/validate-beacon-tls-secret.sh
+    points: 1
+  - name: beacon-san
+    description: The beacon-tls certificate is new, not the outpost copy, and names only beacon.example.test in its SAN
+    type: file
+    source: validation/validate-beacon-san.sh
     points: 1
   - name: beacon-https
     description: https://beacon.example.test is served with a certificate for its name

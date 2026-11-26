@@ -1,20 +1,8 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
-# Disable Profiling And Raise The API Server TLS Minimum Solution
+# Disable Profiling And Raise The API Server TLS Minimum — Solution
 
-Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
+You solve this lab with one edit of the API server static pod manifest. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-astrona ssh astro-ats-031-lab-020-03-02
-kubectl config current-context
-```
-
-The second command prints `kubernetes-admin@astro-ats-031-lab-020-03-02`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
-
-## Confirm both findings
+## Step 1: look at the starting state
 
 The profiling endpoint `/debug/pprof/` returns data about the memory and CPU use of the API server. Any user who is allowed to read it can learn about the inside of the server, and heavy profiling requests use resources. Request it with your administrator credentials, then read the two flags of the running process:
 
@@ -25,21 +13,43 @@ sudo ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' 
 
 The first command prints the start of an HTML page, so the endpoint answers. The second shows `--tls-min-version=VersionTLS10` and no `--profiling` flag, so profiling has its default value `true`.
 
-## Change both flags
+## Step 2: copy the manifest
 
-TLS 1.0 and 1.1 have known weaknesses. The benchmark asks for TLS 1.2 or newer. Change the TLS line and add `--profiling=false` in the same edit, so the API server restarts only once. The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod. Edit a copy in a work directory outside that folder, check the copy, and move it back in one step, so that the kubelet never reads a half-written file:
+The kubelet watches `/etc/kubernetes/manifests` and starts every file in it as a static pod, a pod that the kubelet runs from a file on the node. Edit a copy in a work directory outside that folder, so that the kubelet never reads a half-written file and no backup becomes a second pod:
 
 ```sh
 sudo mkdir -p /etc/kubernetes/edit
 sudo cp -p /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/edit/kube-apiserver.yaml
-sudo sed -i -e 's|--tls-min-version=VersionTLS10|--tls-min-version=VersionTLS12|' -e 's|^\( *\)- kube-apiserver$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-apiserver.yaml
+```
+
+Both flag changes go into this copy, so the API server restarts only once.
+
+## Step 3: turn off profiling (check `api-profiling-disabled`)
+
+Add `--profiling=false` right after the line `- kube-apiserver`, with the same indentation as the other flags:
+
+```sh
+sudo sed -i 's|^\( *\)- kube-apiserver$|&\n\1- --profiling=false|' /etc/kubernetes/edit/kube-apiserver.yaml
+```
+
+## Step 4: raise the TLS minimum (check `tls-min-version`)
+
+TLS 1.0 and 1.1 have known weaknesses. The benchmark asks for TLS 1.2 or newer. Change the existing line instead of adding a second one:
+
+```sh
+sudo sed -i 's|--tls-min-version=VersionTLS10|--tls-min-version=VersionTLS12|' /etc/kubernetes/edit/kube-apiserver.yaml
 sudo grep -e '--profiling' -e '--tls-min-version' /etc/kubernetes/edit/kube-apiserver.yaml
+```
+
+The `grep` prints `- --profiling=false` and `- --tls-min-version=VersionTLS12`. Move the copy back in one step:
+
+```sh
 sudo mv /etc/kubernetes/edit/kube-apiserver.yaml /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
 
-## Verify the running API server
+## Step 5: wait for the new API server (check `pprof-not-found`)
 
-The kubelet sees the changed file and starts a new API server; on the lab VM that takes about 45 seconds, and kubectl fails until it is back. Wait until the API server answers, then repeat the checks:
+The kubelet sees the changed file and starts a new API server; kubectl fails until it is back. Wait until it answers:
 
 ```sh
 for attempt in $(seq 1 60); do
@@ -48,16 +58,24 @@ for attempt in $(seq 1 60); do
 done
 ```
 
-The old API server process can still answer for a few seconds after the `mv`, so the loop waits until the running API server process has the new flag and the API server is ready. It prints `new flag visible and API server ready`. If it ends without that message, run `sudo crictl ps -a --name kube-apiserver` and read the logs of the exited container.
+The old API server process can still answer for a few seconds after the `mv`, so the loop waits until the running process has the new flag and the API server is ready. It prints `new flag visible and API server ready`. If it ends without that message, run `sudo crictl ps -a --name kube-apiserver` and read the logs of the exited container with `sudo crictl logs <CONTAINER_ID>`.
+
+## Step 6: test the result
 
 ```sh
 sudo ps -eo args | grep '^kube-apiserver' | tr ' ' '\n' | grep -e '--profiling' -e '--tls-min-version'
 kubectl get --raw /debug/pprof/
 ```
 
-The process now has `--profiling=false` and `--tls-min-version=VersionTLS12`, and the last command fails with `the server could not find the requested resource`, which is HTTP `404`.
+The process now has `--profiling=false` and `--tls-min-version=VersionTLS12`. The last command fails with a `NotFound` error, which is HTTP `404`.
+
+## Step 7: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> A `--profiling=false` line in the manifest does nothing until the new process runs; check the process. A second `--tls-min-version` flag overrides the first, so remove the old line instead of adding one. Valid values are `VersionTLS12` and `VersionTLS13`, not `1.2`.
+> The grader reads the running `kube-apiserver` process, not the manifest. A flag in the file does nothing until the new process runs.
+>
+> A second `--tls-min-version` flag overrides the first: the last one wins. Valid values are `VersionTLS12` and `VersionTLS13`, not `1.2`.

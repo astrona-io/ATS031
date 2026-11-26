@@ -116,6 +116,8 @@ if wants('egress-denied'):
     assert 'Egress' in baseline().get('policyTypes', []), 'The baseline must isolate pods for egress'
     expect_blocked(NS, 'hauler', pod_ip(OTHER, 'pilot'), 8080, note='to another namespace ')
     expect_blocked(NS, 'hauler', pod_ip(NS, 'winch'), 8080, note='inside the namespace ')
+if wants('dns-denied'):
+    assert 'Egress' in baseline().get('policyTypes', []), 'The baseline must isolate pods for egress'
     expect_dns(NS, 'winch', works=False)
 if wants('ingress-still-open'):
     assert baseline().get('policyTypes') == ['Egress'], 'policyTypes must list only Egress'

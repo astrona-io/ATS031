@@ -120,12 +120,16 @@ def recorded():
     assert not policies(OUTPOST), 'Do not create policies in the outpost namespace'
     return get('configmap', 'test-matrix', NS).get('data') or {}
 
-if wants('traffic-rows'):
-    data = recorded()
-    for key, source_ns, source, target_ns, target in ROWS:
+def check_rows(data, rows):
+    for key, source_ns, source, target_ns, target in rows:
         assert data.get(key) in ('open', 'blocked'), 'Row ' + key + ' must be open or blocked'
         actual = client(source_ns, source, 'tcp', pod_ip(target_ns, target), 8080).split(' ')[0]
         assert data[key] == actual, 'Row ' + key + ' is recorded as ' + data[key] + ' but the request is ' + actual
+
+if wants('starfleet-rows'):
+    check_rows(recorded(), [row for row in ROWS if row[1] == NS])
+if wants('outpost-rows'):
+    check_rows(recorded(), [row for row in ROWS if row[1] == OUTPOST])
 if wants('dns-rows'):
     data = recorded()
     for key, source_ns, source in DNS_ROWS:

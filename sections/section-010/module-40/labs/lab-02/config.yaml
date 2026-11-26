@@ -36,13 +36,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: dns-rule
+    description: The navigator-dns policy selects only the navigator pod and allows egress only on UDP 53 and TCP 53 to the kube-dns pods, selected in one peer entry; no other policy is added
+    type: file
+    source: validation/validate-dns-rule.sh
+    points: 1
   - name: navigator-resolves
     description: The navigator pod resolves names through CoreDNS while default-deny-all stays in place
     type: file
     source: validation/validate-navigator-resolves.sh
     points: 1
   - name: dns-only
-    description: 'The DNS rule reaches only CoreDNS on port 53: other CoreDNS ports and other pods time out, and the cargo pod still cannot resolve names'
+    description: 'The navigator pod reaches nothing else: the CoreDNS metrics port 9153 and the cargo pod time out, and the cargo pod still cannot resolve names'
     type: file
     source: validation/validate-dns-only.sh
     points: 1

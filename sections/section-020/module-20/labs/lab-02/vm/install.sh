@@ -642,6 +642,11 @@ if wants('edition-files'):
     expected = set(image_output('grader-files', 'ls /opt/kube-bench/cfg/' + edition).split())
     recorded = {line.strip() for line in saved.get('files', '').splitlines() if line.strip()}
     assert recorded == expected, 'The key files must list exactly the files of ' + edition
+if wants('profiling-check-in-edition'):
+    recorded = saved.get('apiserver-profiling-check', '').strip()
+    assert recorded.startswith('1.2.'), 'apiserver-profiling-check must be an API server check, with an id that starts with 1.2.'
+    listed = [re.match(r'\s*- id: (\S+)', line) for line in image_output('grader-ids', 'cat /opt/kube-bench/cfg/' + edition + '/master.yaml').splitlines()]
+    assert recorded in [found.group(1).strip('"') for found in listed if found], 'apiserver-profiling-check is not a check id in ' + edition + '/master.yaml'
 if wants('profiling-check'):
     current = None
     check = None
@@ -773,6 +778,13 @@ lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-edition-files.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-profiling-check-in-edition.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

@@ -649,6 +649,7 @@ if wants('node-job-completed'):
     assert image in ('docker.io/aquasec/kube-bench:v0.10.6', 'aquasec/kube-bench:v0.10.6'), 'Run the Job with the image docker.io/aquasec/kube-bench:v0.10.6'
     arguments = command_line(pod['spec'])
     assert option(arguments, 'targets') == 'node', 'Run kube-bench with --targets node'
+if wants('kubelet-results-logged'):
     assert re.search(r'^\[(PASS|FAIL|WARN)\] 4\.2\.', log, re.M), 'The log holds no kubelet results of section 4.2'
 if wants('ran-on-worker'):
     assert pod['spec'].get('nodeName') == WORKER, 'The pod of node-audit must run on ' + WORKER
@@ -770,6 +771,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-kubelet-results-logged.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-node-job-completed.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

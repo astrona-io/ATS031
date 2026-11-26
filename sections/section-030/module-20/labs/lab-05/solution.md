@@ -1,31 +1,21 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Find A Broken Route With The Traefik API Solution
+# Repair An Ingress Backend And Read The Traefik Router Name — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+You solve this lab with a corrected Ingress and one ConfigMap. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-02-05)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-02-05" || exit 1
-```
+## Step 1: look at the starting state
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
-
-## Read the controller log
-
-Traefik writes an error when it cannot turn an Ingress into a route:
+Compare the port the Ingress names with the ports the Service has:
 
 ```sh
-kubectl -n ingress-system logs deployment/traefik --tail=30 | grep -i beacon
-kubectl -n starfleet-031-030-02-05 get ingress beacon -o jsonpath='{.spec.rules[0].http.paths[0].backend.service.port}{"\n"}'
-kubectl -n starfleet-031-030-02-05 get service beacon -o jsonpath='{.spec.ports[0].name} {.spec.ports[0].port}{"\n"}'
+kubectl -n starfleet-031-030-02-05 get ingress beacon -o yaml
+kubectl -n starfleet-031-030-02-05 get service beacon -o yaml
 ```
 
-The log names the Ingress and the Service port. The Ingress asks for the port name `web`, but the Service port is named `http`, so Traefik skips the whole route.
+The Ingress backend names the port `web`, but the Service `beacon` has only the port `http` (number 80). Traefik cannot find a port named `web` on the Service, so it builds no router for `beacon.local`.
 
-## Fix the backend port
+## Step 2: name the right Service port (check `beacon-backend`)
+
+An Ingress backend points at a Service and one of its ports, by `name` or by `number`. The name must be a port name of the Service, not a name from the Traefik setup. Keep everything else in the Ingress as it is.
 
 Save this as `ingress-beacon.yaml`:
 
@@ -58,37 +48,52 @@ Apply it:
 kubectl apply -f ingress-beacon.yaml
 ```
 
-## Read the router from the API
+`port: number: 80` works as well; both name the same Service port.
 
-Open a port forward to the API port and the web port in a second terminal. Then list the routers with their rules:
+## Step 3: test the route (check `beacon-route`)
 
-```sh
-kubectl -n ingress-system port-forward service/traefik 9000:8080 8080:80
-curl -s http://127.0.0.1:9000/api/http/routers | python3 -m json.tool | grep -E '"(name|rule)"'
-curl -s -H 'Host: beacon.local' http://127.0.0.1:8080/
-```
-
-The router for the rule ``Host(`beacon.local`) && PathPrefix(`/`)`` has a name that ends in `@kubernetes`. The `curl` request now returns a line that starts with `app=beacon`.
-
-## Record the router name
-
-Copy the name from the API output into the ConfigMap. Replace `<ROUTER>` with the name that the API printed:
+Forward the Traefik HTTP port and the API port to your machine. `--resolve` sends the name `beacon.local` to the forwarded port:
 
 ```sh
-kubectl -n starfleet-031-030-02-05 create configmap route-evidence --from-literal=router='<ROUTER>'
+kubectl -n ingress-system port-forward service/traefik 8000:80 8080:8080 >/dev/null &
+curl --resolve beacon.local:8000:127.0.0.1 http://beacon.local:8000/
 ```
+
+Wait a second for the port forward before `curl`. The reply must start with `app=beacon`.
+
+## Step 4: record the router name (check `router-name`)
+
+Traefik turns every Ingress path into a router, an internal object that matches requests with a rule such as ``Host(`beacon.local`)`` and sends them to a service. The API on port 8080 lists every HTTP router as JSON. Each router name ends with `@` and the provider that created it, here `@kubernetes`.
+
+```sh
+curl http://127.0.0.1:8080/api/http/routers
+```
+
+Find the router whose `rule` contains `beacon.local` and copy its `name` value. Use it in place of `<ROUTER>`:
+
+```sh
+kubectl -n starfleet-031-030-02-05 create configmap route-evidence --from-literal=router=<ROUTER>
+```
+
+Then check the result:
+
+```sh
+kubectl -n starfleet-031-030-02-05 get configmap route-evidence -o jsonpath='{.data.router}{"\n"}'
+```
+
+It must print the same name as the API. Stop the port forward with `kill %1`.
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Reading only the Ingress.** The Ingress looks valid; the log and the API show that Traefik skipped it.
-> - **Recording the name without `@kubernetes`.** The API name includes the provider, and the task asks for the exact name.
-> - **Leaving `--api.insecure=true` on a shared cluster.** It exposes every route without authentication. It is enabled here only for this exercise.
-
-## Clean up
-
-Destroy the lab cluster when you are done:
-
-```sh
-astrona destroy ats-031-lab-030-02-05
-```
+> Do not change the Service to add a port named `web`. Fix the Ingress: its backend must name the Service port `http` or the number 80.
+>
+> Keep the annotation `traefik.ingress.kubernetes.io/router.entrypoints: web`, the host `beacon.local` and the `Prefix` path `/`. The check rejects any other route.
+>
+> Copy the router name exactly, including `@kubernetes`. A name without the provider part does not match the API.
+>
+> Read the name after the route works. Before the fix, the API lists no router for `beacon.local`.

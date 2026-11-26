@@ -660,6 +660,7 @@ job, pod, log = learner_job('etcd-audit')
 arguments = command_line(pod['spec'])
 if wants('etcd-target-run'):
     assert option(arguments, 'targets') == 'etcd', 'Run kube-bench with --targets etcd only'
+if wants('etcd-results-only'):
     assert re.search(r'^\[(PASS|FAIL|WARN)\] 2\.\d', log, re.M), 'The log holds no etcd results'
     assert not re.search(r'^\[(PASS|FAIL|WARN|INFO)\] 1\.\d', log, re.M), 'The log also holds control plane results'
 if wants('benchmark-pinned'):
@@ -783,6 +784,13 @@ lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-benchmark-pinned.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-etcd-results-only.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

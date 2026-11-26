@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: host-network-pods
+  namespace: dock-031-040-03-04
+data:
+  pods: |
+    dock-031-040-03-04/net-tool
+    dock-031-040-03-04/port-watch
+    outpost-031-040-03-04/sniffer

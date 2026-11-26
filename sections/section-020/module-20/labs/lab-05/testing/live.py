@@ -149,8 +149,10 @@ def option(arguments, name):
 
 job, pod, log = learner_job('master-audit')
 assert option(command_line(pod['spec']), 'targets') == 'master', 'Run kube-bench with --targets master'
-saved = get('configmap', 'master-result').get('data', {})
+if wants('master-job-completed'):
+    assert re.search(r'^\d+ checks (PASS|FAIL|WARN|INFO)$', log, re.M), 'The log of master-audit has no summary'
 if wants('totals-match'):
+    saved = get('configmap', 'master-result').get('data', {})
     totals = {}
     for number, state in re.findall(r'^(\d+) checks (PASS|FAIL|WARN|INFO)$', log, re.M):
         totals[state.lower()] = number
@@ -158,6 +160,7 @@ if wants('totals-match'):
     for key, number in totals.items():
         assert saved.get(key, '').strip() == number, 'The key ' + key + ' differs from the summary of the report'
 if wants('section-counts-match'):
+    saved = get('configmap', 'master-result').get('data', {})
     for section in ('1.1', '1.2'):
         expected = len(re.findall(r'^\[FAIL\] ' + re.escape(section) + r'\.\d+', log, re.M))
         assert saved.get('fail-' + section, '').strip() == str(expected), 'The key fail-' + section + ' differs from the report'

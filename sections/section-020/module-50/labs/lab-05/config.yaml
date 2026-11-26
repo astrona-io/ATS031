@@ -41,9 +41,14 @@ testing:
 validation:
   scripts:
   - name: service-file-modes
-    description: The kubelet unit file and its drop-in files have mode 600 or stricter and owner root:root
+    description: The kubelet unit file (FragmentPath) has mode 600 or stricter and owner root:root
     type: file
     source: vm/validate-service-file-modes.sh
+    points: 1
+  - name: drop-in-file-modes
+    description: Every drop-in file of the kubelet service (DropInPaths) has mode 600 or stricter and owner root:root
+    type: file
+    source: vm/validate-drop-in-file-modes.sh
     points: 1
   - name: rotate-certificates
     description: The effective kubelet configuration has rotateCertificates set to true

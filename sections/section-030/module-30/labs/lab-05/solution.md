@@ -1,21 +1,24 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Redirect HTTP To HTTPS And Add HSTS Solution
+# Redirect HTTP To HTTPS And Add An HSTS Header — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+You solve this lab with a new `dynamic.yaml`, one Ingress update and one patch of the Traefik Deployment. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+Check the dynamic configuration, the Traefik arguments and the Ingress annotations:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-03-05)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-03-05" || exit 1
+kubectl -n ingress-system get configmap traefik-dynamic -o jsonpath='{.data.dynamic\.yaml}'
+kubectl -n ingress-system get deployment traefik -o jsonpath='{.spec.template.spec.containers[0].args}{"\n"}'
+kubectl -n starfleet-031-030-03-05 get ingress harbor -o jsonpath='{.metadata.annotations}{"\n"}'
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+Traefik mounts the ConfigMap `traefik-dynamic` at `/etc/traefik/dynamic` and reads it with its file provider (`--providers.file.directory` and `--providers.file.watch=true`). Today the file holds only the TLS option `default`.
 
-## Add the HSTS middleware
+## Step 2: define the hsts middleware (check `hsts-middleware`)
 
-The middleware lives in the dynamic configuration of the file provider. Keep the TLS option that is already there. Save this as `dynamic.yaml`:
+A middleware is a Traefik step that changes a request or a response on a route. The `headers` middleware with `stsSeconds: 300` adds the response header `Strict-Transport-Security: max-age=300`. HTTP Strict Transport Security (HSTS) tells the browser to use only HTTPS for this host for the next 300 seconds. Keep the TLS option `default` in the same file.
+
+Save this as `dynamic.yaml`:
 
 ```yaml
 tls:
@@ -29,14 +32,15 @@ http:
         stsSeconds: 300
 ```
 
-Apply it by replacing the ConfigMap from the file:
+Replace the ConfigMap with the new file. The key name comes from the file name, so the file must be called `dynamic.yaml`:
 
 ```sh
-kubectl -n ingress-system create configmap traefik-dynamic --from-file=dynamic.yaml --dry-run=client -o yaml > configmap-traefik-dynamic.yaml
-kubectl apply -f configmap-traefik-dynamic.yaml
+kubectl -n ingress-system create configmap traefik-dynamic --from-file=dynamic.yaml --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-## Attach the middleware to the route
+## Step 3: attach the middleware to the Ingress (check `hsts-header`)
+
+A middleware from the file provider has the name `<name>@file`. The annotation `traefik.ingress.kubernetes.io/router.middlewares: hsts@file` adds it to the route Traefik builds for the Ingress `harbor`. The rest of the Ingress stays as it was.
 
 Save this as `ingress-harbor.yaml`:
 
@@ -75,9 +79,11 @@ Apply it:
 kubectl apply -f ingress-harbor.yaml
 ```
 
-## Redirect on the entrypoint
+## Step 4: redirect the web entrypoint to HTTPS (check `https-redirect`)
 
-The `args` list is not merged by key, so append the two arguments with a JSON patch. Save this as `traefik-redirect-patch.json`:
+An entrypoint is a port Traefik listens on: `web` on 8000 for HTTP and `websecure` on 8443 for HTTPS. Two arguments make Traefik answer every request on `web` with a permanent redirect to `websecure` with the scheme `https`. A JSON patch with the operation `add` and the path `args/-` appends them and keeps every existing argument.
+
+Save this as `traefik-redirect-patch.json`:
 
 ```json
 [
@@ -86,37 +92,42 @@ The `args` list is not merged by key, so append the two arguments with a JSON pa
 ]
 ```
 
-Apply it and wait for the new pod, which also reads the new dynamic configuration:
+Apply it and wait for the new Traefik pod:
 
 ```sh
 kubectl -n ingress-system patch deployment traefik --type=json --patch-file traefik-redirect-patch.json
-kubectl -n ingress-system rollout status deployment/traefik
+kubectl -n ingress-system rollout status deployment/traefik --timeout=180s
 ```
 
-## Verify
+## Step 5: test the header and the redirect (checks `hsts-header` and `https-redirect`)
 
-Open a port forward in a second terminal. Then read the headers of a plain HTTP request and of an HTTPS request:
+Save the certificate from the Secret, so `curl` can trust it, and forward both Traefik ports to your machine:
 
 ```sh
-kubectl -n ingress-system port-forward service/traefik 8080:80 8443:443
-curl -si -H 'Host: harbor.example.test' http://127.0.0.1:8080/cargo | head -n 3
-kubectl -n starfleet-031-030-03-05 get secret harbor-tls -o jsonpath='{.data.tls\.crt}' | base64 --decode > harbor.crt
-curl -si --cacert harbor.crt --resolve harbor.example.test:8443:127.0.0.1 https://harbor.example.test:8443/ | grep -i strict-transport
+kubectl -n starfleet-031-030-03-05 get secret harbor-tls -o jsonpath='{.data.tls\.crt}' | base64 -d > harbor.crt
+kubectl -n ingress-system port-forward service/traefik 8080:80 8443:443 >/dev/null &
 ```
 
-The first response is a permanent redirect whose `Location` starts with `https://harbor.example.test`. The second shows `Strict-Transport-Security: max-age=300`.
+Wait a second for the port forward, then send one HTTPS and one HTTP request. `-i` prints the response headers:
+
+```sh
+curl -si --cacert harbor.crt --resolve harbor.example.test:8443:127.0.0.1 https://harbor.example.test:8443/
+curl -si --resolve harbor.example.test:8080:127.0.0.1 http://harbor.example.test:8080/cargo
+```
+
+The HTTPS response must have the status `200`, the header `Strict-Transport-Security: max-age=300` and a body that starts with `app=harbor`. The HTTP response must have the status `301` or `308` and a `Location` header that starts with `https://harbor.example.test` and ends with `/cargo`. Stop the port forward with `kill %1`.
+
+## Step 6: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Replacing the whole `args` list with a merge patch.** Use a JSON patch that appends items.
-> - **Dropping the TLS option `default` when you add the middleware.** The ConfigMap holds one file; write the whole file again.
-> - **Expecting the HSTS header over plain HTTP.** Traefik adds it only on the HTTPS route that uses the middleware.
-
-## Clean up
-
-Destroy the lab cluster when you are done:
-
-```sh
-astrona destroy ats-031-lab-030-03-05
-```
+> Do not drop the TLS option `default` when you write the new `dynamic.yaml`. The check requires it with `minVersion: VersionTLS12`.
+>
+> The annotation value must be exactly `hsts@file`. Without the `@file` suffix, Traefik looks for the middleware in the wrong provider.
+>
+> A strategic merge patch or `kubectl edit` that replaces the `args` list can lose an existing argument. The check requires all of them, such as `--providers.file.directory=/etc/traefik/dynamic` and `--entrypoints.websecure.address=:8443`.
+>
+> A redirect with the status `302` is temporary and fails. The entrypoint redirection is permanent by default.

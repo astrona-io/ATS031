@@ -104,19 +104,25 @@ def expect_dns(namespace, pod, works=True):
         assert output == 'unresolved', f'{namespace}/{pod} must not resolve names but got: {output}'
 
 NS = 'starfleet-031-010-01-03'
+
+def relay_policy():
+    spec = get('networkpolicy', 'relay-egress-isolation', NS)['spec']
+    assert selector_matches(spec.get('podSelector'), pod_labels(NS, 'relay')), 'The policy must select the relay pod'
+    return spec
+
+if wants('relay-egress-policy'):
+    spec = relay_policy()
+    for name in ('lander', 'courier'):
+        assert not selector_matches(spec.get('podSelector'), pod_labels(NS, name)), 'The policy must not select ' + name
+    assert spec.get('policyTypes') == ['Egress'], 'policyTypes must list only Egress, so ingress to relay is not isolated'
+    assert not spec.get('egress'), 'Allow no egress at all: the policy must have no egress rules'
+    assert len(policies(NS)) == 1, 'Create only the relay-egress-isolation policy in this namespace'
 if wants('relay-egress-isolated'):
-    policy = get('networkpolicy', 'relay-egress-isolation', NS)
-    assert selector_matches(policy['spec'].get('podSelector'), pod_labels(NS, 'relay')), 'The policy must select the relay pod'
-    assert 'Egress' in policy['spec'].get('policyTypes', []), 'The policy must isolate relay for egress'
-    assert not policy['spec'].get('egress'), 'Allow no egress at all: the policy must have no egress rules'
+    relay_policy()
     expect_blocked(NS, 'relay', pod_ip(NS, 'lander'), 8080)
     expect_dns(NS, 'relay', works=False)
 if wants('ingress-and-neighbours-open'):
-    policy = get('networkpolicy', 'relay-egress-isolation', NS)
-    assert policy['spec'].get('policyTypes') == ['Egress'], 'policyTypes must list only Egress, so ingress to relay is not isolated'
-    for name in ('lander', 'courier'):
-        assert not selector_matches(policy['spec'].get('podSelector'), pod_labels(NS, name)), 'The policy must not select ' + name
-    assert len(policies(NS)) == 1, 'Create only the relay-egress-isolation policy in this namespace'
+    relay_policy()
     expect_open(NS, 'courier', pod_ip(NS, 'relay'), 8080)
     expect_open(NS, 'lander', pod_ip(NS, 'courier'), 8080)
     expect_dns(NS, 'lander')

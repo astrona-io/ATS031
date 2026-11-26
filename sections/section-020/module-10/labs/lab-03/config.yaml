@@ -46,7 +46,12 @@ validation:
     source: vm/validate-apiserver-values.sh
     points: 1
   - name: etcd-values
-    description: ConfigMap manual-audit records the effective etcd client certificate setting and data directory mode
+    description: ConfigMap manual-audit records the effective etcd client certificate setting
     type: file
     source: vm/validate-etcd-values.sh
+    points: 1
+  - name: etcd-data-dir-mode
+    description: ConfigMap manual-audit records the octal mode of the etcd data directory /var/lib/etcd
+    type: file
+    source: vm/validate-etcd-data-dir-mode.sh
     points: 1

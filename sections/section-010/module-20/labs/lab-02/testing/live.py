@@ -115,8 +115,11 @@ def baseline():
 if wants('ingress-denied'):
     assert 'Ingress' in baseline().get('policyTypes', []), 'The baseline must isolate pods for ingress'
     expect_blocked(OTHER, 'visitor', pod_ip(NS, 'vault'), 8080, note='from another namespace ')
+    expect_blocked(OTHER, 'visitor', pod_ip(NS, 'crane'), 8080, note='from another namespace ')
+if wants('same-namespace-denied'):
+    assert 'Ingress' in baseline().get('policyTypes', []), 'The baseline must isolate pods for ingress'
     expect_blocked(NS, 'crane', pod_ip(NS, 'vault'), 8080, note='from the same namespace ')
-    expect_blocked(OTHER, 'visitor', pod_ip(NS, 'crane'), 8080)
+    expect_blocked(NS, 'vault', pod_ip(NS, 'crane'), 8080, note='from the same namespace ')
 if wants('egress-still-open'):
     assert baseline().get('policyTypes') == ['Ingress'], 'policyTypes must list only Ingress'
     assert len(policies(NS)) == 1, 'Create only the default-deny-ingress policy in the dock namespace'

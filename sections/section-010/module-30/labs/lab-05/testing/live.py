@@ -139,5 +139,8 @@ if wants('udp-named-port'):
             break
     else:
         expect_open(OUTPOST, 'surveyor', meter, 7200, protocol='udp')
+if wants('admin-port-closed'):
+    meter_rules()
+    meter = pod_ip(HOME, 'meter')
     expect_blocked(OUTPOST, 'surveyor', meter, 7100)
     expect_blocked(OUTPOST, 'loiterer', meter, 7200, protocol='udp')

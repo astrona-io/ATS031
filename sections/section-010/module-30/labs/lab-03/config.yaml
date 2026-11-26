@@ -41,8 +41,13 @@ validation:
     type: file
     source: validation/validate-division-labels.sh
     points: 1
+  - name: archive-policy
+    description: The archive-from-science policy selects the archive pod and admits TCP 8080 from every pod in namespaces labelled division=science
+    type: file
+    source: validation/validate-archive-policy.sh
+    points: 1
   - name: archive-admits-division
-    description: The archive pod accepts TCP 8080 from namespaces labelled division=science and the outpost namespace times out
+    description: The mapper pods in survey and salvage reach the archive pod on TCP 8080 and the mapper pod in outpost times out
     type: file
     source: validation/validate-archive-admits-division.sh
     points: 1

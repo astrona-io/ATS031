@@ -36,8 +36,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: dns-egress
+    description: pathfinder-egress allows UDP 53 and TCP 53 to the kube-dns pods in kube-system, and the pathfinder pod resolves names
+    type: file
+    source: validation/validate-dns-egress.sh
+    points: 1
   - name: pathfinder-dependencies
-    description: The pathfinder pod resolves names, reaches the datastore on TCP 6379 and the API server, and still times out to the stranger pod
+    description: The pathfinder pod reaches the datastore on TCP 6379 and the API server through the kubernetes Service, keeps the /32 API server rule, and still times out to the stranger pod
     type: file
     source: validation/validate-pathfinder-dependencies.sh
     points: 1

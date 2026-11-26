@@ -36,7 +36,12 @@ validation:
     description: manifest-check names every file that fails the SHA256SUMS manifest
     type: file
     source: validation/validate-failed-files.sh
-    points: 2
+    points: 1
+  - name: passing-files
+    description: manifest-check names no file that passes the SHA256SUMS manifest
+    type: file
+    source: validation/validate-passing-files.sh
+    points: 1
   - name: agent-digest
     description: manifest-check records the current SHA-256 digest of fleet-agent
     type: file

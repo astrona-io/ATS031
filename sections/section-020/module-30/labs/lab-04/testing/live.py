@@ -72,6 +72,11 @@ if wants('authorization-mode'):
     modes = flag_list(process_arguments(NODE, 'kube-apiserver'), 'authorization-mode')
     assert 'AlwaysAllow' not in modes, 'Remove AlwaysAllow from --authorization-mode'
     assert modes == ['Node', 'RBAC'], 'The API server must run with --authorization-mode=Node,RBAC'
+if wants('anonymous-binding-removed'):
+    bindings = json.loads(kubectl('get', 'clusterrolebindings', '-o', 'json'))['items']
+    granted = [item['metadata']['name'] for item in bindings
+               if any(subject.get('name') == 'system:anonymous' for subject in item.get('subjects') or [])]
+    assert not granted, 'A ClusterRoleBinding still grants access to system:anonymous: ' + ', '.join(granted)
 if wants('anonymous-denied'):
     status = node_exec(NODE, 'curl', '-sk', '-m', '5', '-o', '/dev/null', '-w', '%{http_code}', 'https://127.0.0.1:6443/api/v1/namespaces/' + NAMESPACE + '/pods', success=False).stdout.strip()
     assert status in ('401', '403'), 'An anonymous request to list pods returned HTTP ' + status

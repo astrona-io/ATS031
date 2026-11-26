@@ -42,7 +42,12 @@ validation:
     source: validation/validate-service-port-repaired.sh
     points: 1
   - name: metrics-range
-    description: The collector pod reaches TCP 9100 to 9102 on every kiosk replica through one endPort range, and nothing else is opened
+    description: The kiosk-ingress policy allows TCP 9100 to 9102 with one endPort item and opens no port other than 8080 and that range
     type: file
     source: validation/validate-metrics-range.sh
+    points: 1
+  - name: collector-reaches-metrics
+    description: The collector pod reaches TCP 9100 and 9102 on every kiosk replica, while the visitor pod times out on 9101 and the collector pod times out on 8080
+    type: file
+    source: validation/validate-collector-reaches-metrics.sh
     points: 1

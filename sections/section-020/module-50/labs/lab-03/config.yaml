@@ -41,9 +41,14 @@ testing:
 validation:
   scripts:
   - name: flags-file-clean
-    description: The kubelet flags file and the running kubelet process have no --authorization-mode flag
+    description: /var/lib/kubelet/kubeadm-flags.env has no --authorization-mode flag
     type: file
     source: vm/validate-flags-file-clean.sh
+    points: 1
+  - name: kubelet-flag-removed
+    description: The running kubelet process has no --authorization-mode flag
+    type: file
+    source: vm/validate-kubelet-flag-removed.sh
     points: 1
   - name: webhook-effective
     description: The effective kubelet configuration of the node uses the Webhook authorization mode

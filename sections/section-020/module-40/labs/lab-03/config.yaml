@@ -41,12 +41,17 @@ testing:
 validation:
   scripts:
   - name: client-cert-auth
-    description: etcd runs with --client-cert-auth=true and refuses a request without a client certificate
+    description: The running etcd process has --client-cert-auth=true
     type: file
     source: vm/validate-client-cert-auth.sh
-    points: 2
+    points: 1
   - name: peer-client-cert-auth
     description: etcd runs with --peer-client-cert-auth=true
     type: file
     source: vm/validate-peer-client-cert-auth.sh
+    points: 1
+  - name: anonymous-request-rejected
+    description: etcd refuses a request to https://127.0.0.1:2379/health without a client certificate
+    type: file
+    source: vm/validate-anonymous-request-rejected.sh
     points: 1

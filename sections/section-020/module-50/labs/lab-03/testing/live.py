@@ -72,6 +72,7 @@ assert_node_ready(WORKER)
 if wants('flags-file-clean'):
     flags = node_exec(WORKER, 'cat', '/var/lib/kubelet/kubeadm-flags.env').stdout
     assert not re.search(r'^[^#]*--authorization-mode\b', flags, re.M), 'kubeadm-flags.env still sets --authorization-mode'
+if wants('kubelet-flag-removed'):
     assert flag_value(process_arguments(WORKER, 'kubelet'), 'authorization-mode') is None, 'The running kubelet still has an --authorization-mode flag'
 if wants('webhook-effective'):
     assert configz(WORKER)['authorization']['mode'] == 'Webhook', 'The effective kubelet authorization mode must be Webhook'

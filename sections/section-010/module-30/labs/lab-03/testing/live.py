@@ -108,16 +108,19 @@ HOME, SURVEY, SALVAGE, OUTPOST = 'starfleet-031-010-03-03', 'survey-031-010-03-0
 def labels_of(namespace):
     return get('namespace', namespace, None)['metadata'].get('labels', {})
 
-if wants('division-labels'):
-    for namespace in (SURVEY, SALVAGE):
-        assert labels_of(namespace).get('division') == 'science', namespace + ' needs the label division=science'
-    assert labels_of(OUTPOST).get('division') != 'science', OUTPOST + ' must not be in the science division'
-if wants('archive-admits-division'):
+def archive_rules():
     get('networkpolicy', 'archive-from-science', HOME)
     rules = rules_for(HOME, pod_labels(HOME, 'archive'), 'Ingress')
     assert rules, 'The archive pod needs an ingress rule'
     no_open_rules(rules)
-    for rule in rules:
+    return rules
+
+if wants('division-labels'):
+    for namespace in (SURVEY, SALVAGE):
+        assert labels_of(namespace).get('division') == 'science', namespace + ' needs the label division=science'
+    assert labels_of(OUTPOST).get('division') != 'science', OUTPOST + ' must not be in the science division'
+if wants('archive-policy'):
+    for rule in archive_rules():
         assert port_set(rule) == {('TCP', '8080', None)}, 'The archive rule must allow only TCP port 8080'
         for peer in peers_of(rule):
             selector = peer.get('namespaceSelector')
@@ -125,6 +128,8 @@ if wants('archive-admits-division'):
             assert selector_matches(selector, {'division': 'science'}), 'The namespaceSelector must match division=science'
             assert not selector_matches(selector, {'kubernetes.io/metadata.name': SURVEY}), 'Select the namespaces by the division label, not by name'
             assert peer.get('podSelector') in (None, {}), 'Admit every pod in those namespaces: leave out the podSelector or use podSelector: {}'
+if wants('archive-admits-division'):
+    archive_rules()
     expect_open(SURVEY, 'mapper', pod_ip(HOME, 'archive'), 8080)
     expect_open(SALVAGE, 'mapper', pod_ip(HOME, 'archive'), 8080)
     expect_blocked(OUTPOST, 'mapper', pod_ip(HOME, 'archive'), 8080)

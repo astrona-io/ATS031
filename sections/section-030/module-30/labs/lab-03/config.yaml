@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: depot-certificate
-    description: Secret depot-tls holds a self-signed certificate for both names, valid for about 30 days, with its key
+    description: Secret depot-tls holds a self-signed certificate valid for about 30 days, with its key
     type: file
     source: validation/validate-depot-certificate.sh
+    points: 1
+  - name: depot-san
+    description: The depot-tls certificate names depot.example.test and www.depot.example.test in its SAN
+    type: file
+    source: validation/validate-depot-san.sh
     points: 1
   - name: depot-https
     description: Both host names are served over verified HTTPS with the depot-tls certificate

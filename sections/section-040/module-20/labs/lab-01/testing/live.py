@@ -55,20 +55,59 @@ def remove_test_pods():
     del TEST_PODS[:]
 
 
+def selector_matches(selector, labels):
+    """Apply a Kubernetes label selector (matchLabels and matchExpressions)."""
+    selector = selector or {}
+    for key, value in (selector.get('matchLabels') or {}).items():
+        if labels.get(key) != value:
+            return False
+    for expression in selector.get('matchExpressions') or []:
+        key, operator, values = expression['key'], expression['operator'], expression.get('values') or []
+        if operator == 'In' and labels.get(key) not in values:
+            return False
+        if operator == 'NotIn' and key in labels and labels[key] in values:
+            return False
+        if operator == 'Exists' and key not in labels:
+            return False
+        if operator == 'DoesNotExist' and key in labels:
+            return False
+    return True
+
+
+def egress_policies(namespace, labels=None):
+    """Names of the NetworkPolicies in a namespace that control egress, optionally only those that select the given pod labels."""
+    policies = json.loads(kubectl('-n', namespace, 'get', 'networkpolicy', '-o', 'json'))['items']
+    names = []
+    for policy in policies:
+        spec = policy.get('spec', {})
+        if 'Egress' not in (spec.get('policyTypes') or []) and 'egress' not in spec:
+            continue
+        if labels is not None and not selector_matches(spec.get('podSelector'), labels):
+            continue
+        names.append(policy['metadata']['name'])
+    return names
+
+
 OUTPOST = 'outpost-031-040-02-01'
 METADATA = 'http://169.254.169.254/latest/meta-data/'
 PROBE_STARFLEET = 'http://probe.' + NAMESPACE + '.svc.cluster.local/'
 try:
-    assert get('pod', 'drifter', OUTPOST)['status'].get('phase') == 'Running', 'Pod %s/drifter must still be running' % OUTPOST
+    drifter = get('pod', 'drifter', OUTPOST)
+    assert drifter['status'].get('phase') == 'Running', 'Pod %s/drifter must still be running' % OUTPOST
     expect_http('metadata-stub-031-040-02-01', 'control', METADATA, '200', 'The control pod must still reach the metadata server')
     expect_http(NAMESPACE, 'shuttle', METADATA, '200', 'Namespace %s must stay unchanged' % NAMESPACE)
     expect_http(NAMESPACE, 'agent', METADATA, '200', 'Namespace %s must stay unchanged' % NAMESPACE)
     expect_http('dock-031-040-02-01', 'tender', METADATA, '200', 'Namespace dock-031-040-02-01 must stay unchanged')
+    drifter_guard = 'No egress NetworkPolicy in %s selects pod drifter' % OUTPOST
     if wants('metadata-blocked'):
+        assert egress_policies(OUTPOST, drifter['metadata'].get('labels', {})), drifter_guard
         expect_http(OUTPOST, 'drifter', METADATA, 'denied', 'drifter must not reach the metadata address')
+    if wants('services-kept'):
+        assert egress_policies(OUTPOST, drifter['metadata'].get('labels', {})), drifter_guard
         expect_http(OUTPOST, 'drifter', 'http://probe/', '200', 'drifter must still reach the probe Service in its namespace')
         expect_http(OUTPOST, 'drifter', PROBE_STARFLEET, '200', 'drifter must still reach a Service in another namespace by DNS name')
     if wants('whole-namespace'):
+        assert egress_policies(OUTPOST), 'No egress NetworkPolicy exists in %s' % OUTPOST
         new_pod = test_pod(OUTPOST)
         expect_http(OUTPOST, new_pod, METADATA, 'denied', 'A new pod in %s must not reach the metadata address' % OUTPOST)
         expect_http(OUTPOST, new_pod, 'http://probe/', '200', 'A new pod in %s must still reach the probe Service' % OUTPOST)

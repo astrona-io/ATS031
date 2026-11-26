@@ -41,12 +41,17 @@ testing:
 validation:
   scripts:
   - name: anonymous-auth
-    description: The kubelet has anonymous authentication off and answers an anonymous request with HTTP 401
+    description: The effective kubelet configuration has anonymous authentication off
     type: file
     source: vm/validate-anonymous-auth.sh
-    points: 2
+    points: 1
   - name: webhook-authorization
     description: The effective kubelet configuration uses the Webhook authorization mode
     type: file
     source: vm/validate-webhook-authorization.sh
+    points: 1
+  - name: anonymous-request-rejected
+    description: An anonymous request to the kubelet API on port 10250 returns HTTP 401
+    type: file
+    source: vm/validate-anonymous-request-rejected.sh
     points: 1

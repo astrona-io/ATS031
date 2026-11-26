@@ -5,40 +5,6 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
-cat <<'EOF' | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: block-metadata
-  namespace: starfleet-031-040-02-02
-spec:
-  podSelector: {}
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - ipBlock:
-        cidr: 0.0.0.0/0
-        except:
-        - 169.254.169.254/32
-EOF
-cat <<'EOF' | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-metadata-agent
-  namespace: starfleet-031-040-02-02
-spec:
-  podSelector:
-    matchLabels:
-      role: cloud-agent
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - ipBlock:
-        cidr: 169.254.169.254/32
-    ports:
-    - protocol: TCP
-      port: 80
-EOF
+solution_directory="$(cd "$(dirname "$0")" && pwd)"
+kubectl apply -f "$solution_directory/networkpolicy-block-metadata.yaml"
+kubectl apply -f "$solution_directory/networkpolicy-allow-metadata-agent.yaml"

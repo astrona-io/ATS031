@@ -5,44 +5,9 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
   printf 'Refusing to operate on another Kubernetes context\n' >&2
   exit 1
 fi
+solution_directory="$(cd "$(dirname "$0")" && pwd)"
 # outpost: widen the selector to every pod. dock: add the missing policy.
-for namespace in outpost-031-040-02-04 dock-031-040-02-04; do
-  cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: block-metadata
-  namespace: $namespace
-spec:
-  podSelector: {}
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - ipBlock:
-        cidr: 0.0.0.0/0
-        except:
-        - 169.254.169.254/32
-EOF
-done
+kubectl apply -f "$solution_directory/networkpolicy-block-metadata-outpost.yaml"
+kubectl apply -f "$solution_directory/networkpolicy-block-metadata-dock.yaml"
 # starfleet: keep the block and add the exception for the labelled agent.
-cat <<'EOF' | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-metadata-agent
-  namespace: starfleet-031-040-02-04
-spec:
-  podSelector:
-    matchLabels:
-      role: cloud-agent
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - ipBlock:
-        cidr: 169.254.169.254/32
-    ports:
-    - protocol: TCP
-      port: 80
-EOF
+kubectl apply -f "$solution_directory/networkpolicy-allow-metadata-agent.yaml"

@@ -125,12 +125,18 @@ if wants('assay-policy-repaired'):
                 assert not selector_matches(peer['namespaceSelector'], namespace_labels(other)), 'The namespaceSelector must not select ' + other
             assert selector_matches(peer['podSelector'], pod_labels(STARFLEET, 'sampler')), 'The podSelector must select the sampler pod'
             assert not selector_matches(peer['podSelector'], pod_labels(STARFLEET, 'idler')), 'The podSelector must not select the idler pod'
-if wants('only-starfleet-sampler'):
+if wants('idler-denied'):
     assay_rules()
     assert [item['metadata']['name'] for item in policies(NS)] == ['assay-from-starfleet'], 'Keep only the assay-from-starfleet policy in ' + NS
     assert not policies(STARFLEET) and not policies(OUTPOST), 'Do not create policies in ' + STARFLEET + ' or ' + OUTPOST
     target = pod_ip(NS, 'assay')
     expect_open(STARFLEET, 'sampler', target, 8080)
     expect_blocked(STARFLEET, 'idler', target, 8080)
+if wants('only-starfleet-sampler'):
+    assay_rules()
+    assert [item['metadata']['name'] for item in policies(NS)] == ['assay-from-starfleet'], 'Keep only the assay-from-starfleet policy in ' + NS
+    assert not policies(STARFLEET) and not policies(OUTPOST), 'Do not create policies in ' + STARFLEET + ' or ' + OUTPOST
+    target = pod_ip(NS, 'assay')
+    expect_open(STARFLEET, 'sampler', target, 8080)
     expect_blocked(NS, 'sampler', target, 8080)
     expect_blocked(OUTPOST, 'sampler', target, 8080)

@@ -45,7 +45,12 @@ validation:
     source: validation/validate-pod-network.sh
     points: 2
   - name: metadata-blocked
-    description: relay cannot reach metadata-simulator and still reaches the probe Service
+    description: relay runs on the pod network and cannot reach metadata-simulator
     type: file
     source: validation/validate-metadata-blocked.sh
     points: 2
+  - name: probe-reachable
+    description: relay runs on the pod network and still reaches the probe Service by name
+    type: file
+    source: validation/validate-probe-reachable.sh
+    points: 1

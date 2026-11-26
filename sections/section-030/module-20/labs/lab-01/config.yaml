@@ -42,7 +42,12 @@ validation:
     source: validation/validate-fleet-ingress.sh
     points: 1
   - name: path-routing
-    description: /probe and /scout reach their Services; other hosts and paths get 404
+    description: fleet.local/probe and fleet.local/scout reach their own Services
     type: file
     source: validation/validate-path-routing.sh
+    points: 1
+  - name: unmatched-404
+    description: Requests for another host or another path on fleet.local get 404 from Traefik
+    type: file
+    source: validation/validate-unmatched-404.sh
     points: 1

@@ -36,10 +36,15 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
-  - name: traffic-rows
-    description: The five traffic rows in the test-matrix ConfigMap match the live result (open or blocked)
+  - name: starfleet-rows
+    description: The three traffic rows sent from pods in starfleet-031-010-04-04 (rover-to-hangar, rover-to-vault, tanker-to-hangar) in the test-matrix ConfigMap match the live result (open or blocked)
     type: file
-    source: validation/validate-traffic-rows.sh
+    source: validation/validate-starfleet-rows.sh
+    points: 1
+  - name: outpost-rows
+    description: The two traffic rows sent from the drone pod in outpost-031-010-04-04 (drone-to-hangar, drone-to-vault) in the test-matrix ConfigMap match the live result (open or blocked)
+    type: file
+    source: validation/validate-outpost-rows.sh
     points: 1
   - name: dns-rows
     description: The two DNS rows in the test-matrix ConfigMap match the live result (resolved or unresolved)

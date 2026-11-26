@@ -45,6 +45,11 @@ validation:
     type: file
     source: vm/validate-edition-files.sh
     points: 1
+  - name: profiling-check-in-edition
+    description: ConfigMap check-definition records the id of a section 1.2 (API server) check that exists in the master.yaml of the requested edition
+    type: file
+    source: vm/validate-profiling-check-in-edition.sh
+    points: 1
   - name: profiling-check
     description: ConfigMap check-definition records the identifier of the API server profiling check in that edition
     type: file

@@ -36,7 +36,12 @@ validation:
     description: signature-review names every document without a good signature from the publisher key
     type: file
     source: validation/validate-rejected-files.sh
-    points: 2
+    points: 1
+  - name: accepted-files
+    description: signature-review names no document that has a good signature from the publisher key
+    type: file
+    source: validation/validate-accepted-files.sh
+    points: 1
   - name: publisher-fingerprint
     description: signature-review records the fingerprint of the publisher key
     type: file

@@ -194,6 +194,12 @@ response = answer('probe.example.test', pems[0])
 assert ' 200 ' in status_of(response) + ' ', 'https://probe.example.test must still answer 200 over TLS 1.3'
 assert 'app=probe ' in response, 'https://probe.example.test must still reach the Service probe'
 """, [probe_certificate])
+if wants('tls-option'):
+    data = get('configmap', 'traefik-dynamic', 'ingress-system').get('data') or {}
+    lines = [line.split('#', 1)[0].strip().replace('"', '').replace("'", '') for value in data.values() for line in value.splitlines()]
+    assert 'minVersion: VersionTLS13' in lines, 'The ConfigMap traefik-dynamic must set minVersion: VersionTLS13'
+    assert 'sniStrict: true' in lines, 'The ConfigMap traefik-dynamic must set sniStrict: true'
+    assert 'default:' in lines, 'Set both values in the TLS option default'
 if wants('tls13-minimum'):
     live(r"""
 assert refused(lambda: https_get('probe.example.test', pems[0], maximum=ssl.TLSVersion.TLSv1_2)), 'A TLS 1.2 handshake must be refused'

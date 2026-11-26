@@ -122,7 +122,7 @@ if wants('range-admits-courier'):
     blocks = ip_blocks()
     assert blocks and all(ipaddress.ip_network(block['cidr'], strict=False) == POD_RANGE for block in blocks), 'The ipBlock cidr must be the pod range 192.168.0.0/16'
     expect_open(OUTPOST, 'courier', pod_ip(HOME, 'ledger'), 7070)
-if wants('except-blocks-rogue'):
+if wants('rogue-except-entry'):
     blocks = ip_blocks()
     rogue = ipaddress.ip_address(pod_ip(OUTPOST, 'rogue'))
     courier = ipaddress.ip_address(pod_ip(OUTPOST, 'courier'))
@@ -130,5 +130,7 @@ if wants('except-blocks-rogue'):
         excluded = [ipaddress.ip_network(item, strict=False) for item in block.get('except') or []]
         assert not any(courier in network for network in excluded), 'The except list must not remove the courier address'
         assert excluded == [ipaddress.ip_network(str(rogue) + '/32')], 'The except list must hold exactly one entry: ' + str(rogue) + '/32'
+if wants('except-blocks-rogue'):
+    ip_blocks()
     expect_blocked(OUTPOST, 'rogue', pod_ip(HOME, 'ledger'), 7070)
     expect_open(OUTPOST, 'courier', pod_ip(HOME, 'ledger'), 7070)

@@ -1,22 +1,24 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
-# Save The Failing API Server Check Ids Solution
+# Save The Failing API Server Check Ids — Solution
 
-Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
+You solve this lab with one kube-bench Job and one ConfigMap built from its JSON output. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+kube-bench is a tool that runs the checks of the CIS (Center for Internet Security) Kubernetes Benchmark against the node it runs on. Check that the namespace has no audit Job and no list yet:
 
 ```sh
-astrona ssh astro-ats-031-lab-020-02-01
-kubectl config current-context
+kubectl -n starfleet-031-020-02-01 get jobs,configmaps
 ```
 
-The second command prints `kubernetes-admin@astro-ats-031-lab-020-02-01`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
+The list shows no Job, and no ConfigMap named `failing-checks`.
 
-## Run the audit with JSON output
+## Step 2: create the audit Job (check `audit-job-options`)
 
-The text report is made for people. The `--json` option prints the same result as one JSON document, so a script can read it. The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version. Save this as `job-api-server-audit.yaml`:
+The text report of kube-bench is made for people. The `--json` option prints the same result as one JSON document, so a script can read it. The `--targets master` option runs only the control plane checks, which include the API server checks in group `1.2`.
+
+The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `nodeSelector` and the toleration place the pod on the control plane node. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version.
+
+Save this as `job-api-server-audit.yaml`:
 
 ```yaml
 apiVersion: batch/v1
@@ -55,24 +57,26 @@ spec:
       - {name: usr-bin, hostPath: {path: /usr/bin}}
 ```
 
-Apply it, wait until it completes and save the log in a local file:
+Apply it:
 
 ```sh
 kubectl apply -f job-api-server-audit.yaml
+```
+
+## Step 3: wait for the report (check `json-job-completed`)
+
+Wait until the Job completes, then save its log in a local file:
+
+```sh
 kubectl -n starfleet-031-020-02-01 wait --for=condition=complete job/api-server-audit --timeout=180s
 kubectl -n starfleet-031-020-02-01 logs job/api-server-audit > api-server-audit.json
 ```
 
-## Filter the failing API server checks
+The `wait` command prints `job.batch/api-server-audit condition met`.
 
-Each result in the JSON document is an object with a `test_number` and a `status`. The `jq` filter below walks the whole document, keeps the failing results and prints the numbers that start with `1.2.`:
+## Step 4: record the failing API server checks (check `failing-checks-match`)
 
-```sh
-jq -r '[.. | objects | select(has("test_number")) | select(.status == "FAIL") | .test_number | select(startswith("1.2."))] | sort | .[]' api-server-audit.json > failing-1-2.txt
-cat failing-1-2.txt
-```
-
-If `jq` is not installed, save this short Python program as `failing_checks.py`. It does the same walk through the document:
+Each result in the JSON document is an object with a `test_number` and a `status`. Save this short Python program as `failing_checks.py`. It walks the whole document, keeps the failing results and prints the numbers that start with `1.2.`:
 
 ```python
 import json
@@ -86,7 +90,7 @@ failing = set()
 def collect(node):
     if isinstance(node, dict):
         if node.get("status") == "FAIL" and str(node.get("test_number", "")).startswith("1.2."):
-            failing.add(node["test_number"])
+            failing.add(str(node["test_number"]))
         for value in node.values():
             collect(value)
     elif isinstance(node, list):
@@ -98,15 +102,14 @@ collect(report)
 print("\n".join(sorted(failing)))
 ```
 
-Run it on the saved log:
+Run it on the saved log and look at the list:
 
 ```sh
 python3 failing_checks.py api-server-audit.json > failing-1-2.txt
+cat failing-1-2.txt
 ```
 
-## Record the list
-
-Create the ConfigMap from the file:
+Then create the ConfigMap from the file and check it:
 
 ```sh
 kubectl -n starfleet-031-020-02-01 create configmap failing-checks --from-file=ids=failing-1-2.txt
@@ -115,7 +118,15 @@ kubectl -n starfleet-031-020-02-01 get configmap failing-checks -o yaml
 
 The key `ids` holds one check number on each line. Do not change any API server setting now, because the grader compares your list with a new run.
 
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
+
 ## Common pitfalls
 
 > [!WARNING]
-> A `grep` on the text report also matches the numbers in the remediation block and can miss checks that wrap. A partial list fails, and so does a list with `WARN` checks. A Job name can be used only once; delete the Job before you run it again with other options.
+> Every check fails when a control plane manifest or `/var/lib/kubelet/config.yaml` changed since the start. Record the findings; do not fix them.
+>
+> A `grep` on the text report also matches numbers in the remediation text and can miss checks. The list must equal the failing `1.2.` checks: a partial list fails, a list with `WARN` checks fails, and so does any number outside `1.2.`.
+>
+> A Job name can be used only once. Delete the Job before you run it again with other options.

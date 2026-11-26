@@ -20,9 +20,16 @@ def review():
     return json.loads(found.stdout).get('data') or {}
 
 
+def recorded_rejected():
+    return set(re.split(r'[\s,]+', review().get('rejected', '').strip())) - {''}
+
+
 if wants('rejected-files'):
-    recorded = set(re.split(r'[\s,]+', review().get('rejected', '').strip())) - {''}
-    assert recorded == rejected, 'rejected must name every document without a good signature from the publisher key, and no other'
+    assert rejected <= recorded_rejected(), 'rejected must name every document without a good signature from the publisher key'
+if wants('accepted-files'):
+    recorded = recorded_rejected()
+    assert recorded, 'rejected must name at least one document'
+    assert recorded <= rejected, 'rejected must not name a document that has a good signature from the publisher key'
 if wants('publisher-fingerprint'):
     recorded = re.sub(r'\s', '', review().get('fingerprint', '')).upper()
     assert recorded == next(iter(fingerprints)), 'fingerprint must be the full 40-character fingerprint of the publisher key'

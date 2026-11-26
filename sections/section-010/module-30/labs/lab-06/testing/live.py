@@ -134,6 +134,8 @@ if wants('metrics-range'):
         ports |= port_set(rule)
     assert ('TCP', '9100', 9102) in ports, 'Allow TCP 9100 to 9102 with one item that has port: 9100 and endPort: 9102'
     assert ports <= {('TCP', '8080', None), ('TCP', 'http', None), ('TCP', '9100', 9102)}, 'Allow only TCP 8080 and the range 9100 to 9102'
+if wants('collector-reaches-metrics'):
+    kiosk_rules()
     for address in kiosk_ips():
         for port in (9100, 9102):
             expect_open(NS, 'collector', address, port)

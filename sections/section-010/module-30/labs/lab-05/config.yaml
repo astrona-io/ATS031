@@ -42,7 +42,12 @@ validation:
     source: validation/validate-tcp-port-range.sh
     points: 1
   - name: udp-named-port
-    description: The surveyor pod gets a UDP reply on the port named tick, and TCP 7100 stays closed
+    description: The surveyor pod gets a UDP reply on the port named tick
     type: file
     source: validation/validate-udp-named-port.sh
+    points: 1
+  - name: admin-port-closed
+    description: The surveyor pod times out on TCP 7100 and the loiterer pod gets no UDP reply on the port named tick
+    type: file
+    source: validation/validate-admin-port-closed.sh
     points: 1

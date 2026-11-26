@@ -540,6 +540,7 @@ def assert_node_ready(node):
 arguments = process_arguments(NODE, 'kube-apiserver')
 if wants('api-profiling-disabled'):
     assert flag_value(arguments, 'profiling') == 'false', 'kube-apiserver must run with --profiling=false'
+if wants('pprof-not-found'):
     result = command(['kubectl', 'get', '--raw', '/debug/pprof/'], success=False)
     assert result.returncode != 0 and 'NotFound' in result.stdout + result.stderr, 'The /debug/pprof/ endpoint must return 404'
 if wants('tls-min-version'):
@@ -663,6 +664,13 @@ lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-api-profiling-disabled.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-pprof-not-found.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

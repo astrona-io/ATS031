@@ -1,22 +1,23 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
-# Run The Node Checks With A kube-bench Job Solution
+# Run The Node Checks With A kube-bench Job — Solution
 
-Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
+You solve this lab with one kube-bench Job. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+kube-bench is a tool that runs the checks of the CIS (Center for Internet Security) Kubernetes Benchmark on the node where it runs. Check that no audit Job exists yet and see the one node of the cluster:
 
 ```sh
-astrona ssh astro-ats-031-lab-020-02-03
-kubectl config current-context
+kubectl -n starfleet-031-020-02-03 get jobs
+kubectl get nodes
 ```
 
-The second command prints `kubernetes-admin@astro-ats-031-lab-020-02-03`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
+The first command prints `No resources found in starfleet-031-020-02-03 namespace.` The node is both the control plane and the worker.
 
-## Write the Job
+## Step 2: write and run the Job (check `node-job-completed`)
 
-kube-bench must run where the processes and files are. The worker node checks read the kubelet, so the audit runs in a pod on the node that runs the kubelet. The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version. In this lab the one node is both the control plane and the worker, and it has no taint, so the Job needs no `nodeSelector` and no toleration. On a cluster with separate worker nodes, the scheduler places a pod without a toleration only on nodes without the control plane taint, so the same Job runs on a worker.
+kube-bench must run where the processes and files are. The worker node checks read the kubelet, so the audit runs in a pod on the node that runs the kubelet. The `--targets node` option runs only the worker node section of the benchmark.
+
+The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version. In this lab the one node has no taint, so the Job needs no `nodeSelector` and no toleration. On a cluster with separate worker nodes, the scheduler places a pod without a toleration only on nodes without the control plane taint, so the same Job runs on a worker.
 
 Save this as `job-node-audit.yaml`:
 
@@ -51,31 +52,45 @@ spec:
       - {name: usr-bin, hostPath: {path: /usr/bin}}
 ```
 
-Apply it:
+Apply it and wait until the Job completes:
 
 ```sh
 kubectl apply -f job-node-audit.yaml
-```
-
-## Check where it ran and what it found
-
-Wait until the Job completes, then print the node of its pod:
-
-```sh
 kubectl -n starfleet-031-020-02-03 wait --for=condition=complete job/node-audit --timeout=180s
-kubectl -n starfleet-031-020-02-03 get pods -l job-name=node-audit -o wide
 ```
 
-The `NODE` column shows `astro-ats-031-lab-020-02-03`. Now read the log. The worker checks are in section `4` of the benchmark:
+The `wait` command prints `job.batch/node-audit condition met`.
+
+## Step 3: read the kubelet results (check `kubelet-results-logged`)
+
+The worker checks are in section `4` of the benchmark. Section `4.2` holds the kubelet checks, and each result line starts with `[PASS]`, `[FAIL]` or `[WARN]` and the check number:
 
 ```sh
 kubectl -n starfleet-031-020-02-03 logs job/node-audit | grep -e '^\[INFO\] 4' -e '^== Summary'
-kubectl -n starfleet-031-020-02-03 logs job/node-audit | grep '^\[FAIL\]'
+kubectl -n starfleet-031-020-02-03 logs job/node-audit | grep -E '^\[(PASS|FAIL|WARN)\] 4\.2\.'
 ```
 
-The log lists the sections `4.1` (worker node configuration files) and `4.2` (kubelet), and ends with a summary of the counts.
+The second command prints the kubelet results. If it prints nothing, the pod could not read the kubelet process.
+
+## Step 4: check where it ran (check `ran-on-worker`)
+
+The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes, such as the kubelet. Print the node of the pod:
+
+```sh
+kubectl -n starfleet-031-020-02-03 get pods -l job-name=node-audit -o wide
+```
+
+The `NODE` column shows the name of the lab node, the same name that `kubectl get nodes` printed.
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> A Job without `hostPID: true` sees only its own container, so the kubelet checks report that no kubelet runs. On a cluster with separate worker nodes, a control plane `nodeSelector` copied from a master Job sends the pod to the wrong node. A Job name can be used only once; delete the old Job before you apply a changed one.
+> Every check fails until the Job `node-audit` has completed. Use the pinned image `docker.io/aquasec/kube-bench:v0.10.6` and `--targets node`; another image or target fails.
+>
+> A Job without `hostPID: true` sees only its own container, so the kubelet checks report that no kubelet runs and the log has no `4.2` results.
+>
+> A Job name can be used only once. Delete the old Job before you apply a changed one.

@@ -544,8 +544,13 @@ if wants('kubeconfig-files'):
     for path in files:
         assert_mode_at_most(NODE, path, 0o600)
 if wants('key-files'):
-    files = node_exec(NODE, 'find', '/etc/kubernetes/pki', '-name', '*.key').stdout.split()
-    assert len(files) >= 8, 'The private key files under /etc/kubernetes/pki are missing'
+    files = node_exec(NODE, 'find', '/etc/kubernetes/pki', '-path', '/etc/kubernetes/pki/etcd', '-prune', '-o', '-name', '*.key', '-print').stdout.split()
+    assert len(files) >= 5, 'The private key files in /etc/kubernetes/pki are missing'
+    for path in files:
+        assert_mode_at_most(NODE, path, 0o600)
+if wants('etcd-key-files'):
+    files = node_exec(NODE, 'find', '/etc/kubernetes/pki/etcd', '-name', '*.key').stdout.split()
+    assert len(files) >= 3, 'The private key files in /etc/kubernetes/pki/etcd are missing'
     for path in files:
         assert_mode_at_most(NODE, path, 0o600)
 ASTRONA_LAB_FILE
@@ -665,6 +670,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-etcd-key-files.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-key-files.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

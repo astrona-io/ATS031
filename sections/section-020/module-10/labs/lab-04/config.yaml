@@ -41,10 +41,15 @@ testing:
 validation:
   scripts:
   - name: effective-values
-    description: ConfigMap kubelet-review records the effective anonymous, authorization and read-only port values of the kubelet
+    description: ConfigMap kubelet-review records the effective anonymous authentication and authorization mode values of the kubelet
     type: file
     source: vm/validate-effective-values.sh
-    points: 2
+    points: 1
+  - name: read-only-port
+    description: ConfigMap kubelet-review records the effective read-only port of the kubelet, including the command-line override
+    type: file
+    source: vm/validate-read-only-port.sh
+    points: 1
   - name: config-file-mode
     description: /var/lib/kubelet/config.yaml on the node has mode 600 or stricter and owner root:root
     type: file

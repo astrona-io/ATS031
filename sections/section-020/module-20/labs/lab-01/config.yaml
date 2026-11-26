@@ -40,8 +40,13 @@ testing:
     source: vm/wait-solved.sh
 validation:
   scripts:
+  - name: audit-job-options
+    description: Job api-server-audit runs kube-bench run with --targets master and --json
+    type: file
+    source: vm/validate-audit-job-options.sh
+    points: 1
   - name: json-job-completed
-    description: Job api-server-audit ran kube-bench with the master target and JSON output and completed
+    description: Job api-server-audit completed and its log holds a kube-bench JSON report
     type: file
     source: vm/validate-json-job-completed.sh
     points: 1

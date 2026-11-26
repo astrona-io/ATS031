@@ -36,8 +36,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: beacon-backend
+    description: Ingress beacon keeps host beacon.local, Prefix path / and the web entrypoint, and names the Service port http or 80
+    type: file
+    source: validation/validate-beacon-backend.sh
+    points: 1
   - name: beacon-route
-    description: "http://beacon.local reaches the Service beacon"
+    description: "http://beacon.local answers 200 from the Service beacon through Traefik"
     type: file
     source: validation/validate-beacon-route.sh
     points: 1

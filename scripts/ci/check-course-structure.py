@@ -100,10 +100,9 @@ def check_lab(root, lab, entry):
     for script in ['validate.sh', 'solution/apply.sh']:
         if 'ASTRONA_KUBE_CONTEXT' not in (directory / script).read_text():
             raise ValueError(f'{lab}: {script} needs the context guard')
-    question = (directory / 'question.md').read_text()
-    minutes = re.search(r'^Allow about (\d+) minutes for the tasks\.$', question, re.M)
+    minutes = re.fullmatch(r'(\d+)m', str(entry.get('estimated_duration', '')))
     if not minutes or int(minutes.group(1)) > MAX_MINUTES:
-        raise ValueError(f'{lab}: question.md needs "Allow about N minutes for the tasks." with N <= {MAX_MINUTES}')
+        raise ValueError(f'{lab}: astrona.yaml needs estimated_duration Nm with N <= {MAX_MINUTES}')
     if entry.get('examScope') and runtime != 'kind':
         raise ValueError(f'{lab}: only kind labs fit the exam profile')
     # Last, so a broken source file reports its own rule first.

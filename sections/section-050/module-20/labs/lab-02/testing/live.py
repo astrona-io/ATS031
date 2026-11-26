@@ -24,9 +24,13 @@ if wants('check-file'):
     assert set(listed) == set(tools), 'SHA256SUMS must list exactly kubectl, kubeadm and kubelet by file name only'
     for tool in tools:
         assert listed[tool] == published[tool], f'The digest for {tool} must come from {tool}.sha256'
-if wants('check-result'):
+def result():
     found = command(['kubectl', '-n', NAMESPACE, 'get', 'configmap', 'download-check', '-o', 'json'], success=False)
     assert found.returncode == 0, 'Create the ConfigMap download-check in ' + NAMESPACE
-    data = json.loads(found.stdout).get('data') or {}
-    assert data.get('exit-status', '').strip() == ('1' if failing else '0'), 'exit-status must be the exit status of the strict check'
-    assert data.get('failed', '').strip() == (failing[0] if failing else 'none'), 'failed must name the failing download, or be none'
+    return json.loads(found.stdout).get('data') or {}
+
+
+if wants('check-result'):
+    assert result().get('exit-status', '').strip() == ('1' if failing else '0'), 'exit-status must be the exit status of the strict check'
+if wants('failed-download'):
+    assert result().get('failed', '').strip() == (failing[0] if failing else 'none'), 'failed must name the failing download, or be none'

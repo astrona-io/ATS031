@@ -1,71 +1,98 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Repair Four Broken TLS Ingresses Solution
+# Repair Four Broken TLS Ingresses — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+You solve this lab with three patches and one new TLS Secret. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-04-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-04-02" || exit 1
-```
+## Step 1: look at the starting state
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
-
-## Find the cause for each Ingress
+List the Ingresses, their hosts, classes and Secrets, and the Secrets that exist:
 
 ```sh
 kubectl -n starfleet-031-030-04-02 get ingress
+kubectl -n starfleet-031-030-04-02 get ingress -o custom-columns=NAME:.metadata.name,CLASS:.spec.ingressClassName,HOST:.spec.rules[0].host,TLS-HOST:.spec.tls[0].hosts[0],SECRET:.spec.tls[0].secretName
 kubectl -n starfleet-031-030-04-02 get secret
-for name in alpha bravo charlie delta; do
-  echo "== $name"
-  kubectl -n starfleet-031-030-04-02 get ingress $name -o jsonpath='class={.spec.ingressClassName} host={.spec.rules[0].host} tls-hosts={.spec.tls[0].hosts} secret={.spec.tls[0].secretName}{"\n"}'
-done
-kubectl -n starfleet-031-030-04-02 get secret bravo-tls -o jsonpath='{.data.tls\.crt}' | base64 --decode | openssl x509 -noout -pubkey | openssl sha256
-kubectl -n starfleet-031-030-04-02 get secret bravo-tls -o jsonpath='{.data.tls\.key}' | base64 --decode | openssl pkey -pubout | openssl sha256
 ```
 
-The four causes are these:
+Compare each column with the name of the Ingress. A TLS Secret (type `kubernetes.io/tls`) holds a certificate in `tls.crt` and its private key in `tls.key`. Traefik serves a certificate for a host only when the Secret exists, the certificate names the host and the key belongs to the certificate. In any other case it serves its own default certificate, and a client that trusts only the Secret's certificate rejects it.
 
-- `alpha` names `alpha-tls`, which does not exist. The working Secret is `alpha-cert`.
-- `bravo` has the Secret `bravo-tls`, but the key does not match the certificate. The two hashes differ.
-- `charlie` has a host that is misspelled in the rule.
-- `delta` has class `nginx`, which no controller serves.
+## Step 2: point alpha at the working Secret (check `alpha-ingress`)
 
-## Repair them
+The Ingress `alpha` names the Secret `alpha-tls`, which does not exist. The certificate for `alpha.example.test` is in the Secret `alpha-cert`. Change only the Secret name in the `tls` entry, so the Ingress object stays the same one:
 
 ```sh
 kubectl -n starfleet-031-030-04-02 patch ingress alpha --type=json -p '[{"op":"replace","path":"/spec/tls/0/secretName","value":"alpha-cert"}]'
+```
+
+## Step 3: give bravo a matching key pair (check `bravo-ingress`)
+
+The Secret `bravo-tls` holds a certificate for `bravo.example.test` and a private key from another pair. You can see it by comparing the public key inside the certificate with the public key of the private key:
+
+```sh
+kubectl -n starfleet-031-030-04-02 get secret bravo-tls -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -noout -pubkey
+kubectl -n starfleet-031-030-04-02 get secret bravo-tls -o jsonpath='{.data.tls\.key}' | base64 -d | openssl pkey -pubout
+```
+
+The two public keys differ. Create a new private key and a self-signed certificate for `bravo.example.test`, with the name in the Subject Alternative Name (SAN), the list of host names the certificate is valid for:
+
+```sh
+openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
+  -keyout bravo-tls.key -out bravo-tls.crt \
+  -subj "/CN=bravo.example.test" -addext "subjectAltName=DNS:bravo.example.test" >/dev/null 2>&1
+```
+
+Replace the Secret with the new pair. The Ingress `bravo` already names `bravo-tls`, so it stays unchanged:
+
+```sh
 kubectl -n starfleet-031-030-04-02 delete secret bravo-tls
-openssl req -x509 -nodes -newkey rsa:2048 -days 30 -keyout bravo.key -out bravo.crt -subj "/CN=bravo.example.test" -addext "subjectAltName=DNS:bravo.example.test"
-kubectl -n starfleet-031-030-04-02 create secret tls bravo-tls --cert=bravo.crt --key=bravo.key
+kubectl -n starfleet-031-030-04-02 create secret tls bravo-tls --cert=bravo-tls.crt --key=bravo-tls.key
+```
+
+## Step 4: fix the charlie host (check `charlie-ingress`)
+
+The rule of `charlie` routes the misspelled host `charlie.example.tset`, while its `tls` entry lists `charlie.example.test`. Traefik matches requests by the host in the rule, so no route serves `charlie.example.test`. Correct the host in the rule:
+
+```sh
 kubectl -n starfleet-031-030-04-02 patch ingress charlie --type=json -p '[{"op":"replace","path":"/spec/rules/0/host","value":"charlie.example.test"}]'
+```
+
+## Step 5: give delta the right class (check `delta-ingress`)
+
+The Ingress `delta` has the class `nginx`. Traefik reads only Ingresses of the class `traefik`, so it ignores `delta`. Change the class:
+
+```sh
 kubectl -n starfleet-031-030-04-02 patch ingress delta --type=json -p '[{"op":"replace","path":"/spec/ingressClassName","value":"traefik"}]'
 ```
 
-## Verify
+## Step 6: test the four hosts (all checks)
 
-Open a port forward in a second terminal. The Secrets for `alpha` and `bravo` hold the certificates, so extract and test one of them:
+Start a port forward to the Traefik HTTPS port in another terminal:
 
 ```sh
 kubectl -n ingress-system port-forward service/traefik 8443:443
-kubectl -n starfleet-031-030-04-02 get secret alpha-cert -o jsonpath='{.data.tls\.crt}' | base64 --decode > alpha.crt
-curl -s --cacert alpha.crt --resolve alpha.example.test:8443:127.0.0.1 https://alpha.example.test:8443/
 ```
 
-Repeat for the other hosts with the certificate of their own Secret.
+For each Ingress, save the certificate of the Secret it names, then send a request that trusts only that certificate:
+
+```sh
+for name in alpha bravo charlie delta; do
+  secret_name=$(kubectl -n starfleet-031-030-04-02 get ingress "$name" -o jsonpath='{.spec.tls[0].secretName}')
+  kubectl -n starfleet-031-030-04-02 get secret "$secret_name" -o jsonpath='{.data.tls\.crt}' | base64 -d > "$name.crt"
+  curl --cacert "$name.crt" --resolve "$name.example.test:8443:127.0.0.1" "https://$name.example.test:8443/"
+done
+```
+
+Each of the four requests must print a line that starts with `app=probe`. Stop the port forward with Ctrl+C.
+
+## Step 7: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
+
 ## Common pitfalls
 
 > [!WARNING]
-> - **Fixing only what the first error shows.** Each Ingress has its own cause; check all four.
-> - **Editing the host in `rules` but not in `tls`.** Both lists must name the host. Check which list is wrong first.
-> - **Deleting Ingresses.** The task forbids it and you lose the evidence.
-
-## Clean up
-
-Destroy the lab cluster when you are done:
-
-```sh
-astrona destroy ats-031-lab-030-04-02
-```
+> Do not delete an Ingress and create it again, even with the same YAML. The check compares each Ingress with the object the lab started with, and a new object fails.
+>
+> Each Ingress needs exactly one `tls` entry whose hosts list only its own name, and a rule for that same name. A wildcard certificate or a certificate that also names `wrong.example.test` fails the check.
+>
+> A Secret whose key does not match its certificate looks fine in `kubectl get secret`. Compare the public keys, or create a new pair, before you trust it.
+>
+> An Ingress with the class `nginx` is ignored by Traefik. Without the class `traefik`, the host gets no route at all.

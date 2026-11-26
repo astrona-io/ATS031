@@ -36,8 +36,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: api-endpoint-rule
+    description: The operator-to-api-server policy has an egress rule whose ipBlock contains the API server endpoint address and whose port is the endpoint port, not the Service port 443
+    type: file
+    source: validation/validate-api-endpoint-rule.sh
+    points: 1
   - name: operator-reaches-api
-    description: The operator pod reaches the kubernetes Service, and the egress rule names the API server endpoint address and port
+    description: The operator pod reaches the API server through the kubernetes Service on port 443
     type: file
     source: validation/validate-operator-reaches-api.sh
     points: 1

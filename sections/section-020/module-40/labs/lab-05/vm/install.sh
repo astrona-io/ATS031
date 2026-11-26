@@ -539,11 +539,20 @@ def assert_node_ready(node):
 
 
 saved = get('configmap', 'etcd-query').get('data', {})
-if wants('secret-located'):
+
+
+def relay_token_namespace():
     found = kubectl('get', 'secrets', '-A', '--field-selector=metadata.name=relay-token', '-o', 'jsonpath={.items[0].metadata.namespace}')
     assert found, 'The Secret relay-token is missing'
-    assert saved.get('secret-namespace', '').strip() == found, 'The key secret-namespace does not name the namespace of relay-token'
-    assert saved.get('secret-key', '').strip() == '/registry/secrets/' + found + '/relay-token', 'The key secret-key is not the etcd key of relay-token'
+    return found
+
+
+if wants('secret-key-recorded'):
+    assert saved.get('secret-key', '').strip(), 'The ConfigMap etcd-query has no key secret-key'
+    assert saved.get('secret-key', '').strip() == '/registry/secrets/' + relay_token_namespace() + '/relay-token', 'The key secret-key is not the etcd key of relay-token'
+if wants('secret-located'):
+    assert saved.get('secret-namespace', '').strip(), 'The ConfigMap etcd-query has no key secret-namespace'
+    assert saved.get('secret-namespace', '').strip() == relay_token_namespace(), 'The key secret-namespace does not name the namespace of relay-token'
 if wants('member-recorded'):
     member = flag_value(process_arguments(NODE, 'etcd'), 'name')
     assert member, 'etcd has no --name flag'
@@ -667,6 +676,13 @@ lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-member-recorded.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-secret-key-recorded.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

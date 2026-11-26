@@ -189,14 +189,19 @@ def traefik_args():
     return deployment['spec']['template']['spec']['containers'][0].get('args') or []
 
 if wants('beacon-tls-secret'):
+    live(r"""
+pem, key = pems
+assert key_matches(pem, key), 'tls.key in beacon-tls must be the private key of tls.crt'
+""", tls_secret('beacon-tls'))
+if wants('beacon-san'):
+    secret = tls_secret('beacon-tls')
     copy = command(['kubectl', '-n', 'outpost-031-030-03-02', 'get', 'secret', 'beacon-tls', '-o', 'jsonpath={.data.tls\\.crt}'], success=False).stdout.strip()
     live(r"""
-pem, key = pems[:2]
+pem = pems[0]
 assert len(pems) == 2 or der(pem) != der(pems[2]), 'beacon-tls must hold a new certificate, not the copy from outpost-031-030-03-02 without a SAN'
 assert 'beacon.example.test' in dns_names(pem), 'The beacon-tls certificate must name DNS:beacon.example.test in its SAN'
 assert not [value for value in dns_names(pem) if value.startswith('*') or value == 'wrong.example.test'], 'The certificate must not match another name, so a client that expects wrong.example.test rejects it'
-assert key_matches(pem, key), 'tls.key in beacon-tls must be the private key of tls.crt'
-""", tls_secret('beacon-tls') + ([copy] if copy else []))
+""", secret + ([copy] if copy else []))
 if wants('beacon-https'):
     live(r"""
 pem = pems[0]

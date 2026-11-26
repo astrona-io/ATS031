@@ -18,6 +18,9 @@ if wants('deployment-pinned'):
     listing = node_exec(node, 'ctr', '-n', 'k8s.io', 'images', 'ls').stdout.splitlines()
     started = [line.split()[2] for line in listing if line.split()[:1] == ['docker.io/library/python:3.13-alpine']]
     assert started and started[0] == 'sha256:' + pinned, 'Pin the digest of the image that the relay pod ran at the start'
+if wants('pod-pinned'):
+    pinned = digest_of(deployment['spec']['template']['spec']['containers'][0]['image'])
+    assert pinned, 'Pin the relay Deployment image by digest first'
     status = deployment['status']
     assert status.get('observedGeneration', 0) >= deployment['metadata']['generation'], 'Current generation has not been observed'
     assert all(status.get(field, 0) == 1 for field in ('replicas', 'updatedReplicas', 'readyReplicas')), 'The relay rollout is incomplete'

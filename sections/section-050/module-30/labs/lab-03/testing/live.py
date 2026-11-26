@@ -36,5 +36,10 @@ if wants('signed-approval'):
     assert re.fullmatch(r'release: fleet-\d{8}\napproved-by: release-manager\n', approval), 'Sign approval.txt as it is; do not change it'
     assert verify(APPROVAL, 'cosign.pub', 'approval.txt'), \
         'approval.txt.sig must be a signature of approval.txt that verifies with ' + APPROVAL + '/cosign.pub'
+if wants('private-key-removed'):
+    assert node_exec(NODE, 'test', '-f', APPROVAL + '/cosign.pub', success=False).returncode == 0, \
+        'Generate a key pair in ' + APPROVAL + ' so that cosign.pub is there'
+    assert node_exec(NODE, 'test', '-f', APPROVAL + '/approval.txt.sig', success=False).returncode == 0, \
+        'Sign approval.txt so that approval.txt.sig is there'
     assert node_exec(NODE, 'test', '-e', APPROVAL + '/cosign.key', success=False).returncode != 0, \
         'Delete the private key cosign.key after signing'

@@ -1,21 +1,24 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Match Exact And Prefix Paths Solution
+# Route An Exact Path And A Prefix Path — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+You solve this lab with one Ingress. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+Check the two Services and the Ingress class, and that no Ingress exists yet:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-02-04)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-02-04" || exit 1
+kubectl -n starfleet-031-030-02-04 get deployment,service
+kubectl get ingressclass traefik
+kubectl -n starfleet-031-030-02-04 get ingress
 ```
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
+The Services `beacon` and `scout` listen on port 80. Each pod replies with a line that starts with `app=beacon` or `app=scout`, so you can see which Service answered.
 
-## Write the Ingress
+## Step 2: create the Ingress with two path types (check `api-ingress`)
 
-`Exact` matches only the identical path. `Prefix` matches the path and every path below it, element by element. Save this as `ingress-api.yaml`:
+An Ingress is a Kubernetes object that tells an Ingress controller how to route HTTP requests to Services. Each path has a `pathType`. `Exact` matches only that one path, letter for letter. `Prefix` matches the path and every path below it, split at `/`: `/v1` matches `/v1` and `/v1/ships/7`, but not `/v2`. The annotation `traefik.ingress.kubernetes.io/router.entrypoints: web` puts the routes on the HTTP entrypoint of Traefik.
+
+Save this as `ingress-api.yaml`:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -53,31 +56,40 @@ Apply it:
 kubectl apply -f ingress-api.yaml
 ```
 
-## Test each path
+## Step 3: test the Exact path (check `exact-path`)
 
-Open a port forward in a second terminal, then print the status code and the answering application for each path:
+Forward the Traefik HTTP port to your machine. `--resolve` sends the name `api.local` to the forwarded port:
 
 ```sh
-kubectl -n ingress-system port-forward service/traefik 8080:80
-for path in /healthz /healthz/deep /v1 /v1/ships/7 /v2 /; do
-  printf '%s ' "$path"
-  curl -s -w ' %{http_code}\n' -H 'Host: api.local' "http://127.0.0.1:8080$path" | tail -c 60
-done
+kubectl -n ingress-system port-forward service/traefik 8000:80 >/dev/null &
+curl --resolve api.local:8000:127.0.0.1 http://api.local:8000/healthz
+curl -s -o /dev/null -w '%{http_code}\n' --resolve api.local:8000:127.0.0.1 http://api.local:8000/healthz/deep
 ```
 
-`/healthz` reaches `beacon`, `/v1` and `/v1/ships/7` reach `scout`, and the other paths get `404`.
+Wait a second for the port forward before the first `curl`. The first reply must start with `app=beacon`. The second command must print `404`, because `Exact` does not match a longer path.
+
+## Step 4: test the Prefix path (check `prefix-path`)
+
+```sh
+curl --resolve api.local:8000:127.0.0.1 http://api.local:8000/v1
+curl --resolve api.local:8000:127.0.0.1 http://api.local:8000/v1/ships/7
+curl -s -o /dev/null -w '%{http_code}\n' --resolve api.local:8000:127.0.0.1 http://api.local:8000/v2
+curl -s -o /dev/null -w '%{http_code}\n' --resolve api.local:8000:127.0.0.1 http://api.local:8000/
+```
+
+The first two replies must start with `app=scout`. The last two commands must print `404`: no path matches them, so Traefik answers itself. Stop the port forward with `kill %1`.
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Using `Prefix` for the health check.** Then `/healthz/deep` also reaches `beacon`.
-> - **Adding a catch-all path `/`.** Every unknown path would then reach a Service instead of getting `404`.
-> - **Writing `/v1/` with a trailing slash.** The task asks for `/v1`, and the request `/v1` itself must match.
-
-## Clean up
-
-Destroy the lab cluster when you are done:
-
-```sh
-astrona destroy ats-031-lab-030-02-04
-```
+> Do not use `Prefix` for `/healthz`. Then `/healthz/deep` reaches `beacon` instead of getting 404.
+>
+> Do not add a path `/` or any other path. The check wants exactly the two paths, and `/` must get 404.
+>
+> Do not leave out the annotation `traefik.ingress.kubernetes.io/router.entrypoints: web` or the class `traefik`. The check reads both.
+>
+> Use the Service port 80 in both backends, not the container port 8080.

@@ -36,13 +36,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: api-ingress
+    description: Ingress api of class traefik uses the web entrypoint and has exactly the Exact path /healthz and the Prefix path /v1 of api.local
+    type: file
+    source: validation/validate-api-ingress.sh
+    points: 1
   - name: exact-path
-    description: api.local/healthz matches only the exact path and reaches beacon
+    description: api.local/healthz reaches beacon, and api.local/healthz/deep gets 404
     type: file
     source: validation/validate-exact-path.sh
     points: 1
   - name: prefix-path
-    description: api.local/v1 and every path below it reach scout, and nothing else does
+    description: api.local/v1 and every path below it reach scout, while /v2 and / get 404
     type: file
     source: validation/validate-prefix-path.sh
     points: 1

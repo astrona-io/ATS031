@@ -153,6 +153,7 @@ job, pod, log = learner_job('etcd-audit')
 arguments = command_line(pod['spec'])
 if wants('etcd-target-run'):
     assert option(arguments, 'targets') == 'etcd', 'Run kube-bench with --targets etcd only'
+if wants('etcd-results-only'):
     assert re.search(r'^\[(PASS|FAIL|WARN)\] 2\.\d', log, re.M), 'The log holds no etcd results'
     assert not re.search(r'^\[(PASS|FAIL|WARN|INFO)\] 1\.\d', log, re.M), 'The log also holds control plane results'
 if wants('benchmark-pinned'):

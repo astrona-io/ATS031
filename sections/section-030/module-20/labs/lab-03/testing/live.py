@@ -195,9 +195,16 @@ if wants('depot-ingress'):
     assert routes(depot) == {('depot.local', '/', 'Prefix', 'depot', 80)}, \
         'The Ingress depot must have one rule: host depot.local, Prefix path /, Service depot on port 80'
 if wants('depot-http'):
+    get('ingress', 'depot')
     live(r"""
 response = http_get('depot.local', '/manifest')
 assert ' 200 ' in status_of(response) + ' ' and 'app=depot ' in response, 'http://depot.local/manifest must answer 200 from the Service depot'
+""")
+if wants('depot-404'):
+    # Without the Ingress every request gets 404, so the route must work first.
+    get('ingress', 'depot')
+    live(r"""
+assert 'app=depot ' in http_get('depot.local', '/manifest'), 'http://depot.local must reach the Service depot before other requests can be tested'
 assert ' 404 ' in status_of(http_get('other.local')) + ' ', 'A request for another host must get 404'
 assert ' 404 ' in status_of(unverified_get('depot.local')) + ' ', 'The route must not answer on the websecure entrypoint'
 """)

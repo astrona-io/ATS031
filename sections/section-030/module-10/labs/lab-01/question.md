@@ -1,35 +1,9 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Verify TLS Termination And Server Identity
+# Terminate TLS At The Ingress And Verify The Server Name
 
-Allow about 6 minutes for the tasks.
+In namespace `starfleet-031-030-01-01`, the Deployment `probe` and its Service `probe` run, and the Traefik Ingress controller runs in `ingress-system`. The TLS Secret `probe-tls` holds a certificate for `probe.local`. Publish the application over HTTPS only for that name.
 
-Route HTTPS through the controller and verify both matching and mismatched certificate identities. Use the isolated `starfleet-031-030-01-01` environment to verify the result.
+1. Create an Ingress named `probe` with class `traefik` that routes host `probe.local`, path `/` (type `Prefix`), to Service `probe` port 80.
+2. Serve the Ingress on the Traefik entrypoint `websecure` and terminate TLS with the Secret `probe-tls`.
+3. A client that trusts the `probe-tls` certificate must get the reply `version=v1` from `https://probe.local` and must reject the certificate for any other server name.
 
-## Objective
-
-Route HTTPS through the controller and verify both matching and mismatched certificate identities.
-
-## Starting state
-
-The lab includes a working Traefik Ingress controller and healthy application. The required route has not been created.
-
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
-
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-01-01)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-01-01" || exit 1
-```
-
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
-
-
-## Required result
-
-Create a TLS Ingress `probe` for class `traefik`, host `probe.local`, Prefix path `/` and backend Service `probe` port 80. Use the supplied TLS Secret `probe-tls` and websecure entrypoint. A client trusting the supplied certificate must receive version one for the matching server name and must reject a mismatched server name. Preserve the original application and Service.
-
-## Verify The Result
-
-The grader checks the stated resource fields and live evidence. Wait for controller convergence before submitting. Inspect actual results rather than relying on a sample transcript.
+Do not change the Deployment `probe`, the Service `probe` or the Secret `probe-tls`, and keep certificate verification on.

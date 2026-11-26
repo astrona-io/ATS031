@@ -72,7 +72,10 @@ if wants('noderestriction-enabled'):
     arguments = process_arguments(NODE, 'kube-apiserver')
     assert 'NodeRestriction' in flag_list(arguments, 'enable-admission-plugins'), 'Add NodeRestriction to --enable-admission-plugins'
     assert 'NodeRestriction' not in flag_list(arguments, 'disable-admission-plugins'), 'NodeRestriction must not be disabled'
-    assert 'LimitRanger' in flag_list(arguments, 'enable-admission-plugins'), 'Keep the admission plugins that were enabled'
+if wants('admission-plugins-kept'):
+    # The plugin is added to the list, not swapped in: LimitRanger stays next to it.
+    enabled = flag_list(process_arguments(NODE, 'kube-apiserver'), 'enable-admission-plugins')
+    assert 'NodeRestriction' in enabled and 'LimitRanger' in enabled, 'Add NodeRestriction to --enable-admission-plugins and keep LimitRanger'
 if wants('node-label-denied'):
     attempt = node_exec(WORKER, 'kubectl', '--kubeconfig', '/etc/kubernetes/kubelet.conf', 'label', 'node', WORKER, 'node-restriction.kubernetes.io/lab-check=kubelet', '--overwrite', success=False)
     if attempt.returncode == 0:

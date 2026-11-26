@@ -188,10 +188,11 @@ def traefik_args():
     deployment = get('deployment', 'traefik', 'ingress-system')
     return deployment['spec']['template']['spec']['containers'][0].get('args') or []
 
-if wants('mtls-option'):
+if wants('vault-annotation'):
     assert annotation(get('ingress', 'vault'), 'router.tls.options') == 'mtls@file', \
         'The Ingress vault must have the annotation traefik.ingress.kubernetes.io/router.tls.options: mtls@file'
     assert annotation(get('ingress', 'beacon'), 'router.tls.options') is None, 'The Ingress beacon must not use a TLS option'
+if wants('mtls-option'):
     client_ca = (get('configmap', 'client-ca', 'ingress-system').get('data') or {}).get('client-ca.crt', '')
     expected = command(['kubectl', '-n', NAMESPACE, 'get', 'secret', 'crew-client', '-o', 'jsonpath={.data.ca\\.crt}']).stdout.strip()
     assert client_ca.strip() == base64.b64decode(expected).decode().strip(), \

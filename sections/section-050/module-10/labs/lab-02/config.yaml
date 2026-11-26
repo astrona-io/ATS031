@@ -32,11 +32,16 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: signed-mirror
+    description: artifact-review names a mirror whose manifest has a good signature from the publisher key
+    type: file
+    source: validation/validate-signed-mirror.sh
+    points: 1
   - name: trusted-mirror
-    description: artifact-review names the only mirror whose manifest is signed by the publisher key and matches its binary
+    description: the named mirror's relay-agent also matches its signed manifest, so it is the one genuine release
     type: file
     source: validation/validate-trusted-mirror.sh
-    points: 2
+    points: 1
   - name: review-digest
     description: artifact-review records the relay-agent digest from the authenticated manifest
     type: file

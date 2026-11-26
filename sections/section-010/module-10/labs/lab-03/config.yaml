@@ -36,13 +36,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: relay-egress-policy
+    description: The relay-egress-isolation policy selects only the relay pod, lists only Egress in policyTypes, has no egress rules and is the only policy in the namespace
+    type: file
+    source: validation/validate-relay-egress-policy.sh
+    points: 1
   - name: relay-egress-isolated
     description: 'The relay pod is isolated for egress: its requests to a pod address and its DNS lookups time out'
     type: file
     source: validation/validate-relay-egress-isolated.sh
     points: 1
   - name: ingress-and-neighbours-open
-    description: The policy names only Egress, so other pods still reach relay and the lander and courier pods stay unaffected
+    description: The courier pod still reaches relay on TCP 8080, and the lander and courier pods keep their own traffic and DNS
     type: file
     source: validation/validate-ingress-and-neighbours-open.sh
     points: 1

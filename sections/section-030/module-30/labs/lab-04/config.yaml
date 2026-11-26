@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: relay-certificate
-    description: Secret relay-tls holds a certificate for relay.example.test signed by the lab CA, with its key
+    description: Secret relay-tls holds a 30-day certificate signed by the lab CA, with its key
     type: file
     source: validation/validate-relay-certificate.sh
+    points: 1
+  - name: relay-san
+    description: The relay-tls certificate names relay.example.test in its SAN
+    type: file
+    source: validation/validate-relay-san.sh
     points: 1
   - name: relay-https
     description: "A client that trusts only the lab CA gets the relay response from https://relay.example.test"

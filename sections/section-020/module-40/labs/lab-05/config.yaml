@@ -40,8 +40,13 @@ testing:
     source: vm/wait-solved.sh
 validation:
   scripts:
+  - name: secret-key-recorded
+    description: ConfigMap etcd-query records the full etcd key of the Secret relay-token
+    type: file
+    source: vm/validate-secret-key-recorded.sh
+    points: 1
   - name: secret-located
-    description: ConfigMap etcd-query records the namespace and the full etcd key of the Secret relay-token
+    description: ConfigMap etcd-query records the namespace of the Secret relay-token
     type: file
     source: vm/validate-secret-located.sh
     points: 1

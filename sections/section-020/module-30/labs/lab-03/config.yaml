@@ -40,11 +40,16 @@ testing:
     source: vm/wait-solved.sh
 validation:
   scripts:
+  - name: manifest-flag-removed
+    description: The kube-controller-manager manifest no longer has the broken flag
+    type: file
+    source: vm/validate-manifest-flag-removed.sh
+    points: 1
   - name: controller-manager-running
     description: kube-controller-manager runs again without the broken flag and its pod is ready
     type: file
     source: vm/validate-controller-manager-running.sh
-    points: 2
+    points: 1
   - name: manifest-mode-kept
     description: The kube-controller-manager manifest has mode 600 or stricter and owner root:root, and no extra file is in the manifests directory
     type: file
