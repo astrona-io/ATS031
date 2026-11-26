@@ -42,7 +42,12 @@ validation:
     source: validation/validate-depot-ingress.sh
     points: 1
   - name: depot-http
-    description: "http://depot.local reaches depot, while other hosts and HTTPS get 404"
+    description: "http://depot.local/manifest reaches the Service depot over HTTP"
     type: file
     source: validation/validate-depot-http.sh
+    points: 1
+  - name: depot-404
+    description: Requests for another host and HTTPS requests for depot.local get 404
+    type: file
+    source: validation/validate-depot-404.sh
     points: 1

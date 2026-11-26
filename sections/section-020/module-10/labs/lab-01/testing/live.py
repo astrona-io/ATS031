@@ -76,10 +76,11 @@ assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manage
 if wants('scheduler-bind-address'):
     arguments = process_arguments(NODE, 'kube-scheduler')
     assert flag_value(arguments, 'bind-address') == '127.0.0.1', 'kube-scheduler must run with --bind-address=127.0.0.1'
-    address = kubectl('get', 'node', NODE, '-o', 'jsonpath={.status.addresses[?(@.type=="InternalIP")].address}')
-    loopback = node_exec(NODE, 'curl', '-sk', '-m', '3', 'https://127.0.0.1:10259/healthz', success=False)
-    assert loopback.stdout.strip() == 'ok', 'kube-scheduler must answer on 127.0.0.1:10259'
-    outside = node_exec(NODE, 'curl', '-sk', '-m', '3', 'https://' + address + ':10259/healthz', success=False)
-    assert outside.returncode != 0, 'Port 10259 must not accept connections on the node address ' + address
     ready = kubectl('-n', 'kube-system', 'get', 'pod', 'kube-scheduler-' + NODE, '-o', 'jsonpath={.status.conditions[?(@.type=="Ready")].status}')
     assert ready == 'True', 'The kube-scheduler pod must be ready'
+if wants('scheduler-loopback-only'):
+    address = kubectl('get', 'node', NODE, '-o', 'jsonpath={.status.addresses[?(@.type=="InternalIP")].address}')
+    outside = node_exec(NODE, 'curl', '-sk', '-m', '3', 'https://' + address + ':10259/healthz', success=False)
+    assert outside.returncode != 0, 'Port 10259 must not accept connections on the node address ' + address
+    loopback = node_exec(NODE, 'curl', '-sk', '-m', '3', 'https://127.0.0.1:10259/healthz', success=False)
+    assert loopback.stdout.strip() == 'ok', 'kube-scheduler must answer on 127.0.0.1:10259'

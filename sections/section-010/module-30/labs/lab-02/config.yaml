@@ -41,8 +41,13 @@ validation:
     type: file
     source: validation/validate-assay-policy-repaired.sh
     points: 1
+  - name: idler-denied
+    description: The sampler pod in starfleet reaches the assay pod and the idler pod in starfleet times out
+    type: file
+    source: validation/validate-idler-denied.sh
+    points: 1
   - name: only-starfleet-sampler
-    description: Only the sampler pod in starfleet reaches the assay; the idler in starfleet and the sampler pods in dock and outpost time out, and no other policy exists
+    description: The sampler pods in dock and outpost time out to the assay while the sampler pod in starfleet still reaches it, and no other policy exists
     type: file
     source: validation/validate-only-starfleet-sampler.sh
     points: 1

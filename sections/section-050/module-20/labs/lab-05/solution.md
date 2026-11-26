@@ -1,65 +1,102 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
-# Verify The Running kubelet Against A Release Checksum: Solution
+# Verify The Running kubelet Against A Release Checksum — Solution
 
-Connect to the lab first, so that `kubectl` talks to this lab's cluster and `$worker_name` names its worker node:
+You solve this lab by reading the running kubelet process on the worker node and recording four values in one ConfigMap. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+The node of a `kind` cluster is a container on your machine. Open a shell on the worker node (write `docker` instead of `podman` if your machine uses Docker):
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-02-05)"
-worker_name="astro-ats-031-lab-050-02-05-worker"
+podman exec -it astro-ats-031-lab-050-02-05-worker bash
 ```
-
-## Do not trust the usual path
 
 The kubelet is usually `/usr/bin/kubelet`, and `which kubelet` finds that file. But systemd starts the kubelet from the `ExecStart=` line of its unit, and a drop-in file can replace that line. Print the unit with all its drop-ins:
 
 ```sh
-podman exec "$worker_name" which kubelet
-podman exec "$worker_name" systemctl cat kubelet
+which kubelet
+systemctl cat kubelet
 ```
 
-The last drop-in clears `ExecStart=` and starts the kubelet from another path. The unit only says what systemd will start next time, though. The kernel knows what runs now.
+The last drop-in, `20-node-agent.conf`, clears `ExecStart=` and starts the kubelet from another path. The unit only says what systemd starts the next time, though. The kernel knows what runs now.
 
-## Find the running binary
+## Step 2: find the running binary and its version (check `kubelet-binary`)
 
 `pidof` prints the process ID of the running kubelet. The link `/proc/<pid>/exe` points to the binary that the process was started from:
 
 ```sh
-KUBELET_PID=$(podman exec "$worker_name" pidof kubelet)
-podman exec "$worker_name" readlink /proc/$KUBELET_PID/exe
+KUBELET_PID=$(pidof kubelet)
+readlink /proc/$KUBELET_PID/exe
 ```
 
-Use the path that `readlink` prints. `systemctl status kubelet` shows the same path in its `CGroup` lines.
+Use the path that `readlink` prints. It is not `/usr/bin/kubelet`.
 
-## Read the version and the architecture
-
-The node status reports the kubelet version and the CPU architecture, in the form that the release paths use:
+In a second terminal on your machine, read the kubelet version and the CPU architecture from the node status. Both are already in the form that the release paths use:
 
 ```sh
-kubectl get node "$worker_name" -o jsonpath='{.status.nodeInfo.kubeletVersion} {.status.nodeInfo.architecture}{"\n"}'
+kubectl get node astro-ats-031-lab-050-02-05-worker -o jsonpath='{.status.nodeInfo.kubeletVersion} {.status.nodeInfo.architecture}{"\n"}'
 ```
 
-## Compare the digests
+## Step 3: compute the digest of the running binary (check `kubelet-digest`)
 
-Compute the digest through `/proc/<pid>/exe`, so you hash exactly the bytes the process was started from. Then print the published digest for the version and the architecture. The example uses `amd64`; use your architecture:
+Back in the worker shell, compute the digest through `/proc/<pid>/exe`, so you hash exactly the bytes the process was started from:
 
 ```sh
-podman exec "$worker_name" sha256sum /proc/$KUBELET_PID/exe
-podman exec "$worker_name" cat /var/lib/kubelet-release/v1.35.0/bin/linux/amd64/kubelet.sha256
+sha256sum /proc/$KUBELET_PID/exe
 ```
 
-If the two digests are equal, the result is `match`. If not, it is `mismatch`. A copy with changed bytes can still start and still report `v1.35.0`, so the version alone never proves the build. Also run `sha256sum /usr/bin/kubelet`: in this lab it always gives the opposite answer, which is why checking the wrong file is a real risk.
+## Step 4: compare with the published digest (check `checksum-result`)
 
-## Record the result
-
-Use your own values:
+Print the published digest for the version and the architecture from Step 2. Replace `<VERSION>` and `<ARCHITECTURE>`:
 
 ```sh
-kubectl -n starfleet-031-050-02-05 create configmap kubelet-review \
-  --from-literal=version=v1.35.0 --from-literal=path=<PATH> \
-  --from-literal=sha256=<DIGEST> --from-literal=result=<match-or-mismatch>
+cat /var/lib/kubelet-release/<VERSION>/bin/linux/<ARCHITECTURE>/kubelet.sha256; echo
+exit
 ```
 
-The grader finds the kubelet process itself, hashes `/proc/<pid>/exe` and compares the result with the ConfigMap.
+If the digest from Step 3 equals this one, the result is `match`. If not, it is `mismatch`. A copy with changed bytes can still start and still report `v1.35.0`, so the version alone never proves the build. `sha256sum /usr/bin/kubelet` always gives the opposite answer in this lab, which is why checking the wrong file is a real risk.
+
+## Step 5: record the result (checks `kubelet-binary`, `kubelet-digest` and `checksum-result`)
+
+Replace the placeholders with your values. Save this as `configmap-kubelet-review.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubelet-review
+  namespace: starfleet-031-050-02-05
+data:
+  version: "<VERSION>"
+  path: "<PATH>"
+  sha256: "<DIGEST>"
+  result: "<match-or-mismatch>"
+```
+
+Apply it:
+
+```sh
+kubectl apply -f configmap-kubelet-review.yaml
+```
+
+## Step 6: test the record
+
+Print the four keys:
+
+```sh
+kubectl -n starfleet-031-050-02-05 get configmap kubelet-review -o jsonpath='{.data.version}{"\n"}{.data.path}{"\n"}{.data.sha256}{"\n"}{.data.result}{"\n"}'
+```
+
+The lines must show the version from the node status, the path from `readlink`, the digest of `/proc/<pid>/exe` and `match` or `mismatch`.
+
+## Step 7: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
+
+## Common pitfalls
+
+> [!WARNING]
+> Do not record `/usr/bin/kubelet` or its digest. The running process was started from the path in the drop-in, and `/usr/bin/kubelet` always gives the opposite result.
+>
+> Do not restart the kubelet or change its unit. If the kubelet no longer runs from the path in `20-node-agent.conf`, the grader fails every check.
+>
+> Do not decide the result from the version. A changed binary still reports `v1.35.0`; only the digest shows the change.

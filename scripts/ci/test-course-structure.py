@@ -117,10 +117,10 @@ class StructureTests(unittest.TestCase):
             module.validate(self.root)
 
     def test_long_exam_time(self):
-        question = self.lab / 'question.md'
-        text = question.read_text()
-        question.write_text(module.re.sub(r'Allow about \d+ minutes', 'Allow about 45 minutes', text))
-        with self.assertRaisesRegex(ValueError, 'Allow about N minutes'):
+        course = self.course()
+        next(e for e in self.content_of(course, LAB) if e['path'] == LAB)['estimated_duration'] = '45m'
+        self.save_course(course)
+        with self.assertRaisesRegex(ValueError, 'estimated_duration'):
             module.validate(self.root)
 
 

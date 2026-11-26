@@ -36,8 +36,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: bridge-entry
+    description: Ingress fleet has a spec.tls entry for bridge.local alone with the Secret bridge-tls
+    type: file
+    source: validation/validate-bridge-entry.sh
+    points: 1
   - name: fleet-tls
-    description: Ingress fleet lists bridge.local with bridge-tls and dock.local with dock-tls
+    description: Ingress fleet has a spec.tls entry for dock.local with dock-tls, no other entries, and unchanged rules
     type: file
     source: validation/validate-fleet-tls.sh
     points: 1

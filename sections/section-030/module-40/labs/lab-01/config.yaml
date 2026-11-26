@@ -36,6 +36,11 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: tls-option
+    description: The TLS option default in the ConfigMap traefik-dynamic sets minVersion VersionTLS13 and sniStrict true
+    type: file
+    source: validation/validate-tls-option.sh
+    points: 1
   - name: tls13-minimum
     description: The default TLS option refuses TLS 1.2
     type: file

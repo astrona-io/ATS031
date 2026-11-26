@@ -126,12 +126,14 @@ if wants('registry-policy'):
                 assert not selector_matches(peer['namespaceSelector'], namespace_labels(other)), 'The namespaceSelector must not select ' + other
             assert selector_matches(peer['podSelector'], pod_labels(OUTPOST, 'courier')), 'The podSelector must select the courier pod'
             assert not selector_matches(peer['podSelector'], pod_labels(OUTPOST, 'idler')), 'The podSelector must not select the idler pod'
+if wants('outpost-courier-allowed'):
+    registry_rules()
+    expect_open(OUTPOST, 'courier', pod_ip(NS, 'registry'), 8080)
 if wants('only-outpost-courier'):
     registry_rules()
     assert [item['metadata']['name'] for item in policies(NS)] == ['registry-from-outpost-courier'], 'Create only the registry-from-outpost-courier policy in ' + NS
     assert not policies(OUTPOST) and not policies(DOCK), 'Do not create policies in ' + OUTPOST + ' or ' + DOCK
     target = pod_ip(NS, 'registry')
-    expect_open(OUTPOST, 'courier', target, 8080)
     expect_blocked(OUTPOST, 'idler', target, 8080)
     expect_blocked(DOCK, 'courier', target, 8080)
     expect_blocked(NS, 'courier', target, 8080)

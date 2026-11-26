@@ -43,8 +43,13 @@ validation:
     type: file
     source: validation/validate-config-closed.sh
     points: 1
+  - name: kubelet-restarted
+    description: The running worker kubelet reports no read-only port in its configz endpoint, while port 10250 still serves
+    type: file
+    source: validation/validate-kubelet-restarted.sh
+    points: 1
   - name: port-closed
-    description: The running worker kubelet uses no read-only port and port 10255 does not answer, while port 10250 still serves
+    description: Port 10255 on the worker does not answer, while port 10250 still serves
     type: file
     source: validation/validate-port-closed.sh
-    points: 2
+    points: 1

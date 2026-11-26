@@ -1,30 +1,20 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
-# Run The etcd Checks With A Pinned Benchmark Edition Solution
+# Run The etcd Checks With A Pinned Benchmark Edition — Solution
 
-Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
+You solve this lab with one kube-bench Job. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-astrona ssh astro-ats-031-lab-020-02-04
-kubectl config current-context
-```
+## Step 1: look at the starting state
 
-The second command prints `kubernetes-admin@astro-ats-031-lab-020-02-04`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
-
-## Read the requested edition
-
-Without `--benchmark`, kube-bench detects the Kubernetes version and maps it to an edition. The `--benchmark` option names the edition directly. Read the edition that the team asks for:
+kube-bench is a tool that runs the checks of the CIS (Center for Internet Security) Kubernetes Benchmark on the node where it runs. Without `--benchmark`, kube-bench detects the Kubernetes version and maps it to an edition. The `--benchmark` option names the edition directly. Read the edition that the team asks for:
 
 ```sh
 kubectl -n starfleet-031-020-02-04 get configmap audit-request -o jsonpath='{.data.benchmark}{"\n"}'
 ```
 
-## Write the Job
+The value is the name of an edition such as `cis-1.10`.
 
-etcd runs on the control plane node, so the Job needs the same `nodeSelector` and toleration as a control plane audit. The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version. The command names the `etcd` target and the edition.
+## Step 2: write the Job for the etcd target (check `etcd-target-run`)
+
+etcd runs on the control plane node, so the Job needs a `nodeSelector` and a toleration for the control plane. The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version.
 
 Save this as `job-etcd-audit.yaml`, and replace `<EDITION>` with the value you read:
 
@@ -65,24 +55,44 @@ spec:
       - {name: usr-bin, hostPath: {path: /usr/bin}}
 ```
 
-Apply it:
+Apply it and wait until the Job completes:
 
 ```sh
 kubectl apply -f job-etcd-audit.yaml
+kubectl -n starfleet-031-020-02-04 wait --for=condition=complete job/etcd-audit --timeout=180s
 ```
 
-## Check the result
+The `wait` command prints `job.batch/etcd-audit condition met`. If the Job fails instead, read its log: a misspelt edition name makes kube-bench stop with an error.
 
-Wait for the Job, then list the section headings and the summary of its log:
+## Step 3: check the sections in the log (check `etcd-results-only`)
+
+The `--targets etcd` option runs only section `2` of the benchmark, the etcd node configuration. List the section headings and the summary of the log:
 
 ```sh
-kubectl -n starfleet-031-020-02-04 wait --for=condition=complete job/etcd-audit --timeout=180s
 kubectl -n starfleet-031-020-02-04 logs job/etcd-audit | grep -e '^\[INFO\]' -e '^== Summary'
 ```
 
-The log has only section `2`, the etcd node configuration. If the Job fails instead, read its log: a misspelt edition name makes kube-bench stop with an error.
+The `[INFO]` headings all start with `2`. No heading starts with `1`.
+
+## Step 4: check the pinned edition (check `benchmark-pinned`)
+
+The edition from `audit-request` is in the command of the Job. Print the command:
+
+```sh
+kubectl -n starfleet-031-020-02-04 get job etcd-audit -o jsonpath='{.spec.template.spec.containers[0].command}{"\n"}'
+```
+
+The output ends with `"--benchmark"` and the edition you read in the first step.
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> A control plane Job with `--targets master` does not run the etcd checks. Without `--benchmark`, kube-bench picks the edition from the detected version, which may not be the edition the team reports against. A misspelt edition name stops the program with an error instead of a result.
+> Every check fails until the Job `etcd-audit` has completed. A misspelt edition name stops kube-bench with an error, so the Job fails.
+>
+> A control plane Job with `--targets master` does not run the etcd checks, and a Job with `--targets master,etcd` also logs section `1` results.
+>
+> Without `--benchmark`, kube-bench picks the edition from the detected version, which may not be the edition the team reports against.

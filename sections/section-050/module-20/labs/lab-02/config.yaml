@@ -38,7 +38,12 @@ validation:
     source: validation/validate-check-file.sh
     points: 2
   - name: check-result
-    description: download-check records the exit status and the failing file of the strict check
+    description: download-check records the exit status of the strict check
     type: file
     source: validation/validate-check-result.sh
+    points: 1
+  - name: failed-download
+    description: download-check names the download that failed the strict check, or none
+    type: file
+    source: validation/validate-failed-download.sh
     points: 1

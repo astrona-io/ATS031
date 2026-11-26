@@ -41,9 +41,14 @@ testing:
 validation:
   scripts:
   - name: etcd-target-run
-    description: Job etcd-audit completed and its log holds only etcd results
+    description: Job etcd-audit runs kube-bench with --targets etcd and completed
     type: file
     source: vm/validate-etcd-target-run.sh
+    points: 1
+  - name: etcd-results-only
+    description: The log of Job etcd-audit holds etcd results of section 2 and no control plane results of section 1
+    type: file
+    source: vm/validate-etcd-results-only.sh
     points: 1
   - name: benchmark-pinned
     description: Job etcd-audit runs kube-bench with the requested --benchmark edition

@@ -41,8 +41,13 @@ validation:
     type: file
     source: validation/validate-relay-class.sh
     points: 1
+  - name: relay-backend
+    description: Ingress relay sends the Prefix path / of relay.local to the Service relay on port 80 over the web entrypoint
+    type: file
+    source: validation/validate-relay-backend.sh
+    points: 1
   - name: relay-routing
-    description: "http://relay.local reaches the Service relay on port 80"
+    description: "http://relay.local answers 200 from the Service relay and another host gets 404"
     type: file
     source: validation/validate-relay-routing.sh
     points: 1

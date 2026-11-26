@@ -44,7 +44,12 @@ validation:
     source: validation/validate-host-network-listed.sh
     points: 2
   - name: admission-blocks-host-network
-    description: The dock namespace enforces the baseline Pod Security level, so a new hostNetwork pod is rejected and an ordinary pod is accepted
+    description: The dock namespace enforces the baseline Pod Security level, so a new hostNetwork pod is rejected
     type: file
     source: validation/validate-admission-blocks-host-network.sh
     points: 2
+  - name: plain-pod-accepted
+    description: The dock namespace has a Pod Security enforce label that still accepts an ordinary new pod
+    type: file
+    source: validation/validate-plain-pod-accepted.sh
+    points: 1

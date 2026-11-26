@@ -551,11 +551,22 @@ def assert_node_ready(node):
 
 
 assert_node_ready(WORKER)
+
+
+def unit_paths(property_name):
+    shown = node_exec(WORKER, 'systemctl', 'show', 'kubelet', '-p', property_name, '--value').stdout
+    return [item for item in shown.split() if item.startswith('/')]
+
+
 if wants('service-file-modes'):
-    shown = node_exec(WORKER, 'systemctl', 'show', 'kubelet', '-p', 'FragmentPath', '-p', 'DropInPaths', '--value').stdout
-    unit_files = [item for item in shown.split() if item.startswith('/')]
-    assert len(unit_files) >= 2, 'systemd lists no drop-in file for the kubelet'
+    unit_files = unit_paths('FragmentPath')
+    assert unit_files, 'systemd lists no unit file for the kubelet'
     for path in unit_files:
+        assert_mode_at_most(WORKER, path, 0o600)
+if wants('drop-in-file-modes'):
+    drop_in_files = unit_paths('DropInPaths')
+    assert drop_in_files, 'systemd lists no drop-in file for the kubelet'
+    for path in drop_in_files:
         assert_mode_at_most(WORKER, path, 0o600)
 if wants('rotate-certificates'):
     assert configz(WORKER).get('rotateCertificates') is True, 'Set rotateCertificates to true'
@@ -676,6 +687,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-drop-in-file-modes.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-rotate-certificates.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

@@ -19,8 +19,19 @@ def review():
     return json.loads(found.stdout).get('data') or {}
 
 
-if wants('trusted-mirror'):
+def named_mirror():
     named = review().get('mirror', '').strip().removeprefix('mirror-')
+    assert named in ('a', 'b', 'c'), 'mirror must be the letter a, b or c'
+    return named
+
+
+if wants('signed-mirror'):
+    folder = f'{release}/mirror-{named_mirror()}'
+    assert node_exec(NODE, 'openssl', 'dgst', '-sha256', '-verify', release + '/publisher.pub', '-signature',
+                     folder + '/SHA256SUMS.sig', folder + '/SHA256SUMS', success=False).returncode == 0, \
+        'mirror must name a mirror whose SHA256SUMS has a good signature from publisher.pub'
+if wants('trusted-mirror'):
+    named = named_mirror()
     assert named == trusted_mirror, 'mirror must name the one mirror whose manifest has a good publisher signature and matches its binary'
 if wants('review-digest'):
     assert review().get('sha256', '').strip() == trusted_digest, 'sha256 must be the relay-agent digest from the authenticated manifest'

@@ -188,8 +188,8 @@ def traefik_args():
     deployment = get('deployment', 'traefik', 'ingress-system')
     return deployment['spec']['template']['spec']['containers'][0].get('args') or []
 
-api = get('ingress', 'api') if (wants('exact-path') | wants('prefix-path')) else None
-if api is not None:
+api = get('ingress', 'api') if (wants('api-ingress') | wants('exact-path') | wants('prefix-path')) else None
+if wants('api-ingress'):
     assert api['spec'].get('ingressClassName') == 'traefik', 'The Ingress api must name the class traefik'
     assert annotation(api, 'router.entrypoints') == 'web', 'The Ingress api must use the web entrypoint'
     assert routes(api) == {('api.local', '/healthz', 'Exact', 'beacon', 80), ('api.local', '/v1', 'Prefix', 'scout', 80)}, \

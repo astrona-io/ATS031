@@ -588,10 +588,11 @@ manifests = sorted(node_exec(NODE, 'ls', '/etc/kubernetes/manifests').stdout.spl
 assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manager.yaml', 'kube-scheduler.yaml'], \
     '/etc/kubernetes/manifests must hold only the four control plane manifests, not ' + ', '.join(manifests)
 
-if wants('encryption-provider'):
-    path = flag_value(process_arguments(NODE, 'kube-apiserver'), 'encryption-provider-config')
-    assert path == '/etc/kubernetes/enc/encryption-config.yaml', 'Set --encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml'
-    text = node_exec(NODE, 'cat', path).stdout
+if wants('encryption-config'):
+    path = '/etc/kubernetes/enc/encryption-config.yaml'
+    read = node_exec(NODE, 'cat', path, success=False)
+    assert read.returncode == 0, path + ' is missing on the control plane node'
+    text = read.stdout
     named = re.search(r'''^\s*-\s*["']?secrets["']?\s*(#.*)?$''', text, re.M) or \
         re.search(r'''^\s*resources\s*:\s*\[[^\]]*["']?\bsecrets\b["']?''', text, re.M)
     assert named, 'The configuration must name the resource secrets'
@@ -606,6 +607,9 @@ if wants('encryption-provider'):
         length = 0
     assert length == 32, 'The aescbc key must be 32 random bytes, base64 encoded'
     assert_mode_at_most(NODE, path, 0o600, owner=None)
+if wants('encryption-provider'):
+    path = flag_value(process_arguments(NODE, 'kube-apiserver'), 'encryption-provider-config')
+    assert path == '/etc/kubernetes/enc/encryption-config.yaml', 'Set --encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml'
 if wants('secret-encrypted'):
     stored = etcdctl('get', '/registry/secrets/' + NAMESPACE + '/launch-code', '--print-value-only')
     assert b'k8s:enc:aescbc:v1:' in stored, 'The Secret is not stored with the aescbc provider'
@@ -729,6 +733,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-encryption-config.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-encryption-provider.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

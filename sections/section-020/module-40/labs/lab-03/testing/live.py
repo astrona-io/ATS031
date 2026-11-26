@@ -77,6 +77,8 @@ assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manage
 arguments = process_arguments(NODE, 'etcd')
 if wants('client-cert-auth'):
     assert flag_value(arguments, 'client-cert-auth') == 'true', 'etcd must run with --client-cert-auth=true'
+if wants('anonymous-request-rejected'):
+    assert flag_value(arguments, 'client-cert-auth') == 'true', 'etcd must run with --client-cert-auth=true before it can refuse a request'
     request = node_exec(NODE, 'curl', '-sk', '--max-time', '5', 'https://127.0.0.1:2379/health', success=False)
     assert request.returncode != 0, 'etcd still answers a request without a client certificate'
 if wants('peer-client-cert-auth'):

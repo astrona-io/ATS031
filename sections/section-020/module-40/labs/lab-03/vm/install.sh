@@ -548,6 +548,8 @@ assert manifests == ['etcd.yaml', 'kube-apiserver.yaml', 'kube-controller-manage
 arguments = process_arguments(NODE, 'etcd')
 if wants('client-cert-auth'):
     assert flag_value(arguments, 'client-cert-auth') == 'true', 'etcd must run with --client-cert-auth=true'
+if wants('anonymous-request-rejected'):
+    assert flag_value(arguments, 'client-cert-auth') == 'true', 'etcd must run with --client-cert-auth=true before it can refuse a request'
     request = node_exec(NODE, 'curl', '-sk', '--max-time', '5', 'https://127.0.0.1:2379/health', success=False)
     assert request.returncode != 0, 'etcd still answers a request without a client certificate'
 if wants('peer-client-cert-auth'):
@@ -670,6 +672,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-anonymous-request-rejected.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-client-cert-auth.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

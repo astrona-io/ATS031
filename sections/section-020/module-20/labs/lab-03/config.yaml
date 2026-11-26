@@ -41,9 +41,14 @@ testing:
 validation:
   scripts:
   - name: node-job-completed
-    description: Job node-audit ran kube-bench with the node target and completed with node check results
+    description: Job node-audit ran kube-bench with the node target and the pinned image and completed
     type: file
     source: vm/validate-node-job-completed.sh
+    points: 1
+  - name: kubelet-results-logged
+    description: The log of Job node-audit holds kubelet results of section 4.2
+    type: file
+    source: vm/validate-kubelet-results-logged.sh
     points: 1
   - name: ran-on-worker
     description: The pod of Job node-audit ran on the node with hostPID

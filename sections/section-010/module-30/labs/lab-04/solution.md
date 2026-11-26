@@ -1,24 +1,30 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
-# Allow A Pod Range With ipBlock And except Solution
+# Allow A Pod Range With ipBlock And except — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
+You solve this lab with one NetworkPolicy. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+Check the pods, their addresses, and that no policy exists yet:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-03-04)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-04" || exit 1
+kubectl -n starfleet-031-010-03-04 get pods -o wide --show-labels
+kubectl -n outpost-031-010-03-04 get pods -o wide --show-labels
+kubectl get networkpolicy -A
 ```
 
-Keep this connection for the whole task. Every script of the lab refuses to run against another context.
+The `ledger` pod listens on TCP 7070. The `courier` and `rogue` pods have addresses inside the pod range `192.168.0.0/16`. Without any policy, both can reach `ledger`.
 
-An `ipBlock` peer selects addresses by CIDR range instead of by labels. Its `except` list removes smaller ranges from it. Here the rule admits the pod range of the cluster but removes the address of the `rogue` pod with a `/32` entry, which is one single address.
+## Step 2: allow the pod range (check `range-admits-courier`)
 
-Find the address of the `rogue` pod:
+An `ipBlock` peer selects senders by address range in CIDR (Classless Inter-Domain Routing) notation instead of by labels. A `cidr` of `192.168.0.0/16` covers every pod address in this cluster, so the `courier` pod matches it.
+
+## Step 3: remove the rogue address (checks `rogue-except-entry` and `range-admits-courier`)
+
+The `except` list removes smaller ranges from the `cidr`. A `/32` entry is one single address. Find the address of the `rogue` pod:
 
 ```sh
-kubectl -n outpost-031-010-03-04 get pod rogue -o jsonpath='{.status.podIP}'
+ROGUE_IP=$(kubectl -n outpost-031-010-03-04 get pod rogue -o jsonpath='{.status.podIP}')
+echo $ROGUE_IP
 ```
 
 Use that address in place of `<ROGUE_IP>` in the file below.
@@ -54,7 +60,9 @@ Apply it:
 kubectl apply -f networkpolicy-ledger-from-pod-range.yaml
 ```
 
-Then check the result. The test client prints `open` with the reply, or `blocked` when the connection times out:
+## Step 4: test both senders (checks `range-admits-courier` and `except-blocks-rogue`)
+
+Every pod has a small test client. It prints `open` with the reply, or `blocked` when the connection times out:
 
 ```sh
 LEDGER_IP=$(kubectl -n starfleet-031-010-03-04 get pod ledger -o jsonpath='{.status.podIP}')
@@ -62,15 +70,21 @@ kubectl -n outpost-031-010-03-04 exec courier -- python /app/client.py tcp "$LED
 kubectl -n outpost-031-010-03-04 exec rogue -- python /app/client.py tcp "$LEDGER_IP" 7070
 ```
 
-The request from `courier` must print `open` and the request from `rogue` must print `blocked`.
+The first command must print `open`: the `courier` address is inside the range and not in the `except` list. The second must print `blocked`: the `rogue` address is removed.
 
-The `courier` pod gets a reply, because its address is inside the range and not in the `except` list. The `rogue` pod times out, because its `/32` address is removed. The `except` entry holds a pod address, so it stops matching if the `rogue` pod is recreated with a new address: this is why labels are the better tool for pods.
+The `except` entry holds a pod address, so it stops matching if the `rogue` pod is recreated with a new address. This is why labels are the better tool for pods.
 
-When you are done, remove the lab with `astrona destroy ats-031-lab-010-03-04`.
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Pod addresses change when a pod is recreated. Use `ipBlock` for stable ranges, such as addresses outside the cluster, and labels for pods.
+> The `except` list must hold exactly one entry, the `rogue` address with `/32`. A wider entry, such as a `/24`, can also remove the `courier` address.
+>
+> Use only an `ipBlock` peer. Do not add a `podSelector` or a `namespaceSelector` to the rule.
+>
+> Use the `cidr` `192.168.0.0/16` and allow only TCP 7070. A rule without `ports` allows every port.
 >
 > Every `except` range must be inside the `cidr` range, or the API server rejects the policy.

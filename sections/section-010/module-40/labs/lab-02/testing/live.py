@@ -128,7 +128,7 @@ if wants('navigator-resolves'):
     baseline_intact()
     get('networkpolicy', 'navigator-dns', NS)
     expect_dns(NS, 'navigator')
-if wants('dns-only'):
+if wants('dns-rule'):
     baseline_intact()
     get('networkpolicy', 'navigator-dns', NS)
     rules = rules_for(NS, pod_labels(NS, 'navigator'), 'Egress')
@@ -144,6 +144,9 @@ if wants('dns-only'):
         if policy['metadata']['name'] != 'navigator-dns':
             assert policy['metadata']['name'] == 'default-deny-all', 'Create only the navigator-dns policy'
     assert not selector_matches(get('networkpolicy', 'navigator-dns', NS)['spec'].get('podSelector'), pod_labels(NS, 'cargo')), 'The DNS policy must not select the cargo pod'
+if wants('dns-only'):
+    baseline_intact()
+    get('networkpolicy', 'navigator-dns', NS)
     expect_blocked(NS, 'navigator', coredns_ip(), 9153, note='(the CoreDNS metrics port is not DNS) ')
     expect_blocked(NS, 'navigator', pod_ip(NS, 'cargo'), 8080)
     expect_dns(NS, 'cargo', works=False)

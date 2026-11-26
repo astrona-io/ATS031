@@ -32,6 +32,11 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: review-record
+    description: repository-review names one package file from Packages and one installed fleet-tools file
+    type: file
+    source: validation/validate-review-record.sh
+    points: 1
   - name: bad-package
     description: repository-review names the package file whose digest differs from the signed index
     type: file

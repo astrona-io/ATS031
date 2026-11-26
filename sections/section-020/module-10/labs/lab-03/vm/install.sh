@@ -573,6 +573,7 @@ if wants('apiserver-values'):
 if wants('etcd-values'):
     arguments = process_arguments(NODE, 'etcd')
     assert saved.get('etcd-client-cert-auth') == (flag_value(arguments, 'client-cert-auth') or 'false'), 'etcd-client-cert-auth differs from the running etcd'
+if wants('etcd-data-dir-mode'):
     mode = node_exec(NODE, 'stat', '-c', '%a', '/var/lib/etcd').stdout.strip()
     assert saved.get('etcd-data-dir-mode') == mode, 'etcd-data-dir-mode differs from the mode of /var/lib/etcd'
 ASTRONA_LAB_FILE
@@ -694,6 +695,13 @@ lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-apiserver-values.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-etcd-data-dir-mode.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

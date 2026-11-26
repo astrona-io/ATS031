@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: orbit-renewed
-    description: Secret orbit-tls holds a new key and a certificate for orbit.example.test valid for at least 60 more days
+    description: Secret orbit-tls holds a new certificate that names DNS:orbit.example.test and is valid for 90 days
     type: file
     source: validation/validate-orbit-renewed.sh
+    points: 1
+  - name: orbit-key
+    description: Secret orbit-tls holds a new private key that matches its new certificate
+    type: file
+    source: validation/validate-orbit-key.sh
     points: 1
   - name: orbit-served
     description: Traefik serves the renewed orbit-tls certificate for orbit.example.test

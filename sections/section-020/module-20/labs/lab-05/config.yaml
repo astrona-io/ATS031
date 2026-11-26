@@ -40,6 +40,11 @@ testing:
     source: vm/wait-solved.sh
 validation:
   scripts:
+  - name: master-job-completed
+    description: Job master-audit ran kube-bench with --targets master, completed and logged a summary
+    type: file
+    source: vm/validate-master-job-completed.sh
+    points: 1
   - name: totals-match
     description: ConfigMap master-result records the PASS, FAIL, WARN and INFO totals of the control plane report
     type: file

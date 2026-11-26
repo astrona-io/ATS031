@@ -1,56 +1,67 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Repair A TLS Ingress With A Missing Secret Solution
+# Fix A Missing TLS Secret For An Ingress — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+You solve this lab with one new certificate and one Secret. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-03-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-03-02" || exit 1
-```
+## Step 1: look at the starting state
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
-
-## Find the cause
+Check which Secret the Ingress names and where Secrets with that name exist:
 
 ```sh
-kubectl -n starfleet-031-030-03-02 get ingress beacon -o jsonpath='{.spec.tls[0].secretName}{"\n"}'
-kubectl -n starfleet-031-030-03-02 get secret
-kubectl get secret --all-namespaces | grep beacon-tls
-kubectl -n outpost-031-030-03-02 get secret beacon-tls -o jsonpath='{.data.tls\.crt}' | base64 --decode | openssl x509 -noout -subject -ext subjectAltName
+kubectl -n starfleet-031-030-03-02 get ingress beacon -o jsonpath='{.spec.tls}{"\n"}'
+kubectl get secret -A --field-selector metadata.name=beacon-tls
+kubectl -n outpost-031-030-03-02 get secret beacon-tls -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -noout -text | grep -A1 -E 'Subject:|Subject Alternative Name'
 ```
 
-The Ingress names `beacon-tls`, the Secret does not exist in `starfleet-031-030-03-02` and the copy in `outpost-031-030-03-02` has no SAN extension. An Ingress cannot use a Secret from another namespace, and a certificate without a SAN is not accepted by current clients.
+An Ingress can only use a Secret in its own namespace, so Traefik cannot read `beacon-tls` from `outpost-031-030-03-02` and serves its own default certificate instead. The certificate there also has no Subject Alternative Name (SAN), the list of host names the certificate is valid for. Clients check the name only in the SAN, so they reject that certificate even if you copied it.
 
-## Create the correct Secret
+## Step 2: create the Secret in the Ingress namespace (check `beacon-tls-secret`)
+
+Create a new private key and a self-signed certificate. A Secret of type `kubernetes.io/tls` holds the certificate under `tls.crt` and the private key under `tls.key`, and the two must belong together:
 
 ```sh
-openssl req -x509 -nodes -newkey rsa:2048 -days 30 -keyout beacon.key -out beacon.crt -subj "/CN=beacon.example.test" -addext "subjectAltName=DNS:beacon.example.test"
-kubectl -n starfleet-031-030-03-02 create secret tls beacon-tls --cert=beacon.crt --key=beacon.key
+openssl req -x509 -newkey rsa:2048 -nodes -days 30 \
+  -keyout beacon-tls.key -out beacon-tls.crt \
+  -subj "/CN=beacon.example.test" -addext "subjectAltName=DNS:beacon.example.test"
+kubectl -n starfleet-031-030-03-02 create secret tls beacon-tls --cert=beacon-tls.crt --key=beacon-tls.key
 ```
 
-## Verify
+## Step 3: confirm the name in the SAN (check `beacon-san`)
+
+The `-addext "subjectAltName=DNS:beacon.example.test"` option of the command above put the name in the SAN. Check it:
 
 ```sh
-kubectl -n ingress-system port-forward service/traefik 8443:443
-curl -s --cacert beacon.crt --resolve beacon.example.test:8443:127.0.0.1 https://beacon.example.test:8443/
+openssl x509 -in beacon-tls.crt -noout -text | grep -A1 'Subject Alternative Name'
 ```
 
-The command prints the `beacon` response. The Ingress itself needs no change, because it already names `beacon-tls` in its own namespace.
+The second line must show `DNS:beacon.example.test` and no other name.
+
+## Step 4: test HTTPS with verification (check `beacon-https`)
+
+Traefik watches Secrets and picks up `beacon-tls` without a restart. Forward the Traefik HTTPS port to your machine:
+
+```sh
+kubectl -n ingress-system port-forward service/traefik 8443:443 >/dev/null &
+```
+
+Wait a second for the port forward, then send a request that trusts only the new certificate:
+
+```sh
+curl --cacert beacon-tls.crt --resolve beacon.example.test:8443:127.0.0.1 https://beacon.example.test:8443/
+```
+
+The command must print a line that starts with `app=beacon`. Stop the port forward with `kill %1`.
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Copying the Secret from `outpost-031-030-03-02`.** Its certificate has no SAN.
-> - **Editing the Ingress to a new Secret name.** The required result keeps `beacon-tls`.
-> - **Waiting without checking.** If the response is still wrong, read the Traefik log.
-
-## Clean up
-
-Destroy the lab cluster when you are done:
-
-```sh
-astrona destroy ats-031-lab-030-03-02
-```
+> Copying the Secret from `outpost-031-030-03-02` fails: the check rejects that certificate because it has no SAN.
+>
+> Do not change the Ingress to point somewhere else. The Ingress `beacon` must keep `secretName: beacon-tls`.
+>
+> `tls.key` must be the private key of `tls.crt`, and the SAN must not hold a wildcard or a second name such as `wrong.example.test`.
+>
+> Do not test with `curl -k`. The check verifies the certificate and the server name.

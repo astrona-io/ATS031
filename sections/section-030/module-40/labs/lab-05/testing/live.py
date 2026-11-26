@@ -197,12 +197,17 @@ for line in staged.stdout.splitlines():
     name, uid, version = line.split()
     found = command(['kubectl', '-n', NAMESPACE, 'get', 'secret', name, '-o', 'jsonpath={.metadata.uid} {.metadata.resourceVersion}'], success=False).stdout.split()
     assert found[:1] == [uid], 'Replace the data of the Secret in place; do not delete ' + name + ' and create it again'
-if wants('orbit-renewed'):
+if wants('orbit-key'):
     live(r"""
 pem, key, old = pems
 assert der(pem) != der(old), 'orbit-tls must hold a new certificate'
 assert not key_matches(old, key), 'The new certificate must use a new private key'
 assert key_matches(pem, key), 'tls.key in orbit-tls must be the private key of tls.crt'
+""", tls_secret('orbit-tls') + [previous])
+if wants('orbit-renewed'):
+    live(r"""
+pem, key, old = pems
+assert der(pem) != der(old), 'orbit-tls must hold a new certificate'
 assert 'orbit.example.test' in dns_names(pem), 'The new certificate must name DNS:orbit.example.test in its SAN'
 assert 88 <= days_left(pem) <= 91, 'The new certificate must be valid for 90 days'
 """, tls_secret('orbit-tls') + [previous])

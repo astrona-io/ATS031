@@ -41,10 +41,15 @@ testing:
 validation:
   scripts:
   - name: scheduler-bind-address
-    description: kube-scheduler runs with --bind-address=127.0.0.1 and port 10259 answers only on the loopback address
+    description: The running kube-scheduler has --bind-address=127.0.0.1 and its pod is ready
     type: file
     source: vm/validate-scheduler-bind-address.sh
-    points: 2
+    points: 1
+  - name: scheduler-loopback-only
+    description: Port 10259 answers on 127.0.0.1 and refuses connections on the node address
+    type: file
+    source: vm/validate-scheduler-loopback-only.sh
+    points: 1
   - name: benchmark-review-record
     description: ConfigMap benchmark-review records the corrected scheduler control
     type: file

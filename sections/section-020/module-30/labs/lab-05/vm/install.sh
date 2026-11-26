@@ -541,7 +541,10 @@ if wants('noderestriction-enabled'):
     arguments = process_arguments(NODE, 'kube-apiserver')
     assert 'NodeRestriction' in flag_list(arguments, 'enable-admission-plugins'), 'Add NodeRestriction to --enable-admission-plugins'
     assert 'NodeRestriction' not in flag_list(arguments, 'disable-admission-plugins'), 'NodeRestriction must not be disabled'
-    assert 'LimitRanger' in flag_list(arguments, 'enable-admission-plugins'), 'Keep the admission plugins that were enabled'
+if wants('admission-plugins-kept'):
+    # The plugin is added to the list, not swapped in: LimitRanger stays next to it.
+    enabled = flag_list(process_arguments(NODE, 'kube-apiserver'), 'enable-admission-plugins')
+    assert 'NodeRestriction' in enabled and 'LimitRanger' in enabled, 'Add NodeRestriction to --enable-admission-plugins and keep LimitRanger'
 if wants('node-label-denied'):
     attempt = node_exec(WORKER, 'kubectl', '--kubeconfig', '/etc/kubernetes/kubelet.conf', 'label', 'node', WORKER, 'node-restriction.kubernetes.io/lab-check=kubelet', '--overwrite', success=False)
     if attempt.returncode == 0:
@@ -665,6 +668,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-admission-plugins-kept.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-node-label-denied.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

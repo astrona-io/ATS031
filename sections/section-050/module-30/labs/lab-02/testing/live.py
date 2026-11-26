@@ -8,10 +8,12 @@ release_digest = node_exec(NODE, 'sed', '-n', 's/^ \\([0-9a-f]\\{64\\}\\) [0-9]*
 assert release_digest == node_exec(NODE, 'sha256sum', repository + '/Packages').stdout.split()[0], \
     'The Packages index was changed; start the lab again'
 bad_packages = []
+package_files = []
 for stanza in node_exec(NODE, 'cat', repository + '/Packages').stdout.split('\n\n'):
     fields = dict(line.split(': ', 1) for line in stanza.splitlines() if ': ' in line and not line.startswith(' '))
     if 'Filename' not in fields:
         continue
+    package_files.append(os.path.basename(fields['Filename']))
     actual = node_exec(NODE, 'sha256sum', f"{repository}/{fields['Filename']}").stdout.split()[0]
     if actual != fields['SHA256']:
         bad_packages.append(os.path.basename(fields['Filename']))
@@ -27,6 +29,13 @@ def review():
     return json.loads(found.stdout).get('data') or {}
 
 
+if wants('review-record'):
+    data = review()
+    assert os.path.basename(data.get('bad-package', '').strip()) in package_files, \
+        'bad-package must be the file name of one package listed in Packages'
+    installed = node_exec(NODE, 'dpkg', '-L', 'fleet-tools').stdout.split()
+    assert data.get('changed-file', '').strip() in installed, \
+        'changed-file must be the full path of one file that dpkg -L fleet-tools lists'
 if wants('bad-package'):
     recorded = os.path.basename(review().get('bad-package', '').strip())
     assert recorded == bad_packages[0], 'bad-package must name the .deb file whose digest differs from the signed Packages index'

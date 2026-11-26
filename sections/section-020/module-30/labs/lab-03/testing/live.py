@@ -68,6 +68,9 @@ def assert_node_ready(node):
     assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
 
 
+if wants('manifest-flag-removed'):
+    manifest = node_exec(NODE, 'cat', '/etc/kubernetes/manifests/kube-controller-manager.yaml').stdout
+    assert 'profilling' not in manifest, 'The kube-controller-manager manifest still has the broken flag'
 if wants('controller-manager-running'):
     arguments = process_arguments(NODE, 'kube-controller-manager')
     assert not any('profilling' in item for item in arguments), 'kube-controller-manager still runs with the broken flag'

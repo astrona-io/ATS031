@@ -11,10 +11,7 @@
         "kind": "Ingress",
         "metadata": {
           "name": "probe",
-          "namespace": "starfleet-031-030-01-01",
-          "annotations": {
-            "traefik.ingress.kubernetes.io/router.entrypoints": "websecure"
-          }
+          "namespace": "starfleet-031-030-01-01"
         },
         "spec": {
           "ingressClassName": "traefik",
@@ -38,7 +35,25 @@
                 ]
               }
             }
-          ],
+          ]
+        }
+      },
+      "outcome": "probe-ingress"
+    },
+    {
+      "kind": "ingress",
+      "name": "probe",
+      "expected": {
+        "apiVersion": "networking.k8s.io/v1",
+        "kind": "Ingress",
+        "metadata": {
+          "name": "probe",
+          "namespace": "starfleet-031-030-01-01",
+          "annotations": {
+            "traefik.ingress.kubernetes.io/router.entrypoints": "websecure"
+          }
+        },
+        "spec": {
           "tls": [
             {
               "secretName": "probe-tls"
@@ -46,7 +61,7 @@
           ]
         }
       },
-      "outcome": "probe-ingress"
+      "outcome": "probe-tls"
     },
     {
       "kind": "deployment",

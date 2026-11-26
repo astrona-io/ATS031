@@ -126,10 +126,12 @@ def operator_rules():
     no_open_rules(rules)
     return rules, address, port
 
-if wants('operator-reaches-api'):
+if wants('api-endpoint-rule'):
     rules, address, port = operator_rules()
     assert any(ipaddress.ip_address(address) in ipaddress.ip_network(peer['ipBlock']['cidr'], strict=False) for rule in rules for peer in peers_of(rule) if 'ipBlock' in peer), 'An ipBlock must contain the API server endpoint address ' + address
     assert any(('TCP', str(port), None) in port_set(rule) for rule in rules), 'Allow the endpoint port ' + str(port) + ', not the Service port 443'
+if wants('operator-reaches-api'):
+    operator_rules()
     expect_open(NS, 'operator', service_ip('default', 'kubernetes'), 443, note='through the kubernetes Service ')
 if wants('api-rule-narrow'):
     rules, address, port = operator_rules()

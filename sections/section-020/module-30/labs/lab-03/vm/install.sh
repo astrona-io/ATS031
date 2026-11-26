@@ -550,6 +550,9 @@ def assert_node_ready(node):
     assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
 
 
+if wants('manifest-flag-removed'):
+    manifest = node_exec(NODE, 'cat', '/etc/kubernetes/manifests/kube-controller-manager.yaml').stdout
+    assert 'profilling' not in manifest, 'The kube-controller-manager manifest still has the broken flag'
 if wants('controller-manager-running'):
     arguments = process_arguments(NODE, 'kube-controller-manager')
     assert not any('profilling' in item for item in arguments), 'kube-controller-manager still runs with the broken flag'
@@ -679,6 +682,13 @@ lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-controller-manager-running.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-manifest-flag-removed.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

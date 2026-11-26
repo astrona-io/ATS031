@@ -55,19 +55,58 @@ def remove_test_pods():
     del TEST_PODS[:]
 
 
+def selector_matches(selector, labels):
+    """Apply a Kubernetes label selector (matchLabels and matchExpressions)."""
+    selector = selector or {}
+    for key, value in (selector.get('matchLabels') or {}).items():
+        if labels.get(key) != value:
+            return False
+    for expression in selector.get('matchExpressions') or []:
+        key, operator, values = expression['key'], expression['operator'], expression.get('values') or []
+        if operator == 'In' and labels.get(key) not in values:
+            return False
+        if operator == 'NotIn' and key in labels and labels[key] in values:
+            return False
+        if operator == 'Exists' and key not in labels:
+            return False
+        if operator == 'DoesNotExist' and key in labels:
+            return False
+    return True
+
+
+def egress_policies(namespace, labels=None):
+    """Names of the NetworkPolicies in a namespace that control egress, optionally only those that select the given pod labels."""
+    policies = json.loads(kubectl('-n', namespace, 'get', 'networkpolicy', '-o', 'json'))['items']
+    names = []
+    for policy in policies:
+        spec = policy.get('spec', {})
+        if 'Egress' not in (spec.get('policyTypes') or []) and 'egress' not in spec:
+            continue
+        if labels is not None and not selector_matches(spec.get('podSelector'), labels):
+            continue
+        names.append(policy['metadata']['name'])
+    return names
+
+
 METADATA = 'http://169.254.169.254/latest/meta-data/'
+AGENT_LABELS = {'app': 'agent', 'role': 'cloud-agent'}
+SHUTTLE_LABELS = {'app': 'shuttle'}
 try:
-    assert get('pod', 'agent')['metadata'].get('labels', {}) == {'app': 'agent', 'role': 'cloud-agent'}, 'Do not add or remove labels on pod %s/agent' % NAMESPACE
-    assert get('pod', 'shuttle')['metadata'].get('labels', {}) == {'app': 'shuttle'}, 'Do not add or remove labels on pod %s/shuttle' % NAMESPACE
+    assert get('pod', 'agent')['metadata'].get('labels', {}) == AGENT_LABELS, 'Do not add or remove labels on pod %s/agent' % NAMESPACE
+    assert get('pod', 'shuttle')['metadata'].get('labels', {}) == SHUTTLE_LABELS, 'Do not add or remove labels on pod %s/shuttle' % NAMESPACE
     expect_http('metadata-stub-031-040-02-02', 'control', METADATA, '200', 'The control pod must still reach the metadata server')
     expect_http('outpost-031-040-02-02', 'drifter', METADATA, '200', 'outpost-031-040-02-02 must stay unchanged')
     expect_http('dock-031-040-02-02', 'tender', METADATA, '200', 'dock-031-040-02-02 must stay unchanged')
-    expect_http(NAMESPACE, 'agent', METADATA, '200', 'agent must reach the metadata address')
-    expect_http(NAMESPACE, 'shuttle', 'http://probe/', '200', 'shuttle must reach the probe Service')
-    expect_http(NAMESPACE, 'agent', 'http://probe/', '200', 'agent must reach the probe Service')
     if wants('shuttle-blocked'):
+        assert egress_policies(NAMESPACE, SHUTTLE_LABELS), 'No egress NetworkPolicy in %s selects pod shuttle' % NAMESPACE
         expect_http(NAMESPACE, 'shuttle', METADATA, 'denied', 'shuttle must not reach the metadata address')
+        expect_http(NAMESPACE, 'shuttle', 'http://probe/', '200', 'shuttle must reach the probe Service')
+    if wants('agent-allowed'):
+        assert egress_policies(NAMESPACE, AGENT_LABELS), 'No egress NetworkPolicy in %s selects pod agent' % NAMESPACE
+        expect_http(NAMESPACE, 'agent', METADATA, '200', 'agent must reach the metadata address')
+        expect_http(NAMESPACE, 'agent', 'http://probe/', '200', 'agent must reach the probe Service')
     if wants('label-decides'):
+        assert egress_policies(NAMESPACE), 'No egress NetworkPolicy exists in %s' % NAMESPACE
         plain_pod = test_pod(NAMESPACE)
         labelled_pod = test_pod(NAMESPACE, 'role=cloud-agent')
         expect_http(NAMESPACE, plain_pod, METADATA, 'denied', 'A new pod without the label must not reach the metadata address')

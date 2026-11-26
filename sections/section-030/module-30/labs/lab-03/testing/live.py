@@ -193,9 +193,13 @@ if wants('depot-certificate'):
 pem, key = pems
 info = decode(pem)
 assert info['issuer'] == info['subject'], 'The certificate must be self-signed: its issuer must equal its subject'
-assert {'depot.example.test', 'www.depot.example.test'} <= set(dns_names(pem)), 'The SAN must name depot.example.test and www.depot.example.test'
 assert 28 <= days_left(pem) <= 31, 'The certificate must be valid for 30 days'
 assert key_matches(pem, key), 'tls.key in depot-tls must be the private key of tls.crt'
+""", tls_secret('depot-tls'))
+if wants('depot-san'):
+    live(r"""
+pem = pems[0]
+assert {'depot.example.test', 'www.depot.example.test'} <= set(dns_names(pem)), 'The SAN must name depot.example.test and www.depot.example.test'
 """, tls_secret('depot-tls'))
 if wants('depot-https'):
     live(r"""

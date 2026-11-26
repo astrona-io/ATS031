@@ -1,21 +1,23 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
-# Isolate One Pod For Egress Only Solution
+# Isolate One Pod For Egress Only — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
+You solve this lab with one NetworkPolicy. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+Check the labels the policy will use, and that no policy exists yet:
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-01-03)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-01-03" || exit 1
+kubectl -n starfleet-031-010-01-03 get pods --show-labels
+kubectl -n starfleet-031-010-01-03 get networkpolicy
 ```
 
-Keep this connection for the whole task. Every script of the lab refuses to run against another context.
+The pod you must isolate carries `app: relay`. The pods `lander` and `courier` carry `app: lander` and `app: courier`. Without any policy, every pod can reach every other pod.
 
-A pod is isolated for a direction when at least one policy selects it and lists that direction in `policyTypes`. A policy that lists only `Egress` and has no `egress` rules blocks every connection the pod opens, including DNS lookups, while incoming connections stay as they were.
+## Step 2: isolate relay for egress only (check `relay-egress-policy`)
 
-Write `policyTypes` explicitly. If you leave it out, the API server fills it in from the rule sections you wrote: a policy with no rules would then get only `Ingress`, which is the opposite of what this task needs.
+A pod is isolated for a direction when at least one policy selects it and lists that direction in `policyTypes`. Egress is the traffic a pod sends; ingress is the traffic it receives. A policy that lists only `Egress` and has no `egress` rules blocks every connection the pod opens, while incoming connections stay as they were.
+
+Write `policyTypes` explicitly. If you leave it out, the API server fills it in from the rule sections you wrote. A policy with no rules would then get only `Ingress`, which is the opposite of what this task needs.
 
 Save this as `networkpolicy-relay-egress-isolation.yaml`:
 
@@ -39,25 +41,52 @@ Apply it:
 kubectl apply -f networkpolicy-relay-egress-isolation.yaml
 ```
 
-Then check the result. The test client prints one word for each attempt: `open` with the reply, `blocked` when the connection times out, `refused` when nothing listens, or `resolved` and `unresolved` for a DNS lookup. Use pod IP addresses, so DNS and traffic are tested separately:
+Then check that it is the only policy and lists only `Egress`:
+
+```sh
+kubectl -n starfleet-031-010-01-03 get networkpolicy
+kubectl -n starfleet-031-010-01-03 get networkpolicy relay-egress-isolation -o jsonpath='{.spec.policyTypes}'
+```
+
+The second command must print `["Egress"]`.
+
+## Step 3: test that relay cannot send (check `relay-egress-isolated`)
+
+Every pod has a small test client. It prints `open` with the reply, `blocked` when the connection times out, and `resolved` or `unresolved` for a DNS lookup. Use the pod IP address of `lander`, so the TCP test does not depend on DNS:
 
 ```sh
 LANDER_IP=$(kubectl -n starfleet-031-010-01-03 get pod lander -o jsonpath='{.status.podIP}')
-RELAY_IP=$(kubectl -n starfleet-031-010-01-03 get pod relay -o jsonpath='{.status.podIP}')
 kubectl -n starfleet-031-010-01-03 exec relay -- python /app/client.py tcp "$LANDER_IP" 8080
 kubectl -n starfleet-031-010-01-03 exec relay -- python /app/client.py dns kubernetes.default.svc.cluster.local
-kubectl -n starfleet-031-010-01-03 exec courier -- python /app/client.py tcp "$RELAY_IP" 8080
 ```
 
-The first two commands must print `blocked` and `unresolved`. The last command must still print `open`.
+The first command must print `blocked` and the second `unresolved`. The DNS lookup fails because a lookup is also a connection that `relay` opens, to CoreDNS, the cluster DNS server, and no egress rule allows it.
 
-The `relay` pod times out to the `lander` pod and cannot resolve names, because the policy isolates it for egress with no rules. The `courier` pod still reaches the `relay` pod, because the policy does not list `Ingress`. The `lander` and `courier` pods are not selected, so nothing changes for them.
+## Step 4: test that the other paths stay open (check `ingress-and-neighbours-open`)
 
-When you are done, remove the lab with `astrona destroy ats-031-lab-010-01-03`.
+The policy does not list `Ingress`, so other pods still reach `relay`. It does not select `lander` or `courier`, so nothing changes for them:
+
+```sh
+RELAY_IP=$(kubectl -n starfleet-031-010-01-03 get pod relay -o jsonpath='{.status.podIP}')
+COURIER_IP=$(kubectl -n starfleet-031-010-01-03 get pod courier -o jsonpath='{.status.podIP}')
+kubectl -n starfleet-031-010-01-03 exec courier -- python /app/client.py tcp "$RELAY_IP" 8080
+kubectl -n starfleet-031-010-01-03 exec lander -- python /app/client.py tcp "$COURIER_IP" 8080
+kubectl -n starfleet-031-010-01-03 exec lander -- python /app/client.py dns kubernetes.default.svc.cluster.local
+```
+
+The first two commands must print `open`. The last must print `resolved`.
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> A policy without `policyTypes` and without rules isolates the pod for ingress only. Always write `policyTypes` when you mean egress.
+> Do not leave out `policyTypes`. A policy without `policyTypes` and without rules isolates the pod for ingress only, so `relay` keeps sending.
 >
-> Egress isolation also stops DNS. A lookup that prints `unresolved` is expected here and is not a CoreDNS fault.
+> Do not list `Ingress` next to `Egress`. That also isolates `relay` for incoming traffic, and `courier` can no longer reach it.
+>
+> Do not add an egress rule, not even one for DNS. The task allows no egress at all, so a lookup that prints `unresolved` is expected and is not a CoreDNS fault.
+>
+> Do not use an empty `podSelector` or create a second policy. The policy must select only `relay`, and it must be the only policy in the namespace.

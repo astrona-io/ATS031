@@ -38,7 +38,12 @@ validation:
     source: validation/validate-denies-tags.sh
     points: 2
   - name: allows-digests
-    description: Digest-pinned Pods are admitted and other namespaces are not affected
+    description: Pods with a digest-pinned image are admitted in the digest-only namespace
     type: file
     source: validation/validate-allows-digests.sh
+    points: 1
+  - name: outpost-unaffected
+    description: The policy is bound with Deny and a tag-only Pod is still admitted in the outpost namespace
+    type: file
+    source: validation/validate-outpost-unaffected.sh
     points: 1

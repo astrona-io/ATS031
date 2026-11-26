@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-metadata-agent
+  namespace: starfleet-031-040-02-04
+spec:
+  podSelector:
+    matchLabels:
+      role: cloud-agent
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 169.254.169.254/32
+    ports:
+    - protocol: TCP
+      port: 80

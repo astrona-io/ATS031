@@ -32,8 +32,13 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: stable-version
+    description: The path in release-pick uses the current stable version that the mirror publishes
+    type: file
+    source: validation/validate-stable-version.sh
+    points: 1
   - name: release-path
-    description: release-pick records the mirror path of kubeadm for the stable version and the worker architecture
+    description: release-pick records the full mirror path of the Linux kubeadm file for the worker architecture
     type: file
     source: validation/validate-release-path.sh
     points: 1

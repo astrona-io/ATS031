@@ -199,9 +199,13 @@ assert 28 <= days_left(pem) <= 31, 'The signed certificate must be valid for 30 
 info, authority_info = decode(pem), decode(authority)
 assert info['issuer'] != info['subject'], 'The certificate must not be self-signed'
 assert info['issuer'] == authority_info['subject'], 'The certificate must be issued by the lab CA from the Secret lab-ca'
-assert 'relay.example.test' in dns_names(pem), 'The signed certificate must name DNS:relay.example.test in its SAN'
 assert key_matches(pem, key), 'tls.key in relay-tls must be the private key of tls.crt'
 """, tls_secret('relay-tls') + [certificate('lab-ca'), original_ca])
+if wants('relay-san'):
+    live(r"""
+pem = pems[0]
+assert 'relay.example.test' in dns_names(pem), 'The signed certificate must name DNS:relay.example.test in its SAN'
+""", tls_secret('relay-tls'))
 if wants('relay-https'):
     live(r"""
 authority, pem = pems

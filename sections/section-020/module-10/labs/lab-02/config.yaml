@@ -46,7 +46,12 @@ validation:
     source: vm/validate-kubeconfig-files.sh
     points: 1
   - name: key-files
-    description: Every private key file under /etc/kubernetes/pki has mode 600 or stricter and owner root:root
+    description: Every private key file in /etc/kubernetes/pki, outside the etcd directory, has mode 600 or stricter and owner root:root
     type: file
     source: vm/validate-key-files.sh
+    points: 1
+  - name: etcd-key-files
+    description: Every private key file in /etc/kubernetes/pki/etcd has mode 600 or stricter and owner root:root
+    type: file
+    source: vm/validate-etcd-key-files.sh
     points: 1

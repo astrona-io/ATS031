@@ -42,7 +42,7 @@ validation:
     source: validation/validate-vault-secret.sh
     points: 1
   - name: vault-certificate
-    description: The vault-tls certificate names vault.local in its SAN and is valid for at least 80 more days
+    description: The vault-tls certificate names vault.local in its SAN and is valid for 90 days
     type: file
     source: validation/validate-vault-certificate.sh
     points: 1

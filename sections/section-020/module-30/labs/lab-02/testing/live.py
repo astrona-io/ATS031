@@ -71,6 +71,7 @@ def assert_node_ready(node):
 arguments = process_arguments(NODE, 'kube-apiserver')
 if wants('api-profiling-disabled'):
     assert flag_value(arguments, 'profiling') == 'false', 'kube-apiserver must run with --profiling=false'
+if wants('pprof-not-found'):
     result = command(['kubectl', 'get', '--raw', '/debug/pprof/'], success=False)
     assert result.returncode != 0 and 'NotFound' in result.stdout + result.stderr, 'The /debug/pprof/ endpoint must return 404'
 if wants('tls-min-version'):

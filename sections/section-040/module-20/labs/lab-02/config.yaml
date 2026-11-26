@@ -40,10 +40,15 @@ testing:
 validation:
   scripts:
   - name: shuttle-blocked
-    description: shuttle cannot reach 169.254.169.254 while agent still can
+    description: An egress NetworkPolicy selects shuttle, shuttle cannot reach 169.254.169.254 and still reaches the probe Service
     type: file
     source: validation/validate-shuttle-blocked.sh
     points: 2
+  - name: agent-allowed
+    description: An egress NetworkPolicy selects agent, and agent still reaches 169.254.169.254 and the probe Service
+    type: file
+    source: validation/validate-agent-allowed.sh
+    points: 1
   - name: label-decides
     description: A new pod without the label is blocked from 169.254.169.254 and a new pod with role=cloud-agent reaches it
     type: file

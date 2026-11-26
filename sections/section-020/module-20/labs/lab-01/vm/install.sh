@@ -694,11 +694,13 @@ staged = node_exec(NODE, 'cat', '/var/lib/astrona-lab/020-02-01-staged', success
 assert staged.returncode == 0, 'The record of the starting settings is missing; start the lab again'
 assert node_exec(NODE, 'sha256sum', '--check', '--quiet', '/var/lib/astrona-lab/020-02-01-staged', success=False).returncode == 0, \
     'Do not change the cluster: a control plane manifest or the kubelet configuration changed'
-if wants('json-job-completed'):
-    job, pod, log = learner_job('api-server-audit')
-    arguments = command_line(pod['spec'])
+if wants('audit-job-options'):
+    job = get('job', 'api-server-audit')
+    arguments = command_line(job['spec']['template']['spec'])
     assert option(arguments, 'targets') == 'master', 'Run kube-bench with --targets master'
     assert '--json' in arguments or option(arguments, 'json') == 'true', 'Run kube-bench with --json'
+if wants('json-job-completed'):
+    job, pod, log = learner_job('api-server-audit')
     failing_api_server_checks(log)
 if wants('failing-checks-match'):
     saved = get('configmap', 'failing-checks').get('data', {}).get('ids', '')
@@ -824,6 +826,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-audit-job-options.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-failing-checks-match.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

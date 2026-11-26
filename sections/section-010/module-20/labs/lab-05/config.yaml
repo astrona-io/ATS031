@@ -42,7 +42,12 @@ validation:
     source: validation/validate-namespaces-labelled.sh
     points: 1
   - name: baseline-per-namespace
-    description: Every namespace with netpol=restricted has default-deny-all for both directions, and the galley namespace keeps no policy
+    description: Every namespace with netpol=restricted has default-deny-all for both directions with no rules, and the galley namespace keeps no policy
     type: file
     source: validation/validate-baseline-per-namespace.sh
+    points: 1
+  - name: baseline-enforced
+    description: The cook pod in galley times out to the loader and pump pods, pump can no longer resolve names, and cook still resolves names
+    type: file
+    source: validation/validate-baseline-enforced.sh
     points: 1

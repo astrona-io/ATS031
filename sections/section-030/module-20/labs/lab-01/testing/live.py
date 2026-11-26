@@ -193,11 +193,19 @@ if wants('fleet-ingress'):
     for expected in (('fleet.local', '/probe', 'Prefix', 'probe', 80), ('fleet.local', '/scout', 'Prefix', 'scout', 80)):
         assert expected in found, 'The Ingress fleet must send the Prefix path ' + expected[1] + ' of fleet.local to the Service ' + expected[3] + ' on port 80'
 if wants('path-routing'):
+    get('ingress', 'fleet')
     live(r"""
 for path, application in (('/probe', 'probe'), ('/scout', 'scout')):
     response = http_get('fleet.local', path)
     assert ' 200 ' in status_of(response) + ' ', 'fleet.local' + path + ' must answer 200'
     assert 'app=' + application + ' ' in response, 'fleet.local' + path + ' must reach the Service ' + application
+""")
+if wants('unmatched-404'):
+    # Without the Ingress every request gets 404, so the Ingress must exist and route first.
+    found = routes(get('ingress', 'fleet'))
+    assert ('fleet.local', '/probe', 'Prefix', 'probe', 80) in found, 'The Ingress fleet must route fleet.local/probe before other requests can be tested'
+    live(r"""
+assert 'app=probe ' in http_get('fleet.local', '/probe'), 'fleet.local/probe must reach the Service probe before other requests can be tested'
 assert ' 404 ' in status_of(http_get('other.local', '/probe')) + ' ', 'A different host must not match'
 assert ' 404 ' in status_of(http_get('fleet.local', '/other')) + ' ', 'An unknown path must not match'
 """)

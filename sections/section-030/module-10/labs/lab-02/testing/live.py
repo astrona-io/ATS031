@@ -188,12 +188,14 @@ def traefik_args():
     deployment = get('deployment', 'traefik', 'ingress-system')
     return deployment['spec']['template']['spec']['containers'][0].get('args') or []
 
+if wants('relay-backend'):
+    relay = get('ingress', 'relay')
+    assert ('relay.local', '/', 'Prefix', 'relay', 80) in routes(relay), \
+        'The Ingress relay must send the Prefix path / of relay.local to the Service relay on port 80'
+    assert annotation(relay, 'router.entrypoints') == 'web', 'The Ingress relay must keep the web entrypoint'
 if wants('relay-routing'):
     relay = get('ingress', 'relay')
     assert relay['spec'].get('ingressClassName') == 'traefik', 'The Ingress relay must name the class traefik'
-    assert annotation(relay, 'router.entrypoints') == 'web', 'The Ingress relay must keep the web entrypoint'
-    assert ('relay.local', '/', 'Prefix', 'relay', 80) in routes(relay), \
-        'The Ingress relay must send the Prefix path / of relay.local to the Service relay on port 80'
     live(r"""
 response = http_get('relay.local')
 assert ' 200 ' in status_of(response) + ' ' and 'app=relay ' in response, 'http://relay.local must answer 200 from the Service relay'

@@ -1,92 +1,106 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
-# Verify A Signed apt Repository And An Installed Package: Solution
+# Verify A Signed apt Repository And An Installed Package — Solution
 
-Connect to the lab first, so that `kubectl` talks to this lab's cluster and `$node_name` names its control plane node. All commands below run in a shell inside the node, in the repository directory:
+You solve this lab by checking each link of the chain of trust on the node and recording two findings in one ConfigMap. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+The node of a `kind` cluster is a container on your machine. Open a shell on the control plane node (write `docker` instead of `podman` if your machine uses Docker):
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-03-02)"
-node_name="astro-ats-031-lab-050-03-02-control-plane"
-podman exec -it -w /var/lib/fleet-apt "$node_name" bash
+podman exec -it astro-ats-031-lab-050-03-02-control-plane bash
 ```
 
-The keys, digests and random choices are new on every start. The output below comes from one run.
+List the repository and read the end of `Release`:
 
-## Verify the signed Release file
+```sh
+cd /var/lib/fleet-apt
+ls -R
+tail -n 2 Release
+```
 
-Only `Release` carries a signature. Everything else is trusted because `Release` lists its digest. So check the signature first:
+The chain has three links. The signature proves `Release`. `Release` holds the digest of `Packages`. `Packages` holds the digest of each file in `pool/`. A link proves something only when the link above it was proven first.
+
+## Step 2: verify the signature of Release
+
+Write the keyring as `./fleet-archive.gpg`, so `gpgv` reads the file in the current directory:
 
 ```sh
 gpgv --keyring ./fleet-archive.gpg Release.gpg Release
 ```
 
-```text
-gpgv: Signature made Tue Nov 17 19:56:58 2026 UTC
-gpgv:                using RSA key ECDF86F9E5DF4DD8F3621180F1A50B45B8FCE45B
-gpgv:                issuer "archive@fleet.example"
-gpgv: Good signature from "Fleet Archive <archive@fleet.example>"
-```
+`gpgv` prints `Good signature` and exits with `0`. `Release` is now trusted.
 
-## Check Packages against Release
+## Step 3: check Packages against Release
 
-The `SHA256:` list at the end of `Release` gives the digest and the size of `Packages`. Compare it with the digest of the file:
+The last line of `Release` is a space, the digest, the size and the name `Packages`. The `sed` command prints only the digest. The `printf` turns it into a line in the check format:
 
 ```sh
-cat Release
-sha256sum Packages
+printf '%s  Packages\n' "$(sed -n 's/^ \([0-9a-f]\{64\}\) [0-9]* Packages$/\1/p' Release)" | sha256sum --check
 ```
 
-```text
-SHA256:
- a116ba8799bd0fc1a7cf59ffff5c1820d9484d89b2666b7b3c5efbad9658a2a1 1254 Packages
-a116ba8799bd0fc1a7cf59ffff5c1820d9484d89b2666b7b3c5efbad9658a2a1  Packages
-```
+It prints `Packages: OK`. `Packages` is now trusted too, and so is every `SHA256:` field in it.
 
-The first lines of `Release` are left out above. The two digests are equal, so `Packages` is the index the archive signed.
+## Step 4: check every package file (checks `review-record` and `bad-package`)
 
-## Check every package file against Packages
-
-Each stanza in `Packages` has a `Filename:` and a `SHA256:` field. `awk` turns them into lines in the check format, and `sha256sum --check` reads those lines from standard input:
+Each stanza of `Packages` has a `Filename:` line before its `SHA256:` line. `awk` remembers the file name and prints a check line when it reaches the digest:
 
 ```sh
 awk '/^Filename:/ {file=$2} /^SHA256:/ {print $2 "  " file}' Packages | sha256sum --check
 ```
 
-```text
-pool/fleet-agent_2.0.1_all.deb: OK
-pool/fleet-docs_1.0.0_all.deb: OK
-pool/fleet-probe_0.9.7_all.deb: OK
-pool/fleet-tools_1.4.2_all.deb: FAILED
-sha256sum: WARNING: 1 computed checksum did NOT match
-```
+Three lines end with `OK`. One line, such as `pool/fleet-probe_0.9.7_all.deb: FAILED`, names the damaged package. Record only the file name after `pool/`.
 
-In this run `fleet-tools_1.4.2_all.deb` changed after the archive published the index. `apt` would refuse to install it for the same reason. The copy of `fleet-tools` on the node was installed before the change, so its installed files need their own check.
+## Step 5: check the installed files (checks `review-record` and `changed-file`)
 
-## Check the installed files of fleet-tools
-
-A good package file says nothing about the files on disk after the install. `dpkg --verify` (short form `dpkg -V`) compares each installed file with the MD5 digest that the package shipped in its `md5sums` list:
+`dpkg --verify` compares every installed file of a package with the MD5 digest that the package shipped. It prints a line only for a file that differs:
 
 ```sh
 dpkg --verify fleet-tools
 exit
 ```
 
-```text
-??5??????   /usr/lib/fleet-tools/check-node
+The line starts with a column of check flags and ends with the path. A `5` as the third character means the digest of the file differs. That path, under `/usr/lib/fleet-tools/`, is the changed file. The file has the same modification time as before, so only the digest shows the change.
+
+## Step 6: record the result (checks `review-record`, `bad-package` and `changed-file`)
+
+Back on your machine, replace `<PACKAGE_FILE>` with the name from Step 4 and `<CHANGED_FILE>` with the path from Step 5. Save this as `configmap-repository-review.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: repository-review
+  namespace: starfleet-031-050-03-02
+data:
+  bad-package: "<PACKAGE_FILE>"
+  changed-file: "<CHANGED_FILE>"
 ```
 
-The `5` in the third column means the digest of the file differs from the package. A `?` means `dpkg` did not check that property. No output at all would mean every file matches.
-
-## Record the result
-
-Use your own names:
+Apply it:
 
 ```sh
-kubectl -n starfleet-031-050-03-02 create configmap repository-review \
-  --from-literal=bad-package=fleet-tools_1.4.2_all.deb \
-  --from-literal=changed-file=/usr/lib/fleet-tools/check-node
+kubectl apply -f configmap-repository-review.yaml
 ```
 
-The grader verifies the chain again on the node, runs `dpkg --verify` itself and compares both findings with the ConfigMap.
+## Step 7: test the record
+
+Print both keys:
+
+```sh
+kubectl -n starfleet-031-050-03-02 get configmap repository-review -o jsonpath='{.data.bad-package}{"\n"}{.data.changed-file}{"\n"}'
+```
+
+The first line must show the `.deb` name from the `FAILED` line of Step 4. The second line must show the path that `dpkg --verify` printed in Step 5.
+
+## Step 8: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
+
+## Common pitfalls
+
+> [!WARNING]
+> Do not compare a package file with a digest you computed yourself or with a value from outside `Packages`. Only the `SHA256:` fields in the signed chain count.
+>
+> Write `changed-file` as the full path that `dpkg --verify` prints, starting with `/usr/lib/fleet-tools/`. A bare file name fails the check.
+>
+> Do not reinstall `fleet-tools` or change a file in the repository. The grader then finds no changed file or no damaged package and fails every check.

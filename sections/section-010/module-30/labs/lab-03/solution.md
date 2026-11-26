@@ -1,26 +1,39 @@
----
-exam_objectives:
-- Use Network security policies to restrict cluster level access
----
-# Admit A Group Of Namespaces By Label Solution
+# Admit A Group Of Namespaces By Label — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig is the file that tells kubectl, the Kubernetes command-line tool, which cluster to use and with which credentials. This lab runs in its own cluster, separate from the playground.
+You solve this lab with two namespace labels and one NetworkPolicy. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-010-03-03)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-010-03-03" || exit 1
-```
+## Step 1: look at the starting state
 
-Keep this connection for the whole task. Every script of the lab refuses to run against another context.
-
-A `namespaceSelector` with a label you choose admits a group of namespaces. Any namespace that carries the label later joins the group without a change to the policy. Label the two namespaces first, then write the policy.
-
-Add the label to the two namespaces:
+Check the namespace labels, the pods, and that no policy exists yet:
 
 ```sh
-kubectl label namespace survey-031-010-03-03 division=science
-kubectl label namespace salvage-031-010-03-03 division=science
+kubectl get namespaces --show-labels
+kubectl -n starfleet-031-010-03-03 get pods --show-labels
+kubectl get networkpolicy -A
 ```
+
+No namespace has a `division` label yet. Without any policy, every `mapper` pod can reach the `archive` pod.
+
+## Step 2: label the science namespaces (check `division-labels`)
+
+A `namespaceSelector` with a label you choose admits a group of namespaces. Any namespace that gets the label later joins the group without a change to the policy. Label the two namespaces first:
+
+```sh
+kubectl label namespace survey-031-010-03-03 division=science --overwrite
+kubectl label namespace salvage-031-010-03-03 division=science --overwrite
+```
+
+Then check the group:
+
+```sh
+kubectl get namespaces -l division=science
+```
+
+The list must show `survey-031-010-03-03` and `salvage-031-010-03-03`, and not `outpost-031-010-03-03`.
+
+## Step 3: admit the group with a namespaceSelector (check `archive-policy`)
+
+The peer entry has only a `namespaceSelector`. With no `podSelector` in the entry, it matches every pod in the selected namespaces. The `ports` list limits the rule to TCP 8080.
 
 Save this as `networkpolicy-archive-from-science.yaml`:
 
@@ -52,24 +65,30 @@ Apply it:
 kubectl apply -f networkpolicy-archive-from-science.yaml
 ```
 
-Then check the result. The test client prints `open` with the reply, or `blocked` when the connection times out:
+## Step 4: test the three mapper pods (check `archive-admits-division`)
+
+Every pod has a small test client. It prints `open` with the reply, or `blocked` when the connection times out:
 
 ```sh
 ARCHIVE_IP=$(kubectl -n starfleet-031-010-03-03 get pod archive -o jsonpath='{.status.podIP}')
-kubectl get namespaces -l division=science
 kubectl -n survey-031-010-03-03 exec mapper -- python /app/client.py tcp "$ARCHIVE_IP" 8080
+kubectl -n salvage-031-010-03-03 exec mapper -- python /app/client.py tcp "$ARCHIVE_IP" 8080
 kubectl -n outpost-031-010-03-03 exec mapper -- python /app/client.py tcp "$ARCHIVE_IP" 8080
 ```
 
-The request from `survey-031-010-03-03` must print `open` and the request from `outpost-031-010-03-03` must print `blocked`.
+The first two commands must print `open`, because their namespaces match the selector. The last one must print `blocked`, because `outpost-031-010-03-03` has no `division=science` label.
 
-The `mapper` pods in the two labelled namespaces get a reply, because their namespaces match the selector. The `mapper` pod in `outpost-031-010-03-03` times out, because its namespace has no `division=science` label.
+## Step 5: submit
 
-When you are done, remove the lab with `astrona destroy ats-031-lab-010-03-03`.
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> Anyone who can label namespaces can join the group. In a real cluster, limit who may change namespace labels.
+> Select the namespaces by `division: science`, not by `kubernetes.io/metadata.name`. A name selector admits fixed namespaces, not the group.
 >
-> A `namespaceSelector: {}` matches every namespace. Always name a label.
+> Do not add a `podSelector` with labels to the peer entry. The task admits every pod in the science namespaces; only an empty `podSelector: {}` or none at all does that.
+>
+> A `namespaceSelector: {}` matches every namespace, and a rule without `ports` allows every port. Always name the label and TCP 8080.
+>
+> Anyone who can label namespaces can join the group. In a real cluster, limit who may change namespace labels.

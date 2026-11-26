@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: probe-ingress
-    description: Ingress probe routes probe.local over websecure with TLS from probe-tls
+    description: Ingress probe of class traefik routes probe.local, Prefix path /, to Service probe port 80
     type: file
     source: validation/validate-probe-ingress.sh
+    points: 1
+  - name: probe-tls
+    description: Ingress probe uses the websecure entrypoint and terminates TLS with the Secret probe-tls
+    type: file
+    source: validation/validate-probe-tls.sh
     points: 1
   - name: probe-https
     description: https://probe.local returns version v1 and rejects a mismatched name

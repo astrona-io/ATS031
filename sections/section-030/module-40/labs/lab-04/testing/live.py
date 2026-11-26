@@ -203,13 +203,14 @@ except OSError:
     reachable = False
 assert not reachable, 'Port 8080 of the Traefik Service must not accept connections'
 """)
-if wants('secret-scope'):
-    assert '--providers.kubernetesingress.namespaces=' + NAMESPACE in traefik_args(), \
-        'Traefik must have the argument --providers.kubernetesingress.namespaces=' + NAMESPACE
+if wants('secret-rbac'):
     assert can_i('get', 'secrets', '-n', 'kube-system') == 'no', 'The Traefik ServiceAccount must not read Secrets in kube-system'
     assert can_i('list', 'secrets', '--all-namespaces') == 'no', 'The Traefik ServiceAccount must not list Secrets in every namespace'
     for verb in ('get', 'list', 'watch'):
         assert can_i(verb, 'secrets', '-n', NAMESPACE) == 'yes', 'The Traefik ServiceAccount must be allowed to ' + verb + ' Secrets in ' + NAMESPACE
+if wants('secret-scope'):
+    assert '--providers.kubernetesingress.namespaces=' + NAMESPACE in traefik_args(), \
+        'Traefik must have the argument --providers.kubernetesingress.namespaces=' + NAMESPACE
     live(r"""
 pem = pems[0]
 assert served('dock.example.test') == der(pem), 'Traefik must still serve the dock-tls certificate for dock.example.test'

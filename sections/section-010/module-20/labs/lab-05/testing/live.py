@@ -108,11 +108,7 @@ CARGO, FUEL, GALLEY = 'cargo-031-010-02-05', 'fuel-031-010-02-05', 'galley-031-0
 def labels_of(namespace):
     return get('namespace', namespace, None)['metadata'].get('labels', {})
 
-if wants('namespaces-labelled'):
-    for namespace in (CARGO, FUEL):
-        assert labels_of(namespace).get('netpol') == 'restricted', namespace + ' needs the label netpol=restricted'
-    assert 'netpol' not in labels_of(GALLEY), GALLEY + ' must not carry the netpol label'
-if wants('baseline-per-namespace'):
+def restricted_baselines():
     marked = kubectl('get', 'namespaces', '-l', 'netpol=restricted', '-o', 'jsonpath={.items[*].metadata.name}').split()
     assert CARGO in marked and FUEL in marked, 'Label the cargo and fuel namespaces with netpol=restricted first'
     for namespace in marked:
@@ -121,6 +117,15 @@ if wants('baseline-per-namespace'):
         assert sorted(spec.get('policyTypes', [])) == ['Egress', 'Ingress'], 'default-deny-all must isolate both directions in ' + namespace
         assert not spec.get('ingress') and not spec.get('egress'), 'default-deny-all must not allow traffic in ' + namespace
     assert not policies(GALLEY), 'The galley namespace must keep no NetworkPolicy'
+
+if wants('namespaces-labelled'):
+    for namespace in (CARGO, FUEL):
+        assert labels_of(namespace).get('netpol') == 'restricted', namespace + ' needs the label netpol=restricted'
+    assert 'netpol' not in labels_of(GALLEY), GALLEY + ' must not carry the netpol label'
+if wants('baseline-per-namespace'):
+    restricted_baselines()
+if wants('baseline-enforced'):
+    restricted_baselines()
     expect_blocked(GALLEY, 'cook', pod_ip(CARGO, 'loader'), 8080)
     expect_blocked(GALLEY, 'cook', pod_ip(FUEL, 'pump'), 8080)
     expect_dns(FUEL, 'pump', works=False)

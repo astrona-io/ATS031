@@ -74,9 +74,11 @@ assert data_directory, 'etcd has no --data-dir flag'
 if wants('data-dir-mode'):
     assert_mode_at_most(NODE, data_directory, 0o700)
     assert kubectl('--request-timeout=5s', 'get', '--raw=/readyz/etcd') == 'ok', 'etcd must stay healthy'
-if wants('process-user-recorded'):
-    pid = node_exec(NODE, 'pgrep', '-n', '-f', '^(/[^ ]*/)?etcd( |$)').stdout.strip()
-    user = node_exec(NODE, 'ps', '-o', 'user=', '-p', pid).stdout.strip()
+if wants('data-dir-recorded'):
     saved = get('configmap', 'etcd-process').get('data', {})
     assert saved.get('data-dir', '').strip() == data_directory, 'The key data-dir differs from --data-dir of the running etcd process'
+if wants('process-user-recorded'):
+    saved = get('configmap', 'etcd-process').get('data', {})
+    pid = node_exec(NODE, 'pgrep', '-n', '-f', '^(/[^ ]*/)?etcd( |$)').stdout.strip()
+    user = node_exec(NODE, 'ps', '-o', 'user=', '-p', pid).stdout.strip()
     assert saved.get('user', '').strip() == user, 'The key user differs from the user of the running etcd process'

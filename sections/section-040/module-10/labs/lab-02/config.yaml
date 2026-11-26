@@ -45,7 +45,12 @@ validation:
     source: validation/validate-metadata-blocked.sh
     points: 2
   - name: dependencies-kept
-    description: courier and new pods with app=courier reach the probe Service by name and nothing outside the allow-list
+    description: courier and a new pod with app=courier still reach the probe Service by name
     type: file
     source: validation/validate-dependencies-kept.sh
     points: 2
+  - name: allow-list-only
+    description: courier and a new pod with app=courier reach nothing outside the allow-list, while a pod with another label still reaches beacon
+    type: file
+    source: validation/validate-allow-list-only.sh
+    points: 1

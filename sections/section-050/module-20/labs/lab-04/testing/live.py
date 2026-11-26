@@ -35,7 +35,13 @@ def triage():
 if wants('rejected-download'):
     tampered = [batch for batch, cause in causes.items() if cause == 'tampered'][0]
     assert triage().get('rejected', '').strip() == tampered, 'rejected must name the batch whose kubectl matches no published digest'
+if wants('checksum-causes'):
+    data = triage()
+    for batch, cause in causes.items():
+        if cause in ('ok', 'stale-checksum'):
+            assert data.get(batch, '').strip() == cause, f'{batch} has the wrong cause'
 if wants('failure-causes'):
     data = triage()
     for batch, cause in causes.items():
-        assert data.get(batch, '').strip() == cause, f'{batch} has the wrong cause'
+        if cause in ('wrong-arch', 'wrong-version', 'tampered'):
+            assert data.get(batch, '').strip() == cause, f'{batch} has the wrong cause'

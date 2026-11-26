@@ -41,7 +41,12 @@ validation:
     description: The default service account of the outpost namespace can no longer update or patch the coredns ConfigMap
     type: file
     source: validation/validate-coredns-write-access.sh
-    points: 2
+    points: 1
+  - name: coredns-rbac-kept
+    description: After the grant is removed, the coredns service account keeps its system:coredns ClusterRoleBinding and can still watch endpoints, services, pods, namespaces and endpointslices
+    type: file
+    source: validation/validate-coredns-rbac-kept.sh
+    points: 1
   - name: pod-records
     description: The Corefile uses pods verified or pods disabled instead of pods insecure, and Service names still resolve
     type: file

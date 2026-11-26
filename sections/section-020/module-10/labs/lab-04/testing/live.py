@@ -78,6 +78,9 @@ if wants('effective-values'):
     effective = configz(WORKER)
     assert saved.get('anonymous-enabled') == str(effective['authentication']['anonymous']['enabled']).lower(), 'anonymous-enabled differs from the effective kubelet value'
     assert saved.get('authorization-mode') == effective['authorization']['mode'], 'authorization-mode differs from the effective kubelet value'
+if wants('read-only-port'):
+    saved = get('configmap', 'kubelet-review').get('data', {})
+    effective = configz(WORKER)
     assert saved.get('read-only-port') == str(effective.get('readOnlyPort', 0)), 'read-only-port differs from the effective kubelet value'
 if wants('config-file-mode'):
     assert_mode_at_most(WORKER, '/var/lib/kubelet/config.yaml', 0o600)

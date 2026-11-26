@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: ingress-denied
-    description: 'Every pod in the dock namespace is isolated for ingress: requests from the same namespace and from another namespace time out'
+    description: The default-deny-ingress policy selects every pod in the dock namespace for ingress with no rules, and requests from the outpost namespace to vault and crane time out
     type: file
     source: validation/validate-ingress-denied.sh
+    points: 1
+  - name: same-namespace-denied
+    description: Pods in the dock namespace are isolated from each other too, so vault and crane time out to each other
+    type: file
+    source: validation/validate-same-namespace-denied.sh
     points: 1
   - name: egress-still-open
     description: The baseline names only Ingress, so pods in the dock namespace still reach other pods and resolve names

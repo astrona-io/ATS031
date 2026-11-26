@@ -1,57 +1,34 @@
----
-exam_objectives:
-- Verify platform binaries before deploying
----
-# Verify Detached GPG Signatures With gpgv: Solution
+# Verify Detached GPG Signatures With gpgv — Solution
 
-Connect to the lab first, so that `kubectl` talks to this lab's cluster and `$node_name` names its control plane node:
+You solve this lab with one `gpgv` loop on the node and one ConfigMap. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+The node of a `kind` cluster is a container on your machine. Open a shell on the control plane node (write `docker` instead of `podman` if your machine uses Docker):
 
 ```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-050-03-01)"
-node_name="astro-ats-031-lab-050-03-01-control-plane"
+podman exec -it astro-ats-031-lab-050-03-01-control-plane bash
 ```
 
-## Verify every document
-
-`gpgv` takes the keyring with `--keyring`, then the signature, then the signed file. Write the keyring as `./publisher.gpg`: a name without a slash makes `gpgv` look for the file in its home directory, not in the current directory. Open a shell in the review directory and check all six documents, with the exit status after each one:
+List the review directory:
 
 ```sh
-podman exec -it -w /var/lib/doc-review "$node_name" bash
+cd /var/lib/doc-review
+ls
+```
+
+It shows six `.txt` documents, `publisher.gpg` and an `.asc` signature for most documents. A document without an `.asc` file has nothing to verify.
+
+## Step 2: verify every document (checks `rejected-files` and `accepted-files`)
+
+`gpgv` takes the keyring with `--keyring`, then the signature, then the signed file. Write the keyring as `./publisher.gpg`: a name without a slash makes `gpgv` look for the file in its home directory, not in the current directory. Check all six documents, with the exit status after each one:
+
+```sh
 for document in *.txt; do
   echo "== $document"
   gpgv --keyring ./publisher.gpg "$document.asc" "$document"; echo "exit $?"
 done
-exit
 ```
-
-The documents, the keys and the damaged files are new on every start. One run printed this (shortened to four documents):
-
-```text
-== cargo-manifest.txt
-gpgv: Signature made Tue Nov 17 19:54:17 2026 UTC
-gpgv:                using RSA key D99766D0C49830B1A0577D7AC412CD41C6EA2D48
-gpgv:                issuer "mirror@fleet.example"
-gpgv: Can't check signature: No public key
-exit 2
-== comms-schedule.txt
-gpgv: Signature made Tue Nov 17 19:54:17 2026 UTC
-gpgv:                using RSA key 96D640D730B4C987E2C47A4ECC073574255C8545
-gpgv:                issuer "publisher@fleet.example"
-gpgv: Good signature from "Fleet Publisher <publisher@fleet.example>"
-exit 0
-== flight-plan.txt
-gpgv: Signature made Tue Nov 17 19:54:17 2026 UTC
-gpgv:                using RSA key 96D640D730B4C987E2C47A4ECC073574255C8545
-gpgv:                issuer "publisher@fleet.example"
-gpgv: BAD signature from "Fleet Publisher <publisher@fleet.example>"
-exit 1
-== nav-update.txt
-gpgv: can't open 'nav-update.txt.asc': No such file or directory
-gpgv: verify signatures failed: No such file or directory
-exit 2
-```
-
-## Read the result
 
 Only exit status `0` with `Good signature` counts. Each failure has its own reason:
 
@@ -59,16 +36,61 @@ Only exit status `0` with `Good signature` counts. Each failure has its own reas
 - `Can't check signature: No public key`: a different key signed it. The `issuer` line is only a claim written inside the signature, so it never proves who signed.
 - `can't open ... .asc`: there is no signature, so there is nothing to verify.
 
-All three go into `rejected`. The fingerprint of the publisher key is the 40-character value on the `using RSA key` line of a good signature.
+All three cases go into `rejected`. Every document that printed `Good signature` stays out of it.
 
-## Record the result
+## Step 3: read the publisher fingerprint (check `publisher-fingerprint`)
 
-Use your own document names and fingerprint:
+For a good signature, `gpgv` prints a line `using RSA key` followed by the 40-character fingerprint of the key that signed it. Print it for one document that passed. Replace `<GOOD_DOCUMENT>` with its name:
 
 ```sh
-kubectl -n starfleet-031-050-03-01 create configmap signature-review \
-  --from-literal=rejected="cargo-manifest.txt flight-plan.txt nav-update.txt" \
-  --from-literal=fingerprint=96D640D730B4C987E2C47A4ECC073574255C8545
+gpgv --keyring ./publisher.gpg <GOOD_DOCUMENT>.asc <GOOD_DOCUMENT> 2>&1 | grep 'using'
+exit
 ```
 
-The grader runs `gpgv` on every document itself and compares the failures and the fingerprint with the ConfigMap.
+`gpgv` writes its messages to standard error, so `2>&1` sends them to `grep`.
+
+## Step 4: record the result (checks `rejected-files`, `accepted-files` and `publisher-fingerprint`)
+
+Back on your machine, replace `<REJECTED_DOCUMENTS>` with the failing names from Step 2, separated by spaces, and `<FINGERPRINT>` with the value from Step 3. Save this as `configmap-signature-review.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: signature-review
+  namespace: starfleet-031-050-03-01
+data:
+  rejected: "<REJECTED_DOCUMENTS>"
+  fingerprint: "<FINGERPRINT>"
+```
+
+Apply it:
+
+```sh
+kubectl apply -f configmap-signature-review.yaml
+```
+
+## Step 5: test the record
+
+Print both keys:
+
+```sh
+kubectl -n starfleet-031-050-03-01 get configmap signature-review -o jsonpath='{.data.rejected}{"\n"}{.data.fingerprint}{"\n"}'
+```
+
+The first line must show every document whose exit status was not `0` in Step 2, and no other. The second line must show the 40-character fingerprint from Step 3.
+
+## Step 6: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
+
+## Common pitfalls
+
+> [!WARNING]
+> Do not leave out the document without an `.asc` file. A missing signature is a rejection, not a pass.
+>
+> Do not accept a document because its `issuer` line names the publisher. Only `Good signature` with exit status `0` proves that the publisher key signed it.
+>
+> Do not add a document that printed `Good signature` to `rejected`.
+>
+> Record the full 40-character fingerprint, not the short key ID. The grader ignores spaces and letter case, but not missing characters.

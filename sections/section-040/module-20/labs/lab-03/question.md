@@ -1,33 +1,9 @@
----
-exam_objectives:
-- Protect node metadata and endpoints
----
 # Repair Metadata Policies That Do Not Block
 
-Allow about 10 minutes for the tasks.
+Each of `starfleet-031-040-02-03`, `outpost-031-040-02-03` and `dock-031-040-02-03` has a NetworkPolicy named `metadata-guard` that should keep its pods away from the metadata server at `http://169.254.169.254/latest/meta-data/`. None of the three does its job.
 
-Find and repair three NetworkPolicies that were meant to block the cloud metadata address.
+1. Repair `metadata-guard` in `starfleet-031-040-02-03`: `shuttle`, `agent` and new pods, with or without `role: cloud-agent`, are blocked from `169.254.169.254` and still reach `http://probe/`.
+2. Repair `metadata-guard` in `outpost-031-040-02-03`: `drifter` and new pods are blocked from `169.254.169.254` and still reach `http://probe/`.
+3. Repair `metadata-guard` in `dock-031-040-02-03`: `tender` and new pods are blocked from `169.254.169.254` and still reach `http://probe/`.
 
-## Starting state
-
-The cluster has the namespaces `starfleet-031-040-02-03`, `outpost-031-040-02-03` and `dock-031-040-02-03`. Each has a `probe` Deployment and Service on port 80, a client pod with the `curl` command (`shuttle`, `drifter` and `tender`), and an egress NetworkPolicy called `metadata-guard`. The `starfleet-031-040-02-03` namespace also runs a second client pod, `agent`, with the label `role: cloud-agent`. The namespace `metadata-stub-031-040-02-03` has the pod `fake-imds`, a fake metadata server on the host network of the worker node at `169.254.169.254` port 80, and a pod `control` that no policy selects.
-
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-040-02-03)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-040-02-03" || exit 1
-```
-
-Keep this connection selected for the whole task.
-
-## Required result
-
-A colleague wrote the three `metadata-guard` policies and reported the metadata address as blocked in all three namespaces. An audit found that this is not true. Repair the policies so that, in each of the three namespaces:
-
-- no pod can reach `169.254.169.254`, including pods that start later;
-- every pod can still reach the `probe` Service of its namespace by the name `probe`.
-
-Keep the existing pods and Services. Do not change the namespace `metadata-stub-031-040-02-03`: the pod `control` must still reach the metadata address.
-
-## Verify the result
-
-The grader sends live requests from `shuttle`, `drifter` and `tender`. In each namespace it also starts a new pod without special labels, sends the same requests from it and removes it again. Wait a few seconds after you change a policy, because the network plugin needs a moment to program it.
+Change nothing in `metadata-stub-031-040-02-03`: pod `control` must still reach the metadata server.

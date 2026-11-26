@@ -40,8 +40,13 @@ testing:
     source: vm/wait-solved.sh
 validation:
   scripts:
+  - name: encryption-config
+    description: /etc/kubernetes/enc/encryption-config.yaml lists aescbc with a 32 byte key before identity for secrets and has mode 600 or stricter
+    type: file
+    source: vm/validate-encryption-config.sh
+    points: 1
   - name: encryption-provider
-    description: kube-apiserver uses an encryption configuration with aescbc before identity, stored with mode 600 or stricter
+    description: The running kube-apiserver has --encryption-provider-config=/etc/kubernetes/enc/encryption-config.yaml
     type: file
     source: vm/validate-encryption-provider.sh
     points: 1

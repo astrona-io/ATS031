@@ -1,30 +1,9 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Repair A TLS Ingress With A Missing Secret
+# Fix A Missing TLS Secret For An Ingress
 
-Allow about 6 minutes for the tasks.
+In namespace `starfleet-031-030-03-02`, the Ingress `beacon` (class `traefik`, host `beacon.example.test`) names the Secret `beacon-tls`, but that Secret exists only in namespace `outpost-031-030-03-02`, and its certificate has a Common Name and no Subject Alternative Name. Make `https://beacon.example.test` work.
 
-The beacon route was created and then abandoned. Clients get a certificate error for `beacon.example.test`. Find the cause and repair it without deleting the Ingress.
+1. Create the Secret `beacon-tls` of type `kubernetes.io/tls` in `starfleet-031-030-03-02` with a certificate and its matching private key.
+2. The certificate must be a new one with `DNS:beacon.example.test` in its Subject Alternative Name, and no wildcard or other name.
+3. A client that trusts the new certificate must get the `beacon` reply from `https://beacon.example.test`.
 
-## Starting state
-
-The namespace `starfleet-031-030-03-02` holds the `beacon` Deployment and Service and an Ingress `beacon` that names the Secret `beacon-tls`. A Secret with that name exists only in the namespace `outpost-031-030-03-02`, and its certificate has a Common Name but no Subject Alternative Name.
-
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
-
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-03-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-03-02" || exit 1
-```
-
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
-
-## Required result
-
-Make `https://beacon.example.test` work. The Ingress `beacon` must keep class `traefik`, the host `beacon.example.test` and `secretName: beacon-tls`. Create a Secret `beacon-tls` of type `kubernetes.io/tls` in `starfleet-031-030-03-02` from a certificate that has `beacon.example.test` in its Subject Alternative Name. Do not use the certificate in `outpost-031-030-03-02`. Preserve the Deployment and the Service.
-
-## Verify the result
-
-The grader reads the Secret in `starfleet-031-030-03-02`, checks its type, and connects from inside the cluster with that certificate as the trust anchor. It expects the `beacon` response for the right name and a rejection for a wrong name.
+Do not change the Ingress `beacon`, the Deployment or the Service `beacon`, and do not reuse the certificate from `outpost-031-030-03-02`.

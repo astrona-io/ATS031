@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: egress-denied
-    description: 'Every pod in the dock namespace is isolated for egress: requests to pod addresses and DNS lookups time out'
+    description: The default-deny-egress policy selects every pod in the dock namespace for egress with no rules, and requests to pod addresses in both namespaces time out
     type: file
     source: validation/validate-egress-denied.sh
+    points: 1
+  - name: dns-denied
+    description: The egress baseline also blocks DNS, so the winch pod can no longer resolve names through CoreDNS
+    type: file
+    source: validation/validate-dns-denied.sh
     points: 1
   - name: ingress-still-open
     description: The baseline names only Egress, so other pods still reach the pods in the dock namespace

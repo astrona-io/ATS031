@@ -153,6 +153,7 @@ if wants('node-job-completed'):
     assert image in ('docker.io/aquasec/kube-bench:v0.10.6', 'aquasec/kube-bench:v0.10.6'), 'Run the Job with the image docker.io/aquasec/kube-bench:v0.10.6'
     arguments = command_line(pod['spec'])
     assert option(arguments, 'targets') == 'node', 'Run kube-bench with --targets node'
+if wants('kubelet-results-logged'):
     assert re.search(r'^\[(PASS|FAIL|WARN)\] 4\.2\.', log, re.M), 'The log holds no kubelet results of section 4.2'
 if wants('ran-on-worker'):
     assert pod['spec'].get('nodeName') == WORKER, 'The pod of node-audit must run on ' + WORKER

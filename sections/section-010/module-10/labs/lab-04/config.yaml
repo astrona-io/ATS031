@@ -42,7 +42,12 @@ validation:
     source: validation/validate-lander-reaches-depot.sh
     points: 1
   - name: baseline-and-narrow-rules
-    description: The repaired ingress rule admits only the lander pod on TCP 8080 and the stray pod stays blocked
+    description: default-deny-all is unchanged, only the three original policies exist, and the repaired depot-ingress rule admits only the lander pod on TCP 8080
     type: file
     source: validation/validate-baseline-and-narrow-rules.sh
+    points: 1
+  - name: other-paths-blocked
+    description: The stray pod still times out to the depot pod, and the lander pod still times out to the stray pod
+    type: file
+    source: validation/validate-other-paths-blocked.sh
     points: 1

@@ -78,6 +78,8 @@ assert_node_ready(WORKER)
 settings = configz(WORKER)
 if wants('anonymous-auth'):
     assert settings['authentication']['anonymous']['enabled'] is False, 'Turn off anonymous authentication on the kubelet'
+if wants('anonymous-request-rejected'):
+    assert settings['authentication']['anonymous']['enabled'] is False, 'Turn off anonymous authentication on the kubelet before it can reject an anonymous request'
     code = node_exec(NODE, 'curl', '-sk', '--max-time', '5', '-o', '/dev/null', '-w', '%{http_code}', 'https://' + worker_address() + ':10250/pods', success=False).stdout.strip()
     assert code == '401', 'An anonymous request to the kubelet API returned ' + code + ', not 401'
 if wants('webhook-authorization'):

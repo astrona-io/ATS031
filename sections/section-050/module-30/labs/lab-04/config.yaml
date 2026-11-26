@@ -35,10 +35,15 @@ testing:
 validation:
   scripts:
   - name: deployment-pinned
-    description: relay runs its image pinned by the digest of the image it ran before
+    description: The relay Deployment image is python:3.13-alpine pinned by the digest of the image it ran before
     type: file
     source: validation/validate-deployment-pinned.sh
-    points: 2
+    points: 1
+  - name: pod-pinned
+    description: The pinned rollout is complete and the one relay pod reports an imageID with the pinned digest
+    type: file
+    source: validation/validate-pod-pinned.sh
+    points: 1
   - name: pin-review
     description: image-pin-review records the pinned digest and the imageID of the running pod
     type: file

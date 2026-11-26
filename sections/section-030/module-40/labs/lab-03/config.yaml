@@ -37,9 +37,14 @@ testing:
 validation:
   scripts:
   - name: mtls-option
-    description: Ingress vault uses the TLS option mtls@file, which requires a client certificate from the crew CA
+    description: The ConfigMap client-ca holds the crew CA, and the TLS option mtls in traefik-dynamic requires a client certificate from it
     type: file
     source: validation/validate-mtls-option.sh
+    points: 1
+  - name: vault-annotation
+    description: Ingress vault uses the TLS option mtls@file, and Ingress beacon uses no TLS option
+    type: file
+    source: validation/validate-vault-annotation.sh
     points: 1
   - name: mtls-enforced
     description: vault.example.test accepts only clients with a crew certificate, and beacon.example.test stays open

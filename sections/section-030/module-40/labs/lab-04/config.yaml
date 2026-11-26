@@ -36,13 +36,18 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: secret-rbac
+    description: The Traefik ServiceAccount may get, list and watch Secrets only in starfleet-031-030-04-04
+    type: file
+    source: validation/validate-secret-rbac.sh
+    points: 1
   - name: api-closed
     description: Traefik runs without --api.insecure and its Service has no port 8080
     type: file
     source: validation/validate-api-closed.sh
     points: 1
   - name: secret-scope
-    description: Traefik reads Secrets only in the lab namespace and still serves dock-tls
+    description: Traefik watches Ingress objects only in starfleet-031-030-04-04 and still serves dock-tls
     type: file
     source: validation/validate-secret-scope.sh
     points: 1

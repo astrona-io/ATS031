@@ -205,9 +205,13 @@ assert code_of(response) in ('301', '308'), 'http://harbor.example.test/cargo mu
 location = header(response, 'Location') or ''
 assert location.startswith('https://harbor.example.test') and location.endswith('/cargo'), 'The redirect must point to https://harbor.example.test with the same path'
 """)
-if wants('hsts-header'):
+if wants('hsts-middleware'):
+    import re
     dynamic = (get('configmap', 'traefik-dynamic', 'ingress-system').get('data') or {}).get('dynamic.yaml', '')
+    assert re.search(r'^\s*hsts:\s*$', dynamic, re.M), 'dynamic.yaml in traefik-dynamic must define the middleware hsts'
+    assert re.search(r'^\s*stsSeconds:\s*300\s*$', dynamic, re.M), 'The middleware hsts must set stsSeconds: 300'
     assert 'default:' in dynamic and 'VersionTLS12' in dynamic, 'dynamic.yaml must keep the TLS option default with minVersion: VersionTLS12'
+if wants('hsts-header'):
     assert annotation(get('ingress', 'harbor'), 'router.middlewares') == 'hsts@file', \
         'The Ingress harbor must have the annotation traefik.ingress.kubernetes.io/router.middlewares: hsts@file'
     live(r"""

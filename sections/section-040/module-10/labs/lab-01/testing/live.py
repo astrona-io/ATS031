@@ -94,8 +94,12 @@ try:
         assert not pod['spec'].get('hostNetwork'), 'The running relay pod still uses the network of the node'
         assert pod['status'].get('podIP') != pod['status'].get('hostIP'), 'The running relay pod must have its own pod IP address'
     if wants('metadata-blocked'):
-        name = running_relay()['metadata']['name']
-        expect_http(NAMESPACE, name, simulator, 'denied', 'relay must not reach metadata-simulator')
-        expect_http(NAMESPACE, name, 'http://probe/', '200', 'relay must still reach the probe Service by name')
+        pod = running_relay()
+        assert not pod['spec'].get('hostNetwork'), 'The running relay pod still uses the network of the node, so no NetworkPolicy applies to it'
+        expect_http(NAMESPACE, pod['metadata']['name'], simulator, 'denied', 'relay must not reach metadata-simulator')
+    if wants('probe-reachable'):
+        pod = running_relay()
+        assert not pod['spec'].get('hostNetwork'), 'The running relay pod still uses the network of the node, so no NetworkPolicy applies to it'
+        expect_http(NAMESPACE, pod['metadata']['name'], 'http://probe/', '200', 'relay must still reach the probe Service by name')
 finally:
     remove_test_pods()

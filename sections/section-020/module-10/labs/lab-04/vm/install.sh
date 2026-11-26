@@ -556,6 +556,9 @@ if wants('effective-values'):
     effective = configz(WORKER)
     assert saved.get('anonymous-enabled') == str(effective['authentication']['anonymous']['enabled']).lower(), 'anonymous-enabled differs from the effective kubelet value'
     assert saved.get('authorization-mode') == effective['authorization']['mode'], 'authorization-mode differs from the effective kubelet value'
+if wants('read-only-port'):
+    saved = get('configmap', 'kubelet-review').get('data', {})
+    effective = configz(WORKER)
     assert saved.get('read-only-port') == str(effective.get('readOnlyPort', 0)), 'read-only-port differs from the effective kubelet value'
 if wants('config-file-mode'):
     assert_mode_at_most(WORKER, '/var/lib/kubelet/config.yaml', 0o600)
@@ -685,6 +688,13 @@ outcome="$(basename "$0" .sh)"
 exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-effective-values.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-read-only-port.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

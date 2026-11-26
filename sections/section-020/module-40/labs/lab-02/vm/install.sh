@@ -549,14 +549,22 @@ assert node_exec(NODE, 'sha256sum', '--check', '--quiet', '/var/lib/astrona-lab/
     'Do not change the cluster: a control plane manifest or the kubelet configuration changed'
 arguments = process_arguments(NODE, 'kube-apiserver')
 saved = get('configmap', 'etcd-connection').get('data', {})
-checks = {'server-recorded': [('servers', 'etcd-servers')],
-          'credentials-recorded': [('client-certificate', 'etcd-certfile'), ('client-key', 'etcd-keyfile'), ('ca-file', 'etcd-cafile')]}
-for outcome, pairs in checks.items():
-    if wants(outcome):
-        for key, flag in pairs:
-            expected = flag_value(arguments, flag)
-            assert expected, 'kube-apiserver has no --' + flag + ' flag'
-            assert saved.get(key, '').strip() == expected, 'The key ' + key + ' differs from --' + flag + ' of the running API server'
+
+
+def assert_recorded(pairs):
+    for key, flag in pairs:
+        assert saved.get(key, '').strip(), 'The ConfigMap etcd-connection has no key ' + key
+        expected = flag_value(arguments, flag)
+        assert expected, 'kube-apiserver has no --' + flag + ' flag'
+        assert saved.get(key, '').strip() == expected, 'The key ' + key + ' differs from --' + flag + ' of the running API server'
+
+
+if wants('server-recorded'):
+    assert_recorded([('servers', 'etcd-servers')])
+if wants('credentials-recorded'):
+    assert_recorded([('client-certificate', 'etcd-certfile'), ('client-key', 'etcd-keyfile')])
+if wants('ca-recorded'):
+    assert_recorded([('ca-file', 'etcd-cafile')])
 ASTRONA_LAB_FILE
 write_file 0644 testing/requirements.json <<'ASTRONA_LAB_FILE'
 {
@@ -674,6 +682,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-ca-recorded.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-credentials-recorded.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

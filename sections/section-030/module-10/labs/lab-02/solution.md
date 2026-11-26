@@ -1,21 +1,10 @@
----
-exam_objectives:
-- Properly set up Ingress with TLS
----
-# Fix An Ingress That Traefik Ignores Solution
+# Fix An Ingress That Traefik Ignores — Solution
 
-Use a host shell with this lab's private kubeconfig. A kubeconfig identifies the cluster and credentials used by kubectl, the Kubernetes command-line tool. This environment is separate from the ungraded playground.
+You solve this lab by fixing two fields of one Ingress. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
 
-```sh
-export KUBECONFIG="$(astrona kubeconfig ats-031-lab-030-01-02)"
-test "$(kubectl config current-context)" = "kind-astro-ats-031-lab-030-01-02" || exit 1
-```
+## Step 1: look at the starting state
 
-Keep this connection selected throughout the task. Every script supplied by the lab refuses a different context.
-
-## Find the mistakes
-
-Read the class and the backend of the Ingress, then compare them with the classes in the cluster and the ports of the Service:
+Read the class and the backend port of the Ingress, then compare them with the classes in the cluster and the ports of the Service:
 
 ```sh
 kubectl -n starfleet-031-030-01-02 get ingress relay -o jsonpath='{.spec.ingressClassName} {.spec.rules[0].http.paths[0].backend.service.port.number}{"\n"}'
@@ -23,9 +12,15 @@ kubectl get ingressclass
 kubectl -n starfleet-031-030-01-02 get service relay -o jsonpath='{.spec.ports[0].port}{"\n"}'
 ```
 
-The Ingress names the class `nginx`, and no controller serves that class, so Traefik ignores the object. The backend port is 8080, which is the container port. An Ingress backend must name the Service port, which is 80.
+The first command prints `nginx 8080`. The cluster has only the IngressClass `traefik`, and the Service `relay` listens on port `80`.
 
-## Fix the Ingress
+## Step 2: name the traefik class (check `relay-class`)
+
+An IngressClass names the controller that serves an Ingress. Traefik in this lab watches only Ingresses with `spec.ingressClassName: traefik`. The Ingress names `nginx`, and no controller serves that class, so Traefik ignores the object and answers `404` for every host. Change the class to `traefik`.
+
+## Step 3: point the backend at the Service port (check `relay-backend`)
+
+An Ingress backend names a Service and a port of that Service, not a port of the container. The Service `relay` listens on port 80 and forwards to container port 8080, so the backend must say 80. Keep the host, the path and the `web` entrypoint annotation as they are.
 
 Save this as `ingress-relay.yaml`:
 
@@ -58,27 +53,32 @@ Apply it:
 kubectl apply -f ingress-relay.yaml
 ```
 
-Then check the result. Open a port forward in a second terminal and send one request with the right host and one with another host:
+## Step 4: test the right and the wrong host (check `relay-routing`)
+
+Forward the Traefik HTTP port to your machine:
 
 ```sh
-kubectl -n ingress-system port-forward service/traefik 8080:80
+kubectl -n ingress-system port-forward service/traefik 8080:80 >/dev/null &
+```
+
+Wait a second for the port forward, then send one request with the right host and one with another host:
+
+```sh
 curl -s -H 'Host: relay.local' http://127.0.0.1:8080/
 curl -s -o /dev/null -w '%{http_code}\n' -H 'Host: other.local' http://127.0.0.1:8080/
 ```
 
-The first request returns a line that starts with `app=relay`. The second prints `404`.
+The first request prints a line that starts with `app=relay`. The second prints `404`. Stop the port forward with `kill %1`.
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> - **Using the container port as the backend port.** The Ingress backend names the Service port, here 80.
-> - **Changing only one mistake.** With the wrong class, Traefik ignores the Ingress. With the wrong port, Traefik cannot build the route. Both must be fixed.
-> - **Testing without a `Host` header.** Traefik matches the host name, so a request to `127.0.0.1` without the header gets `404`.
-
-## Clean up
-
-Destroy the lab cluster when you are done:
-
-```sh
-astrona destroy ats-031-lab-030-01-02
-```
+> Fix both mistakes. With the wrong class, Traefik ignores the Ingress. With the container port 8080 as the backend port, the route does not reach the Service `relay`.
+>
+> Do not remove the annotation `traefik.ingress.kubernetes.io/router.entrypoints: web` or change the host or the path. The check expects them unchanged.
+>
+> Test with a `Host` header. Traefik matches the host name, so a request to `127.0.0.1` without the header gets `404`.

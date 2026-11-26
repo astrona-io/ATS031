@@ -185,7 +185,7 @@ Strict guidelines:
   path. Name a thing in plain words when the reader needs it ("the task is on
   the next page"), and state a fact on the page itself instead of sending the
   reader somewhere else. Repository files for authors (the root `README.md`,
-  a lab's or playground's `README.md`) may link.
+  a playground's `README.md`) may link.
 - **No links to outside sources.** Course pages, labs and playground docs do
   not link to or point at outside websites (the one exception is the
   `resources` field of a lab entry in `astrona.yaml`) (official docs, GitHub, blogs,
@@ -246,9 +246,9 @@ the CKS labs keep theirs. ATS031 applies it to the CKS labs; copy from it. In sh
   and passes for the reference solution.
 - **`testing.init`.** `testing/verify-start.sh` (every outcome fails at the
   start), then `solution/apply.sh`, then `testing/wait-solved.sh`.
-- **Time line.** `question.md` has `Allow about N minutes for the tasks.`
-  under its title, as in ATS020: the exam time for a prepared student. Over
-  20 minutes cannot join an exam.
+- **Exam time.** The lab's `astrona.yaml` entry sets `estimated_duration`
+  (for example `10m`): the exam time for a prepared student. Over 20 minutes
+  cannot join an exam. `question.md` carries no time line.
 - **`examScope`.** Set `namespace` or `cluster` on the lab's `astrona.yaml`
   entry only when its `runtime.kind` fits the exam profile in
   `exams/kubestronaut/cks.yaml` (one control plane, one worker, kindnet).
@@ -258,6 +258,53 @@ the CKS labs keep theirs. ATS031 applies it to the CKS labs; copy from it. In sh
   `astrona test <lab-dir> --accept-terms --headless` must both pass.
 - **Hands off** `task_kind`, `tags` and `topic`: other tooling owns them.
 
+### Lab docs: question and solution
+
+Model: `sections/section-010/module-10/labs/lab-01`. A lab folder has no
+`README.md`. `question.md` and `solution.md` have no front matter and no
+kubeconfig or context lines: the student is already inside the lab.
+
+`question.md` reads like one real exam task, about 15 lines:
+
+- `# <Title>`, then one or two sentences of scenario: which namespace, which
+  objects, what must be true.
+- The task as 3 to 5 numbered points. Each point matches one grader outcome
+  in `config.yaml`, so a lab has 3 to 5 `validation.scripts`. Merge or split
+  outcomes in `live.py`, `config.yaml` and `validation/` when a lab has fewer
+  or more.
+- One closing line of constraints (what must not be created or changed).
+- No starting-state section (that is `docs/case-study.md`), no "check your
+  work" commands, no hints, no time line.
+
+`solution.md` is a guide that solves the task step by step:
+
+- `# <Title> — Solution`, then one paragraph: keep `astrona submit --watch`
+  running in a second terminal; each check passes as its task is done.
+- `## Step 1: look at the starting state` with read-only commands.
+- One `## Step N: <what> (check `<outcome>`)` per task. Explain why it works
+  before or after the YAML; follow "Configuration goes to a file first".
+- A test step with the lab's own client or `kubectl` commands and the result
+  each must print. Show only output the code makes certain; never invent it.
+- `## Step N: submit`: stop the watch and run `astrona submit`, which grades
+  for real, ends the attempt and removes the lab.
+- `## Common pitfalls` as one `> [!WARNING]` block, taken from what the
+  graders reject.
+
+All or nothing, checked for every lab:
+
+- **Untouched lab fails every check.** Start the lab, change nothing, submit:
+  every outcome prints `FAIL:`, none crashes. Start each `if wants('<id>'):`
+  block with the guard that needs the student's object (for example
+  `hub_policy()` reading the policy), so a missing object fails at once.
+- **Reference solution passes every check.** After `solution/apply.sh` every
+  outcome prints `PASS:`.
+- **`solution.md` is the reference solution.** Its YAML and commands are the
+  same as the files in `solution/`, and its steps cover the outcomes in the
+  order `question.md` lists them. A student who follows it passes every check.
+- `astrona test` proves both states (`verify-start.sh`, then `apply.sh`,
+  then `wait-solved.sh`). Until it has run, say a lab was checked by reading,
+  not tested.
+
 ## About this repo (ATS031 only)
 
 The course covers **Cluster Setup**, worth **15%** of
@@ -266,7 +313,16 @@ The official objectives are listed in `astrona.yaml`, and `README.md` lists the 
 
 ### Playground and graded lab scope
 
-The maintainer requested playgrounds and graded labs on 2026-10-13. This supersedes the earlier reading-only instruction. Each active module has one private ungraded environment and guided practice. Register each independent graded task, launch entry and solution directly after the reading it practises. Retain draft technical pages and the existing question banks. Use context guards and bounded waits; node commands may target only this environment's containers. Record static, offline and live evidence separately.
+Each module has one private, ungraded playground (`module-N0/playground/`) and
+graded labs (`module-N0/labs/lab-NN/`). Register each graded task, its launch
+entry and its solution directly after the reading it practises. Use context
+guards and bounded waits; node commands may target only this environment's
+containers.
+
+Most labs and playgrounds have not been run end to end yet. Do not write
+command output you have not seen, and keep the sentence in
+`sections/intro/30-how-this-course-is-made.md` that says the authors are still
+running every lab until they all pass.
 
 ### Teaching structure and depth
 
@@ -300,11 +356,32 @@ These public banks are practice material, not secure or official exam questions.
 ### Review and authoring checks
 
 Preserve the shared CLAUDE.md prefix copied from ATS015. Keep course IDs, official
-domain weights and ATP links unchanged. Technical pages carry no `draft: true`
-front matter. The ATP registration remains draft until publication is approved.
+domain weights and ATP links unchanged. Course pages (`00-introduction.md`,
+`course-*.md` and the intro pages) and a lab's `question.md` and `solution.md`
+have no front matter; a lab's `docs/` pages keep theirs.
+ATP007 is published in `astrona-content` with `maturity: alpha`.
+
+The repository holds only what the platform and CI read: no planning,
+coverage, sources or authoring files (`AUTHORING.yaml`, `ASSESSMENTS.md`,
+`SOURCES.md`, `CURRICULUM.md`, `LAB-COVERAGE.md`, `TEACHING-COVERAGE.yaml` and
+the like were removed on purpose). Do not add them back.
 
 Check facts against primary sources: the official CKS objectives
 (https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/,
 last checked 2026-10-11) and the upstream project documentation (kubernetes.io, CIS,
-and each tool's own docs). Validate manifest paths, summary ordering, curriculum coverage and question
-contracts. Do not claim live verification until the actual runtime result has been recorded.
+and each tool's own docs). Do not claim live verification until the actual
+runtime result has been recorded.
+
+Run the same checks as CI (`.github/workflows/labs.yml`) before a pull request:
+
+```sh
+python3 -m pip install -r scripts/ci/requirements.txt
+python3 scripts/ci/test-course-structure.py
+python3 scripts/ci/check-course-structure.py   # registration, module order, lab layout
+python3 scripts/ci/test-assessments.py
+python3 scripts/ci/check-assessments.py        # quiz banks against the schema
+python3 scripts/ci/check-authors.py            # intro page 30 against AUTHORS.md
+```
+
+CI boots only the labs and playgrounds a pull request changes
+(`scripts/ci/list-environments.sh`).

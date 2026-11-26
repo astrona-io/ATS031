@@ -659,8 +659,10 @@ def option(arguments, name):
 
 job, pod, log = learner_job('master-audit')
 assert option(command_line(pod['spec']), 'targets') == 'master', 'Run kube-bench with --targets master'
-saved = get('configmap', 'master-result').get('data', {})
+if wants('master-job-completed'):
+    assert re.search(r'^\d+ checks (PASS|FAIL|WARN|INFO)$', log, re.M), 'The log of master-audit has no summary'
 if wants('totals-match'):
+    saved = get('configmap', 'master-result').get('data', {})
     totals = {}
     for number, state in re.findall(r'^(\d+) checks (PASS|FAIL|WARN|INFO)$', log, re.M):
         totals[state.lower()] = number
@@ -668,6 +670,7 @@ if wants('totals-match'):
     for key, number in totals.items():
         assert saved.get(key, '').strip() == number, 'The key ' + key + ' differs from the summary of the report'
 if wants('section-counts-match'):
+    saved = get('configmap', 'master-result').get('data', {})
     for section in ('1.1', '1.2'):
         expected = len(re.findall(r'^\[FAIL\] ' + re.escape(section) + r'\.\d+', log, re.M))
         assert saved.get('fail-' + section, '').strip() == str(expected), 'The key fail-' + section + ' differs from the report'
@@ -788,6 +791,13 @@ if [[ "$(kubectl config current-context)" != "$context" ]]; then
 fi
 lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-master-job-completed.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-section-counts-match.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash

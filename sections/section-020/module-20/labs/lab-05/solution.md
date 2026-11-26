@@ -1,22 +1,22 @@
----
-exam_objectives:
-- Use CIS benchmark to review the security configuration of Kubernetes components
-  (etcd, kubelet, kubedns, kubeapi)
----
-# Record The Totals Of A kube-bench Report Solution
+# Record The Totals Of A kube-bench Report — Solution
 
-Open a shell on the lab VM (virtual machine) and check that kubectl uses this lab's cluster:
+You solve this lab with one kube-bench Job and one ConfigMap of numbers read from its log. Keep `astrona submit --watch` running in a second terminal: it grades the lab again and again while you work and records nothing. Each check below turns green as you finish its task.
+
+## Step 1: look at the starting state
+
+kube-bench is a tool that runs the checks of the CIS (Center for Internet Security) Kubernetes Benchmark on the node where it runs. Check that no audit Job exists yet:
 
 ```sh
-astrona ssh astro-ats-031-lab-020-02-05
-kubectl config current-context
+kubectl -n starfleet-031-020-02-05 get jobs
 ```
 
-The second command prints `kubernetes-admin@astro-ats-031-lab-020-02-05`. You are logged in as the `student` user, which has a kubeconfig file for the cluster. A kubeconfig file tells `kubectl` which cluster to use and which credentials to send. Node files and processes belong to root, so run node commands with `sudo`. They change only the lab VM, not your own computer.
+The command prints `No resources found in starfleet-031-020-02-05 namespace.`
 
-## Run the audit
+## Step 2: run the audit (check `master-job-completed`)
 
-The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version. Save this as `job-master-audit.yaml`:
+The `--targets master` option runs the control plane checks. The `nodeSelector` and the toleration place the pod on the control plane node. The Job shares the process namespace of the node (`hostPID: true`), so the program can read the command lines of the node processes. The `hostPath` volumes mount the node directories that the audit commands read. The node binaries are mounted under `/usr/local/mount-from-host/bin`, where the image looks for `kubectl` and `kubelet` to detect the Kubernetes version.
+
+Save this as `job-master-audit.yaml`:
 
 ```yaml
 apiVersion: batch/v1
@@ -62,19 +62,21 @@ kubectl apply -f job-master-audit.yaml
 kubectl -n starfleet-031-020-02-05 wait --for=condition=complete job/master-audit --timeout=180s
 ```
 
-## Read the summary
+The `wait` command prints `job.batch/master-audit condition met`.
 
-The text report ends with a summary block. Each line gives a number and a state. Read the end of the log:
+## Step 3: read the summary totals (check `totals-match`)
+
+The text report ends with a summary block. Each line gives a number and a state, such as `checks PASS`. Print the summary lines:
 
 ```sh
-kubectl -n starfleet-031-020-02-05 logs job/master-audit | tail -n 12
+kubectl -n starfleet-031-020-02-05 logs job/master-audit | grep -E '^[0-9]+ checks (PASS|FAIL|WARN|INFO)$'
 ```
 
-The block `== Summary master ==` and, when kube-bench prints it, `== Summary total ==` hold lines such as `checks PASS`. With one target, both blocks have the same numbers. Note the four numbers.
+The block `== Summary master ==` and, when kube-bench prints it, `== Summary total ==` hold these lines. With one target, both blocks have the same numbers. Note the four numbers.
 
-## Count the failures by section
+## Step 4: count the failures by section (check `section-counts-match`)
 
-The first two parts of a check number name the section. Count the `[FAIL]` lines of each section:
+The first two parts of a check number name the section. Count the `[FAIL]` result lines of each section:
 
 ```sh
 kubectl -n starfleet-031-020-02-05 logs job/master-audit | grep '^\[FAIL\]' | awk '{print $2}' | cut -d. -f1,2 | sort | uniq -c
@@ -82,16 +84,27 @@ kubectl -n starfleet-031-020-02-05 logs job/master-audit | grep '^\[FAIL\]' | aw
 
 The output gives one line for each section that has failures. A section that is missing from the output has `0` failures.
 
-## Record the numbers
-
-Create the ConfigMap. Replace each placeholder with the number you read:
+Now create the ConfigMap with all six numbers. Replace each placeholder with the number you read:
 
 ```sh
 kubectl -n starfleet-031-020-02-05 create configmap master-result --from-literal=pass=<PASS> --from-literal=fail=<FAIL> --from-literal=warn=<WARN> --from-literal=info=<INFO> --from-literal=fail-1.1=<FAIL_1_1> --from-literal=fail-1.2=<FAIL_1_2>
+```
+
+Then check the result:
+
+```sh
 kubectl -n starfleet-031-020-02-05 get configmap master-result -o yaml
 ```
+
+## Step 5: submit
+
+When `astrona submit --watch` shows every check passing, stop it and run `astrona submit`. This grades the lab for real, ends the attempt and removes the lab.
 
 ## Common pitfalls
 
 > [!WARNING]
-> The `[FAIL]` lines in the remediation block repeat check numbers; count only the result lines that start with `[FAIL]`. A grep for `1.1` without the trailing dot also matches `1.10` and `1.11` of other sections. Use the numbers of this run; a second run after a change gives other numbers.
+> Every check fails until the Job `master-audit` has completed with `--targets master`.
+>
+> The remediation block repeats check numbers. Count only the result lines that start with `[FAIL]`. A grep for `1.1` without the trailing dot also matches `1.10` and `1.11` of other sections.
+>
+> Use the numbers of this run. Write `0` for a section without failures; an empty value does not match.

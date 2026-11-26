@@ -25,8 +25,15 @@ def record():
     return json.loads(found.stdout).get('data') or {}
 
 
+def named_files():
+    return set(re.split(r'[\s,]+', record().get('failed', '').strip())) - {''}
+
+
 if wants('failed-files'):
-    named = set(re.split(r'[\s,]+', record().get('failed', '').strip())) - {''}
-    assert named == failed, 'failed must list every file that fails the manifest, and no other file'
+    assert failed <= named_files(), 'failed must list every file that fails the manifest'
+if wants('passing-files'):
+    named = named_files()
+    assert named, 'failed must name at least one file'
+    assert named <= failed, 'failed must not name a file that passes the manifest'
 if wants('agent-digest'):
     assert record().get('agent-sha256', '').strip() == current['fleet-agent'], 'agent-sha256 must be the current SHA-256 digest of fleet-agent'

@@ -49,4 +49,9 @@ validation:
     description: An anonymous request to list pods is denied while /readyz stays reachable
     type: file
     source: vm/validate-anonymous-denied.sh
-    points: 2
+    points: 1
+  - name: anonymous-binding-removed
+    description: No ClusterRoleBinding has the subject system:anonymous
+    type: file
+    source: vm/validate-anonymous-binding-removed.sh
+    points: 1

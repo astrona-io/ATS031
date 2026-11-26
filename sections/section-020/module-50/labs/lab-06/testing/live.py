@@ -68,10 +68,18 @@ def assert_node_ready(node):
     assert any(item['type'] == 'Ready' and item['status'] == 'True' for item in status['conditions']), node + ' must stay Ready'
 
 
-if wants('coredns-write-access'):
+
+
+def assert_write_access_removed():
     for verb in ('update', 'patch'):
         answer = command(['kubectl', 'auth', 'can-i', verb, 'configmap/coredns', '-n', 'kube-system', '--as=system:serviceaccount:outpost-031-020-05-06:default'], success=False).stdout.strip()
         assert answer == 'no', 'The default service account of outpost-031-020-05-06 can still ' + verb + ' the coredns ConfigMap'
+
+
+if wants('coredns-write-access'):
+    assert_write_access_removed()
+if wants('coredns-rbac-kept'):
+    assert_write_access_removed()
     coredns_role = kubectl('get', 'clusterrolebinding', 'system:coredns', '-o', 'jsonpath={.roleRef.name}')
     assert coredns_role == 'system:coredns', 'Keep the system:coredns ClusterRoleBinding'
     subjects = get('clusterrolebinding', 'system:coredns', namespace=None).get('subjects') or []

@@ -32,11 +32,16 @@ testing:
     source: testing/wait-solved.sh
 validation:
   scripts:
+  - name: protected-directories
+    description: /opt/fleet and /opt/fleet/bin are owned by root and not writable by group or others
+    type: file
+    source: validation/validate-protected-directories.sh
+    points: 1
   - name: installed-binary
-    description: The installed fleet-agent matches the signed manifest and only root can write it or its directories
+    description: The installed fleet-agent matches the signed manifest and is owned by root:root with mode 0755
     type: file
     source: validation/validate-installed-binary.sh
-    points: 2
+    points: 1
   - name: install-record
     description: install-record names the cache that held the genuine copy and the installed digest
     type: file

@@ -547,6 +547,7 @@ assert_node_ready(WORKER)
 if wants('flags-file-clean'):
     flags = node_exec(WORKER, 'cat', '/var/lib/kubelet/kubeadm-flags.env').stdout
     assert not re.search(r'^[^#]*--authorization-mode\b', flags, re.M), 'kubeadm-flags.env still sets --authorization-mode'
+if wants('kubelet-flag-removed'):
     assert flag_value(process_arguments(WORKER, 'kubelet'), 'authorization-mode') is None, 'The running kubelet still has an --authorization-mode flag'
 if wants('webhook-effective'):
     assert configz(WORKER)['authorization']['mode'] == 'Webhook', 'The effective kubelet authorization mode must be Webhook'
@@ -669,6 +670,13 @@ lab_directory="$(cd "$(dirname "$0")" && pwd)"
 python3 "$lab_directory/testing/check.py" "$@"
 ASTRONA_LAB_FILE
 write_file 0755 validation/validate-flags-file-clean.sh <<'ASTRONA_LAB_FILE'
+#!/usr/bin/env bash
+# Grades the outcome this file is named after (validate-<outcome>.sh).
+set -euo pipefail
+outcome="$(basename "$0" .sh)"
+exec bash "$(cd "$(dirname "$0")/.." && pwd)/validate.sh" "${outcome#validate-}"
+ASTRONA_LAB_FILE
+write_file 0755 validation/validate-kubelet-flag-removed.sh <<'ASTRONA_LAB_FILE'
 #!/usr/bin/env bash
 # Grades the outcome this file is named after (validate-<outcome>.sh).
 set -euo pipefail

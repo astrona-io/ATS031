@@ -28,6 +28,7 @@ if wants('installed-binary'):
     mode, owner, group = stat(installed)
     assert owner == 0 and group == 0, 'fleet-agent must be owned by root:root'
     assert mode & 0o777 == 0o755, 'fleet-agent must have mode 0755'
+if wants('protected-directories'):
     for directory in ('/opt/fleet', '/opt/fleet/bin'):
         mode, owner, group = stat(directory)
         assert owner == 0, directory + ' must be owned by root'

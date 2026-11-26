@@ -195,8 +195,14 @@ for line in staged.stdout.splitlines():
     found = command(['kubectl', '-n', NAMESPACE, 'get', 'secret', name, '-o', 'jsonpath={.metadata.uid} {.metadata.resourceVersion}'], success=False).stdout.split()
     assert found[:1] == [uid], 'Do not delete the Secret ' + name + ' and create it again'
     assert found[1:] == [version], 'Do not change the Secrets: ' + name + ' was changed'
+if wants('bridge-entry'):
+    fleet = get('ingress', 'fleet')
+    assert (('bridge.local',), 'bridge-tls') in tls_entries(fleet), \
+        'spec.tls must have an entry for bridge.local alone with the Secret bridge-tls'
 if wants('fleet-tls'):
     fleet = get('ingress', 'fleet')
+    assert (('dock.local',), 'dock-tls') in tls_entries(fleet), \
+        'spec.tls must have an entry for dock.local with the Secret dock-tls'
     assert tls_entries(fleet) == {(('bridge.local',), 'bridge-tls'), (('dock.local',), 'dock-tls')}, \
         'spec.tls must have one entry for bridge.local with bridge-tls and one for dock.local with dock-tls'
     assert {('bridge.local', '/', 'Prefix', 'bridge', 80), ('dock.local', '/', 'Prefix', 'dock', 80)} == routes(fleet), \

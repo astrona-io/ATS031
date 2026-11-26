@@ -38,7 +38,12 @@ validation:
     source: validation/validate-rejected-records.sh
     points: 2
   - name: signed-approval
-    description: approval.txt has a signature that verifies with the new public key, and the private key is gone
+    description: approval.txt has a signature that verifies with a new public key in /var/lib/approval
     type: file
     source: validation/validate-signed-approval.sh
+    points: 1
+  - name: private-key-removed
+    description: The private key cosign.key is gone from /var/lib/approval after signing, and cosign.pub stays
+    type: file
+    source: validation/validate-private-key-removed.sh
     points: 1

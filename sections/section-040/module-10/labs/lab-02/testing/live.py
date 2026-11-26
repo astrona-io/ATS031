@@ -55,7 +55,41 @@ def remove_test_pods():
     del TEST_PODS[:]
 
 
+def selector_matches(selector, labels):
+    """Apply a Kubernetes label selector (matchLabels and matchExpressions)."""
+    selector = selector or {}
+    for key, value in (selector.get('matchLabels') or {}).items():
+        if labels.get(key) != value:
+            return False
+    for expression in selector.get('matchExpressions') or []:
+        key, operator, values = expression['key'], expression['operator'], expression.get('values') or []
+        if operator == 'In' and labels.get(key) not in values:
+            return False
+        if operator == 'NotIn' and key in labels and labels[key] in values:
+            return False
+        if operator == 'Exists' and key not in labels:
+            return False
+        if operator == 'DoesNotExist' and key in labels:
+            return False
+    return True
+
+
+def egress_policies(namespace, labels=None):
+    """Names of the NetworkPolicies in a namespace that control egress, optionally only those that select the given pod labels."""
+    policies = json.loads(kubectl('-n', namespace, 'get', 'networkpolicy', '-o', 'json'))['items']
+    names = []
+    for policy in policies:
+        spec = policy.get('spec', {})
+        if 'Egress' not in (spec.get('policyTypes') or []) and 'egress' not in spec:
+            continue
+        if labels is not None and not selector_matches(spec.get('podSelector'), labels):
+            continue
+        names.append(policy['metadata']['name'])
+    return names
+
+
 OUTPOST = 'outpost-031-040-01-02'
+COURIER_GUARD = 'No egress NetworkPolicy in %s selects the pods labelled app=courier' % NAMESPACE
 
 
 def pod_url(name, namespace):
@@ -73,12 +107,17 @@ try:
     expect_http(OUTPOST, 'drifter', simulator, '200', 'drifter must still reach metadata-simulator, so the listener works')
     expect_http(OUTPOST, 'drifter', beacon, '200', 'drifter must still reach beacon, so the listener works')
     if wants('metadata-blocked'):
+        assert egress_policies(NAMESPACE, {'app': 'courier'}), COURIER_GUARD
         expect_http(NAMESPACE, 'courier', simulator, 'denied', 'courier must not reach metadata-simulator')
     if wants('dependencies-kept'):
+        assert egress_policies(NAMESPACE, {'app': 'courier'}), COURIER_GUARD
         expect_http(NAMESPACE, 'courier', 'http://probe/', '200', 'courier must still reach the probe Service by name')
-        expect_http(NAMESPACE, 'courier', beacon, 'denied', 'courier must not reach beacon, a destination that is not on the allow-list')
         new_pod = test_pod(NAMESPACE, 'app=courier')
         expect_http(NAMESPACE, new_pod, 'http://probe/', '200', 'A new pod with app=courier must reach the probe Service')
+    if wants('allow-list-only'):
+        assert egress_policies(NAMESPACE, {'app': 'courier'}), COURIER_GUARD
+        expect_http(NAMESPACE, 'courier', beacon, 'denied', 'courier must not reach beacon, a destination that is not on the allow-list')
+        new_pod = test_pod(NAMESPACE, 'app=courier')
         expect_http(NAMESPACE, new_pod, simulator, 'denied', 'A new pod with app=courier must not reach metadata-simulator')
         other_pod = test_pod(NAMESPACE, 'app=other')
         expect_http(NAMESPACE, other_pod, beacon, '200', 'The NetworkPolicy must apply only to pods with app=courier: a pod with another label must still reach beacon')

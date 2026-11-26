@@ -188,11 +188,13 @@ def traefik_args():
     deployment = get('deployment', 'traefik', 'ingress-system')
     return deployment['spec']['template']['spec']['containers'][0].get('args') or []
 
-if wants('beacon-route'):
+if wants('beacon-backend'):
     beacon = get('ingress', 'beacon')
     assert annotation(beacon, 'router.entrypoints') == 'web', 'The Ingress beacon must keep the web entrypoint'
     assert routes(beacon) <= {('beacon.local', '/', 'Prefix', 'beacon', 80), ('beacon.local', '/', 'Prefix', 'beacon', 'http')} and routes(beacon), \
         'The Ingress beacon must keep the host beacon.local and the Prefix path /, and send it to the Service beacon'
+if wants('beacon-route'):
+    get('ingress', 'beacon')
     live(r"""
 response = http_get('beacon.local')
 assert ' 200 ' in status_of(response) + ' ' and 'app=beacon ' in response, 'http://beacon.local must answer 200 from the Service beacon'

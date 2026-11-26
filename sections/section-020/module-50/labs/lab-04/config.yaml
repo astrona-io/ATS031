@@ -41,12 +41,17 @@ testing:
 validation:
   scripts:
   - name: read-only-port
-    description: The kubelet read-only port is 0 and a pod can no longer reach port 10255 on the node
+    description: The effective kubelet readOnlyPort is 0
     type: file
     source: vm/validate-read-only-port.sh
-    points: 2
+    points: 1
   - name: tls-min-version
     description: The effective kubelet tlsMinVersion is VersionTLS12 or VersionTLS13
     type: file
     source: vm/validate-tls-min-version.sh
+    points: 1
+  - name: read-only-port-closed
+    description: A request from the shuttle pod to port 10255 on the node fails
+    type: file
+    source: vm/validate-read-only-port-closed.sh
     points: 1
