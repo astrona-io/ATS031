@@ -8,8 +8,6 @@ A flat network is easy while you build an application, but it is risky in produc
 
 Start by looking at what runs in the playground. Policies pick pods and namespaces by their labels, so the labels matter as much as the names.
 
-<!-- astrona:playground:renew -->
-
 ```sh
 kubectl -n starfleet get pods --show-labels
 kubectl -n outpost get pods --show-labels
