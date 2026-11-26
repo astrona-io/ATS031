@@ -15,8 +15,6 @@ A third field, `ports`, limits which destination ports the sources may use.
 
 The policy below protects the pods labelled `app: probe`. It allows TCP port 8080, and only from pods labelled `app: shuttle`. The `from` entry has a `podSelector` but no `namespaceSelector`. In that case, the `podSelector` only matches pods in the same namespace as the policy.
 
-<!-- astrona:playground:renew -->
-
 Save this as `networkpolicy-probe-shuttle.yaml`:
 
 ```yaml

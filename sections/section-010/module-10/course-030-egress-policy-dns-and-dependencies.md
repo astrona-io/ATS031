@@ -8,8 +8,6 @@ An egress policy closes this gap: it limits what a selected pod may send. It tak
 
 To prove a block, you need a destination that works but must stay blocked. If the test target is broken, a failed request proves nothing. So first, create a second web server in `starfleet`. It is labelled `app: blocked-server` and listens on port 8080, like `probe`.
 
-<!-- astrona:playground:renew -->
-
 Save this as `pod-blocked-server.yaml`:
 
 ```yaml

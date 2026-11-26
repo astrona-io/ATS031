@@ -12,8 +12,6 @@ This does not break the policies you already have. Allowances from all policies 
 
 Save this as `networkpolicy-default-deny-all.yaml`:
 
-<!-- astrona:playground:renew -->
-
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
